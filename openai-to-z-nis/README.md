@@ -22,6 +22,8 @@ Legends such as the "lost city of Z", Paititi, and El Dorado hint at dense ancie
 - Analysis of historical colonial texts
 - Respect for indigenous knowledge and oral histories
 - Interactive web frontend for exploration and verification
+- Redis caching for high-performance data access
+- Kafka for event-driven architecture and real-time analytics
 
 ### NIS Protocol Architecture
 Our Neuro-Inspired System (NIS) consists of specialized agents working together:
@@ -40,6 +42,8 @@ Our Neuro-Inspired System (NIS) consists of specialized agents working together:
 - Python 3.9+
 - Node.js 18+
 - Git
+- Redis 
+- Kafka (with ZooKeeper)
 
 #### Installation
 
@@ -57,7 +61,23 @@ npm install
 cd ..
 ```
 
-#### Running the API Server
+#### Running All Services
+
+We provide a single script to start Redis, Kafka, and the API server:
+
+```bash
+# Start all services (Redis, Kafka, API)
+./run_all.py
+```
+
+This will start:
+1. Redis server for caching
+2. Kafka and ZooKeeper for event streaming
+3. The NIS Protocol API server
+
+#### Running Just the API Server
+
+If you already have Redis and Kafka running, you can start only the API server:
 
 ```bash
 # Run the API server
@@ -93,6 +113,33 @@ npm run dev
 ```
 
 Visit `http://localhost:3000` to access the NIS Protocol interface.
+
+### Infrastructure Components
+
+#### Redis Integration
+We use Redis for high-performance caching to speed up data access and reduce computational load:
+
+- Caching analysis results
+- Storing region and pattern information
+- Fast retrieval of site data
+- Automatic cache invalidation for updates
+
+The Redis client is configured to use the following environment variables:
+- `REDIS_HOST` (default: localhost)
+- `REDIS_PORT` (default: 6379)
+- `REDIS_DB` (default: 0)
+
+#### Kafka Integration
+Kafka provides an event-driven architecture for processing analysis events and notifications:
+
+- Site discovery event streaming
+- Real-time analysis updates
+- Async processing of time-consuming operations
+- Event history for auditing and monitoring
+
+The Kafka client is configured to use:
+- `KAFKA_BOOTSTRAP_SERVERS` (default: localhost:9092)
+- `KAFKA_CLIENT_ID` (default: nis-protocol)
 
 ### Data Sources
 - Earth Archive LIDAR data
