@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 class VisionAgent:
     """Agent for analyzing visual data to detect archaeological features."""
     
-    def __init__(self, data_dir: Optional[Path] = None, gpt_model: str = "gpt-4-vision-preview"):
+    def __init__(self, data_dir: Optional[Path] = None, gpt_model: str = "gpt-4o"):
         """Initialize the Vision Agent.
         
         Args:

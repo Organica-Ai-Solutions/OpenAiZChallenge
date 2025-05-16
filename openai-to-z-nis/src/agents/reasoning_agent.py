@@ -189,18 +189,28 @@ class ReasoningAgent:
             for source in indigenous_knowledge
         ]) if indigenous_knowledge else "No indigenous knowledge available."
         
-        # Fill in the template
-        prompt = self.reasoning_prompt_template.format(
-            lat=lat,
-            lon=lon,
-            pattern_type=pattern_type,
-            confidence=confidence,
-            additional_context="",  # Could add more context here in production
-            historical_sources=historical_str,
-            indigenous_knowledge=indigenous_str
-        )
+        # Create a simplified prompt that doesn't rely on the template's JSON example
+        # This avoids the KeyError with the template format string
+        simplified_prompt = f"""
+# NIS Protocol Analysis Request
+
+## Location: {lat}, {lon}
+
+## Visual Pattern Detected: {pattern_type}
+- Confidence: {confidence:.2f}
+
+## Historical Sources:
+{historical_str}
+
+## Indigenous Knowledge:
+{indigenous_str}
+
+Please analyze this potential archaeological site considering the visual pattern detected,
+historical context, and indigenous knowledge. Determine the archaeological significance
+and provide recommendations for further investigation.
+"""
         
-        return prompt
+        return simplified_prompt
     
     def _call_llm(self, prompt: str) -> Dict:
         """Call the LLM with the prompt.

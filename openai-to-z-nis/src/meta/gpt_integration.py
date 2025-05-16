@@ -146,8 +146,11 @@ class GPTIntegration:
             Identify potential human-made structures, earthworks, or landscape modifications that may indicate
             archaeological sites. Focus on geometric patterns, soil discolorations, and vegetation anomalies."""
             
+            # Use gpt-4-vision-preview or gpt-4o depending on availability
+            vision_model = "gpt-4o"  # Updated to use the latest model with vision capabilities
+            
             response = self.client.chat.completions.create(
-                model="gpt-4-vision-preview",  # Using vision model
+                model=vision_model,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {
