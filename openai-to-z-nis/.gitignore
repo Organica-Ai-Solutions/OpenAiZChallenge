@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+ENV/
+env/
+venv/
+VENV/
+env.bak/
+venv.bak/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Data files (optional, uncomment if needed)
+# data/lidar/*
+# data/satellite/*
+# !data/lidar/.gitkeep
+# !data/satellite/.gitkeep
+
+# Output files
+outputs/findings/*
+outputs/logs/*
+outputs/memory/*
+!outputs/findings/.gitkeep
+!outputs/logs/.gitkeep
+!outputs/memory/.gitkeep
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS specific files
+.DS_Store
+Thumbs.db 

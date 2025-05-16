@@ -1,0 +1,27 @@
+# Core dependencies
+fastapi==0.110.0
+uvicorn==0.27.1
+pydantic==2.6.3
+numpy==1.26.4
+python-multipart==0.0.9
+typingx==0.7.0
+
+# Geospatial dependencies (optional for production)
+# rasterio==1.3.9
+# pyproj==3.6.1
+# geopandas==0.14.3
+# shapely==2.0.3
+
+# Optional dependencies for AI models
+# openai==1.21.0
+# torch==2.2.0
+# transformers==4.38.2
+# ultralytics==8.1.2  # For YOLOv8
+
+# Utilities
+python-dotenv==1.0.1
+tqdm==4.66.2
+requests==2.31.0
+
+# CORS
+cors==1.0.1 

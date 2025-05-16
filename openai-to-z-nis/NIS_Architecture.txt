@@ -1,0 +1,59 @@
+# NIS Protocol Architecture
+
+```mermaid
+graph TD
+    %% Define the main components
+    UI["Frontend UI\n(React + Tailwind)"] --> API["FastAPI Backend\n(/api/analyze)"] 
+    API --> NISProtocol["NIS Protocol\nOrchestrator"]
+    
+    %% Define agent components
+    NISProtocol --> VisionAgent["Vision Agent\n(LIDAR & Satellite Processing)"] 
+    NISProtocol --> MemoryAgent["Memory Agent\n(Contextual Information Storage)"] 
+    NISProtocol --> ReasoningAgent["Reasoning Agent\n(GPT-4.1 Powered Interpretation)"] 
+    NISProtocol --> ActionAgent["Action Agent\n(Report & Recommendation Generation)"]
+    
+    %% Define data sources
+    DataSources["Data Sources"] --> VisionAgent
+    DataSources --> ReasoningAgent
+    
+    %% Define the data source types
+    DataSources --> Satellite["Satellite Imagery\n(Sentinel-2)"]
+    DataSources --> LIDAR["LIDAR Data\n(Earth Archive)"]
+    DataSources --> HistoricalTexts["Historical Texts\n(Colonial Records)"]
+    DataSources --> IndigenousKnowledge["Indigenous Knowledge\n(Oral Traditions & Maps)"]
+    
+    %% Define outputs
+    ActionAgent --> FindingReports["Finding Reports"]
+    ActionAgent --> Recommendations["Action Recommendations"]
+    ActionAgent --> AnalysisSummaries["Analysis Summaries"]
+    
+    %% Define agent interactions
+    VisionAgent -- "Visual Findings" --> ReasoningAgent
+    MemoryAgent -- "Contextual Data" --> ReasoningAgent
+    MemoryAgent -- "Reference Data" --> VisionAgent
+    ReasoningAgent -- "Interpretations" --> ActionAgent
+    VisionAgent -- "Visual Findings" --> ActionAgent
+    
+    %% Define memory storage for persistence
+    MemoryAgent --> Storage["Persistent Storage\n(Findings & Analysis History)"]
+    
+    %% Define styling
+    classDef agent fill:#f9f,stroke:#333,stroke-width:2px
+    classDef data fill:#bbf,stroke:#333,stroke-width:1px
+    classDef ui fill:#bfb,stroke:#333,stroke-width:1px
+    classDef output fill:#fbb,stroke:#333,stroke-width:1px
+    
+    class VisionAgent,MemoryAgent,ReasoningAgent,ActionAgent agent
+    class Satellite,LIDAR,HistoricalTexts,IndigenousKnowledge,Storage,DataSources data
+    class UI,API,NISProtocol ui
+    class FindingReports,Recommendations,AnalysisSummaries output
+```
+
+The diagram above illustrates the architecture of the NIS (Neuro-Inspired System) Protocol for archaeological site discovery in the Amazon. It shows the flow from frontend UI to the backend API, through the NIS Protocol orchestrator, which coordinates the activities of four specialized agents:
+
+1. **Vision Agent**: Processes satellite imagery and LIDAR data to detect potential archaeological features
+2. **Memory Agent**: Stores and retrieves contextual information, previous findings, and reference data
+3. **Reasoning Agent**: Interprets visual findings using historical context and indigenous knowledge via GPT-4.1
+4. **Action Agent**: Generates outputs including findings reports and recommendations
+
+Data flows from multiple sources (satellite, LIDAR, historical texts, indigenous knowledge) through the system, with each agent specialized for different stages of the archaeological discovery pipeline. The architecture is designed to be modular and extensible, allowing for future integration of additional data sources and agent capabilities. 
