@@ -7,6 +7,17 @@ import { Input } from "./ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import { Loader, MapPin, FileText, MessageSquare, BarChart, History } from "lucide-react"
 import { Checkbox } from "./ui/checkbox"
+import dynamic from "next/dynamic"
+
+// Dynamically import MapView with no SSR to avoid hydration issues
+const MapView = dynamic(() => import("./MapView").then(mod => mod.MapView), {
+  ssr: false,
+  loading: () => (
+    <div className="bg-muted h-[400px] rounded-md flex items-center justify-center">
+      <p className="text-muted-foreground">Loading map...</p>
+    </div>
+  )
+})
 
 interface AnalysisResult {
   location: {
@@ -16,6 +27,14 @@ interface AnalysisResult {
   confidence: number
   description: string
   sources: string[]
+  historical_context?: string
+  indigenous_perspective?: string
+  recommendations?: Array<{
+    action: string
+    description: string
+    priority: string
+    details?: Record<string, any>
+  }>
 }
 
 export function NISAgentUI() {
@@ -60,6 +79,13 @@ export function NISAgentUI() {
       setLoading(false)
     }
   }
+
+  // Prepare site data for the MapView component
+  const sites = result ? [{
+    location: result.location,
+    confidence: result.confidence,
+    description: result.description
+  }] : []
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
@@ -178,9 +204,7 @@ export function NISAgentUI() {
           </TabsContent>
           
           <TabsContent value="map">
-            <div className="bg-muted h-[400px] rounded-md flex items-center justify-center">
-              <p className="text-muted-foreground">Map view will be available soon</p>
-            </div>
+            <MapView sites={sites} />
           </TabsContent>
           
           <TabsContent value="chat">
@@ -206,6 +230,18 @@ export function NISAgentUI() {
                   <h3 className="text-sm font-medium">Description</h3>
                   <p className="text-sm">{result.description}</p>
                 </div>
+                {result.historical_context && (
+                  <div>
+                    <h3 className="text-sm font-medium">Historical Context</h3>
+                    <p className="text-sm">{result.historical_context}</p>
+                  </div>
+                )}
+                {result.indigenous_perspective && (
+                  <div>
+                    <h3 className="text-sm font-medium">Indigenous Perspective</h3>
+                    <p className="text-sm">{result.indigenous_perspective}</p>
+                  </div>
+                )}
                 <div>
                   <h3 className="text-sm font-medium">Sources</h3>
                   <ul className="text-sm list-disc pl-5">
@@ -214,6 +250,21 @@ export function NISAgentUI() {
                     ))}
                   </ul>
                 </div>
+                {result.recommendations && result.recommendations.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-medium">Recommendations</h3>
+                    <ul className="text-sm list-disc pl-5">
+                      {result.recommendations.map((rec, index) => (
+                        <li key={index} className="mt-1">
+                          <span className="font-medium">{rec.action}:</span> {rec.description}
+                          <span className="text-xs ml-1 px-1.5 py-0.5 rounded-full bg-muted">
+                            {rec.priority}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="h-[300px] flex items-center justify-center">
@@ -232,7 +283,7 @@ export function NISAgentUI() {
       <CardFooter>
         <div className="flex w-full justify-between items-center">
           <div className="text-xs text-muted-foreground">
-            Powered by OpenAI o3/o4 mini and GPT-4.1 models
+            Powered by OpenAI GPT-4.1 and NIS Protocol
           </div>
           <Button onClick={runAnalysis} disabled={loading || !coordinates.trim()}>
             {loading ? (

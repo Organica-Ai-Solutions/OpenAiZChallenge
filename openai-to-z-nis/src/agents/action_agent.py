@@ -19,14 +19,18 @@ logger = logging.getLogger(__name__)
 class ActionAgent:
     """Agent for generating outputs and recommendations based on findings."""
     
-    def __init__(self, output_dir: Optional[Path] = None):
+    def __init__(self, output_dir: Optional[Path] = None, meta_coordinator=None):
         """Initialize the Action Agent.
         
         Args:
             output_dir: Directory to store outputs
+            meta_coordinator: NIS MetaProtocolCoordinator for agent communication
         """
         self.output_dir = output_dir or Path("outputs") / "findings"
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Store reference to MetaProtocolCoordinator if provided
+        self.meta_coordinator = meta_coordinator
         
         logger.info(f"Action Agent initialized with output dir at {self.output_dir}")
     
@@ -61,6 +65,9 @@ class ActionAgent:
         # Remove duplicates while preserving order
         sources = list(dict.fromkeys(sources))
         
+        # Get the pattern type for more specific recommendations
+        pattern_type = visual_findings.get("pattern_type", "")
+        
         # Create the report
         report = {
             "finding_id": finding_id,
@@ -71,7 +78,7 @@ class ActionAgent:
                 "geo_uri": f"geo:{lat},{lon}"
             },
             "confidence": combined_confidence,
-            "pattern_type": visual_findings.get("pattern_type", ""),
+            "pattern_type": pattern_type,
             "description": reasoning_interpretation.get("interpretation", visual_findings.get("description", "")),
             "historical_context": reasoning_interpretation.get("historical_context", ""),
             "indigenous_perspective": reasoning_interpretation.get("indigenous_perspective", ""),
@@ -81,9 +88,26 @@ class ActionAgent:
             },
             "sources": sources,
             "recommendations": self._generate_recommendations(
-                visual_findings, reasoning_interpretation, lat, lon
+                visual_findings, reasoning_interpretation, lat, lon, pattern_type
             )
         }
+        
+        # If we have a MetaProtocolCoordinator, notify it about the new finding
+        if self.meta_coordinator:
+            try:
+                # Using Agent-to-Agent protocol to notify other agents about this finding
+                self.meta_coordinator.send_message(
+                    protocol="a2a",
+                    source="action_agent",
+                    target="memory_agent",
+                    message={
+                        "action": "store_finding",
+                        "data": report
+                    }
+                )
+                logger.info(f"Notified memory agent about new finding {finding_id} via MetaProtocol")
+            except Exception as e:
+                logger.error(f"Error notifying memory agent: {str(e)}")
         
         # Save the report to a file
         self._save_report(report)
@@ -94,7 +118,8 @@ class ActionAgent:
                                 visual_findings: Dict, 
                                 reasoning_interpretation: Dict,
                                 lat: float,
-                                lon: float) -> List[Dict]:
+                                lon: float,
+                                pattern_type: str = "") -> List[Dict]:
         """Generate action recommendations based on findings.
         
         Args:
@@ -102,6 +127,7 @@ class ActionAgent:
             reasoning_interpretation: Results from the Reasoning Agent
             lat: Latitude coordinate
             lon: Longitude coordinate
+            pattern_type: The type of pattern detected
             
         Returns:
             List of recommended actions
@@ -135,35 +161,82 @@ class ActionAgent:
             })
             
             # Add recommendation based on pattern type
-            pattern_type = visual_findings.get("pattern_type", "")
-            if "circular" in pattern_type or "rectangular" in pattern_type:
+            if "circular" in pattern_type.lower():
                 recommendations.append({
                     "action": "lidar_survey",
-                    "description": "Conduct targeted LIDAR survey to map the complete extent of the structure.",
+                    "description": "Conduct targeted LIDAR survey to map the complete extent of the circular structures.",
                     "priority": "high",
                     "details": {
                         "area": "5km x 5km centered on coordinates",
-                        "resolution": "50cm"
+                        "resolution": "50cm",
+                        "focus": "Detect subtle elevation changes typical of Xingu circular village patterns"
                     }
                 })
-            elif "earthwork" in pattern_type or "mound" in pattern_type:
+            elif "rectangular" in pattern_type.lower():
+                recommendations.append({
+                    "action": "drone_photography",
+                    "description": "Deploy aerial drone for high-resolution orthophotos of the rectangular structures.",
+                    "priority": "high",
+                    "details": {
+                        "flight_altitude": "100m",
+                        "image_overlap": "70%",
+                        "camera": "20MP+",
+                        "optimal_time": "Early morning for better shadow definition"
+                    }
+                })
+            elif "earthwork" in pattern_type.lower() or "linear" in pattern_type.lower():
                 recommendations.append({
                     "action": "ground_survey",
-                    "description": "Conduct non-invasive ground survey to confirm the human origin of the features.",
+                    "description": "Conduct non-invasive ground survey to confirm the human origin of the linear features.",
                     "priority": "high",
                     "details": {
                         "methods": ["ground-penetrating radar", "magnetometry"],
-                        "area": "1km x 1km centered on coordinates"
+                        "area": "1km x 1km centered on coordinates",
+                        "transect_spacing": "10m"
                     }
                 })
-            elif "soil" in pattern_type or "terra preta" in pattern_type.lower():
+            elif "soil" in pattern_type.lower() or "terra preta" in pattern_type.lower():
                 recommendations.append({
                     "action": "soil_sampling",
-                    "description": "Collect soil samples to test for anthropogenic soil modifications.",
+                    "description": "Collect soil samples to test for anthropogenic soil modifications (terra preta).",
                     "priority": "medium",
                     "details": {
-                        "tests": ["carbon content", "pottery fragments", "organic remains"],
-                        "sampling_pattern": "grid"
+                        "tests": ["carbon content", "pottery fragments", "organic remains", "phosphorus levels"],
+                        "sampling_pattern": "grid",
+                        "sample_depth": "0-30cm, 30-60cm"
+                    }
+                })
+            elif "mound" in pattern_type.lower():
+                recommendations.append({
+                    "action": "elevation_mapping",
+                    "description": "Create detailed elevation map to determine if mounds are natural or anthropogenic.",
+                    "priority": "high",
+                    "details": {
+                        "method": "RTK GPS survey",
+                        "point_spacing": "1m",
+                        "vertical_accuracy": "±5cm"
+                    }
+                })
+            elif "road" in pattern_type.lower() or "path" in pattern_type.lower() or "network" in pattern_type.lower():
+                recommendations.append({
+                    "action": "connectivity_analysis",
+                    "description": "Analyze potential connections to other known sites or landscape features.",
+                    "priority": "medium",
+                    "details": {
+                        "radius": "20km",
+                        "methods": ["least-cost path analysis", "viewshed analysis"],
+                        "data": "Regional DEM at 10m resolution"
+                    }
+                })
+            elif "water" in pattern_type.lower() or "canal" in pattern_type.lower():
+                recommendations.append({
+                    "action": "hydrological_survey",
+                    "description": "Assess relationship to water sources and potential water management features.",
+                    "priority": "high",
+                    "details": {
+                        "focus": "Seasonal flow patterns",
+                        "methods": ["Drainage analysis", "Water retention assessment"],
+                        "equipment": "Portable soil moisture sensors"
                     }
                 })
         
@@ -174,7 +247,8 @@ class ActionAgent:
                 "description": "Reprocess with additional data sources before field investigation.",
                 "priority": "high",
                 "details": {
-                    "sources": ["historical maps", "additional satellite bands", "seasonal imagery"]
+                    "sources": ["historical maps", "additional satellite bands", "seasonal imagery"],
+                    "methods": ["multi-temporal analysis", "spectral unmixing", "texture analysis"]
                 }
             })
         
@@ -185,7 +259,8 @@ class ActionAgent:
                 "description": "Verify that the pattern is not a natural formation or imaging artifact.",
                 "priority": "high",
                 "details": {
-                    "methods": ["multi-temporal imagery", "geological consultation"]
+                    "methods": ["multi-temporal imagery", "geological consultation", "spectral analysis"],
+                    "comparison": "Check against known natural patterns in the region"
                 }
             }]
         
@@ -196,7 +271,20 @@ class ActionAgent:
             "priority": "high",
             "details": {
                 "approach": "Respectful engagement with proper protocols",
-                "purpose": "Incorporate traditional knowledge and ensure ethical research"
+                "purpose": "Incorporate traditional knowledge and ensure ethical research",
+                "ethics": "Follow appropriate guidelines for working with Indigenous knowledge"
+            }
+        })
+        
+        # Implementation of the two independent verification methods requirement
+        recommendations.append({
+            "action": "dual_verification",
+            "description": "Ensure findings are verified through two independent methods as required by the challenge.",
+            "priority": "high",
+            "details": {
+                "method1": visual_findings.get("sources", [""])[0] if visual_findings.get("sources") else "Visual analysis",
+                "method2": reasoning_interpretation.get("sources_used", [""])[0] if reasoning_interpretation.get("sources_used") else "Contextual analysis",
+                "requirement": "OpenAI to Z Challenge requires each finding to be verified by at least two independent methods"
             }
         })
         
@@ -327,4 +415,5 @@ class ActionAgent:
                 "analysis_summaries",
                 "recommendations",
             ],
+            "protocols": ["a2a"] if self.meta_coordinator else []
         } 

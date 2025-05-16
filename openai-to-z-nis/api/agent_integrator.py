@@ -18,6 +18,7 @@ try:
     from src.agents.reasoning_agent import ReasoningAgent
     from src.agents.memory_agent import MemoryAgent
     from src.agents.action_agent import ActionAgent
+    from src.meta import MetaProtocolCoordinator
     agents_available = True
 except ImportError as e:
     logging.warning(f"Could not import agent modules: {e}")
@@ -25,6 +26,115 @@ except ImportError as e:
 
 # Setup logging
 logger = logging.getLogger(__name__)
+
+# Define protocol adapters for the MetaProtocolCoordinator
+class MCPAdapter:
+    """Managed Compute Protocol adapter for external API calls."""
+    
+    def send_message(self, message: Dict[str, Any]) -> Dict[str, Any]:
+        """Send a message via the MCP protocol."""
+        # In a real implementation, this would handle API calls to external services
+        # For now, we'll just log and mock the response
+        target = message.get("target", "")
+        content = message.get("content", {})
+        action = content.get("action", "")
+        
+        logger.info(f"MCP message to {target}: {action}")
+        
+        # Mock responses for different targets
+        if target == "openai":
+            # Mock OpenAI API call
+            return {"status": "success", "model": "gpt-4.1", "response": "Mock GPT-4.1 response"}
+        elif target == "vision_service":
+            # Mock external vision service
+            return {"status": "success", "detected_objects": ["mock object 1", "mock object 2"]}
+        else:
+            return {"status": "error", "message": f"Unknown target: {target}"}
+
+
+class ACPAdapter:
+    """Agent Computing Protocol adapter for agent function calls."""
+    
+    def __init__(self, agent_registry: Optional[Dict[str, Any]] = None):
+        """Initialize the ACP adapter."""
+        self.agent_registry = agent_registry or {}
+    
+    def register_agent(self, agent_id: str, agent: Any) -> None:
+        """Register an agent with the adapter."""
+        self.agent_registry[agent_id] = agent
+    
+    def send_message(self, message: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Send a message via the ACP protocol."""
+        target = message.get("target", "")
+        content = message.get("content", {})
+        action = content.get("action", "")
+        data = content.get("data", {})
+        params = content.get("params", {})
+        
+        logger.info(f"ACP message to {target}: {action}")
+        
+        # Check if we have the target agent registered
+        if target not in self.agent_registry:
+            logger.error(f"Unknown agent: {target}")
+            return {"status": "error", "message": f"Unknown agent: {target}"}
+        
+        # Get the agent
+        agent = self.agent_registry[target]
+        
+        # Look for a method matching the action
+        if not hasattr(agent, action):
+            logger.error(f"Unknown action: {action} for agent {target}")
+            return {"status": "error", "message": f"Unknown action: {action} for agent {target}"}
+        
+        # Call the method on the agent
+        try:
+            method = getattr(agent, action)
+            result = method(**data, **params)
+            return {"status": "success", "result": result}
+        except Exception as e:
+            logger.error(f"Error calling {target}.{action}: {str(e)}")
+            return {"status": "error", "message": str(e)}
+
+
+class A2AAdapter:
+    """Agent-to-Agent Protocol adapter for direct peer communication."""
+    
+    def __init__(self, agent_registry: Optional[Dict[str, Any]] = None):
+        """Initialize the A2A adapter."""
+        self.agent_registry = agent_registry or {}
+    
+    def register_agent(self, agent_id: str, agent: Any) -> None:
+        """Register an agent with the adapter."""
+        self.agent_registry[agent_id] = agent
+    
+    def send_message(self, message: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Send a message via the A2A protocol."""
+        target = message.get("target", "")
+        source = message.get("source", "")
+        content = message.get("content", {})
+        
+        logger.info(f"A2A message from {source} to {target}")
+        
+        # Check if we have the target agent registered
+        if target not in self.agent_registry:
+            logger.error(f"Unknown agent: {target}")
+            return None  # A2A typically doesn't return responses
+        
+        # Get the target agent
+        agent = self.agent_registry[target]
+        
+        # Look for a handle_message method that can process the message
+        if hasattr(agent, "handle_message"):
+            try:
+                result = agent.handle_message(source, content)
+                return result
+            except Exception as e:
+                logger.error(f"Error in {target}.handle_message: {str(e)}")
+                return None
+        else:
+            # No specific handler, just log the message
+            logger.info(f"Agent {target} received message from {source} but has no handler")
+            return None
 
 
 class NISProtocol:
@@ -37,11 +147,38 @@ class NISProtocol:
         # Initialize agents if available
         if self.agents_available:
             try:
+                # Initialize the MetaProtocolCoordinator
+                self.coordinator = MetaProtocolCoordinator()
+                
+                # Initialize agents
                 self.vision_agent = VisionAgent()
                 self.reasoning_agent = ReasoningAgent()
                 self.memory_agent = MemoryAgent()
-                self.action_agent = ActionAgent()
-                logger.info("NIS Protocol agents initialized successfully")
+                self.action_agent = ActionAgent(meta_coordinator=self.coordinator)
+                
+                # Register agents with the coordinator
+                self.agent_registry = {
+                    "vision_agent": self.vision_agent,
+                    "reasoning_agent": self.reasoning_agent,
+                    "memory_agent": self.memory_agent,
+                    "action_agent": self.action_agent,
+                }
+                
+                # Initialize protocol adapters
+                self.mcp_adapter = MCPAdapter()
+                self.acp_adapter = ACPAdapter(self.agent_registry)
+                self.a2a_adapter = A2AAdapter(self.agent_registry)
+                
+                # Register protocol adapters with the coordinator
+                self.coordinator.register_protocol("mcp", self.mcp_adapter)
+                self.coordinator.register_protocol("acp", self.acp_adapter)
+                self.coordinator.register_protocol("a2a", self.a2a_adapter)
+                
+                # Register agents with the coordinator
+                for agent_id, agent in self.agent_registry.items():
+                    self.coordinator.register_agent(agent_id, agent)
+                
+                logger.info("NIS Protocol agents and coordinator initialized successfully")
             except Exception as e:
                 logger.error(f"Error initializing agents: {e}")
                 self.agents_available = False
@@ -74,31 +211,67 @@ class NISProtocol:
                                       use_historical, use_indigenous)
         
         try:
-            # Step 1: Run Vision Agent to analyze satellite/LIDAR data
-            vision_results = self.vision_agent.analyze_coordinates(
-                lat, lon, use_satellite=use_satellite, use_lidar=use_lidar
-            )
+            # Define the analysis pipeline using the MetaProtocolCoordinator
+            pipeline_config = [
+                {
+                    "description": "Vision analysis",
+                    "protocol": "acp",
+                    "target": "vision_agent",
+                    "action": "analyze_coordinates",
+                    "params": {
+                        "lat": lat,
+                        "lon": lon,
+                        "use_satellite": use_satellite,
+                        "use_lidar": use_lidar
+                    },
+                    "update_strategy": "replace"
+                },
+                {
+                    "description": "Reasoning analysis",
+                    "protocol": "acp",
+                    "target": "reasoning_agent",
+                    "action": "interpret_findings",
+                    "params": {
+                        "lat": lat,
+                        "lon": lon,
+                        "use_historical": use_historical,
+                        "use_indigenous": use_indigenous
+                    },
+                    "update_strategy": "merge"
+                },
+                {
+                    "description": "Action generation",
+                    "protocol": "acp",
+                    "target": "action_agent",
+                    "action": "generate_finding_report",
+                    "params": {
+                        "lat": lat,
+                        "lon": lon
+                    },
+                    "update_strategy": "replace"
+                }
+            ]
             
-            # Step 2: Run Reasoning Agent to interpret findings with context
-            reasoning_results = self.reasoning_agent.interpret_findings(
-                vision_results, lat, lon, 
-                use_historical=use_historical, 
-                use_indigenous=use_indigenous
-            )
+            # Run the pipeline
+            initial_data = {
+                "coordinates": {
+                    "lat": lat,
+                    "lon": lon
+                },
+                "config": {
+                    "use_satellite": use_satellite,
+                    "use_lidar": use_lidar,
+                    "use_historical": use_historical,
+                    "use_indigenous": use_indigenous
+                }
+            }
             
-            # Step 3: Store results in Memory Agent
-            self.memory_agent.store_finding(lat, lon, {
-                "vision_results": vision_results,
-                "reasoning_results": reasoning_results
-            })
+            logger.info(f"Starting NIS Protocol analysis pipeline for coordinates: {lat}, {lon}")
+            final_report = self.coordinator.run_pipeline(pipeline_config, initial_data)
             
-            # Step 4: Generate comprehensive report with Action Agent
-            final_report = self.action_agent.generate_finding_report(
-                lat, lon, vision_results, reasoning_results
-            )
-            
+            # Return the formatted result
             return {
-                "location": {"lat": lat, "lon": lon},
+                "location": final_report.get("location", {"lat": lat, "lon": lon}),
                 "confidence": final_report.get("confidence", 0.0),
                 "description": final_report.get("description", ""),
                 "sources": final_report.get("sources", []),
