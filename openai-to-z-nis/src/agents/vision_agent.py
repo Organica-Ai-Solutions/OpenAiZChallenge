@@ -1,14 +1,18 @@
 """Vision Agent for the NIS Protocol.
 
-This agent is responsible for processing satellite and LIDAR data to
-detect anomalies and patterns that may indicate archaeological sites.
+This agent analyzes satellite imagery and LIDAR data to detect potential
+archaeological sites and anomalies.
 """
 
-import numpy as np
-from typing import Dict, List, Tuple, Optional, Union
-from pathlib import Path
 import logging
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple, Union
+import os
+import random
 import json
+
+# Import the GPT integration for vision analysis
+from src.meta.gpt_integration import GPTIntegration
 
 # In a production environment, we would import actual vision models
 # For example: import cv2, tensorflow, or a custom model
@@ -26,20 +30,31 @@ logger = logging.getLogger(__name__)
 
 
 class VisionAgent:
-    """Agent for processing visual data (satellite imagery and LIDAR)."""
+    """Agent for analyzing visual data to detect archaeological features."""
     
-    def __init__(self, data_dir: Optional[Path] = None):
+    def __init__(self, data_dir: Optional[Path] = None, gpt_model: str = "gpt-4o"):
         """Initialize the Vision Agent.
         
         Args:
-            data_dir: Base directory for data files
+            data_dir: Directory containing satellite and LIDAR data
+            gpt_model: GPT model to use for vision analysis
         """
         self.data_dir = data_dir or Path("data")
         self.satellite_dir = self.data_dir / "satellite"
         self.lidar_dir = self.data_dir / "lidar"
         
-        # In production, load the actual models here
-        # self.model = load_model("path/to/model")
+        # Create directories if they don't exist
+        os.makedirs(self.satellite_dir, exist_ok=True)
+        os.makedirs(self.lidar_dir, exist_ok=True)
+        
+        # Initialize the GPT integration for vision analysis
+        try:
+            self.gpt = GPTIntegration(model_name=gpt_model)
+            logger.info(f"Initialized GPT Vision integration with model: {gpt_model}")
+            self.use_live_vision = True
+        except Exception as e:
+            logger.warning(f"Failed to initialize GPT Vision: {str(e)}. Falling back to mock responses.")
+            self.use_live_vision = False
         
         logger.info("Vision Agent initialized")
     
@@ -88,6 +103,99 @@ class VisionAgent:
         
         return results
     
+    def analyze_image(self, image_url: str, image_type: str, lat: float, lon: float) -> Dict:
+        """Analyze an image using GPT Vision.
+        
+        Args:
+            image_url: URL to the image to analyze
+            image_type: Type of image (satellite or lidar)
+            lat: Latitude coordinate
+            lon: Longitude coordinate
+            
+        Returns:
+            Dictionary with GPT Vision analysis results
+        """
+        if not self.use_live_vision:
+            logger.warning("GPT Vision not available, skipping image analysis")
+            return {
+                "anomaly_detected": False,
+                "confidence": 0.0,
+                "pattern_type": "",
+                "description": "Image analysis not available.",
+                "source": f"{image_type.capitalize()} image at {lat}, {lon}"
+            }
+        
+        try:
+            # Create a specific question based on image type
+            if image_type.lower() == "satellite":
+                question = f"Analyze this satellite image at coordinates {lat}, {lon}. Identify any potential archaeological features such as geometric patterns, earthworks, settlement layouts, or landscape modifications that could indicate human activity. Focus on circular structures, rectangular patterns, linear features, or distinctive soil colors."
+            else:  # LIDAR
+                question = f"Analyze this LIDAR elevation data at coordinates {lat}, {lon}. Identify any potential archaeological features such as mounds, depressions, earthworks, or geometric patterns that might not be visible in regular satellite imagery. Focus on subtle elevation changes that could indicate human-made structures."
+            
+            # Call GPT Vision for analysis
+            result = self.gpt.vision_analysis(
+                image_url=image_url,
+                question=question
+            )
+            
+            # Parse the results
+            analysis_text = result.get("analysis", "")
+            
+            # Extract key information from the analysis
+            # This is a simple version - in production we would use more sophisticated parsing
+            anomaly_detected = "no features" not in analysis_text.lower() and "no archaeological" not in analysis_text.lower()
+            
+            # Try to determine pattern type from the analysis
+            pattern_types = [
+                "circular geometric structures",
+                "rectangular settlement patterns",
+                "linear earthworks",
+                "anthropogenic soil signatures",
+                "artificial mounds",
+                "road networks",
+                "water management systems"
+            ]
+            
+            detected_pattern = ""
+            for pattern in pattern_types:
+                if pattern in analysis_text.lower() or pattern.replace(" ", "") in analysis_text.lower():
+                    detected_pattern = pattern
+                    break
+            
+            # If no specific pattern was found but anomalies were detected, use a generic type
+            if anomaly_detected and not detected_pattern:
+                detected_pattern = "unclassified archaeological feature"
+            
+            # Estimate confidence based on language used
+            confidence = 0.5  # Default
+            if "clearly" in analysis_text.lower() or "definitely" in analysis_text.lower():
+                confidence = 0.85
+            elif "likely" in analysis_text.lower() or "probable" in analysis_text.lower():
+                confidence = 0.7
+            elif "possible" in analysis_text.lower() or "might be" in analysis_text.lower():
+                confidence = 0.5
+            elif "unlikely" in analysis_text.lower() or "does not appear" in analysis_text.lower():
+                confidence = 0.2
+                anomaly_detected = False
+            
+            return {
+                "anomaly_detected": anomaly_detected,
+                "confidence": confidence,
+                "pattern_type": detected_pattern,
+                "description": analysis_text,
+                "source": f"{image_type.capitalize()} image analyzed with GPT Vision at {lat}, {lon}"
+            }
+            
+        except Exception as e:
+            logger.error(f"Error during GPT Vision analysis: {str(e)}")
+            return {
+                "anomaly_detected": False,
+                "confidence": 0.0,
+                "pattern_type": "",
+                "description": f"Image analysis error: {str(e)}",
+                "source": f"{image_type.capitalize()} image at {lat}, {lon}"
+            }
+    
     def _process_satellite(self, lat: float, lon: float) -> Dict:
         """Process satellite imagery for the given coordinates.
         
@@ -98,12 +206,24 @@ class VisionAgent:
         Returns:
             Dictionary with satellite analysis results
         """
-        # This is a placeholder. In production, this would:
-        # 1. Get the appropriate satellite tile
-        # 2. Apply image processing and ML models
-        # 3. Return detected features
+        # If we have GPT Vision enabled and the image URL exists, use it
+        if self.use_live_vision:
+            try:
+                # In production, this would retrieve an actual satellite image URL
+                # For demonstration, we'll use a mock URL based on coordinates
+                # This would be replaced with actual satellite image URL in production
+                mock_image_url = f"https://example.com/satellite/{lat}_{lon}.jpg"
+                
+                # Check if the satellite image exists (in production)
+                # Here we'll assume it does for demonstration
+                
+                # Use GPT Vision to analyze the image
+                return self.analyze_image(mock_image_url, "satellite", lat, lon)
+                
+            except Exception as e:
+                logger.warning(f"GPT Vision satellite processing failed: {str(e)}, falling back to mock")
         
-        # Mock implementation
+        # Fallback to standard processing or mock data
         try:
             tile_path = get_tile_path(lat, lon, "satellite")
             data, metadata = load_raster_data(tile_path)
@@ -138,7 +258,23 @@ class VisionAgent:
         Returns:
             Dictionary with LIDAR analysis results
         """
-        # Similar to satellite processing but for LIDAR
+        # If we have GPT Vision enabled and the image URL exists, use it
+        if self.use_live_vision:
+            try:
+                # In production, this would retrieve an actual LIDAR visualization URL
+                # For demonstration, we'll use a mock URL based on coordinates
+                mock_image_url = f"https://example.com/lidar/{lat}_{lon}.jpg"
+                
+                # Check if the LIDAR visualization exists (in production)
+                # Here we'll assume it does for demonstration
+                
+                # Use GPT Vision to analyze the image
+                return self.analyze_image(mock_image_url, "lidar", lat, lon)
+                
+            except Exception as e:
+                logger.warning(f"GPT Vision LIDAR processing failed: {str(e)}, falling back to mock")
+                
+        # Fallback to standard processing or mock data
         try:
             tile_path = get_tile_path(lat, lon, "lidar")
             data, metadata = load_raster_data(tile_path)

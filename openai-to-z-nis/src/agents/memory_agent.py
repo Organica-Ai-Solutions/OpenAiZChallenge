@@ -1,309 +1,848 @@
 """Memory Agent for the NIS Protocol.
 
-This agent stores and retrieves contextual information, including
-previous findings, analysis results, and reference data.
+This agent stores and retrieves information about archaeological sites
+and previous analyses.
 """
 
-import json
 import logging
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union, Any
+import json
 import os
+from pathlib import Path
+from typing import Dict, List, Optional, Union, Any
 import time
+
+# Import the GPT integration
+from src.meta.gpt_integration import GPTIntegration
+
+# Import infrastructure
+from src.infrastructure import get_redis_client, get_kafka_client
 
 # Setup logging
 logger = logging.getLogger(__name__)
 
 
 class MemoryAgent:
-    """Agent for storing and retrieving contextual information."""
+    """Agent for storing and retrieving information about archaeological sites."""
     
-    def __init__(self, storage_dir: Optional[Path] = None):
+    def __init__(self, storage_dir: Optional[Path] = None, gpt_model: str = "gpt-4o"):
         """Initialize the Memory Agent.
         
         Args:
-            storage_dir: Directory to store memory files
+            storage_dir: Directory for storing memory data
+            gpt_model: GPT model to use for memory operations
         """
-        self.storage_dir = storage_dir or Path("outputs") / "memory"
-        self.storage_dir.mkdir(parents=True, exist_ok=True)
+        self.storage_dir = storage_dir or Path("outputs/memory")
+        self.sites_dir = self.storage_dir / "sites"
+        self.regions_dir = self.storage_dir / "regions"
+        self.patterns_dir = self.storage_dir / "patterns"
         
-        # In-memory cache for recent retrievals
-        self.cache = {}
+        # Create directories if they don't exist
+        os.makedirs(self.sites_dir, exist_ok=True)
+        os.makedirs(self.regions_dir, exist_ok=True)
+        os.makedirs(self.patterns_dir, exist_ok=True)
         
-        # In production, we might use a database or vector store
-        # For now, we'll use simple JSON files
+        # Initialize GPT for enhanced memory operations
+        try:
+            self.gpt = GPTIntegration(model_name=gpt_model)
+            logger.info(f"Initialized GPT integration for Memory Agent with model: {gpt_model}")
+            self.use_live_gpt = True
+        except Exception as e:
+            logger.warning(f"Failed to initialize GPT integration: {str(e)}. Using basic memory functions.")
+            self.use_live_gpt = False
         
-        logger.info(f"Memory Agent initialized with storage at {self.storage_dir}")
+        # Initialize Redis for caching
+        try:
+            self.redis = get_redis_client()
+            logger.info("Initialized Redis for Memory Agent caching")
+            self.use_redis = True
+        except Exception as e:
+            logger.warning(f"Failed to initialize Redis: {str(e)}. Using file-based storage only.")
+            self.use_redis = False
+        
+        # Initialize Kafka for event streaming
+        try:
+            self.kafka = get_kafka_client()
+            logger.info("Initialized Kafka for Memory Agent events")
+            self.use_kafka = True
+        except Exception as e:
+            logger.warning(f"Failed to initialize Kafka: {str(e)}. Using local events only.")
+            self.use_kafka = False
+        
+        logger.info("Memory Agent initialized with storage at {}".format(self.storage_dir))
     
-    def store(self, key: str, data: Any, metadata: Optional[Dict] = None) -> str:
-        """Store data in memory.
+    def store_site_data(self, lat: float, lon: float, data: Dict) -> bool:
+        """Store data about a specific archaeological site.
         
         Args:
-            key: Unique identifier for the data
-            data: The data to store
-            metadata: Optional metadata about the data
+            lat: Latitude coordinate
+            lon: Longitude coordinate
+            data: Site data to store
             
         Returns:
-            The storage key
+            Success status
         """
-        if metadata is None:
-            metadata = {}
-        
-        # Add timestamp and storage info
-        metadata["timestamp"] = time.time()
-        metadata["storage_format"] = "json"
-        
-        # Create the storage object
-        storage_obj = {
-            "key": key,
-            "metadata": metadata,
+        try:
+            # Create a unique ID for the site based on coordinates
+            site_id = self._get_site_id(lat, lon)
+            
+            # Prepare the data for storage
+            storage_data = {
+                "site_id": site_id,
+                "coordinates": {"lat": lat, "lon": lon},
+                "last_updated": time.time(),
             "data": data
         }
         
-        # Store in the cache
-        self.cache[key] = storage_obj
-        
-        # Store in a file
-        try:
-            safe_key = key.replace("/", "_").replace("\\", "_")
-            file_path = self.storage_dir / f"{safe_key}.json"
-            with open(file_path, "w", encoding="utf-8") as f:
-                json.dump(storage_obj, f, indent=2)
-            logger.info(f"Stored data with key '{key}' to {file_path}")
+            # Write to Redis cache if available
+            if self.use_redis:
+                cache_key = f"site:{site_id}"
+                self.redis.cache_set(cache_key, storage_data)
+                logger.debug(f"Stored site data in Redis cache with key: {cache_key}")
+            
+            # Write to disk
+            site_file = self.sites_dir / f"{site_id}.json"
+            with open(site_file, "w", encoding="utf-8") as f:
+                json.dump(storage_data, f, indent=2)
+            
+            # Also store patterns for cross-referencing
+            if "pattern_type" in data:
+                self._update_pattern_index(data["pattern_type"], site_id, {"lat": lat, "lon": lon})
+                
+            # Update region index
+            region = self._get_region_for_coordinates(lat, lon)
+            if region:
+                self._update_region_index(region, site_id, {"lat": lat, "lon": lon})
+            
+            # Publish event to Kafka
+            if self.use_kafka:
+                event_data = {
+                    "event_type": "site_data_stored",
+                    "site_id": site_id,
+                    "coordinates": {"lat": lat, "lon": lon},
+                    "pattern_type": data.get("pattern_type", "unknown"),
+                    "confidence": data.get("confidence", 0.0),
+                    "timestamp": time.time()
+                }
+                self.kafka.produce("nis.memory.events", event_data, key=site_id)
+                logger.debug(f"Published site data storage event to Kafka for site: {site_id}")
+            
+            logger.info(f"Stored data for site at {lat}, {lon} with ID {site_id}")
+            return True
+            
         except Exception as e:
-            logger.error(f"Failed to store data with key '{key}': {str(e)}")
-        
-        return key
+            logger.error(f"Error storing site data: {str(e)}")
+            return False
     
-    def retrieve(self, key: str, use_cache: bool = True) -> Optional[Dict]:
-        """Retrieve data from memory.
+    def retrieve_site_data(self, lat: float, lon: float) -> Optional[Dict]:
+        """Retrieve data about a specific archaeological site.
         
         Args:
-            key: The key for the data to retrieve
-            use_cache: Whether to use the in-memory cache
+            lat: Latitude coordinate
+            lon: Longitude coordinate
             
         Returns:
-            The retrieved data or None if not found
+            Site data or None if not found
         """
-        # Check cache first if enabled
-        if use_cache and key in self.cache:
-            logger.info(f"Retrieved data with key '{key}' from cache")
-            return self.cache[key]
-        
-        # Otherwise, try to load from file
         try:
-            safe_key = key.replace("/", "_").replace("\\", "_")
-            file_path = self.storage_dir / f"{safe_key}.json"
+            site_id = self._get_site_id(lat, lon)
             
-            if not file_path.exists():
-                logger.warning(f"No data found for key '{key}'")
+            # Try to get from Redis cache first
+            if self.use_redis:
+                cache_key = f"site:{site_id}"
+                cached_data = self.redis.cache_get(cache_key)
+                if cached_data:
+                    logger.debug(f"Retrieved site data from Redis cache with key: {cache_key}")
+                    return cached_data["data"]
+            
+            # Fall back to file storage
+            site_file = self.sites_dir / f"{site_id}.json"
+            
+            if not site_file.exists():
+                logger.info(f"No data found for site at {lat}, {lon}")
                 return None
             
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(site_file, "r", encoding="utf-8") as f:
                 data = json.load(f)
             
-            # Update cache
-            self.cache[key] = data
+            # Cache the data in Redis for future requests
+            if self.use_redis:
+                cache_key = f"site:{site_id}"
+                self.redis.cache_set(cache_key, data, ttl=3600)  # Cache for 1 hour
             
-            logger.info(f"Retrieved data with key '{key}' from {file_path}")
-            return data
+            logger.info(f"Retrieved data for site at {lat}, {lon}")
+            return data["data"]
+            
         except Exception as e:
-            logger.error(f"Failed to retrieve data with key '{key}': {str(e)}")
+            logger.error(f"Error retrieving site data: {str(e)}")
             return None
     
-    def store_finding(self, lat: float, lon: float, finding: Dict) -> str:
-        """Store an archaeological finding.
+    def find_similar_sites(self, 
+                          pattern_type: str, 
+                          region: Optional[str] = None, 
+                          max_results: int = 5) -> List[Dict]:
+        """Find similar archaeological sites based on pattern type.
         
         Args:
-            lat: Latitude coordinate
-            lon: Longitude coordinate
-            finding: The finding data
+            pattern_type: Type of pattern to search for
+            region: Optional region to restrict search
+            max_results: Maximum number of results to return
             
         Returns:
-            The storage key
+            List of similar sites
         """
-        # Create a unique key based on coordinates
-        key = f"finding_{lat:.6f}_{lon:.6f}"
-        
-        # Add coordinates to metadata
-        metadata = {
-            "lat": lat,
-            "lon": lon,
-            "type": "archaeological_finding"
-        }
-        
-        # Store the finding
-        return self.store(key, finding, metadata)
-    
-    def retrieve_finding(self, lat: float, lon: float) -> Optional[Dict]:
-        """Retrieve a finding by coordinates.
-        
-        Args:
-            lat: Latitude coordinate
-            lon: Longitude coordinate
-            
-        Returns:
-            The finding data or None if not found
-        """
-        key = f"finding_{lat:.6f}_{lon:.6f}"
-        result = self.retrieve(key)
-        return result["data"] if result else None
-    
-    def store_analysis_history(self, session_id: str, history: List[Dict]) -> str:
-        """Store analysis history for a session.
-        
-        Args:
-            session_id: Unique session identifier
-            history: List of analysis steps and results
-            
-        Returns:
-            The storage key
-        """
-        key = f"history_{session_id}"
-        metadata = {"type": "analysis_history"}
-        return self.store(key, history, metadata)
-    
-    def retrieve_analysis_history(self, session_id: str) -> Optional[List[Dict]]:
-        """Retrieve analysis history for a session.
-        
-        Args:
-            session_id: The session identifier
-            
-        Returns:
-            The analysis history or None if not found
-        """
-        key = f"history_{session_id}"
-        result = self.retrieve(key)
-        return result["data"] if result else None
-    
-    def store_reference_data(self, data_type: str, data_id: str, data: Any) -> str:
-        """Store reference data (historical, indigenous, etc.).
-        
-        Args:
-            data_type: Type of reference data
-            data_id: Unique identifier for the data
-            data: The reference data
-            
-        Returns:
-            The storage key
-        """
-        key = f"reference_{data_type}_{data_id}"
-        metadata = {"type": "reference_data", "data_type": data_type}
-        return self.store(key, data, metadata)
-    
-    def retrieve_reference_data(self, data_type: str, data_id: str) -> Optional[Dict]:
-        """Retrieve reference data.
-        
-        Args:
-            data_type: Type of reference data
-            data_id: Unique identifier for the data
-            
-        Returns:
-            The reference data or None if not found
-        """
-        key = f"reference_{data_type}_{data_id}"
-        result = self.retrieve(key)
-        return result["data"] if result else None
-    
-    def find_nearby_findings(self, lat: float, lon: float, radius_km: float = 10.0) -> List[Dict]:
-        """Find findings within a certain radius of coordinates.
-        
-        Args:
-            lat: Latitude coordinate
-            lon: Longitude coordinate
-            radius_km: Radius in kilometers to search
-            
-        Returns:
-            List of findings within the radius
-        """
-        # In production, this would use a spatial database or index
-        # For now, we'll just iterate through all files and filter
-        
-        nearby_findings = []
-        
         try:
-            # List all finding files
-            finding_files = list(self.storage_dir.glob("finding_*.json"))
+            # Check Redis cache first
+            cache_key = f"similar:pattern:{pattern_type}"
+            if region:
+                cache_key += f":region:{region}"
             
-            for file_path in finding_files:
-                try:
-                    with open(file_path, "r", encoding="utf-8") as f:
-                        stored_data = json.load(f)
-                    
-                    # Get coordinates from metadata
-                    metadata = stored_data.get("metadata", {})
-                    finding_lat = metadata.get("lat")
-                    finding_lon = metadata.get("lon")
-                    
-                    if finding_lat is None or finding_lon is None:
-                        continue
-                    
-                    # Calculate distance (simple approximation)
-                    distance_km = self._calculate_distance(lat, lon, finding_lat, finding_lon)
-                    
-                    if distance_km <= radius_km:
-                        # Add distance to the finding data
-                        finding_data = stored_data["data"]
-                        finding_data["distance_km"] = distance_km
-                        nearby_findings.append(finding_data)
-                except Exception as e:
-                    logger.warning(f"Error processing finding file {file_path}: {str(e)}")
+            if self.use_redis:
+                cached_results = self.redis.cache_get(cache_key)
+                if cached_results:
+                    logger.debug(f"Retrieved similar sites from Redis cache with key: {cache_key}")
+                    return cached_results[:max_results]
             
-            # Sort by distance
-            nearby_findings.sort(key=lambda x: x.get("distance_km", float('inf')))
+            # Look up sites with this pattern
+            pattern_file = self.patterns_dir / f"{self._sanitize_filename(pattern_type)}.json"
             
-            logger.info(f"Found {len(nearby_findings)} findings within {radius_km} km of {lat}, {lon}")
+            if not pattern_file.exists():
+                logger.info(f"No sites found with pattern type: {pattern_type}")
+                return []
+            
+            with open(pattern_file, "r", encoding="utf-8") as f:
+                pattern_data = json.load(f)
+            
+            sites = pattern_data.get("sites", [])
+            
+            # Filter by region if specified
+            if region:
+                region_file = self.regions_dir / f"{self._sanitize_filename(region)}.json"
+                if region_file.exists():
+                    with open(region_file, "r", encoding="utf-8") as f:
+                        region_data = json.load(f)
+                    
+                    region_sites = set(site["site_id"] for site in region_data.get("sites", []))
+                    sites = [site for site in sites if site["site_id"] in region_sites]
+            
+            # Limit results
+            sites = sites[:max_results]
+            
+            # Load full site data for each result
+            result = []
+            for site in sites:
+                site_data = self.retrieve_site_data(site["coordinates"]["lat"], site["coordinates"]["lon"])
+                if site_data:
+                    result.append({
+                        "coordinates": site["coordinates"],
+                        "data": site_data
+                    })
+            
+            # Cache the results
+            if self.use_redis:
+                self.redis.cache_set(cache_key, result, ttl=3600)  # Cache for 1 hour
+            
+            logger.info(f"Found {len(result)} similar sites with pattern type: {pattern_type}")
+            return result
             
         except Exception as e:
-            logger.error(f"Error finding nearby findings: {str(e)}")
-        
-        return nearby_findings
+            logger.error(f"Error finding similar sites: {str(e)}")
+            return []
     
-    def _calculate_distance(self, lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-        """Calculate distance between two points in kilometers.
-        
-        This is a simple approximation. In production, use a proper geospatial library.
+    def get_regional_summary(self, region: str) -> Optional[Dict]:
+        """Get a summary of archaeological findings in a region.
         
         Args:
-            lat1: Latitude of first point
-            lon1: Longitude of first point
-            lat2: Latitude of second point
-            lon2: Longitude of second point
+            region: Name of the region
             
         Returns:
-            Distance in kilometers
+            Summary data or None if not found
         """
-        import math
-        
-        # Convert to radians
-        lat1_rad = math.radians(lat1)
-        lon1_rad = math.radians(lon1)
-        lat2_rad = math.radians(lat2)
-        lon2_rad = math.radians(lon2)
-        
-        # Haversine formula
-        dlat = lat2_rad - lat1_rad
-        dlon = lon2_rad - lon1_rad
-        a = math.sin(dlat/2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon/2)**2
-        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
-        distance = 6371 * c  # Earth radius in km
-        
-        return distance
+        try:
+            # Check Redis cache first
+            cache_key = f"summary:region:{region}"
+            
+            if self.use_redis:
+                cached_summary = self.redis.cache_get(cache_key)
+                if cached_summary:
+                    logger.debug(f"Retrieved regional summary from Redis cache with key: {cache_key}")
+                    return cached_summary
+            
+            region_file = self.regions_dir / f"{self._sanitize_filename(region)}.json"
+            
+            if not region_file.exists():
+                logger.info(f"No data found for region: {region}")
+                return None
+            
+            with open(region_file, "r", encoding="utf-8") as f:
+                region_data = json.load(f)
+            
+            # Get site data for each site in the region
+            sites = []
+            for site_ref in region_data.get("sites", []):
+                site_data = self.retrieve_site_data(
+                    site_ref["coordinates"]["lat"], 
+                    site_ref["coordinates"]["lon"]
+                )
+                if site_data:
+                    sites.append({
+                        "coordinates": site_ref["coordinates"],
+                        "data": site_data
+                    })
+            
+            # Generate summary with GPT if available
+            if self.use_live_gpt and sites:
+                summary = self._generate_region_summary(region, sites)
+            else:
+                summary = region_data.get("summary", {
+                    "description": f"Region {region} contains {len(sites)} known archaeological sites.",
+                    "dominant_patterns": self._get_dominant_patterns(sites),
+                    "time_periods": []
+                })
+            
+            result = {
+                "region": region,
+                "site_count": len(sites),
+                "summary": summary,
+                "sites": [{"lat": s["coordinates"]["lat"], "lon": s["coordinates"]["lon"]} for s in sites]
+            }
+            
+            # Cache the results
+            if self.use_redis:
+                self.redis.cache_set(cache_key, result, ttl=7200)  # Cache for 2 hours
+            
+            logger.info(f"Retrieved summary for region: {region}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error getting regional summary: {str(e)}")
+            return None
     
-    def clear_cache(self) -> None:
-        """Clear the in-memory cache."""
-        self.cache = {}
-        logger.info("Memory cache cleared")
+    def find_potential_connections(self, site_ids: List[str]) -> Dict:
+        """Find potential connections between archaeological sites.
+        
+        Args:
+            site_ids: List of site IDs to analyze
+            
+        Returns:
+            Dictionary with connection analysis
+        """
+        try:
+            # Generate cache key based on sorted site IDs
+            cache_key = f"connections:{','.join(sorted(site_ids))}"
+            
+            # Check Redis cache first
+            if self.use_redis:
+                cached_connections = self.redis.cache_get(cache_key)
+                if cached_connections:
+                    logger.debug(f"Retrieved connection analysis from Redis cache")
+                    return cached_connections
+            
+            # Load site data for each ID
+            sites = []
+            for site_id in site_ids:
+                site_file = self.sites_dir / f"{site_id}.json"
+                if site_file.exists():
+                    with open(site_file, "r", encoding="utf-8") as f:
+                        site_data = json.load(f)
+                        sites.append(site_data)
+            
+            if not sites:
+                logger.info("No valid sites found for connection analysis")
+                return {"connections": [], "analysis": "No valid sites found"}
+            
+            # For basic analysis without GPT
+            if not self.use_live_gpt:
+                connections = self._basic_connection_analysis(sites)
+                result = {
+                    "site_count": len(sites),
+                    "connections": connections,
+                    "analysis": f"Found {len(connections)} potential connections between {len(sites)} sites."
+                }
+            else:
+                # Use GPT for enhanced connection analysis
+                # Format site data for GPT
+                site_contexts = []
+                for site in sites:
+                    coord = site.get("coordinates", {})
+                    data = site.get("data", {})
+                    
+                    context = {
+                        "title": f"Site {site.get('site_id', 'Unknown')}",
+                        "type": "archaeological_site",
+                        "content": (
+                            f"Coordinates: {coord.get('lat', 0)}, {coord.get('lon', 0)}\n"
+                            f"Pattern: {data.get('pattern_type', 'Unknown')}\n"
+                            f"Description: {data.get('description', '')}\n"
+                            f"Confidence: {data.get('confidence', 0)}\n"
+                        )
+                    }
+                    site_contexts.append(context)
+                
+                # Call GPT for analysis
+                gpt_result = self.gpt.multimodal_research(
+                    query="Analyze the potential connections between these archaeological sites. Identify patterns, possible trade routes, cultural relationships, or other significant connections.",
+                    context=site_contexts
+                )
+                
+                connections = self._extract_connections_from_text(gpt_result.get("analysis", ""))
+                
+                result = {
+                    "site_count": len(sites),
+                    "connections": connections,
+                    "analysis": gpt_result.get("analysis", ""),
+                    "site_ids": site_ids
+                }
+            
+            # Cache the results
+            if self.use_redis:
+                self.redis.cache_set(cache_key, result, ttl=86400)  # Cache for 24 hours
+            
+            # Publish event to Kafka
+            if self.use_kafka:
+                event_data = {
+                    "event_type": "connection_analysis",
+                    "site_count": len(sites),
+                    "connection_count": len(connections),
+                    "site_ids": site_ids,
+                    "timestamp": time.time()
+                }
+                self.kafka.produce("nis.analysis.events", event_data)
+            
+            logger.info(f"Completed connection analysis for {len(sites)} sites")
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error finding potential connections: {str(e)}")
+            return {"connections": [], "analysis": f"Error: {str(e)}"}
     
-    def get_capabilities(self) -> Dict:
-        """Return the capabilities of this agent."""
-        return {
-            "name": "MemoryAgent",
-            "description": "Stores and retrieves information for the NIS Protocol",
-            "storage_types": [
-                "archaeological_findings",
-                "analysis_history",
-                "reference_data",
-            ],
-            "spatial_capabilities": ["nearby_search"],
-        } 
+    def analyze_temporal_patterns(self, 
+                                 region: str,
+                                 historical_timeline: Optional[List[Dict]] = None) -> Dict:
+        """Analyze temporal patterns in archaeological sites for a region.
+        
+        Args:
+            region: Name of the region
+            historical_timeline: Optional list of historical events
+            
+        Returns:
+            Temporal analysis
+        """
+        try:
+            # Generate cache key
+            cache_key = f"temporal:region:{region}"
+            
+            # Check Redis cache first
+            if self.use_redis:
+                cached_analysis = self.redis.cache_get(cache_key)
+                if cached_analysis:
+                    logger.debug(f"Retrieved temporal analysis from Redis cache")
+                    return cached_analysis
+            
+            # Get sites in the region
+            region_summary = self.get_regional_summary(region)
+            if not region_summary:
+                return {"error": f"No data found for region: {region}"}
+            
+            site_refs = region_summary.get("sites", [])
+            
+            # If no historical timeline provided, use a default one
+            if not historical_timeline:
+                historical_timeline = self._get_default_historical_timeline()
+            
+            # If we have GPT, use it for enhanced analysis
+            if self.use_live_gpt and site_refs:
+                # Get the first site to use as an example
+                example_site = None
+                if site_refs and len(site_refs) > 0:
+                    site_data = self.retrieve_site_data(site_refs[0]["lat"], site_refs[0]["lon"])
+                    if site_data:
+                        example_site = {
+                            "lat": site_refs[0]["lat"],
+                            "lon": site_refs[0]["lon"],
+                            "pattern_type": site_data.get("pattern_type", ""),
+                            "description": site_data.get("description", "")
+                        }
+                
+                if example_site:
+                    # Get region context
+                    region_context = region_summary.get("summary", {}).get("description", f"Region in the Amazon basin")
+                    
+                    # Use GPT for temporal analysis
+                    analysis = self.gpt.temporal_analysis(
+                        site_data=example_site,
+                        historical_timeline=historical_timeline,
+                        region_context=region_context
+                    )
+                    
+                    # Add site count information
+                    analysis["site_count"] = len(site_refs)
+                    analysis["region"] = region
+                    
+                    # Cache the results
+                    if self.use_redis:
+                        self.redis.cache_set(cache_key, analysis, ttl=86400)  # Cache for 24 hours
+                    
+                    # Publish event to Kafka
+                    if self.use_kafka:
+                        event_data = {
+                            "event_type": "temporal_analysis",
+                            "region": region,
+                            "site_count": len(site_refs),
+                            "timestamp": time.time()
+                        }
+                        self.kafka.produce("nis.analysis.events", event_data)
+                    
+                    logger.info(f"Completed temporal analysis for region: {region}")
+                    return analysis
+            
+            # Fallback basic analysis
+            result = {
+                "region": region,
+                "site_count": len(site_refs),
+                "temporal_analysis": f"Region {region} contains {len(site_refs)} archaeological sites.",
+                "likely_time_periods": []
+            }
+            
+            # Cache the fallback results
+            if self.use_redis:
+                self.redis.cache_set(cache_key, result, ttl=3600)  # Cache for 1 hour (shorter for fallback)
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error analyzing temporal patterns: {str(e)}")
+            return {"error": str(e)}
+    
+    def _get_site_id(self, lat: float, lon: float) -> str:
+        """Generate a unique ID for a site based on coordinates.
+        
+        Args:
+            lat: Latitude coordinate
+            lon: Longitude coordinate
+            
+        Returns:
+            Site ID string
+        """
+        # Format coordinates to 4 decimal places and combine
+        return f"site_{lat:.4f}_{lon:.4f}".replace("-", "n").replace(".", "p")
+    
+    def _update_pattern_index(self, pattern_type: str, site_id: str, coordinates: Dict) -> None:
+        """Update the index of sites with a particular pattern.
+        
+        Args:
+            pattern_type: Type of pattern
+            site_id: Site ID to add
+            coordinates: Site coordinates
+        """
+        pattern_file = self.patterns_dir / f"{self._sanitize_filename(pattern_type)}.json"
+        
+        if pattern_file.exists():
+            with open(pattern_file, "r", encoding="utf-8") as f:
+                pattern_data = json.load(f)
+        else:
+            pattern_data = {
+                "pattern_type": pattern_type,
+                "sites": []
+            }
+        
+        # Check if site already exists
+        site_exists = any(site["site_id"] == site_id for site in pattern_data["sites"])
+        
+        if not site_exists:
+            pattern_data["sites"].append({
+                "site_id": site_id,
+                "coordinates": coordinates
+            })
+        
+        with open(pattern_file, "w", encoding="utf-8") as f:
+            json.dump(pattern_data, f, indent=2)
+        
+        # Update Redis cache
+        if self.use_redis:
+            cache_key = f"pattern:{self._sanitize_filename(pattern_type)}"
+            self.redis.cache_set(cache_key, pattern_data)
+    
+    def _update_region_index(self, region: str, site_id: str, coordinates: Dict) -> None:
+        """Update the index of sites in a particular region.
+        
+        Args:
+            region: Region name
+            site_id: Site ID to add
+            coordinates: Site coordinates
+        """
+        region_file = self.regions_dir / f"{self._sanitize_filename(region)}.json"
+        
+        if region_file.exists():
+            with open(region_file, "r", encoding="utf-8") as f:
+                region_data = json.load(f)
+        else:
+            region_data = {
+                "region": region,
+                "sites": [],
+                "summary": {
+                    "description": f"Region {region}",
+                    "dominant_patterns": [],
+                    "time_periods": []
+                }
+            }
+        
+        # Check if site already exists
+        site_exists = any(site["site_id"] == site_id for site in region_data["sites"])
+        
+        if not site_exists:
+            region_data["sites"].append({
+                "site_id": site_id,
+                "coordinates": coordinates
+            })
+        
+        with open(region_file, "w", encoding="utf-8") as f:
+            json.dump(region_data, f, indent=2)
+        
+        # Update Redis cache
+        if self.use_redis:
+            cache_key = f"region:{self._sanitize_filename(region)}"
+            self.redis.cache_set(cache_key, region_data)
+            
+            # Also invalidate any regional summary cache
+            summary_key = f"summary:region:{region}"
+            self.redis.cache_delete(summary_key)
+    
+    def _sanitize_filename(self, text: str) -> str:
+        """Sanitize text for use in filenames.
+        
+        Args:
+            text: Text to sanitize
+            
+        Returns:
+            Sanitized text
+        """
+        # Replace characters that are invalid in filenames
+        return text.replace(" ", "_").replace("/", "_").replace("\\", "_").replace(":", "_").lower()
+    
+    def _get_region_for_coordinates(self, lat: float, lon: float) -> Optional[str]:
+        """Determine the region name for given coordinates.
+        
+        Args:
+            lat: Latitude coordinate
+            lon: Longitude coordinate
+            
+        Returns:
+            Region name or None
+        """
+        # This is a simplified approach - in production would use proper GIS
+        # Define regions based on coordinate ranges
+        regions = {
+            "Upper Xingu": (-13.0, -3.0, -55.0, -50.0),  # lat_min, lat_max, lon_min, lon_max
+            "Tapajós": (-8.0, -2.0, -60.0, -54.0),
+            "Rio Negro": (-3.0, 3.0, -68.0, -60.0),
+            "Llanos de Moxos": (-15.0, -10.0, -68.0, -63.0),
+            "Ucayali": (-10.0, -7.0, -76.0, -73.0)
+        }
+        
+        for region_name, bounds in regions.items():
+            lat_min, lat_max, lon_min, lon_max = bounds
+            if lat_min <= lat <= lat_max and lon_min <= lon <= lon_max:
+                return region_name
+        
+        # Default to a general name based on the quadrant
+        ns = "North" if lat >= 0 else "South"
+        ew = "East" if lon >= 0 else "West"
+        return f"{ns} Amazon {ew}"
+    
+    def _generate_region_summary(self, region: str, sites: List[Dict]) -> Dict:
+        """Generate a summary of a region using GPT.
+        
+        Args:
+            region: Region name
+            sites: List of sites in the region
+            
+        Returns:
+            Summary dictionary
+        """
+        if not self.use_live_gpt or not sites:
+            return {
+                "description": f"Region {region} contains {len(sites)} known archaeological sites.",
+                "dominant_patterns": self._get_dominant_patterns(sites),
+                "time_periods": []
+            }
+        
+        # Check Redis cache first
+        cache_key = f"summary_text:region:{region}"
+        if self.use_redis:
+            cached_summary = self.redis.cache_get(cache_key)
+            if cached_summary:
+                logger.debug(f"Retrieved region summary text from Redis cache")
+                return cached_summary
+        
+        # Format site data for GPT
+        site_contexts = []
+        for site in sites:
+            coord = site.get("coordinates", {})
+            data = site.get("data", {})
+            
+            context = {
+                "title": f"Site at {coord.get('lat', 0)}, {coord.get('lon', 0)}",
+                "type": "archaeological_site",
+                "content": (
+                    f"Pattern: {data.get('pattern_type', 'Unknown')}\n"
+                    f"Description: {data.get('description', '')}\n"
+                    f"Confidence: {data.get('confidence', 0)}\n"
+                )
+            }
+            site_contexts.append(context)
+        
+        # Call GPT for analysis
+        result = self.gpt.multimodal_research(
+            query=f"Summarize the archaeological significance of the {region} region based on these sites. Identify dominant patterns, likely time periods, and potential cultural connections.",
+            context=site_contexts
+        )
+        
+        # Extract time periods
+        time_periods = self.gpt._extract_time_periods(result.get("analysis", ""))
+        
+        # Create structured summary
+        summary = {
+            "description": result.get("analysis", f"Region {region} contains {len(sites)} known archaeological sites."),
+            "dominant_patterns": self._get_dominant_patterns(sites),
+            "time_periods": time_periods
+        }
+        
+        # Cache the summary
+        if self.use_redis:
+            self.redis.cache_set(cache_key, summary, ttl=86400)  # Cache for 24 hours
+        
+        # Publish event to Kafka
+        if self.use_kafka:
+            event_data = {
+                "event_type": "region_summary_generated",
+                "region": region,
+                "site_count": len(sites),
+                "timestamp": time.time()
+            }
+            self.kafka.produce("nis.analysis.events", event_data)
+        
+        return summary
+    
+    def _get_dominant_patterns(self, sites: List[Dict]) -> List[str]:
+        """Get the most common pattern types from a list of sites.
+        
+        Args:
+            sites: List of site data
+            
+        Returns:
+            List of dominant pattern types
+        """
+        pattern_counts = {}
+        
+        for site in sites:
+            data = site.get("data", {})
+            pattern = data.get("pattern_type", "unknown")
+            
+            if pattern in pattern_counts:
+                pattern_counts[pattern] += 1
+            else:
+                pattern_counts[pattern] = 1
+        
+        # Sort by count and return the patterns
+        sorted_patterns = sorted(pattern_counts.items(), key=lambda x: x[1], reverse=True)
+        return [p[0] for p in sorted_patterns]
+    
+    def _basic_connection_analysis(self, sites: List[Dict]) -> List[Dict]:
+        """Perform basic connection analysis without GPT.
+        
+        Args:
+            sites: List of site data
+            
+        Returns:
+            List of potential connections
+        """
+        connections = []
+        
+        # Look for sites with the same pattern type
+        pattern_groups = {}
+        for site in sites:
+            site_id = site.get("site_id", "")
+            pattern = site.get("data", {}).get("pattern_type", "unknown")
+            
+            if pattern in pattern_groups:
+                pattern_groups[pattern].append(site_id)
+            else:
+                pattern_groups[pattern] = [site_id]
+        
+        # Create connections for sites with the same pattern
+        for pattern, site_ids in pattern_groups.items():
+            if len(site_ids) > 1:
+                connections.append({
+                    "type": "shared_pattern",
+                    "pattern": pattern,
+                    "site_ids": site_ids,
+                    "strength": 0.7,
+                    "description": f"These sites share the same pattern type: {pattern}"
+                })
+        
+        return connections
+    
+    def _extract_connections_from_text(self, text: str) -> List[Dict]:
+        """Extract connection information from GPT analysis text.
+        
+        Args:
+            text: Analysis text from GPT
+            
+        Returns:
+            List of extracted connections
+        """
+        # This is a simplistic extraction - in production would use more sophisticated NLP
+        connections = []
+        
+        # Look for connection indicators in the text
+        connection_indicators = [
+            "connection", "relationship", "network", "linked", "route", 
+            "trade", "cultural exchange", "influence", "similar to"
+        ]
+        
+        # Simple sentence-based extraction
+        sentences = text.split(".")
+        for sentence in sentences:
+            for indicator in connection_indicators:
+                if indicator in sentence.lower():
+                    connections.append({
+                        "type": "inferred_connection",
+                        "strength": 0.6,
+                        "description": sentence.strip() + "."
+                    })
+                    break
+        
+        return connections
+    
+    def _get_default_historical_timeline(self) -> List[Dict]:
+        """Get a default historical timeline for the Amazon region.
+        
+        Returns:
+            List of historical events
+        """
+        # Try to get from Redis cache first
+        cache_key = "default_historical_timeline"
+        if self.use_redis:
+            cached_timeline = self.redis.cache_get(cache_key)
+            if cached_timeline:
+                return cached_timeline
+        
+        timeline = [
+            {"year": 500, "event": "Evidence of complex societies forming in the Upper Xingu region"},
+            {"year": 800, "event": "Expansion of earthwork construction throughout the Amazon basin"},
+            {"year": 1000, "event": "Peak of pre-Columbian population and cultural development"},
+            {"year": 1200, "event": "Widespread use of Terra Preta agricultural techniques"},
+            {"year": 1450, "event": "Development of complex road networks connecting settlements"},
+            {"year": 1500, "event": "European contact begins affecting Amazonian societies"},
+            {"year": 1600, "event": "Population collapse due to European diseases"},
+            {"year": 1750, "event": "Portuguese and Spanish colonization intensifies"},
+            {"year": 1900, "event": "Rubber boom brings new economic activity to the region"},
+            {"year": 1950, "event": "Modern archaeological research begins in the Amazon"},
+            {"year": 2000, "event": "LIDAR and remote sensing technologies reveal extent of ancient settlements"}
+        ]
+        
+        # Cache the timeline
+        if self.use_redis:
+            self.redis.cache_set(cache_key, timeline, ttl=604800)  # Cache for 1 week
+        
+        return timeline 

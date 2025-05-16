@@ -6,5 +6,6 @@ multi-agent systems.
 """
 
 from .coordinator import MetaProtocolCoordinator
+from .gpt_integration import GPTIntegration
 
-__all__ = ["MetaProtocolCoordinator"] 
+__all__ = ["MetaProtocolCoordinator", "GPTIntegration"] 
