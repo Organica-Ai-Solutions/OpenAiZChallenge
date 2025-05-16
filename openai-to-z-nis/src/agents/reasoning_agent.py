@@ -10,8 +10,8 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 import os
 
-# In production, we would import OpenAI or another LLM client
-# import openai
+# Import the GPT integration
+from src.meta.gpt_integration import GPTIntegration
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -20,11 +20,12 @@ logger = logging.getLogger(__name__)
 class ReasoningAgent:
     """Agent for analyzing and interpreting findings with historical context."""
     
-    def __init__(self, prompt_dir: Optional[Path] = None):
+    def __init__(self, prompt_dir: Optional[Path] = None, gpt_model: str = "gpt-4-turbo"):
         """Initialize the Reasoning Agent.
         
         Args:
             prompt_dir: Directory containing prompt templates
+            gpt_model: GPT model to use for reasoning
         """
         self.prompt_dir = prompt_dir or Path("src/prompts")
         self.reasoning_prompt_path = self.prompt_dir / "reasoning_prompt.txt"
@@ -42,8 +43,14 @@ class ReasoningAgent:
                 "Provide historical context and archaeological interpretation.\n"
             )
         
-        # In a production environment, initialize the LLM client
-        # self.client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+        # Initialize the GPT integration
+        try:
+            self.gpt = GPTIntegration(model_name=gpt_model)
+            logger.info(f"Initialized GPT integration with model: {gpt_model}")
+            self.use_live_llm = True
+        except Exception as e:
+            logger.warning(f"Failed to initialize GPT integration: {str(e)}. Falling back to mock responses.")
+            self.use_live_llm = False
         
         logger.info("Reasoning Agent initialized")
     
@@ -84,9 +91,8 @@ class ReasoningAgent:
         historical_sources = self._get_mock_historical_sources(lat, lon) if use_historical else []
         indigenous_knowledge = self._get_mock_indigenous_knowledge(lat, lon) if use_indigenous else []
         
-        # In production, this would make an actual call to GPT-4 or another LLM
-        # Using the prompt template and filling in the variables
-        interpretation = self._mock_llm_interpretation(
+        # Prepare the prompt
+        prompt = self._fill_prompt_template(
             pattern_type, 
             confidence, 
             lat, 
@@ -95,6 +101,40 @@ class ReasoningAgent:
             indigenous_knowledge
         )
         
+        # Use live GPT if available, otherwise fall back to mock
+        if self.use_live_llm:
+            try:
+                # Call GPT for analysis
+                interpretation = self.gpt.reasoning_analysis(
+                    prompt=prompt,
+                    pattern_type=pattern_type,
+                    lat=lat,
+                    lon=lon,
+                    historical_sources=historical_sources,
+                    indigenous_knowledge=indigenous_knowledge
+                )
+                logger.info(f"Using live GPT for analysis at {lat}, {lon}")
+            except Exception as e:
+                logger.error(f"Error calling GPT: {str(e)}. Falling back to mock responses.")
+                interpretation = self._mock_llm_interpretation(
+                    pattern_type, 
+                    confidence, 
+                    lat, 
+                    lon, 
+                    historical_sources,
+                    indigenous_knowledge
+                )
+        else:
+            # Fall back to mock responses
+            interpretation = self._mock_llm_interpretation(
+                pattern_type, 
+                confidence, 
+                lat, 
+                lon, 
+                historical_sources,
+                indigenous_knowledge
+            )
+        
         # Add sources used for reproducibility
         sources_used = visual_findings.get("sources", [])
         if historical_sources:
@@ -102,15 +142,20 @@ class ReasoningAgent:
         if indigenous_knowledge:
             sources_used.extend([source["source"] for source in indigenous_knowledge])
         
-        # In production, the LLM would provide this entire object
-        # Here we'll construct it manually for the demo
-        return {
-            "interpretation": interpretation["description"],
-            "confidence": interpretation["confidence"],
-            "historical_context": interpretation["historical_context"],
-            "indigenous_perspective": interpretation["indigenous_perspective"],
+        # Ensure we have all the required keys
+        result = {
+            "interpretation": interpretation.get("description", "No interpretation available."),
+            "confidence": interpretation.get("confidence", 0.0),
+            "historical_context": interpretation.get("historical_context", "No historical context available."),
+            "indigenous_perspective": interpretation.get("indigenous_perspective", "No indigenous perspective available."),
             "sources_used": sources_used,
         }
+        
+        # Add recommended next steps if available
+        if "recommended_next_steps" in interpretation:
+            result["recommended_next_steps"] = interpretation["recommended_next_steps"]
+        
+        return result
     
     def _fill_prompt_template(self, 
                             pattern_type: str, 
