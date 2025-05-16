@@ -121,3 +121,20 @@ MIT
 
 ### Acknowledgements
 This project is submitted as part of the OpenAI to Z Challenge. We thank the Earth Archive for providing LIDAR data and acknowledge the traditional knowledge of indigenous communities of the Amazon region. 
+
+
+
+
+##developerNote
+Data Processing
+Could benefit from more sophisticated image processing algorithms
+Might need better handling of large LIDAR datasets
+Could improve the integration of indigenous knowledge
+Scalability
+The current implementation might face challenges with large-scale analysis
+Could benefit from distributed processing for multiple areas
+Might need optimization for real-time processing
+Validation
+Field verification of findings is still needed
+Could benefit from more collaboration with archaeological experts
+Might need more robust validation methods
