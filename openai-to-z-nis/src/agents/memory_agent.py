@@ -90,9 +90,9 @@ class MemoryAgent:
                 "site_id": site_id,
                 "coordinates": {"lat": lat, "lon": lon},
                 "last_updated": time.time(),
-                "data": data
-            }
-            
+            "data": data
+        }
+        
             # Write to Redis cache if available
             if self.use_redis:
                 cache_key = f"site:{site_id}"
