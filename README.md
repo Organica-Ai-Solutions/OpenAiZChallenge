@@ -1,187 +1,186 @@
-# OpenAI to Z Challenge - NIS Protocol
+# OpenAI to Z Challenge: NIS Protocol
 
-<p align="center">
-  <img src="src/images/challengelogo.png" alt="OpenAI to Z Challenge Logo" width="300"/>
-</p>
+![OpenAI to Z Challenge Logo](src/images/challengelogo.png)
 
-## Amazon Archaeological Site Discovery
+## Project Overview
 
-### Overview
-This project leverages the NIS Protocol (Neuro-Inspired System) to discover potential archaeological sites in the Amazon rainforest using multi-modal AI analysis of satellite imagery, LIDAR data, colonial texts, and indigenous knowledge.
+This project leverages the NIS (Neuro-Inspired System) Protocol to discover potential archaeological sites in the Amazon rainforest. By integrating satellite imagery, LIDAR data, colonial texts, and indigenous knowledge with state-of-the-art AI models, we aim to uncover previously unknown archaeological sites that could rewrite our understanding of pre-Columbian civilizations in the Amazon.
 
-Developed for the OpenAI to Z Challenge, our goal is to use AI to identify previously unknown archaeological sites within the Amazon biome of Northern South America, focusing on Brazil with extensions into Bolivia, Colombia, Ecuador, Guyana, Peru, Suriname, Venezuela, and French Guiana.
+## Architecture
 
-### About the Challenge
-The OpenAI to Z Challenge invites participants to bring legends to life by discovering previously unknown archaeological sites using open-source data and AI. The Amazon rainforest, spanning over 6,000,000 sq km across nine countries, holds untold histories of past civilizations and is home to numerous Indigenous groups. Resources like satellite imagery and LIDAR are helping to fill gaps in our understanding of this previously unexplored region.
+The NIS Protocol is a biologically inspired multi-agent architecture that coordinates various AI agents:
 
-Legends such as the "lost city of Z", Paititi, and El Dorado hint at dense ancient civilizations waiting to be discovered. Our project seeks to contribute to this exploration using cutting-edge AI technology.
+- **Vision Agent**: Processes raw data (satellite images, LIDAR scans) to detect anomalies or structures
+- **Memory Agent**: Stores and retrieves contextual information (previous findings, historical texts)
+- **Reasoning Agent**: Analyzes inputs using GPT-4.1 to determine the likelihood of archaeological sites
+- **Action Agent**: Produces final outputs (compiled reports, map markers, recommendations)
 
-### Key Features
-- Multi-agent AI system using our custom NIS Protocol
-- Integration of satellite imagery and LIDAR data
-- Analysis of historical colonial texts
-- Respect for indigenous knowledge and oral histories
-- Interactive web frontend for exploration and verification
-- Redis caching for high-performance data access
-- Kafka for event-driven architecture and real-time analytics
+These agents communicate via the MetaProtocolCoordinator, which implements three protocols:
+- **MCP** (Managed Compute Protocol): For orchestrating external API calls
+- **ACP** (Agent Communication Protocol): For structured agent function calls
+- **A2A** (Agent-to-Agent Protocol): For direct peer-to-peer agent communication
 
-### NIS Protocol Architecture
-Our Neuro-Inspired System (NIS) consists of specialized agents working together:
-- **Vision Agent**: Processes satellite and LIDAR data to detect anomalies
-- **Memory Agent**: Stores and retrieves contextual information
-- **Reasoning Agent**: Analyzes findings and connects evidence
-- **Action Agent**: Generates outputs and recommendations
+![NIS Architecture](NIS_Architecture.png)
 
-<p align="center">
-  <img src="NIS_Architecture.png" alt="NIS Architecture Diagram" width="600"/>
-</p>
+## Project Setup
 
-### Getting Started
+### Prerequisites
 
-#### Prerequisites
 - Python 3.9+
 - Node.js 18+
 - Git
-- Redis 
-- Kafka (with ZooKeeper)
 
-#### Installation
+### Backend Setup
 
+1. Clone the repository:
 ```bash
-# Clone the repository
 git clone https://github.com/yourusername/openai-to-z-nis.git
 cd openai-to-z-nis
+```
 
-# Install backend dependencies
+2. Create and activate a virtual environment:
+```bash
+# On Windows
+python -m venv venv
+.\venv\Scripts\activate
+
+# On macOS/Linux
+python -m venv venv
+source venv/bin/activate
+```
+
+3. Install backend dependencies:
+```bash
 pip install -r requirements.txt
+```
 
-# Install frontend dependencies
+4. Create necessary directories:
+```bash
+mkdir -p data/lidar data/satellite data/colonial_texts data/overlays
+mkdir -p outputs/findings outputs/logs outputs/memory
+```
+
+5. Set up environment variables:
+Create a `.env` file in the project root with the following:
+```
+OPENAI_API_KEY=your_openai_api_key
+```
+
+### Frontend Setup
+
+1. Install frontend dependencies:
+```bash
 cd frontend
 npm install
-cd ..
 ```
 
-#### Running All Services
+### Running the Application
 
-We provide a single script to start Redis, Kafka, and the API server:
-
-```bash
-# Start all services (Redis, Kafka, API)
-./run_all.py
-```
-
-This will start:
-1. Redis server for caching
-2. Kafka and ZooKeeper for event streaming
-3. The NIS Protocol API server
-
-#### Running Just the API Server
-
-If you already have Redis and Kafka running, you can start only the API server:
+#### Running the API Server
 
 ```bash
-# Run the API server
+# From the project root
 python run_api.py
 ```
 
-The API server will start on http://localhost:8000 by default. You can test the API by visiting:
-- API documentation: http://localhost:8000/docs
-- Health check: http://localhost:8000/health
-
-#### Using the API
-
-The main endpoint is `/analyze`, which accepts a POST request with coordinates and data source preferences:
-
-```json
-{
-  "coordinates": "-3.4653, -62.2159",
-  "dataSources": {
-    "satellite": true,
-    "lidar": true,
-    "historicalTexts": true,
-    "indigenousMaps": true
-  }
-}
-```
+The API will be available at http://localhost:8000
 
 #### Running the Frontend
 
+In a separate terminal:
 ```bash
-# In a separate terminal, run the frontend
+# From the frontend directory
 cd frontend
 npm run dev
 ```
 
-Visit `http://localhost:3000` to access the NIS Protocol interface.
+The frontend will be available at http://localhost:3000
 
-### Infrastructure Components
+### Troubleshooting npm issues in Git Bash
 
-#### Redis Integration
-We use Redis for high-performance caching to speed up data access and reduce computational load:
+If you experience issues with npm in Git Bash, try using PowerShell instead:
 
-- Caching analysis results
-- Storing region and pattern information
-- Fast retrieval of site data
-- Automatic cache invalidation for updates
+1. Open PowerShell and navigate to the frontend directory:
+```powershell
+cd C:\path\to\openai-to-z-nis\frontend
+```
 
-The Redis client is configured to use the following environment variables:
-- `REDIS_HOST` (default: localhost)
-- `REDIS_PORT` (default: 6379)
-- `REDIS_DB` (default: 0)
+2. Install dependencies and run the development server:
+```powershell
+npm install
+npm run dev
+```
 
-#### Kafka Integration
-Kafka provides an event-driven architecture for processing analysis events and notifications:
+## Using the Application
 
-- Site discovery event streaming
-- Real-time analysis updates
-- Async processing of time-consuming operations
-- Event history for auditing and monitoring
+1. Open your web browser and navigate to http://localhost:3000
+2. Enter coordinates or select a preset location
+3. Select the data sources you want to use (satellite, LIDAR, historical texts, indigenous maps)
+4. Click "Run Agent" to start the analysis
+5. View results in the "Results" tab and explore the map in the "Map" tab
 
-The Kafka client is configured to use:
-- `KAFKA_BOOTSTRAP_SERVERS` (default: localhost:9092)
-- `KAFKA_CLIENT_ID` (default: nis-protocol)
+## Data Sources
 
-### Data Sources
-- Earth Archive LIDAR data
-- Sentinel-2 satellite imagery
-- Historical colonial texts from digitized archives
-- Published archaeological surveys
-- Indigenous knowledge maps (with proper attribution)
+- **Satellite Imagery**: Sentinel-2 multispectral imagery
+- **LIDAR Data**: Earth Archive tiles for selected regions
+- **Historical Texts**: Colonial records, missionary accounts, and expedition journals
+- **Indigenous Knowledge**: Oral traditions and cultural maps from local communities
 
-### Research Methodology
-Our approach combines computer vision techniques with natural language processing and historical context analysis:
+## Implementation Details
 
-1. **Data Collection**: We gather satellite imagery, LIDAR data, colonial texts, and indigenous knowledge
-2. **Anomaly Detection**: Our Vision Agent identifies potential structures and patterns
-3. **Contextual Analysis**: The Reasoning Agent connects visual findings with historical records
-4. **Verification**: Multiple sources are used to verify each potential discovery
-5. **Documentation**: Findings are thoroughly documented with coordinates, confidence scores, and supporting evidence
+The project is built with:
+- **Backend**: FastAPI for the API server
+- **Frontend**: Next.js with shadcn/ui components
+- **Map Integration**: Leaflet for interactive maps
+- **AI Models**: GPT-4.1 for reasoning, YOLOv8/WALDO for computer vision
 
-### Future Directions
-- Expand coverage to more remote regions of the Amazon
-- Incorporate additional data sources and sensing technologies
-- Develop collaborations with local archaeological teams
-- Create open datasets for the archaeological research community
+The NIS Protocol architecture ensures seamless communication between agents, with the MetaProtocolCoordinator managing the flow of information and preserving context across different processing steps.
 
-### License
-MIT
+## Directory Structure
 
-### Acknowledgements
-This project is submitted as part of the OpenAI to Z Challenge. We thank the Earth Archive for providing LIDAR data and acknowledge the traditional knowledge of indigenous communities of the Amazon region. 
+```
+openai-to-z-nis/
+├── data/                      # Raw data sources
+│   ├── lidar/                 # LIDAR tiles
+│   ├── satellite/             # Satellite imagery
+│   ├── colonial_texts/        # Historical text sources
+│   └── overlays/              # Generated overlay images
+├── src/
+│   ├── agents/                # Agent implementations
+│   │   ├── vision_agent.py      # Vision Agent
+│   │   ├── memory_agent.py      # Memory Agent
+│   │   ├── reasoning_agent.py   # Reasoning Agent
+│   │   └── action_agent.py      # Action Agent
+│   ├── meta/                  # MetaProtocol implementation
+│   │   └── coordinator.py       # MetaProtocolCoordinator
+│   ├── prompts/               # Prompt templates for GPT-4.1
+│   └── utils/                 # Utility modules
+├── api/                       # API endpoints and integrators
+├── frontend/                  # Next.js frontend
+│   ├── components/            # React components
+│   └── ...
+├── outputs/                   # Analysis outputs
+│   ├── findings/              # Discovered site reports
+│   ├── logs/                  # Log files
+│   └── memory/                # Agent memory persistence
+├── run_api.py                 # Script to run the API server
+└── README.md                  # Project documentation
+```
 
+## Contributing
 
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Commit your changes: `git commit -am 'Add your feature'`
+4. Push to the branch: `git push origin feature/your-feature`
+5. Submit a pull request
 
+## License
 
-##developerNote
-Data Processing
-Could benefit from more sophisticated image processing algorithms
-Might need better handling of large LIDAR datasets
-Could improve the integration of indigenous knowledge
-Scalability
-The current implementation might face challenges with large-scale analysis
-Could benefit from distributed processing for multiple areas
-Might need optimization for real-time processing
-Validation
-Field verification of findings is still needed
-Could benefit from more collaboration with archaeological experts
-Might need more robust validation methods
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgements
+
+- OpenAI for the GPT-4.1 model and the OpenAI to Z Challenge
+- Earth Archive for LIDAR data
+- Indigenous communities of the Amazon region for their knowledge and perspectives 

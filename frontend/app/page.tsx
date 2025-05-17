@@ -83,6 +83,14 @@ export default function LandingPage() {
                   Our AI-powered system uses satellite imagery, LIDAR data, and historical records to identify patterns
                   consistent with ancient settlements and structures.
                 </p>
+                <div className="mt-4">
+                  <Button variant="outline" asChild className="w-full">
+                    <Link href="/archaeological-discovery">
+                      Explore Archaeological Sites
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
 

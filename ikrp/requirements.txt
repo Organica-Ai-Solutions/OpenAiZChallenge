@@ -1,0 +1,19 @@
+fastapi==0.109.0
+uvicorn==0.25.0
+sqlalchemy==2.0.25
+pydantic==2.6.1
+pydantic-settings==2.1.0
+redis==5.0.1
+kafka-python==2.0.2
+dask==2024.1.1
+python-jose==3.3.0
+passlib==1.7.4
+python-multipart==0.0.9
+httpx==0.26.0
+
+# Development dependencies
+pytest==7.4.4
+mypy==1.8.0
+black==24.1.1
+isort==5.13.2
+flake8==7.0.0

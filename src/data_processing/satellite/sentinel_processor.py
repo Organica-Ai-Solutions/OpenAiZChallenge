@@ -11,118 +11,148 @@ import requests
 from pathlib import Path
 import json
 from scipy.ndimage import uniform_filter, binary_opening, binary_closing
+import logging
+from shapely.geometry import box
+
+logger = logging.getLogger(__name__)
 
 class SentinelProcessor:
-    """Process Sentinel-2 satellite imagery for archaeological site detection."""
+    """Processor for Sentinel-2 satellite imagery."""
     
-    def __init__(self, credentials: Dict[str, str], output_dir: str):
-        """Initialize the processor with credentials and output directory."""
-        self.username = credentials.get('username')
-        self.password = credentials.get('password')
-        self.output_dir = Path(output_dir)
-        self.output_dir.mkdir(parents=True, exist_ok=True)
+    def __init__(
+        self, 
+        credentials: Dict[str, str], 
+        output_dir: str = 'data/satellite'
+    ):
+        """
+        Initialize Sentinel-2 data processor.
         
-        # STAC API endpoints
-        self.stac_api_url = "https://catalogue.dataspace.copernicus.eu/stac"
-        self.auth_url = "https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token"
+        Args:
+            credentials: Dictionary with 'username' and 'password'
+            output_dir: Directory to save downloaded satellite images
+        """
+        self.username = credentials['username']
+        self.password = credentials['password']
+        self.output_dir = output_dir
+        os.makedirs(output_dir, exist_ok=True)
         
-        # Get access token
-        self.access_token = self._get_access_token()
+        # Initialize Sentinel API client
+        self.api = SentinelAPI(self.username, self.password, 'https://scihub.copernicus.eu/dhus')
     
-    def _get_access_token(self) -> str:
-        """Get OAuth2 access token for STAC API."""
-        data = {
-            'grant_type': 'password',
-            'username': self.username,
-            'password': self.password,
-            'client_id': 'cdse-public'
-        }
+    def search_images(
+        self, 
+        area: Dict[str, float], 
+        start_date: datetime, 
+        end_date: datetime,
+        cloud_cover: Optional[Tuple[float, float]] = (0, 10)
+    ) -> List[Dict]:
+        """
+        Search for Sentinel-2 images matching criteria.
         
-        response = requests.post(self.auth_url, data=data)
-        response.raise_for_status()
-        return response.json()['access_token']
-    
-    def search_imagery(self, 
-                      area: Dict[str, float],
-                      start_date: datetime,
-                      end_date: datetime,
-                      max_cloud_cover: float = 20.0) -> List[Dict]:
-        """Search for Sentinel-2 imagery using STAC API."""
-        # Convert dates to ISO format
-        start_date_str = start_date.isoformat() + 'Z'
-        end_date_str = end_date.isoformat() + 'Z'
+        Args:
+            area: Dictionary with 'north', 'south', 'east', 'west' coordinates
+            start_date: Start of search period
+            end_date: End of search period
+            cloud_cover: Tuple of (min, max) acceptable cloud cover percentage
         
-        # Create STAC query
-        query = {
-            "collections": ["SENTINEL-2"],
-            "datetime": f"{start_date_str}/{end_date_str}",
-            "query": {
-                "eo:cloud_cover": {
-                    "lte": max_cloud_cover
-                }
-            },
-            "intersects": {
-                "type": "Polygon",
-                "coordinates": [[
-                    [area['west'], area['south']],
-                    [area['east'], area['south']],
-                    [area['east'], area['north']],
-                    [area['west'], area['north']],
-                    [area['west'], area['south']]
-                ]]
-            }
-        }
+        Returns:
+            List of matching image metadata
+        """
+        # Create a bounding box for the area
+        footprint = geojson_to_wkt(box(
+            area['west'], area['south'], 
+            area['east'], area['north']
+        ))
         
-        # Make request to STAC API
-        headers = {'Authorization': f'Bearer {self.access_token}'}
-        response = requests.post(
-            f"{self.stac_api_url}/search",
-            json=query,
-            headers=headers
+        # Search for images
+        products = self.api.query(
+            footprint,
+            date=(start_date, end_date),
+            platformname='Sentinel-2',
+            cloudcoverpercentage=cloud_cover
         )
-        response.raise_for_status()
         
-        return response.json()['features']
+        return list(products.values())
     
-    def download_product(self, product_id: str) -> str:
-        """Download a Sentinel-2 product using STAC API."""
-        # Get product download URL
-        headers = {'Authorization': f'Bearer {self.access_token}'}
-        response = requests.get(
-            f"{self.stac_api_url}/collections/SENTINEL-2/items/{product_id}",
-            headers=headers
-        )
-        response.raise_for_status()
+    def download_images(
+        self, 
+        products: List[Dict], 
+        max_images: int = 5
+    ) -> List[str]:
+        """
+        Download selected satellite images.
         
-        # Get download URL for the product
-        product_data = response.json()
-        download_url = product_data['assets']['data']['href']
+        Args:
+            products: List of product metadata
+            max_images: Maximum number of images to download
         
-        # Download the product
-        output_path = self.output_dir / f"{product_id}.zip"
-        response = requests.get(download_url, headers=headers, stream=True)
-        response.raise_for_status()
+        Returns:
+            List of downloaded image file paths
+        """
+        downloaded_images = []
         
-        with open(output_path, 'wb') as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
+        for product in products[:max_images]:
+            try:
+                # Download the product
+                path = self.api.download(
+                    product['uuid'], 
+                    directory_path=self.output_dir
+                )
+                downloaded_images.append(path)
+            except Exception as e:
+                logger.warning(f"Failed to download image: {e}")
         
-        return str(output_path)
+        return downloaded_images
     
-    def process_image(self, image_path: str) -> np.ndarray:
-        """Process a Sentinel-2 image for archaeological feature detection."""
-        # Read the image using rasterio
-        with rasterio.open(image_path) as src:
-            # Read the image data
-            image = src.read()
-            
-            # Convert to float32 for processing
-            image = image.astype(np.float32)
-            
-            # Normalize the data
-            image = (image - image.min()) / (image.max() - image.min())
-            
-            return image
+    def process_image(
+        self, 
+        image_path: str, 
+        bands: List[str] = ['B04', 'B03', 'B02']  # Red, Green, Blue
+    ) -> Dict[str, np.ndarray]:
+        """
+        Process a downloaded Sentinel-2 image.
+        
+        Args:
+            image_path: Path to the downloaded image
+            bands: List of bands to extract
+        
+        Returns:
+            Dictionary of extracted band arrays
+        """
+        try:
+            with rasterio.open(image_path) as src:
+                processed_bands = {}
+                for band in bands:
+                    # Find the band index
+                    band_index = src.descriptions.index(band)
+                    processed_bands[band] = src.read(band_index + 1)
+                
+                return processed_bands
+        except Exception as e:
+            logger.error(f"Error processing image {image_path}: {e}")
+            return {}
+    
+    def analyze_vegetation_index(
+        self, 
+        red_band: np.ndarray, 
+        near_infrared_band: np.ndarray
+    ) -> np.ndarray:
+        """
+        Calculate Normalized Difference Vegetation Index (NDVI).
+        
+        Args:
+            red_band: Red band array
+            near_infrared_band: Near-infrared band array
+        
+        Returns:
+            NDVI array
+        """
+        # Avoid division by zero
+        near_infrared_band = near_infrared_band.astype(float)
+        red_band = red_band.astype(float)
+        
+        ndvi = (near_infrared_band - red_band) / (near_infrared_band + red_band + 1e-10)
+        return ndvi
     
     def calculate_ndvi(self, image: np.ndarray) -> np.ndarray:
         """Calculate Normalized Difference Vegetation Index (NDVI)."""
@@ -163,7 +193,7 @@ class SentinelProcessor:
                     max_cloud_cover: float = 20.0) -> Dict:
         """Process a specific area for archaeological features."""
         # Search for available imagery
-        products = self.search_imagery(area, start_date, end_date, max_cloud_cover)
+        products = self.search_images(area, start_date, end_date)
         
         if not products:
             return {
@@ -175,27 +205,27 @@ class SentinelProcessor:
         for product in products:
             try:
                 # Download the product
-                product_path = self.download_product(product['id'])
+                product_path = self.download_images([product])[0]
                 
                 # Process the image
                 image = self.process_image(product_path)
                 
                 # Calculate NDVI
-                ndvi = self.calculate_ndvi(image)
+                ndvi = self.analyze_vegetation_index(image['B04'], image['B08'])
                 
                 # Detect anomalies
                 anomalies = self.detect_anomalies(ndvi)
                 
                 # Store results
                 results.append({
-                    'product_id': product['id'],
-                    'acquisition_date': product['properties']['datetime'],
-                    'cloud_cover': product['properties']['eo:cloud_cover'],
+                    'product_id': product['uuid'],
+                    'acquisition_date': product['date'],
+                    'cloud_cover': product['cloudcoverpercentage'],
                     'anomalies': anomalies.tolist()
                 })
                 
             except Exception as e:
-                print(f"Error processing product {product['id']}: {str(e)}")
+                print(f"Error processing product {product['uuid']}: {str(e)}")
                 continue
         
         return {

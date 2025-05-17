@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, memo } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -11,6 +10,8 @@ import { Layers, MapIcon, Database } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
+import type { LatLngExpression, LatLngTuple } from 'leaflet'
+import type { Feature, FeatureCollection, Geometry } from 'geojson'
 
 // Define types for Leaflet components to avoid direct imports
 type MapContainerProps = {
@@ -50,7 +51,13 @@ type GeoJSONProps = {
 }
 
 // Known archaeological sites data
-const knownSites = [
+const knownSites: Array<{
+  name: string
+  coordinates: LatLngTuple
+  description: string
+  confidence: number
+  type: string
+}> = [
   {
     name: "Kuhikugu",
     coordinates: [-12.2551, -53.2134],
@@ -75,8 +82,8 @@ const knownSites = [
 ]
 
 // Mock LIDAR data overlay (GeoJSON)
-const mockLidarData = {
-  type: "FeatureCollection",
+const mockLidarData: FeatureCollection = {
+  type: "FeatureCollection" as const,
   features: [
     {
       type: "Feature",
@@ -123,6 +130,252 @@ interface MapViewerProps {
   onCoordinateSelect?: (coords: string) => void
 }
 
+// Memoized Map Container Component
+const MapContainerComponent = memo(({ 
+  leafletComponents,
+  mapCenter,
+  mapZoom,
+  activeBaseMap,
+  showKnownSites,
+  showLidarData,
+  selectedCoordinates,
+  handleMapClick,
+  lidarStyle,
+  setMapRef
+}: {
+  leafletComponents: any
+  mapCenter: [number, number]
+  mapZoom: number
+  activeBaseMap: string
+  showKnownSites: boolean
+  showLidarData: boolean
+  selectedCoordinates: [number, number] | null
+  handleMapClick: (e: any) => void
+  lidarStyle: (feature: any) => any
+  setMapRef: (map: any) => void
+}) => {
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
+
+  // Initialize map
+  useEffect(() => {
+    let map: any;
+    const container = mapContainerRef.current;
+
+    const initMap = async () => {
+      if (!container || !leafletComponents) return;
+
+      const L = await import('leaflet');
+      
+      // Ensure any existing map is properly removed
+      if (mapInstanceRef.current) {
+        try {
+          mapInstanceRef.current.remove();
+          mapInstanceRef.current = null;
+        } catch (error) {
+          console.warn('Error removing previous map instance:', error);
+        }
+      }
+
+      // Ensure the container is clean and ready
+      if (container.children.length > 0) {
+        container.innerHTML = '';
+      }
+
+      // Create new map instance with safe initialization
+      try {
+        map = L.map(container, {
+          center: mapCenter,
+          zoom: mapZoom,
+          preferCanvas: true, // Better performance for many markers
+          attributionControl: true,
+          zoomControl: true
+        });
+
+        // Store reference
+        mapInstanceRef.current = map;
+        setMapRef(map);
+
+        // Add click event listener
+        map.on('click', handleMapClick);
+
+        // Add initial tile layer
+        let tileLayer;
+        if (activeBaseMap === "satellite") {
+          tileLayer = L.tileLayer(
+            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+            {
+              attribution: "&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
+            }
+          );
+        } else if (activeBaseMap === "terrain") {
+          tileLayer = L.tileLayer(
+            "https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.png",
+            {
+              attribution: "&copy; <a href='http://stamen.com'>Stamen Design</a> &mdash; Map data &copy; OpenStreetMap contributors"
+            }
+          );
+        } else {
+          tileLayer = L.tileLayer(
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+              attribution: "&copy; OpenStreetMap contributors"
+            }
+          );
+        }
+
+        tileLayer.addTo(map);
+      } catch (error) {
+        console.error('Error initializing map:', error);
+      }
+    };
+
+    initMap();
+
+    // Cleanup function
+    return () => {
+      if (mapInstanceRef.current) {
+        try {
+          mapInstanceRef.current.remove();
+          mapInstanceRef.current = null;
+        } catch (error) {
+          console.warn('Error during map cleanup:', error);
+        }
+      }
+    };
+  }, [mapCenter, mapZoom, activeBaseMap, leafletComponents, handleMapClick, setMapRef]);
+
+  // Update map view when center or zoom changes
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+    mapInstanceRef.current.setView(mapCenter, mapZoom, { animate: true });
+  }, [mapCenter, mapZoom]);
+
+  // Update markers when showKnownSites changes
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+    const map = mapInstanceRef.current;
+    const L = window.L;
+
+    // Remove existing markers
+    map.eachLayer((layer: any) => {
+      if (layer instanceof L.Marker) {
+        map.removeLayer(layer);
+      }
+    });
+
+    if (showKnownSites) {
+      knownSites.forEach((site) => {
+        const marker = L.marker(site.coordinates, {
+          icon: L.divIcon({
+            className: "custom-div-icon",
+            html: `<div style="background-color: rgba(52, 211, 153, 0.8); width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>`,
+            iconSize: [12, 12],
+            iconAnchor: [6, 6],
+          })
+        });
+
+        marker.bindPopup(`
+          <div class="p-1">
+            <h3 class="font-bold text-sm">${site.name}</h3>
+            <p class="text-xs mt-1">${site.description}</p>
+            <div class="flex items-center gap-2 mt-2">
+              <span class="text-xs px-2 py-1 rounded-full border">${site.type}</span>
+              <span class="text-xs px-2 py-1 rounded-full bg-emerald-500 text-white">${site.confidence}% confidence</span>
+            </div>
+          </div>
+        `);
+
+        marker.addTo(map);
+      });
+    }
+  }, [showKnownSites]);
+
+  // Update LIDAR data when showLidarData changes
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+    const map = mapInstanceRef.current;
+    const L = window.L;
+    
+    // Remove existing GeoJSON layers
+    map.eachLayer((layer: any) => {
+      if (layer instanceof L.GeoJSON) {
+        map.removeLayer(layer);
+      }
+    });
+
+    if (showLidarData) {
+      const geoJsonLayer = L.geoJSON(mockLidarData, {
+        style: lidarStyle,
+        onEachFeature: (feature: any, layer: any) => {
+          const props = feature.properties;
+          layer.bindPopup(`
+            <div>
+              <h3 class="font-bold text-sm">${props.name}</h3>
+              <p class="text-xs mt-1">${props.description}</p>
+              <div class="mt-2">
+                <span class="inline-block px-2 py-1 text-xs bg-emerald-100 text-emerald-800 rounded-full">${props.type}</span>
+                <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full ml-1">${props.confidence}% confidence</span>
+              </div>
+            </div>
+          `);
+        }
+      });
+      geoJsonLayer.addTo(map);
+    }
+  }, [showLidarData, lidarStyle]);
+
+  // Update selected marker
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+    const map = mapInstanceRef.current;
+    const L = window.L;
+    
+    // Remove existing selected marker
+    map.eachLayer((layer: any) => {
+      if (layer._icon && layer._icon.className.includes('selected-marker')) {
+        map.removeLayer(layer);
+      }
+    });
+
+    if (selectedCoordinates) {
+      const marker = L.marker(selectedCoordinates, {
+        icon: new L.Icon({
+          iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+          iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+          shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41],
+          className: 'selected-marker'
+        })
+      });
+
+      marker.bindPopup(`
+        <div class="p-1">
+          <h3 class="font-bold text-sm">Selected Location</h3>
+          <p class="text-xs mt-1">
+            ${selectedCoordinates[0].toFixed(4)}, ${selectedCoordinates[1].toFixed(4)}
+          </p>
+        </div>
+      `);
+
+      marker.addTo(map);
+    }
+  }, [selectedCoordinates]);
+
+  return (
+    <div 
+      ref={mapContainerRef} 
+      style={{ height: "100%", width: "100%" }}
+      className="rounded-lg overflow-hidden"
+    />
+  );
+});
+
+MapContainerComponent.displayName = 'MapContainerComponent';
+
 export default function MapViewer({ initialCoordinates, onCoordinateSelect }: MapViewerProps) {
   const [activeBaseMap, setActiveBaseMap] = useState<string>("satellite")
   const [selectedCoordinates, setSelectedCoordinates] = useState<[number, number] | null>(null)
@@ -132,70 +385,53 @@ export default function MapViewer({ initialCoordinates, onCoordinateSelect }: Ma
   const [mapCenter, setMapCenter] = useState<[number, number]>([-3.4653, -62.2159]) // Default to Central Amazon
   const [mapZoom, setMapZoom] = useState<number>(5)
   const [leafletLoaded, setLeafletLoaded] = useState(false)
-  const [leafletComponents, setLeafletComponents] = useState<{
-    MapContainer: React.ComponentType<MapContainerProps>
-    TileLayer: React.ComponentType<TileLayerProps>
-    Marker: React.ComponentType<MarkerProps>
-    Popup: React.ComponentType<PopupProps>
-    Circle: React.ComponentType<CircleProps>
-    GeoJSON: React.ComponentType<GeoJSONProps>
-    useMap: () => any
-    Icon: any
-    divIcon: any
-  } | null>(null)
-
+  const [leafletComponents, setLeafletComponents] = useState<any>(null)
   const mapRef = useRef<any>(null)
 
   // Load Leaflet components dynamically
   useEffect(() => {
+    let mounted = true
+    let mapInstance: any = null
+
     async function loadLeaflet() {
       try {
-        // Import Leaflet CSS
         await import("leaflet/dist/leaflet.css")
-
-        // Import Leaflet and react-leaflet components
         const L = await import("leaflet")
         const RL = await import("react-leaflet")
 
-        // Create marker icons
-        const markerIcon = new L.Icon({
-          iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-          iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
-          shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
-          iconSize: [25, 41],
-          iconAnchor: [12, 41],
-          popupAnchor: [1, -34],
-          shadowSize: [41, 41],
-        })
-
-        // Custom marker for archaeological sites
-        const siteIcon = L.divIcon({
-          className: "custom-div-icon",
-          html: `<div style="background-color: rgba(52, 211, 153, 0.8); width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>`,
-          iconSize: [12, 12],
-          iconAnchor: [6, 6],
-        })
-
-        // Store Leaflet components and icons
-        setLeafletComponents({
-          MapContainer: RL.MapContainer,
-          TileLayer: RL.TileLayer,
-          Marker: RL.Marker,
-          Popup: RL.Popup,
-          Circle: RL.Circle,
-          GeoJSON: RL.GeoJSON,
-          useMap: RL.useMap,
-          Icon: L.Icon,
-          divIcon: L.divIcon,
-        })
-
-        setLeafletLoaded(true)
+        if (mounted) {
+          setLeafletComponents({
+            MapContainer: RL.MapContainer,
+            TileLayer: RL.TileLayer,
+            Marker: RL.Marker,
+            Popup: RL.Popup,
+            Circle: RL.Circle,
+            GeoJSON: RL.GeoJSON,
+            useMap: RL.useMap,
+            Icon: L.Icon,
+            divIcon: L.divIcon,
+          })
+          setLeafletLoaded(true)
+        }
       } catch (error) {
         console.error("Failed to load Leaflet:", error)
       }
     }
 
     loadLeaflet()
+
+    return () => {
+      mounted = false
+      if (mapRef.current) {
+        try {
+          // Safely remove the map instance
+          mapRef.current.remove()
+        } catch (error) {
+          console.warn('Error removing map instance:', error)
+        }
+        mapRef.current = null
+      }
+    }
   }, [])
 
   // Parse initial coordinates if provided
@@ -210,7 +446,6 @@ export default function MapViewer({ initialCoordinates, onCoordinateSelect }: Ma
     }
   }, [initialCoordinates])
 
-  // Handle map click to select coordinates
   const handleMapClick = (e: any) => {
     const { lat, lng } = e.latlng
     const formattedCoords = `${lat.toFixed(4)}, ${lng.toFixed(4)}`
@@ -220,7 +455,6 @@ export default function MapViewer({ initialCoordinates, onCoordinateSelect }: Ma
     }
   }
 
-  // Style function for GeoJSON features
   const lidarStyle = (feature: any) => {
     const confidence = feature.properties.confidence || 70
     const opacity = confidence / 100
@@ -251,27 +485,17 @@ export default function MapViewer({ initialCoordinates, onCoordinateSelect }: Ma
     }
   }
 
-  // Function to go to a specific location
-  const goToLocation = (coords: [number, number]) => {
-    setMapCenter(coords)
-    setMapZoom(12)
+  const setMapRef = (map: any) => {
+    // Safely set map reference, preventing multiple initializations
     if (mapRef.current) {
-      mapRef.current.setView(coords, 12)
-    }
-  }
-
-  // Component to set the map view based on coordinates
-  function SetViewOnClick({ coords }: { coords: [number, number] }) {
-    const map = leafletComponents?.useMap()
-
-    useEffect(() => {
-      if (map) {
-        map.setView(coords, 12)
+      try {
+        mapRef.current.remove();
+      } catch (error) {
+        console.warn('Error removing previous map reference:', error);
       }
-    }, [coords, map])
-
-    return null
-  }
+    }
+    mapRef.current = map;
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -309,143 +533,19 @@ export default function MapViewer({ initialCoordinates, onCoordinateSelect }: Ma
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="md:col-span-3">
           <div className="h-[400px] rounded-lg overflow-hidden border">
-            {leafletLoaded && leafletComponents ? (
-              <leafletComponents.MapContainer
-                center={mapCenter}
-                zoom={mapZoom}
-                style={{ height: "100%", width: "100%" }}
-                whenCreated={(map) => (mapRef.current = map)}
-                onClick={handleMapClick}
-              >
-                {/* Base map layers */}
-                {activeBaseMap === "satellite" && (
-                  <leafletComponents.TileLayer
-                    url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                    attribution="&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
-                  />
-                )}
-                {activeBaseMap === "terrain" && (
-                  <leafletComponents.TileLayer
-                    url="https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.png"
-                    attribution="&copy; <a href='http://stamen.com'>Stamen Design</a> &mdash; Map data &copy; OpenStreetMap contributors"
-                  />
-                )}
-                {activeBaseMap === "osm" && (
-                  <leafletComponents.TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
-                  />
-                )}
-
-                {/* Known archaeological sites */}
-                {showKnownSites &&
-                  knownSites.map((site, index) => (
-                    <leafletComponents.Marker
-                      key={index}
-                      position={site.coordinates}
-                      icon={leafletComponents.divIcon({
-                        className: "custom-div-icon",
-                        html: `<div style="background-color: rgba(52, 211, 153, 0.8); width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>`,
-                        iconSize: [12, 12],
-                        iconAnchor: [6, 6],
-                      })}
-                    >
-                      <leafletComponents.Popup>
-                        <div className="p-1">
-                          <h3 className="font-bold text-sm">{site.name}</h3>
-                          <p className="text-xs mt-1">{site.description}</p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <Badge variant="outline" className="text-xs">
-                              {site.type}
-                            </Badge>
-                            <Badge className="bg-emerald-500 text-xs">{site.confidence}% confidence</Badge>
-                          </div>
-                        </div>
-                      </leafletComponents.Popup>
-                    </leafletComponents.Marker>
-                  ))}
-
-                {/* LIDAR data overlay */}
-                {showLidarData && (
-                  <leafletComponents.GeoJSON
-                    data={mockLidarData}
-                    style={lidarStyle}
-                    onEachFeature={(feature, layer) => {
-                      const props = feature.properties
-                      layer.bindPopup(`
-                        <div>
-                          <h3 class="font-bold text-sm">${props.name}</h3>
-                          <p class="text-xs mt-1">${props.description}</p>
-                          <div class="mt-2">
-                            <span class="inline-block px-2 py-1 text-xs bg-emerald-100 text-emerald-800 rounded-full">${props.type}</span>
-                            <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full ml-1">${props.confidence}% confidence</span>
-                          </div>
-                        </div>
-                      `)
-                    }}
-                  />
-                )}
-
-                {/* Selected coordinates marker */}
-                {selectedCoordinates && (
-                  <>
-                    <leafletComponents.Marker
-                      position={selectedCoordinates}
-                      icon={
-                        new leafletComponents.Icon({
-                          iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-                          iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
-                          shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
-                          iconSize: [25, 41],
-                          iconAnchor: [12, 41],
-                          popupAnchor: [1, -34],
-                          shadowSize: [41, 41],
-                        })
-                      }
-                    >
-                      <leafletComponents.Popup>
-                        <div className="p-1">
-                          <h3 className="font-bold text-sm">Selected Location</h3>
-                          <p className="text-xs font-mono mt-1">
-                            {selectedCoordinates[0].toFixed(4)}, {selectedCoordinates[1].toFixed(4)}
-                          </p>
-                          <Button
-                            size="sm"
-                            className="mt-2 w-full text-xs"
-                            onClick={() => {
-                              if (onCoordinateSelect) {
-                                onCoordinateSelect(
-                                  `${selectedCoordinates[0].toFixed(4)}, ${selectedCoordinates[1].toFixed(4)}`,
-                                )
-                              }
-                            }}
-                          >
-                            Analyze This Location
-                          </Button>
-                        </div>
-                      </leafletComponents.Popup>
-                    </leafletComponents.Marker>
-                    <leafletComponents.Circle
-                      center={selectedCoordinates}
-                      radius={2000}
-                      pathOptions={{ color: "#10b981", fillColor: "#10b981", fillOpacity: 0.1 }}
-                    />
-                  </>
-                )}
-
-                {/* Update view when coordinates change */}
-                {mapCenter && <SetViewOnClick coords={mapCenter} />}
-              </leafletComponents.MapContainer>
-            ) : (
-              <div className="h-full flex items-center justify-center bg-muted">
-                <div className="text-center p-4">
-                  <Layers className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
-                  <h3 className="text-lg font-medium">Loading Map...</h3>
-                  <p className="text-sm text-muted-foreground max-w-md">
-                    Please wait while we load the interactive map components.
-                  </p>
-                </div>
-              </div>
+            {leafletLoaded && leafletComponents && (
+              <MapContainerComponent
+                leafletComponents={leafletComponents}
+                mapCenter={mapCenter}
+                mapZoom={mapZoom}
+                activeBaseMap={activeBaseMap}
+                showKnownSites={showKnownSites}
+                showLidarData={showLidarData}
+                selectedCoordinates={selectedCoordinates}
+                handleMapClick={handleMapClick}
+                lidarStyle={lidarStyle}
+                setMapRef={setMapRef}
+              />
             )}
           </div>
         </div>
@@ -480,7 +580,7 @@ export default function MapViewer({ initialCoordinates, onCoordinateSelect }: Ma
                     variant="outline"
                     size="sm"
                     className="w-full justify-start text-xs"
-                    onClick={() => goToLocation([-3.4653, -62.2159])}
+                    onClick={() => setMapCenter([-3.4653, -62.2159])}
                   >
                     Central Amazon
                   </Button>
@@ -488,7 +588,7 @@ export default function MapViewer({ initialCoordinates, onCoordinateSelect }: Ma
                     variant="outline"
                     size="sm"
                     className="w-full justify-start text-xs"
-                    onClick={() => goToLocation([-12.2551, -53.2134])}
+                    onClick={() => setMapCenter([-12.2551, -53.2134])}
                   >
                     Xingu River Basin
                   </Button>
@@ -496,7 +596,7 @@ export default function MapViewer({ initialCoordinates, onCoordinateSelect }: Ma
                     variant="outline"
                     size="sm"
                     className="w-full justify-start text-xs"
-                    onClick={() => goToLocation([-9.8282, -67.9452])}
+                    onClick={() => setMapCenter([-9.8282, -67.9452])}
                   >
                     Acre Geoglyphs
                   </Button>

@@ -20,8 +20,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger("nis_api")
 
-# Import the analyze module containing our endpoints
+# Import the modules containing our endpoints
 from .analyze import app as analyze_app
+from .batch import app as batch_app
+from .statistics import app as statistics_app
 
 # Create the main FastAPI application
 app = FastAPI(
@@ -40,7 +42,9 @@ app.add_middleware(
 )
 
 # Include routers from other modules
-app.include_router(analyze_app, prefix="")
+app.include_router(analyze_app, prefix="/analyze", tags=["Analysis"])
+app.include_router(batch_app, prefix="/batch", tags=["Batch Processing"])
+app.include_router(statistics_app, prefix="/statistics", tags=["Statistics"])
 
 # Root endpoint
 @app.get("/")
@@ -108,6 +112,7 @@ if static_dir.exists():
 # Create necessary directories
 os.makedirs("outputs/logs", exist_ok=True)
 os.makedirs("outputs/findings", exist_ok=True)
+os.makedirs("outputs/statistics", exist_ok=True)
 
 # Initialize infrastructure on startup
 @app.on_event("startup")
@@ -126,16 +131,23 @@ async def startup_event():
         kafka_client = get_kafka_client()
         logger.info("Kafka client initialized")
         
-        # Start a consumer for analysis events
-        kafka_client.consume(
-            topic="nis.analysis.events",
-            callback=lambda key, value: logger.info(f"Analysis event: {value}"),
-            group_id="nis-api-server"
-        )
+        # Start consumers for various topics
+        topics = [
+            ("nis.analysis.events", "nis-api-server-analysis"),
+            ("nis.batch.events", "nis-api-server-batch"),
+            ("nis.statistics.events", "nis-api-server-stats")
+        ]
+        
+        for topic, group_id in topics:
+            kafka_client.consume(
+                topic=topic,
+                callback=lambda key, value: logger.info(f"{topic} event: {value}"),
+                group_id=group_id
+            )
     except Exception as e:
         logger.error(f"Failed to initialize Kafka: {str(e)}")
 
-# Cleanup on shutdown
+# Shutdown event handler
 @app.on_event("shutdown")
 async def shutdown_event():
     logger.info("API server shutting down")

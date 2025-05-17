@@ -9,17 +9,32 @@ from datetime import datetime
 from pathlib import Path
 import json
 import h5py
+import logging
+import rasterio
+from rasterio.transform import from_origin
+
+logger = logging.getLogger(__name__)
 
 class LidarProcessor:
-    """Process GEDI LIDAR data for archaeological site detection."""
+    """Advanced LIDAR data processor for archaeological site detection."""
     
-    def __init__(self, credentials: Dict[str, str], output_dir: str):
-        """Initialize the processor with credentials and output directory."""
+    def __init__(
+        self, 
+        credentials: Dict[str, str], 
+        output_dir: str = 'data/lidar'
+    ):
+        """
+        Initialize LIDAR data processor.
+        
+        Args:
+            credentials: Dictionary with authentication details
+            output_dir: Directory to save processed LIDAR data
+        """
         self.username = credentials.get('username')
         self.password = credentials.get('password')
         self.token = credentials.get('token')
-        self.output_dir = Path(output_dir)
-        self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.output_dir = output_dir
+        os.makedirs(output_dir, exist_ok=True)
         
         # NASA Earthdata API configuration
         self.api_url = os.getenv('EARTHDATA_API_URL', 'https://cmr.earthdata.nasa.gov')
@@ -101,48 +116,249 @@ class LidarProcessor:
         anomalies = np.abs(data - mean) > (threshold * std)
         return anomalies
     
-    def process_area(self, 
-                    area: Dict[str, float],
-                    start_date: datetime,
-                    end_date: datetime) -> Dict:
-        """Process a specific area for archaeological features using LIDAR data."""
-        # Search for available data
-        results = self.search_data(area, start_date, end_date)
+    def download_lidar_data(
+        self, 
+        area: Dict[str, float], 
+        start_date: datetime, 
+        end_date: datetime
+    ) -> List[str]:
+        """
+        Download LIDAR data for a specific area and time range.
         
-        if not results.get('features'):
+        Args:
+            area: Dictionary with 'north', 'south', 'east', 'west' coordinates
+            start_date: Start of search period
+            end_date: End of search period
+        
+        Returns:
+            List of downloaded LIDAR file paths
+        """
+        # In a real implementation, this would use NASA's Earthdata API
+        # For now, we'll simulate the download process
+        try:
+            # Simulated download logic
+            downloaded_files = []
+            for i in range(3):  # Simulate multiple tiles
+                filename = f"lidar_tile_{i}_{start_date.year}.las"
+                filepath = os.path.join(self.output_dir, filename)
+                
+                # Simulate file creation (in reality, this would be an actual download)
+                with laspy.create(filepath) as las_file:
+                    # Create some mock point cloud data
+                    las_file.x = np.random.uniform(
+                        area['west'], area['east'], 10000
+                    )
+                    las_file.y = np.random.uniform(
+                        area['south'], area['north'], 10000
+                    )
+                    las_file.z = np.random.uniform(0, 100, 10000)
+                
+                downloaded_files.append(filepath)
+            
+            return downloaded_files
+        
+        except Exception as e:
+            logger.error(f"LIDAR data download error: {e}")
+            return []
+    
+    def process_point_cloud(
+        self, 
+        las_file_path: str
+    ) -> Dict[str, np.ndarray]:
+        """
+        Process a LIDAR point cloud file.
+        
+        Args:
+            las_file_path: Path to the LAS/LAZ file
+        
+        Returns:
+            Dictionary of processed LIDAR data
+        """
+        try:
+            # Read the LAS file
+            las_data = laspy.read(las_file_path)
+            
+            # Extract point cloud data
+            x = las_data.x
+            y = las_data.y
+            z = las_data.z
+            
+            # Create Digital Terrain Model (DTM)
+            # This is a simplified version. Real-world processing would be more complex
+            grid_resolution = 1.0  # 1-meter grid
+            x_min, x_max = x.min(), x.max()
+            y_min, y_max = y.min(), y.max()
+            
+            # Create grid
+            x_grid = np.arange(x_min, x_max, grid_resolution)
+            y_grid = np.arange(y_min, y_max, grid_resolution)
+            
+            # Interpolate elevation
+            dtm = np.zeros((len(y_grid), len(x_grid)))
+            for i, yi in enumerate(y_grid):
+                for j, xj in enumerate(x_grid):
+                    # Find points within a small radius
+                    mask = (
+                        (x >= xj) & (x < xj + grid_resolution) & 
+                        (y >= yi) & (y < yi + grid_resolution)
+                    )
+                    if mask.sum() > 0:
+                        dtm[i, j] = z[mask].mean()
+            
+            # Calculate derivatives
+            slope = np.gradient(dtm)[0]
+            aspect = np.gradient(dtm)[1]
+            
             return {
-                'status': 'error',
-                'message': 'No suitable LIDAR data found for the specified area and time period'
+                'dtm': dtm,
+                'slope': slope,
+                'aspect': aspect,
+                'point_density': len(x) / ((x_max - x_min) * (y_max - y_min))
             }
         
-        processed_results = []
-        for feature in results['features']:
-            try:
-                # Download the data
-                data_path = self.download_data(feature['id'])
-                
-                # Process the data
-                data = self.process_data(data_path)
-                
-                # Detect anomalies
-                anomalies = self.detect_anomalies(data)
-                
-                # Store results
-                processed_results.append({
-                    'granule_id': feature['id'],
-                    'acquisition_date': feature['properties']['time'],
-                    'coordinates': feature['geometry']['coordinates'],
-                    'anomalies': anomalies.tolist() if anomalies is not None else None
-                })
-                
-            except Exception as e:
-                print(f"Error processing granule {feature['id']}: {str(e)}")
-                continue
+        except Exception as e:
+            logger.error(f"Error processing point cloud {las_file_path}: {e}")
+            return {}
+    
+    def detect_archaeological_features(
+        self, 
+        dtm: np.ndarray, 
+        slope: np.ndarray
+    ) -> Dict[str, np.ndarray]:
+        """
+        Detect potential archaeological features in LIDAR data.
         
-        return {
-            'status': 'success',
-            'results': processed_results
-        }
+        Args:
+            dtm: Digital Terrain Model
+            slope: Slope array
+        
+        Returns:
+            Dictionary of detected features
+        """
+        try:
+            # Detect potential archaeological features
+            
+            # 1. Identify flat areas (potential settlements)
+            flat_areas = np.abs(slope) < 0.1
+            
+            # 2. Detect geometric patterns
+            # Use morphological operations to find structured patterns
+            kernel = np.ones((5, 5), np.uint8)
+            geometric_structures = ndimage.binary_opening(flat_areas, kernel)
+            
+            # 3. Detect mounds or artificial elevations
+            elevation_variance = ndimage.uniform_filter(dtm, size=10)
+            potential_mounds = np.abs(dtm - elevation_variance) > 2
+            
+            return {
+                'flat_areas': flat_areas,
+                'geometric_structures': geometric_structures,
+                'potential_mounds': potential_mounds
+            }
+        
+        except Exception as e:
+            logger.error(f"Feature detection error: {e}")
+            return {}
+    
+    def export_feature_map(
+        self, 
+        features: Dict[str, np.ndarray], 
+        output_filename: str
+    ) -> str:
+        """
+        Export detected features to a GeoTIFF file.
+        
+        Args:
+            features: Dictionary of feature arrays
+            output_filename: Name of the output file
+        
+        Returns:
+            Path to the exported file
+        """
+        try:
+            output_path = os.path.join(self.output_dir, output_filename)
+            
+            # Combine features into a single array
+            feature_map = np.zeros_like(features['flat_areas'], dtype=np.uint8)
+            feature_map += features['flat_areas'].astype(np.uint8) * 1
+            feature_map += features['geometric_structures'].astype(np.uint8) * 2
+            feature_map += features['potential_mounds'].astype(np.uint8) * 4
+            
+            # Create a GeoTIFF
+            with rasterio.open(
+                output_path, 
+                'w', 
+                driver='GTiff',
+                height=feature_map.shape[0],
+                width=feature_map.shape[1],
+                count=1,
+                dtype=feature_map.dtype,
+                crs='+proj=latlong',
+                transform=from_origin(0, 0, 1, 1)
+            ) as dst:
+                dst.write(feature_map, 1)
+            
+            return output_path
+        
+        except Exception as e:
+            logger.error(f"Feature map export error: {e}")
+            return ""
+    
+    def process_area(
+        self, 
+        area: Dict[str, float], 
+        start_date: datetime, 
+        end_date: datetime
+    ) -> List[Dict]:
+        """
+        Comprehensive LIDAR data processing for an area.
+        
+        Args:
+            area: Dictionary with 'north', 'south', 'east', 'west' coordinates
+            start_date: Start of search period
+            end_date: End of search period
+        
+        Returns:
+            List of processing results
+        """
+        results = []
+        
+        try:
+            # Download LIDAR data
+            lidar_files = self.download_lidar_data(area, start_date, end_date)
+            
+            for lidar_file in lidar_files:
+                # Process point cloud
+                processed_data = self.process_point_cloud(lidar_file)
+                
+                # Detect archaeological features
+                features = self.detect_archaeological_features(
+                    processed_data['dtm'], 
+                    processed_data['slope']
+                )
+                
+                # Export feature map
+                feature_map_path = self.export_feature_map(
+                    features, 
+                    f"archaeological_features_{os.path.basename(lidar_file)}.tif"
+                )
+                
+                # Compile results
+                results.append({
+                    'input_file': lidar_file,
+                    'feature_map': feature_map_path,
+                    'point_density': processed_data.get('point_density', 0),
+                    'detected_features': {
+                        'flat_areas': features.get('flat_areas', []).sum(),
+                        'geometric_structures': features.get('geometric_structures', []).sum(),
+                        'potential_mounds': features.get('potential_mounds', []).sum()
+                    }
+                })
+        
+        except Exception as e:
+            logger.error(f"LIDAR area processing error: {e}")
+        
+        return results
     
     def find_lidar_files(
         self,
