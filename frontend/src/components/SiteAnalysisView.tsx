@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/tooltip"
 
 import MapViewer from './MapViewer'
+import { ArchaeologicalSite } from '../types/archaeological-site'
 
 interface SiteFeature {
   type: string
@@ -73,36 +74,24 @@ interface EnvironmentalContext {
   terrainComplexity: string
 }
 
-interface SiteAnalysisProps {
-  coordinates: string
-  timestamp: string
-  confidence: number
-  siteType: string
-  features: SiteFeature[]
-  analysis: string
-  aiInsights?: {
-    culturalSignificance: string
-    researchPriority: string
-    preservationStatus: string
-  }
-  similarSites: SimilarSite[]
-  dataSources: DataSources
-  recommendations: string[]
-  environmentalContext?: EnvironmentalContext
+interface SiteAnalysisProps extends Omit<ArchaeologicalSite, 'references'> {
+  references?: string[]
 }
 
 export default function SiteAnalysisView({
+  name,
   coordinates,
-  timestamp,
-  confidence,
-  siteType,
+  region,
+  estimatedPeriod,
+  type,
+  confidenceScore: confidence,
+  researchPriority,
+  environmentalContext,
   features,
-  analysis,
-  aiInsights,
-  similarSites,
   dataSources,
+  aiInsights,
   recommendations,
-  environmentalContext
+  references
 }: SiteAnalysisProps) {
   const [activeTab, setActiveTab] = useState('overview')
   const [activeFeature, setActiveFeature] = useState<SiteFeature | null>(null)
@@ -115,24 +104,26 @@ export default function SiteAnalysisView({
 
   const exportAnalysis = () => {
     const analysisJson = JSON.stringify({
+      name,
       coordinates,
-      timestamp,
+      region,
+      estimatedPeriod,
+      type,
       confidence,
-      siteType,
+      researchPriority,
+      environmentalContext,
       features,
-      analysis,
-      aiInsights,
-      similarSites,
       dataSources,
+      aiInsights,
       recommendations,
-      environmentalContext
+      references
     }, null, 2)
 
     const blob = new Blob([analysisJson], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `site_analysis_${coordinates.replace(/,/g, '_')}.json`
+    link.download = `site_analysis_${coordinates.join(', ').replace(/,/g, '_')}.json`
     link.click()
     URL.revokeObjectURL(url)
   }
@@ -140,8 +131,8 @@ export default function SiteAnalysisView({
   const shareAnalysis = () => {
     if (navigator.share) {
       navigator.share({
-        title: `Archaeological Site Analysis - ${coordinates}`,
-        text: `Discovered archaeological site at ${coordinates} with ${confidence}% confidence`,
+        title: `Archaeological Site Analysis - ${coordinates.join(', ')}`,
+        text: `Discovered archaeological site at ${coordinates.join(', ')} with ${confidence}% confidence`,
         url: window.location.href
       }).catch(console.error)
     } else {
@@ -158,7 +149,7 @@ export default function SiteAnalysisView({
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center">
               <MapPin className="mr-2 h-6 w-6 text-emerald-600" />
-              Site Analysis: {coordinates}
+              {name} - {coordinates.join(', ')}
             </div>
             <div className="flex items-center space-x-2">
               <TooltipProvider>
@@ -195,8 +186,8 @@ export default function SiteAnalysisView({
           </CardTitle>
           <CardDescription>
             <div className="flex items-center space-x-2">
-              <Clock className="h-4 w-4" />
-              <span>{new Date(timestamp).toLocaleString()}</span>
+              <Compass className="h-4 w-4" />
+              <span>{region} | {estimatedPeriod.start}-{estimatedPeriod.end} CE</span>
             </div>
           </CardDescription>
         </CardHeader>
@@ -216,7 +207,7 @@ export default function SiteAnalysisView({
                     <Compass className="h-5 w-5 text-emerald-600" />
                     <span className="font-semibold">Site Classification</span>
                   </div>
-                  <Badge variant="outline">{siteType}</Badge>
+                  <Badge variant="outline">{type} | {researchPriority} Priority</Badge>
                 </div>
                 
                 <div className="flex items-center space-x-4">
@@ -225,7 +216,7 @@ export default function SiteAnalysisView({
                   <span className="font-bold">{confidence}%</span>
                 </div>
                 
-                <p className="text-sm text-muted-foreground">{analysis}</p>
+                <p className="text-sm text-muted-foreground">{researchPriority}</p>
 
                 {aiInsights && (
                   <div className="mt-4 grid grid-cols-3 gap-4">
@@ -238,7 +229,7 @@ export default function SiteAnalysisView({
                     <div className="bg-blue-50 p-3 rounded-lg">
                       <h4 className="text-xs font-semibold text-blue-800 mb-2">Research Priority</h4>
                       <p className="text-xs text-muted-foreground">
-                        {aiInsights.researchPriority}
+                        {researchPriority}
                       </p>
                     </div>
                     <div className="bg-yellow-50 p-3 rounded-lg">
@@ -391,26 +382,19 @@ export default function SiteAnalysisView({
         <CardHeader>
           <CardTitle className="flex items-center">
             <MapPin className="mr-2 h-5 w-5 text-emerald-600" />
-            Similar Sites
+            Academic References
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {similarSites.map((site, index) => (
+            {references && references.map((ref, index) => (
               <div 
                 key={index} 
                 className="border rounded-lg p-3 hover:bg-gray-50 transition-colors"
               >
                 <div className="flex justify-between items-center">
                   <div>
-                    <h4 className="text-sm font-semibold">{site.name}</h4>
-                    <p className="text-xs text-muted-foreground">{site.type}</p>
-                  </div>
-                  <div className="text-right">
-                    <Badge variant="outline" className="bg-emerald-100 text-emerald-800">
-                      {site.similarity}% Similar
-                    </Badge>
-                    <p className="text-xs text-muted-foreground mt-1">{site.distance}</p>
+                    <h4 className="text-sm font-semibold">{ref}</h4>
                   </div>
                 </div>
               </div>

@@ -18,91 +18,17 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from "@/components/ui/dialog"
+import { AmazonArchaeologicalSites, ArchaeologicalSite } from '@/types/archaeological-site'
 
 export default function AnalysisPage() {
-  const [siteAnalysis, setSiteAnalysis] = useState({
-    coordinates: "-12.2551, -53.2134",
-    timestamp: "2025-05-17T11:32:33.045Z",
-    confidence: 85,
-    siteType: "Settlement",
-    features: [
-      {
-        type: "Geometric Pattern",
-        description: "Rectangular earthworks approximately 200m x 150m",
-        confidence: 87,
-        dimensions: {
-          length: 200,
-          width: 150
-        }
-      },
-      {
-        type: "Linear Feature",
-        description: "Possible ancient road or causeway extending 1.2km",
-        confidence: 72,
-        dimensions: {
-          length: 1200,
-          width: 10
-        }
-      },
-      {
-        type: "Vegetation Anomaly",
-        description: "Distinct vegetation pattern suggesting buried structures",
-        confidence: 81
-      }
-    ],
-    analysis: "The identified features are consistent with pre-colonial settlements dating to approximately 800-1200 CE. The rectangular pattern suggests a planned community with possible ceremonial or defensive purposes. The linear feature may represent a transportation route connecting to nearby water sources or other settlements.",
-    aiInsights: {
-      culturalSignificance: "High potential for understanding pre-Columbian social organization and urban planning",
-      researchPriority: "Critical - Unique architectural layout and strategic location",
-      preservationStatus: "Moderate risk from environmental changes and potential agricultural expansion"
-    },
-    similarSites: [
-      {
-        name: "Kuhikugu",
-        similarity: 87,
-        distance: "124km",
-        type: "Settlement"
-      },
-      {
-        name: "Geoglyphs of Acre",
-        similarity: 72,
-        distance: "287km",
-        type: "Ceremonial Site"
-      }
-    ],
-    dataSources: {
-      satellite: "Landsat-8 Scene ID: LC08_L1TP_231062",
-      lidar: "Amazon LIDAR Project Tile: ALP-2023-BR-42",
-      historical: "Carvajal's Chronicle (1542)"
-    },
-    recommendations: [
-      "Verify findings with additional data sources",
-      "Compare with nearby known archaeological sites",
-      "Consult with local indigenous knowledge holders",
-      "Request high-resolution imagery for detailed analysis"
-    ],
-    environmentalContext: {
-      vegetation: "Dense Tropical Rainforest",
-      waterProximity: "Riverside Settlement",
-      elevation: 250,
-      terrainComplexity: "Medium"
-    }
-  })
-
-  const [isAIInsightsOpen, setIsAIInsightsOpen] = useState(false)
+  const [siteAnalysis, setSiteAnalysis] = useState<ArchaeologicalSite>(AmazonArchaeologicalSites[0])
 
   const generateMockAnalysis = () => {
-    const newAnalysis = {
-      ...siteAnalysis,
-      coordinates: `${-12.2551 + (Math.random() * 0.1 - 0.05)}, ${-53.2134 + (Math.random() * 0.1 - 0.05)}`,
-      timestamp: new Date().toISOString(),
-      confidence: Math.min(100, Math.max(50, siteAnalysis.confidence + (Math.random() * 10 - 5))),
-      features: siteAnalysis.features.map(feature => ({
-        ...feature,
-        confidence: Math.min(100, Math.max(50, feature.confidence + (Math.random() * 10 - 5)))
-      }))
-    }
-    setSiteAnalysis(newAnalysis)
+    // Randomly select another site from the available sites
+    const randomSite = AmazonArchaeologicalSites[
+      Math.floor(Math.random() * AmazonArchaeologicalSites.length)
+    ]
+    setSiteAnalysis(randomSite)
   }
 
   const exportAnalysis = () => {
@@ -111,7 +37,7 @@ export default function AnalysisPage() {
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `site_analysis_${siteAnalysis.coordinates.replace(/,/g, '_')}.json`
+    link.download = `site_analysis_${siteAnalysis.name.replace(/\s+/g, '_')}.json`
     link.click()
     URL.revokeObjectURL(url)
   }
@@ -119,8 +45,8 @@ export default function AnalysisPage() {
   const shareAnalysis = () => {
     if (navigator.share) {
       navigator.share({
-        title: `Archaeological Site Analysis - ${siteAnalysis.coordinates}`,
-        text: `Discovered archaeological site at ${siteAnalysis.coordinates} with ${siteAnalysis.confidence}% confidence`,
+        title: `Archaeological Site Analysis - ${siteAnalysis.name}`,
+        text: `Discovered archaeological site ${siteAnalysis.name} at ${siteAnalysis.coordinates.join(', ')} with ${siteAnalysis.confidenceScore}% confidence`,
         url: window.location.href
       }).catch(console.error)
     } else {
@@ -134,7 +60,7 @@ export default function AnalysisPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-emerald-800 flex items-center">
           Archaeological Site Discovery
-          <Dialog open={isAIInsightsOpen} onOpenChange={setIsAIInsightsOpen}>
+          <Dialog>
             <DialogTrigger asChild>
               <Button 
                 variant="ghost" 
@@ -158,7 +84,7 @@ export default function AnalysisPage() {
                       <TrendingUp className="mr-2 h-5 w-5" /> Cultural Significance
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      {siteAnalysis.aiInsights.culturalSignificance}
+                      {siteAnalysis.aiInsights?.culturalSignificance || 'No specific insights available'}
                     </p>
                   </div>
                   <div className="bg-blue-50 p-4 rounded-lg">
@@ -166,7 +92,7 @@ export default function AnalysisPage() {
                       <Zap className="mr-2 h-5 w-5" /> Research Priority
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      {siteAnalysis.aiInsights.researchPriority}
+                      {siteAnalysis.researchPriority} Priority Site
                     </p>
                   </div>
                   <div className="bg-yellow-50 p-4 rounded-lg">
@@ -174,7 +100,7 @@ export default function AnalysisPage() {
                       <Zap className="mr-2 h-5 w-5" /> Preservation Status
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      {siteAnalysis.aiInsights.preservationStatus}
+                      {siteAnalysis.aiInsights?.preservationStatus || 'Status not assessed'}
                     </p>
                   </div>
                 </div>

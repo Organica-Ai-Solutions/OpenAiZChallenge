@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState, useRef, memo } from "react"
+import { useEffect, useState, useRef, memo, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import type { LatLngExpression, LatLngTuple } from 'leaflet'
 import type { Feature, FeatureCollection, Geometry } from 'geojson'
+import { AmazonArchaeologicalSites, ArchaeologicalSite } from '../types/archaeological-site'
 
 // Define types for Leaflet components to avoid direct imports
 type MapContainerProps = {
@@ -50,39 +51,23 @@ type GeoJSONProps = {
   onEachFeature: (feature: any, layer: any) => void
 }
 
-// Known archaeological sites data
-const knownSites: Array<{
+// Memoize known sites to prevent regeneration
+const KNOWN_SITES: Array<{
   name: string
   coordinates: LatLngTuple
   description: string
   confidence: number
   type: string
-}> = [
-  {
-    name: "Kuhikugu",
-    coordinates: [-12.2551, -53.2134],
-    description: "Patchwork of 20 settlements at the headwaters of the Xingu River",
-    confidence: 95,
-    type: "Settlement",
-  },
-  {
-    name: "Geoglyphs of Acre",
-    coordinates: [-9.8282, -67.9452],
-    description: "Geometric earthworks discovered in the western Amazon",
-    confidence: 90,
-    type: "Geoglyph",
-  },
-  {
-    name: "Llanos de Moxos",
-    coordinates: [-14.0, -65.5],
-    description: "Complex of raised fields, canals, and causeways",
-    confidence: 88,
-    type: "Agricultural",
-  },
-]
+}> = AmazonArchaeologicalSites.map(site => ({
+  name: site.name,
+  coordinates: site.coordinates as LatLngTuple,
+  description: site.features.map(f => f.description).join('; '),
+  confidence: site.confidenceScore,
+  type: site.type
+}));
 
-// Mock LIDAR data overlay (GeoJSON)
-const mockLidarData: FeatureCollection = {
+// Memoize mock LIDAR data
+const MOCK_LIDAR_DATA: FeatureCollection = {
   type: "FeatureCollection" as const,
   features: [
     {
@@ -141,7 +126,9 @@ const MapContainerComponent = memo(({
   selectedCoordinates,
   handleMapClick,
   lidarStyle,
-  setMapRef
+  setMapRef,
+  knownSites,
+  mockLidarData
 }: {
   leafletComponents: any
   mapCenter: [number, number]
@@ -153,9 +140,18 @@ const MapContainerComponent = memo(({
   handleMapClick: (e: any) => void
   lidarStyle: (feature: any) => any
   setMapRef: (map: any) => void
+  knownSites: Array<{
+    name: string
+    coordinates: LatLngTuple
+    description: string
+    confidence: number
+    type: string
+  }>
+  mockLidarData: FeatureCollection
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
+  const [isMapInitialized, setIsMapInitialized] = useState(false);
 
   // Initialize map
   useEffect(() => {
@@ -163,38 +159,36 @@ const MapContainerComponent = memo(({
     const container = mapContainerRef.current;
 
     const initMap = async () => {
-      if (!container || !leafletComponents) return;
+      // Prevent multiple initializations
+      if (isMapInitialized || !container || !leafletComponents) return;
 
-      const L = await import('leaflet');
-      
-      // Ensure any existing map is properly removed
-      if (mapInstanceRef.current) {
-        try {
+      try {
+        const L = await import('leaflet');
+        
+        // Ensure any existing map is properly removed
+        if (mapInstanceRef.current) {
           mapInstanceRef.current.remove();
           mapInstanceRef.current = null;
-        } catch (error) {
-          console.warn('Error removing previous map instance:', error);
         }
-      }
 
-      // Ensure the container is clean and ready
-      if (container.children.length > 0) {
-        container.innerHTML = '';
-      }
+        // Ensure the container is clean and ready
+        if (container.children.length > 0) {
+          container.innerHTML = '';
+        }
 
-      // Create new map instance with safe initialization
-      try {
+        // Create new map instance with safe initialization
         map = L.map(container, {
           center: mapCenter,
           zoom: mapZoom,
-          preferCanvas: true, // Better performance for many markers
+          preferCanvas: true,
           attributionControl: true,
           zoomControl: true
         });
 
-        // Store reference
+        // Store reference and mark as initialized
         mapInstanceRef.current = map;
         setMapRef(map);
+        setIsMapInitialized(true);
 
         // Add click event listener
         map.on('click', handleMapClick);
@@ -227,6 +221,7 @@ const MapContainerComponent = memo(({
         tileLayer.addTo(map);
       } catch (error) {
         console.error('Error initializing map:', error);
+        setIsMapInitialized(false);
       }
     };
 
@@ -238,18 +233,19 @@ const MapContainerComponent = memo(({
         try {
           mapInstanceRef.current.remove();
           mapInstanceRef.current = null;
+          setIsMapInitialized(false);
         } catch (error) {
           console.warn('Error during map cleanup:', error);
         }
       }
     };
-  }, [mapCenter, mapZoom, activeBaseMap, leafletComponents, handleMapClick, setMapRef]);
+  }, [mapCenter, mapZoom, activeBaseMap, leafletComponents, handleMapClick, setMapRef, isMapInitialized]);
 
   // Update map view when center or zoom changes
   useEffect(() => {
-    if (!mapInstanceRef.current) return;
+    if (!mapInstanceRef.current || !isMapInitialized) return;
     mapInstanceRef.current.setView(mapCenter, mapZoom, { animate: true });
-  }, [mapCenter, mapZoom]);
+  }, [mapCenter, mapZoom, isMapInitialized]);
 
   // Update markers when showKnownSites changes
   useEffect(() => {
@@ -289,7 +285,7 @@ const MapContainerComponent = memo(({
         marker.addTo(map);
       });
     }
-  }, [showKnownSites]);
+  }, [showKnownSites, knownSites]);
 
   // Update LIDAR data when showLidarData changes
   useEffect(() => {
@@ -323,7 +319,7 @@ const MapContainerComponent = memo(({
       });
       geoJsonLayer.addTo(map);
     }
-  }, [showLidarData, lidarStyle]);
+  }, [showLidarData, lidarStyle, mockLidarData]);
 
   // Update selected marker
   useEffect(() => {
@@ -365,11 +361,16 @@ const MapContainerComponent = memo(({
     }
   }, [selectedCoordinates]);
 
+  // Render map container
   return (
     <div 
       ref={mapContainerRef} 
-      style={{ height: "100%", width: "100%" }}
-      className="rounded-lg overflow-hidden"
+      style={{ 
+        height: '500px', 
+        width: '100%', 
+        position: 'relative', 
+        zIndex: 1 
+      }} 
     />
   );
 });
@@ -377,6 +378,8 @@ const MapContainerComponent = memo(({
 MapContainerComponent.displayName = 'MapContainerComponent';
 
 export default function MapViewer({ initialCoordinates, onCoordinateSelect }: MapViewerProps) {
+  // Use state for client-side only rendering
+  const [isClient, setIsClient] = useState(false);
   const [activeBaseMap, setActiveBaseMap] = useState<string>("satellite")
   const [selectedCoordinates, setSelectedCoordinates] = useState<[number, number] | null>(null)
   const [lidarOpacity, setLidarOpacity] = useState<number>(70)
@@ -388,8 +391,15 @@ export default function MapViewer({ initialCoordinates, onCoordinateSelect }: Ma
   const [leafletComponents, setLeafletComponents] = useState<any>(null)
   const mapRef = useRef<any>(null)
 
+  // Ensure client-side rendering
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   // Load Leaflet components dynamically
   useEffect(() => {
+    if (!isClient) return;
+
     let mounted = true
     let mapInstance: any = null
 
@@ -432,7 +442,7 @@ export default function MapViewer({ initialCoordinates, onCoordinateSelect }: Ma
         mapRef.current = null
       }
     }
-  }, [])
+  }, [isClient])
 
   // Parse initial coordinates if provided
   useEffect(() => {
@@ -445,6 +455,11 @@ export default function MapViewer({ initialCoordinates, onCoordinateSelect }: Ma
       }
     }
   }, [initialCoordinates])
+
+  // Prevent hydration mismatch by checking client-side rendering
+  if (!isClient) {
+    return null;
+  }
 
   const handleMapClick = (e: any) => {
     const { lat, lng } = e.latlng
@@ -545,6 +560,8 @@ export default function MapViewer({ initialCoordinates, onCoordinateSelect }: Ma
                 handleMapClick={handleMapClick}
                 lidarStyle={lidarStyle}
                 setMapRef={setMapRef}
+                knownSites={KNOWN_SITES}
+                mockLidarData={MOCK_LIDAR_DATA}
               />
             )}
           </div>
