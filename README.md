@@ -47,9 +47,26 @@ Our Neuro-Inspired System (NIS) Protocol deploys a sophisticated multi-agent eco
 - 🐍 Python 3.9+
 - 📦 Node.js 18+
 - 🔧 Git
+- 🐚 Bash/Zsh
 
-### Setup in 3 Simple Steps
+### One-Command Launch
 
+Simply run our unified startup script:
+
+```bash
+./start.sh
+```
+
+This script will:
+- 🔧 Set up virtual environment
+- 📦 Install dependencies
+- 🌐 Launch backend API
+- 🖥️ Start frontend development server
+- 🤖 Prepare NIS Protocol agents
+
+### Manual Setup Alternative
+
+If you prefer manual setup, follow these steps:
 1. **Clone the Repository**
    ```bash
    git clone https://github.com/yourusername/openai-to-z-nis.git
