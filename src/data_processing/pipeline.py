@@ -31,7 +31,7 @@ class ResearchDataPoint:
     metadata: Dict[str, Any] = field(default_factory=dict)
     validation_status: ValidationStatus = ValidationStatus.PENDING
 
-class ResearchPipeline:
+class AnalysisPipeline:
     """Advanced research data processing pipeline."""
     
     def __init__(self):
@@ -240,7 +240,7 @@ async def process_research_location(
     Returns:
         Processed research data point
     """
-    pipeline = ResearchPipeline()
+    pipeline = AnalysisPipeline()
     
     # Collect data
     data_point = await pipeline.collect_data(

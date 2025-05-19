@@ -2,53 +2,63 @@
 
 import { useState, useEffect } from "react"
 import dynamic from "next/dynamic"
-import { Loader } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import SimpleMapFallback from "./SimpleMapFallback"
+import type { SiteData } from "@/types/site-data"
 
 // Create a loading component
 const MapLoading = () => (
-  <div className="h-[400px] flex items-center justify-center bg-muted rounded-lg">
+  <div className="h-full flex items-center justify-center bg-muted rounded-lg">
     <div className="text-center">
-      <Loader className="h-8 w-8 animate-spin mx-auto mb-2 text-emerald-600" />
+      <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
       <p className="text-sm text-muted-foreground">Loading interactive map...</p>
     </div>
   </div>
 )
 
-// Dynamically import the MapViewer component with no SSR
-const MapViewer = dynamic(() => import("./MapViewer").catch(() => () => <SimpleMapFallback />), {
+// Dynamically import the PigeonMapViewer component with no SSR
+const PigeonMapViewer = dynamic(() => import("./PigeonMapViewer"), {
   ssr: false,
   loading: MapLoading,
 })
 
 interface DynamicMapViewerProps {
+  sites?: SiteData[]
+  onSiteSelect?: (site: SiteData) => void
+  selectedSite?: SiteData | null
   initialCoordinates?: string
   onCoordinateSelect?: (coords: string) => void
+  className?: string
 }
 
-export default function DynamicMapViewer({ initialCoordinates, onCoordinateSelect }: DynamicMapViewerProps) {
+export default function DynamicMapViewer({ 
+  sites = [], 
+  onSiteSelect, 
+  selectedSite = null,
+  initialCoordinates,
+  onCoordinateSelect,
+  className
+}: DynamicMapViewerProps) {
   const [isMounted, setIsMounted] = useState(false)
-  const [loadFailed, setLoadFailed] = useState(false)
 
   // Only render on client-side
   useEffect(() => {
     setIsMounted(true)
-
-    // Set a timeout to show fallback if loading takes too long
-    const timeout = setTimeout(() => {
-      setLoadFailed(true)
-    }, 5000)
-
-    return () => clearTimeout(timeout)
   }, [])
 
   if (!isMounted) {
     return <MapLoading />
   }
 
-  if (loadFailed) {
-    return <SimpleMapFallback onCoordinateSelect={onCoordinateSelect} />
-  }
-
-  return <MapViewer initialCoordinates={initialCoordinates} onCoordinateSelect={onCoordinateSelect} />
+  return (
+    <div className={className}>
+      <PigeonMapViewer 
+        sites={sites} 
+        onSiteSelect={onSiteSelect} 
+        selectedSite={selectedSite}
+        initialCoordinates={initialCoordinates ? initialCoordinates.split(',').map(coord => Number.parseFloat(coord.trim())) as [number, number] : undefined}
+        onCoordinateSelect={onCoordinateSelect}
+      />
+    </div>
+  )
 }

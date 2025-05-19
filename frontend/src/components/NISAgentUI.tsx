@@ -20,6 +20,7 @@ import {
   FileText,
   Compass,
   MessageSquare,
+  Eye,
 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -40,6 +41,7 @@ import {
 import ChatInterface from "./ChatInterface"
 import DynamicMapViewer from "./DynamicMapViewer"
 import SimpleMapFallback from "./SimpleMapFallback"
+import { VisionAgentVisualization } from "./vision-agent-visualization"
 
 // Mock data for demonstration
 const BIOME_REGIONS = [
@@ -282,6 +284,10 @@ export default function NISAgentUI() {
             <TabsTrigger value="history" className="flex items-center gap-1" disabled={savedAnalyses.length === 0}>
               <History className="h-4 w-4" />
               <span className="hidden sm:inline">History</span>
+            </TabsTrigger>
+            <TabsTrigger value="vision" className="flex gap-1 items-center">
+              <Eye className="h-4 w-4" />
+              Vision Analysis
             </TabsTrigger>
           </TabsList>
 
@@ -705,6 +711,13 @@ export default function NISAgentUI() {
                 <p className="text-sm text-muted-foreground">Run an analysis and save the results to see them here</p>
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="vision" className="space-y-4">
+            <VisionAgentVisualization 
+              coordinates={coordinates} 
+              imageSrc={results?.imageSrc || "/placeholder.svg?height=400&width=600"} 
+            />
           </TabsContent>
         </Tabs>
 

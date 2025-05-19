@@ -1,3 +1,5 @@
+import yaml
+import os
 """Configuration Management for Indigenous Knowledge Research Platform.
 
 Provides centralized configuration management with environment-specific settings,
@@ -8,6 +10,7 @@ import os
 import logging
 from typing import Dict, Any, Optional
 from enum import Enum, auto
+from pathlib import Path
 
 import yaml
 from pydantic import BaseModel, Field, ValidationError
@@ -17,7 +20,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # API Keys
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
 SENTINEL_USERNAME = os.getenv('SENTINEL_USERNAME')
 SENTINEL_PASSWORD = os.getenv('SENTINEL_PASSWORD')
 
@@ -96,7 +99,7 @@ class Environment(Enum):
 
 class SecurityConfig(BaseModel):
     """Security configuration settings."""
-    secret_key: str = Field(..., env="SECRET_KEY")
+    secret_key: str = Field(default_factory=lambda: os.getenv('SECRET_KEY', os.urandom(32).hex()), env="SECRET_KEY")
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
     cors_allowed_origins: list = ["*"]
@@ -237,4 +240,9 @@ def get_config(config_type: str) -> BaseModel:
 
 def get_environment() -> Environment:
     """Get current deployment environment."""
-    return config_manager.environment 
+    return config_manager.environment
+
+# Convenience function for getting settings
+def get_settings() -> Dict[str, Any]:
+    """Get all configuration settings."""
+    return config_manager.export_config()

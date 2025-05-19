@@ -27,7 +27,18 @@ class GPTIntegration:
             model_name: The GPT model to use
         """
         try:
-            self.client = OpenAI(api_key=OPENAI_API_KEY)
+            # Use environment variables to configure the client
+            import os
+            
+            # Explicitly set OpenAI configuration
+            os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
+            
+            # Disable any proxy settings
+            os.environ.pop('HTTP_PROXY', None)
+            os.environ.pop('HTTPS_PROXY', None)
+            
+            # Initialize the client
+            self.client = OpenAI()
             self.model = model_name
             self.max_tokens = 4096
             self.temperature = 0.7

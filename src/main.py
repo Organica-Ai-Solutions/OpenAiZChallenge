@@ -92,7 +92,14 @@ class IndigenousKnowledgePlatform:
         # Configure CORS
         app.add_middleware(
             CORSMiddleware,
-            allow_origins=self.security_config.cors_allowed_origins,
+            allow_origins=[
+                "http://localhost:3000",  # Default Next.js dev server
+                "http://localhost:3001",  # Alternate port
+                "http://localhost:3002",  # Another alternate port
+                "http://localhost:3003",  # Yet another alternate port
+                f"http://localhost:{os.getenv('FRONTEND_PORT', '3000')}",  # Dynamic port
+                "*"  # Be cautious with this in production
+            ],
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
