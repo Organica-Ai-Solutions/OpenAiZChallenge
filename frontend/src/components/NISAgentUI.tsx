@@ -264,10 +264,14 @@ export default function NISAgentUI() {
         </CardHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-5 mx-4 mt-4">
+          <TabsList className="flex justify-center items-center mx-4 mt-4">
             <TabsTrigger value="input" className="flex items-center gap-1">
               <MapPin className="h-4 w-4" />
               <span className="hidden sm:inline">Coordinates</span>
+            </TabsTrigger>
+            <TabsTrigger value="vision" className="flex gap-1 items-center">
+              <Eye className="h-4 w-4" />
+              <span className="hidden sm:inline">Vision</span>
             </TabsTrigger>
             <TabsTrigger value="map" className="flex items-center gap-1">
               <Layers className="h-4 w-4" />
@@ -284,10 +288,6 @@ export default function NISAgentUI() {
             <TabsTrigger value="history" className="flex items-center gap-1" disabled={savedAnalyses.length === 0}>
               <History className="h-4 w-4" />
               <span className="hidden sm:inline">History</span>
-            </TabsTrigger>
-            <TabsTrigger value="vision" className="flex gap-1 items-center">
-              <Eye className="h-4 w-4" />
-              Vision Analysis
             </TabsTrigger>
           </TabsList>
 
@@ -462,6 +462,13 @@ export default function NISAgentUI() {
                 ))}
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="vision" className="space-y-4">
+            <VisionAgentVisualization 
+              coordinates={coordinates} 
+              imageSrc={results?.imageSrc || "/placeholder.svg?height=400&width=600"} 
+            />
           </TabsContent>
 
           <TabsContent value="map" className="p-4">
@@ -712,13 +719,6 @@ export default function NISAgentUI() {
               </div>
             )}
           </TabsContent>
-
-          <TabsContent value="vision" className="space-y-4">
-            <VisionAgentVisualization 
-              coordinates={coordinates} 
-              imageSrc={results?.imageSrc || "/placeholder.svg?height=400&width=600"} 
-            />
-          </TabsContent>
         </Tabs>
 
         <CardFooter className="flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-muted-foreground border-t p-4">
@@ -739,3 +739,4 @@ export default function NISAgentUI() {
     </div>
   )
 }
+
