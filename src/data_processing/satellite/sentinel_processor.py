@@ -165,6 +165,59 @@ class SentinelProcessor:
         
         return ndvi
     
+    def calculate_evi(self, bands_dict: Dict[str, np.ndarray]) -> Optional[np.ndarray]:
+        """Calculate Enhanced Vegetation Index (EVI).
+        Requires B02 (Blue), B04 (Red), B08 (NIR).
+        EVI = 2.5 * (NIR - Red) / (NIR + C1*Red - C2*Blue + L)
+        L=1, C1=6, C2=7.5
+        """
+        if not all(b in bands_dict for b in ['B02', 'B04', 'B08']):
+            logger.warning("Missing bands for EVI calculation (B02, B04, B08 required).")
+            return None
+        
+        blue = bands_dict['B02'].astype(float) / 10000.0 # Assuming input bands are original scaled integers
+        red = bands_dict['B04'].astype(float) / 10000.0
+        nir = bands_dict['B08'].astype(float) / 10000.0
+        
+        L = 1.0
+        C1 = 6.0
+        C2 = 7.5
+        
+        evi = 2.5 * (nir - red) / (nir + C1 * red - C2 * blue + L + 1e-10) # add epsilon for denominator
+        return evi
+
+    def calculate_savi(self, bands_dict: Dict[str, np.ndarray]) -> Optional[np.ndarray]:
+        """Calculate Soil Adjusted Vegetation Index (SAVI).
+        Requires B04 (Red), B08 (NIR).
+        SAVI = ((NIR - Red) / (NIR + Red + L)) * (1 + L)
+        L=0.5 (common value)
+        """
+        if not all(b in bands_dict for b in ['B04', 'B08']):
+            logger.warning("Missing bands for SAVI calculation (B04, B08 required).")
+            return None
+        
+        red = bands_dict['B04'].astype(float) / 10000.0
+        nir = bands_dict['B08'].astype(float) / 10000.0
+        L_savi = 0.5
+        
+        savi = ((nir - red) / (nir + red + L_savi + 1e-10)) * (1 + L_savi)
+        return savi
+
+    def calculate_ndwi_gao(self, bands_dict: Dict[str, np.ndarray]) -> Optional[np.ndarray]:
+        """Calculate Normalized Difference Water Index (NDWI - Gao, 1996).
+        Uses NIR (B08) and SWIR1 (B11 for Sentinel-2).
+        NDWI = (NIR - SWIR1) / (NIR + SWIR1)
+        """
+        if not all(b in bands_dict for b in ['B08', 'B11']):
+            logger.warning("Missing bands for NDWI (Gao) calculation (B08, B11 required).")
+            return None
+        
+        nir = bands_dict['B08'].astype(float) / 10000.0
+        swir1 = bands_dict['B11'].astype(float) / 10000.0
+        
+        ndwi = (nir - swir1) / (nir + swir1 + 1e-10)
+        return ndwi
+    
     def detect_anomalies(self, ndvi: np.ndarray, threshold: float = 2.0) -> np.ndarray:
         """Detect anomalies in NDVI data that might indicate archaeological features."""
         # Apply median filter to reduce noise

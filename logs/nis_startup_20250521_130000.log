@@ -1,0 +1,149 @@
+INFO:     Will watch for changes in these directories: ['/Users/diegofuego/Desktop/openai-to-z-nis']
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:     Started reloader process [92272] using StatReload
+Starting NIS Protocol API server on 0.0.0.0:8001
+2025-05-21 13:01:33,092 - src.meta.coordinator - INFO - MetaProtocolCoordinator initialized
+2025-05-21 13:01:34,036 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-21 13:01:34,039 - src.agents.vision_agent - INFO - Vision Agent initialized with GPTIntegration (gpt-4-turbo)
+2025-05-21 13:01:34,040 - src.agents.reasoning_agent - INFO - Loaded reasoning prompt from src/prompts/reasoning_prompt.txt
+2025-05-21 13:01:35,283 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-21 13:01:35,285 - src.agents.reasoning_agent - INFO - Initialized GPT integration with model: gpt-4-turbo
+2025-05-21 13:01:35,285 - src.agents.reasoning_agent - INFO - Reasoning Agent initialized
+2025-05-21 13:01:35,824 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-21 13:01:35,826 - src.agents.memory_agent - INFO - Initialized GPT integration for Memory Agent with model: gpt-4o
+2025-05-21 13:01:36,200 - src.infrastructure.redis_client - INFO - Connected to Redis at localhost:6379
+2025-05-21 13:01:36,201 - src.agents.memory_agent - INFO - Initialized Redis for Memory Agent caching
+2025-05-21 13:01:36,462 - src.infrastructure.kafka_client - INFO - Kafka producer initialized for 127.0.0.1:9092
+2025-05-21 13:01:36,463 - src.agents.memory_agent - INFO - Initialized Kafka for Memory Agent events
+2025-05-21 13:01:36,464 - src.agents.memory_agent - INFO - Memory Agent initialized with storage at outputs/memory
+2025-05-21 13:01:36,464 - src.agents.action_agent - INFO - Action Agent initialized with output dir at outputs/findings
+/Users/diegofuego/Desktop/openai-to-z-nis/venv/lib/python3.10/site-packages/huggingface_hub/file_download.py:943: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Could not find image processor class in the image processor config or the model config. Loading based on pattern matching with the model's feature extractor configuration. Please open a PR/issue to update `preprocessor_config.json` to use `image_processor_type` instead of `feature_extractor_type`. This warning will be removed in v4.40.
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-multilingual-uncased and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+/Users/diegofuego/Desktop/openai-to-z-nis/venv/lib/python3.10/site-packages/transformers/pipelines/text_classification.py:104: UserWarning: `return_all_scores` is now deprecated,  if want a similar functionality use `top_k=None` instead of `return_all_scores=True` or `top_k=1` instead of `return_all_scores=False`.
+  warnings.warn(
+2025-05-21 13:01:42,073 - src.data_processing.indigenous_maps - WARNING - Could not load reference features: [Errno 2] No such file or directory: 'data/indigenous_maps/reference_features.json'
+2025-05-21 13:01:44,626 - src.data_processing.indigenous_maps - WARNING - Could not load known locations: data/indigenous_maps/known_locations.geojson: No such file or directory
+/Users/diegofuego/Desktop/openai-to-z-nis/venv/lib/python3.10/site-packages/huggingface_hub/file_download.py:943: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Some weights of the model checkpoint at dslim/bert-base-NER were not used when initializing BertForTokenClassification: ['bert.pooler.dense.bias', 'bert.pooler.dense.weight']
+- This IS expected if you are initializing BertForTokenClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForTokenClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+2025-05-21 13:01:49,690 - src.data_processing.historical_texts - WARNING - Could not load historical places database: [Errno 2] No such file or directory: 'data/historical_texts/historical_places.csv'
+2025-05-21 13:01:49,702 - src.meta.coordinator - INFO - Registered protocol adapter: mcp
+2025-05-21 13:01:49,710 - src.meta.coordinator - INFO - Registered protocol adapter: acp
+2025-05-21 13:01:49,710 - src.meta.coordinator - INFO - Registered protocol adapter: a2a
+2025-05-21 13:01:49,710 - src.meta.coordinator - INFO - Registered agent: vision_agent
+2025-05-21 13:01:49,710 - src.meta.coordinator - INFO - Registered agent: reasoning_agent
+2025-05-21 13:01:49,710 - src.meta.coordinator - INFO - Registered agent: memory_agent
+2025-05-21 13:01:49,710 - src.meta.coordinator - INFO - Registered agent: action_agent
+2025-05-21 13:01:49,710 - api.agent_integrator - INFO - NIS Protocol agents and coordinator initialized successfully
+INFO:     Started server process [92277]
+INFO:     Waiting for application startup.
+2025-05-21 13:01:51,903 - src.infrastructure.kafka_client - INFO - Started consumer for topic nis.analysis.events
+2025-05-21 13:01:51,903 - src.infrastructure.kafka_client - INFO - Started consumer for topic nis.batch.events
+2025-05-21 13:01:52,179 - nis_api - INFO - API server starting up
+2025-05-21 13:01:52,249 - nis_api - INFO - Redis client initialized
+2025-05-21 13:01:52,249 - nis_api - INFO - Kafka client initialized
+2025-05-21 13:01:52,249 - src.infrastructure.kafka_client - WARNING - Consumer for topic nis.analysis.events is already running
+2025-05-21 13:01:52,249 - src.infrastructure.kafka_client - WARNING - Consumer for topic nis.batch.events is already running
+2025-05-21 13:01:52,250 - src.infrastructure.kafka_client - INFO - Started consumer for topic nis.statistics.events
+INFO:     Application startup complete.
+2025-05-21 13:01:53,913 - src.infrastructure.kafka_client - ERROR - Consumer error: KafkaError{code=UNKNOWN_TOPIC_OR_PART,val=3,str="Subscribed topic not available: nis.analysis.events: Broker: Unknown topic or partition"}
+2025-05-21 13:01:53,914 - src.infrastructure.kafka_client - INFO - Consumer closed for topic nis.analysis.events
+2025-05-21 13:01:53,916 - src.infrastructure.kafka_client - ERROR - Consumer error: KafkaError{code=UNKNOWN_TOPIC_OR_PART,val=3,str="Subscribed topic not available: nis.batch.events: Broker: Unknown topic or partition"}
+2025-05-21 13:01:53,916 - src.infrastructure.kafka_client - INFO - Consumer closed for topic nis.batch.events
+2025-05-21 13:01:54,483 - nis_api - INFO - nis.statistics.events event: {'type': 'statistics_update', 'timestamp': '2025-05-21T13:01:52.177502', 'snapshot': {'timestamp': '2025-05-21T13:01:51.842788', 'hourly_statistics': {'total_analyses': 0, 'average_processing_time': 0, 'success_rate': 0, 'data_source_distribution': {}}, 'daily_statistics': {'total_analyses': 0, 'average_processing_time': 0, 'success_rate': 0, 'data_source_distribution': {}}, 'batch_statistics': {}, 'total_statistics': {'total_analyses': 0, 'total_batches': 0, 'data_source_usage': {}, 'error_distribution': {}}}}
+2025-05-21 13:01:54,483 - nis_api - INFO - nis.statistics.events event: {'type': 'statistics_update', 'timestamp': '2025-05-21T13:01:52.177152', 'snapshot': {'timestamp': '2025-05-21T13:01:51.903714', 'hourly_statistics': {'total_analyses': 0, 'average_processing_time': 0, 'success_rate': 0, 'data_source_distribution': {}}, 'daily_statistics': {'total_analyses': 0, 'average_processing_time': 0, 'success_rate': 0, 'data_source_distribution': {}}, 'batch_statistics': {}, 'total_statistics': {'total_analyses': 0, 'total_batches': 0, 'data_source_usage': {}, 'error_distribution': {}}}}
+2025-05-21 13:06:52,489 - nis_api - INFO - nis.statistics.events event: {'type': 'statistics_update', 'timestamp': '2025-05-21T13:06:52.442580', 'snapshot': {'timestamp': '2025-05-21T13:06:52.184335', 'hourly_statistics': {'total_analyses': 0, 'average_processing_time': 0, 'success_rate': 0, 'data_source_distribution': {}}, 'daily_statistics': {'total_analyses': 0, 'average_processing_time': 0, 'success_rate': 0, 'data_source_distribution': {}}, 'batch_statistics': {}, 'total_statistics': {'total_analyses': 0, 'total_batches': 0, 'data_source_usage': {}, 'error_distribution': {}}}}
+2025-05-21 13:06:52,495 - nis_api - INFO - nis.statistics.events event: {'type': 'statistics_update', 'timestamp': '2025-05-21T13:06:52.442488', 'snapshot': {'timestamp': '2025-05-21T13:06:52.184547', 'hourly_statistics': {'total_analyses': 0, 'average_processing_time': 0, 'success_rate': 0, 'data_source_distribution': {}}, 'daily_statistics': {'total_analyses': 0, 'average_processing_time': 0, 'success_rate': 0, 'data_source_distribution': {}}, 'batch_statistics': {}, 'total_statistics': {'total_analyses': 0, 'total_batches': 0, 'data_source_usage': {}, 'error_distribution': {}}}}
+WARNING:  StatReload detected changes in 'src/data_processing/pipeline.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2025-05-21 13:11:42,308 - nis_api - INFO - API server shutting down
+2025-05-21 13:11:42,311 - src.infrastructure.redis_client - INFO - Redis connection closed
+2025-05-21 13:11:42,311 - nis_api - INFO - Redis connection closed
+2025-05-21 13:11:47,318 - src.infrastructure.kafka_client - WARNING - Consumer thread for topic nis.statistics.events is still running
+2025-05-21 13:11:47,319 - src.infrastructure.kafka_client - INFO - Kafka client closed
+2025-05-21 13:11:47,319 - nis_api - INFO - Kafka connection closed
+INFO:     Application shutdown complete.
+INFO:     Finished server process [92277]
+2025-05-21 13:12:02,821 - src.meta.coordinator - INFO - MetaProtocolCoordinator initialized
+2025-05-21 13:12:03,914 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-21 13:12:03,916 - src.agents.vision_agent - INFO - Vision Agent initialized with GPTIntegration (gpt-4-turbo)
+2025-05-21 13:12:03,916 - src.agents.reasoning_agent - INFO - Loaded reasoning prompt from src/prompts/reasoning_prompt.txt
+2025-05-21 13:12:04,698 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-21 13:12:04,698 - src.agents.reasoning_agent - INFO - Initialized GPT integration with model: gpt-4-turbo
+2025-05-21 13:12:04,698 - src.agents.reasoning_agent - INFO - Reasoning Agent initialized
+2025-05-21 13:12:05,367 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-21 13:12:05,369 - src.agents.memory_agent - INFO - Initialized GPT integration for Memory Agent with model: gpt-4o
+2025-05-21 13:12:05,721 - src.infrastructure.redis_client - INFO - Connected to Redis at localhost:6379
+2025-05-21 13:12:05,721 - src.agents.memory_agent - INFO - Initialized Redis for Memory Agent caching
+2025-05-21 13:12:05,925 - src.infrastructure.kafka_client - INFO - Kafka producer initialized for 127.0.0.1:9092
+2025-05-21 13:12:05,925 - src.agents.memory_agent - INFO - Initialized Kafka for Memory Agent events
+2025-05-21 13:12:05,925 - src.agents.memory_agent - INFO - Memory Agent initialized with storage at outputs/memory
+2025-05-21 13:12:05,926 - src.agents.action_agent - INFO - Action Agent initialized with output dir at outputs/findings
+/Users/diegofuego/Desktop/openai-to-z-nis/venv/lib/python3.10/site-packages/huggingface_hub/file_download.py:943: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Could not find image processor class in the image processor config or the model config. Loading based on pattern matching with the model's feature extractor configuration. Please open a PR/issue to update `preprocessor_config.json` to use `image_processor_type` instead of `feature_extractor_type`. This warning will be removed in v4.40.
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-multilingual-uncased and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+/Users/diegofuego/Desktop/openai-to-z-nis/venv/lib/python3.10/site-packages/transformers/pipelines/text_classification.py:104: UserWarning: `return_all_scores` is now deprecated,  if want a similar functionality use `top_k=None` instead of `return_all_scores=True` or `top_k=1` instead of `return_all_scores=False`.
+  warnings.warn(
+2025-05-21 13:12:10,065 - src.data_processing.indigenous_maps - WARNING - Could not load reference features: [Errno 2] No such file or directory: 'data/indigenous_maps/reference_features.json'
+2025-05-21 13:12:10,243 - src.data_processing.indigenous_maps - WARNING - Could not load known locations: data/indigenous_maps/known_locations.geojson: No such file or directory
+/Users/diegofuego/Desktop/openai-to-z-nis/venv/lib/python3.10/site-packages/huggingface_hub/file_download.py:943: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Some weights of the model checkpoint at dslim/bert-base-NER were not used when initializing BertForTokenClassification: ['bert.pooler.dense.bias', 'bert.pooler.dense.weight']
+- This IS expected if you are initializing BertForTokenClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForTokenClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+2025-05-21 13:12:17,901 - src.data_processing.historical_texts - WARNING - Could not load historical places database: [Errno 2] No such file or directory: 'data/historical_texts/historical_places.csv'
+2025-05-21 13:12:18,218 - src.meta.coordinator - INFO - Registered protocol adapter: mcp
+2025-05-21 13:12:18,219 - src.meta.coordinator - INFO - Registered protocol adapter: acp
+2025-05-21 13:12:18,219 - src.meta.coordinator - INFO - Registered protocol adapter: a2a
+2025-05-21 13:12:18,219 - src.meta.coordinator - INFO - Registered agent: vision_agent
+2025-05-21 13:12:18,219 - src.meta.coordinator - INFO - Registered agent: reasoning_agent
+2025-05-21 13:12:18,219 - src.meta.coordinator - INFO - Registered agent: memory_agent
+2025-05-21 13:12:18,219 - src.meta.coordinator - INFO - Registered agent: action_agent
+2025-05-21 13:12:18,222 - api.agent_integrator - INFO - NIS Protocol agents and coordinator initialized successfully
+Process SpawnProcess-2:
+Traceback (most recent call last):
+  File "/Users/diegofuego/.pyenv/versions/3.10.6/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/Users/diegofuego/.pyenv/versions/3.10.6/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/Users/diegofuego/Desktop/openai-to-z-nis/venv/lib/python3.10/site-packages/uvicorn/_subprocess.py", line 76, in subprocess_started
+    target(sockets=sockets)
+  File "/Users/diegofuego/Desktop/openai-to-z-nis/venv/lib/python3.10/site-packages/uvicorn/server.py", line 61, in run
+    return asyncio.run(self.serve(sockets=sockets))
+  File "/Users/diegofuego/.pyenv/versions/3.10.6/lib/python3.10/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "/Users/diegofuego/.pyenv/versions/3.10.6/lib/python3.10/asyncio/base_events.py", line 646, in run_until_complete
+    return future.result()
+  File "/Users/diegofuego/Desktop/openai-to-z-nis/venv/lib/python3.10/site-packages/uvicorn/server.py", line 68, in serve
+    config.load()
+  File "/Users/diegofuego/Desktop/openai-to-z-nis/venv/lib/python3.10/site-packages/uvicorn/config.py", line 473, in load
+    self.loaded_app = import_from_string(self.app)
+  File "/Users/diegofuego/Desktop/openai-to-z-nis/venv/lib/python3.10/site-packages/uvicorn/importer.py", line 21, in import_from_string
+    module = importlib.import_module(module_str)
+  File "/Users/diegofuego/.pyenv/versions/3.10.6/lib/python3.10/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1050, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/Users/diegofuego/Desktop/openai-to-z-nis/api/main.py", line 25, in <module>
+    from .batch import app as batch_app
+  File "/Users/diegofuego/Desktop/openai-to-z-nis/api/batch.py", line 8, in <module>
+    from src.data_processing.pipeline import AnalysisPipeline
+  File "/Users/diegofuego/Desktop/openai-to-z-nis/src/data_processing/pipeline.py", line 583
+    else: # Correctly paired with the 'if'
+    ^^^^
+SyntaxError: invalid syntax
+INFO:     Stopping reloader process [92272]
+utdown complete.
+[?25h

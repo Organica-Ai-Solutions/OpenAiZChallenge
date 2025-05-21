@@ -44,6 +44,8 @@ class AnalysisResult(BaseModel):
     sources: List[str]
     historical_context: Optional[str] = None
     indigenous_perspective: Optional[str] = None
+    pattern_type: Optional[str] = None
+    finding_id: Optional[str] = None
     recommendations: Optional[List[Recommendation]] = None
 
 
@@ -92,19 +94,9 @@ async def analyze_coordinates(request: CoordinatesRequest = Body(...)):
         use_indigenous=data_sources.get("indigenousMaps", True)
     )
     
-    # Format the recommendations if they exist
-    recommendations = None
-    if "recommendations" in result and result["recommendations"]:
-        recommendations = []
-        for rec in result["recommendations"]:
-            rec_data = {
-                "action": rec.get("action", ""),
-                "description": rec.get("description", ""),
-                "priority": rec.get("priority", "medium"),
-            }
-            if "details" in rec:
-                rec_data["details"] = rec["details"]
-            recommendations.append(rec_data)
+    # Recommendations should already be in the correct format from the NISProtocol/ActionAgent
+    # The AnalysisResult model will validate them.
+    recommendations_from_result = result.get("recommendations")
     
     # Return structured result
     return AnalysisResult(
@@ -114,7 +106,9 @@ async def analyze_coordinates(request: CoordinatesRequest = Body(...)):
         sources=result.get("sources", []),
         historical_context=result.get("historical_context"),
         indigenous_perspective=result.get("indigenous_perspective"),
-        recommendations=recommendations
+        pattern_type=result.get("pattern_type"),
+        finding_id=result.get("finding_id"),
+        recommendations=recommendations_from_result # Pass directly
     )
 
 

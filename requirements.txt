@@ -15,8 +15,11 @@ shapely>=2.0.1
 # Optional dependencies for AI models
 openai==1.35.0
 # torch==2.2.0
-# transformers==4.38.2
+transformers==4.38.2
+tf-keras
 # ultralytics==8.1.2  # For YOLOv8
+spacy
+langgraph
 
 # Data infrastructure
 redis==5.0.1

@@ -7,6 +7,9 @@ import logging
 from typing import Optional, Dict, List, Union
 import requests
 from concurrent.futures import ThreadPoolExecutor
+import rasterio
+from rasterio.merge import merge
+from rasterio.transform import from_origin
 
 logger = logging.getLogger(__name__)
 
@@ -56,26 +59,56 @@ class LidarDataCollector:
                 return cached_data
             
             # Query Earth Archive for available tiles
-            tiles = await self._query_tiles(bbox)
+            tiles_metadata = await self._query_tiles(bbox)
             
-            if not tiles:
+            if not tiles_metadata:
                 logger.warning(f"No LIDAR tiles found for coordinates {lat}, {lon}")
                 return None
             
             # Download and process tiles in parallel
-            processed_tiles = []
+            processed_tile_results = []
+            temp_files_to_merge = []
+
             with ThreadPoolExecutor() as executor:
                 futures = [
-                    executor.submit(self._process_tile, tile, resolution)
-                    for tile in tiles
+                    executor.submit(self._process_tile, tile_meta, resolution, idx)
+                    for idx, tile_meta in enumerate(tiles_metadata)
                 ]
                 for future in futures:
-                    processed_tiles.append(future.result())
+                    tile_result_path = future.result()
+                    if tile_result_path:
+                        temp_files_to_merge.append(tile_result_path)
             
-            # Merge tiles
-            merged_data = self._merge_tiles(processed_tiles, bbox, resolution)
+            if not temp_files_to_merge:
+                logger.warning(f"No tiles were successfully processed for {lat}, {lon}")
+                return None
+
+            merged_array, merged_transform = merge(temp_files_to_merge)
             
-            # Cache the results
+            first_tile_crs = None
+            if temp_files_to_merge:
+                with rasterio.open(temp_files_to_merge[0]) as src_tile:
+                    first_tile_crs = src_tile.crs
+            
+            for temp_file_path in temp_files_to_merge:
+                try:
+                    os.remove(temp_file_path)
+                except OSError as e:
+                    logger.error(f"Error deleting temporary file {temp_file_path}: {e}")
+
+            if merged_array.ndim == 3 and merged_array.shape[0] == 1:
+                merged_array = merged_array.squeeze(axis=0)
+            elif merged_array.ndim != 2:
+                logger.error(f"Merged DEM array has unexpected shape: {merged_array.shape}")
+                return None
+
+            merged_data = {
+                'elevation': merged_array,
+                'transform': merged_transform,
+                'crs': first_tile_crs,
+                'resolution': resolution
+            }
+            
             self._cache_data(lat, lon, size_km, resolution, merged_data)
             
             return merged_data
@@ -121,56 +154,71 @@ class LidarDataCollector:
     def _process_tile(
         self,
         tile: Dict,
-        resolution: float
-    ) -> Dict[str, np.ndarray]:
-        """Process a single LIDAR tile."""
+        resolution: float,
+        tile_index: int
+    ) -> Optional[str]:
+        """Process a single LIDAR tile, save to temp TIF, return path."""
         # Download tile
         tile_url = tile['url']
-        local_path = self.cache_dir / f"tile_{tile['id']}.laz"
+        local_laz_path = self.cache_dir / f"tile_{tile['id']}_{tile_index}.laz"
         
-        if not local_path.exists():
-            response = requests.get(tile_url)
-            response.raise_for_status()
-            local_path.write_bytes(response.content)
-        
-        # Define PDAL pipeline
-        pipeline = {
-            "pipeline": [
-                {
-                    "type": "readers.las",
-                    "filename": str(local_path)
-                },
-                {
-                    "type": "filters.range",
-                    "limits": "Classification[1:2]"  # Ground and non-ground points
-                },
-                {
-                    "type": "filters.assign",
-                    "assignment": "Classification[:]=1"
-                },
-                {
-                    "type": "writers.gdal",
-                    "resolution": resolution,
-                    "output_type": "mean",
-                    "filename": "temp.tif"
-                }
-            ]
-        }
-        
-        pipeline = pdal.Pipeline(json.dumps(pipeline))
-        pipeline.execute()
-        
-        # Read results
-        with rasterio.open("temp.tif") as src:
-            elevation = src.read(1)
+        temp_tif_path = self.cache_dir / f"temp_pdal_out_{tile['id']}_{tile_index}.tif"
+
+        try:
+            if not local_laz_path.exists():
+                response = requests.get(tile_url)
+                response.raise_for_status()
+                local_laz_path.write_bytes(response.content)
             
-        # Cleanup
-        os.remove("temp.tif")
-        
-        return {
-            'elevation': elevation,
-            'bounds': tile['bounds']
-        }
+            # Define PDAL pipeline
+            pdal_pipeline_json = {
+                "pipeline": [
+                    {
+                        "type": "readers.las",
+                        "filename": str(local_laz_path)
+                    },
+                    {
+                        "type": "filters.range",
+                        "limits": "Classification[1:2]"
+                    },
+                    {
+                        "type": "filters.assign",
+                        "value": "Classification = 2 WHERE Classification == 2"
+                    },
+                    {
+                        "type": "filters.reprojection",
+                        "out_srs": "EPSG:4326"
+                    },
+                    {
+                        "type": "writers.gdal",
+                        "resolution": resolution,
+                        "output_type": "mean",
+                        "gdaldriver": "GTiff",
+                        "filename": str(temp_tif_path)
+                    }
+                ]
+            }
+            
+            pipeline = pdal.Pipeline(json.dumps(pdal_pipeline_json))
+            pipeline.execute()
+            
+            if temp_tif_path.exists():
+                return str(temp_tif_path)
+            else:
+                logger.error(f"PDAL output TIFF not created for tile {tile['id']}")
+                return None
+
+        except Exception as e:
+            logger.error(f"Error processing tile {tile.get('id', 'unknown')}: {e}")
+            if temp_tif_path.exists():
+                try: os.remove(temp_tif_path) 
+                except: pass
+            return None
+        finally:
+            if local_laz_path.exists():
+                 try: os.remove(local_laz_path)
+                 except OSError as e: logger.warning(f"Could not remove temp LAZ {local_laz_path}: {e}")
+                 pass
     
     def _merge_tiles(
         self,
@@ -212,7 +260,10 @@ class LidarDataCollector:
         if cache_file.exists():
             data = np.load(cache_file)
             return {
-                'elevation': data['elevation']
+                'elevation': data['elevation'],
+                'transform': data['transform'] if 'transform' in data else None,
+                'crs': data['crs'] if 'crs' in data else None,
+                'resolution': data['resolution'] if 'resolution' in data else 1.0
             }
         return None
     
@@ -224,6 +275,15 @@ class LidarDataCollector:
         resolution: float,
         data: Dict[str, np.ndarray]
     ) -> None:
-        """Cache the processed data."""
+        """Cache the processed data, including transform and crs."""
         cache_file = self.cache_dir / f"lidar_{lat}_{lon}_{size_km}_{resolution}.npz"
-        np.savez(cache_file, **data) 
+        save_data = {
+            'elevation': data['elevation'],
+            'resolution': data.get('resolution', 1.0)
+        }
+        if data.get('transform'):
+            save_data['transform'] = list(data['transform'])[:6]
+        if data.get('crs'):
+            save_data['crs'] = str(data['crs'])
+        
+        np.savez(cache_file, **save_data) 

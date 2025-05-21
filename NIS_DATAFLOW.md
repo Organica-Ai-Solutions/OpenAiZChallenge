@@ -1,114 +1,105 @@
-# NIS Protocol Dataflow with GPT Integration
+# NIS Protocol Dataflow with LangGraph and GPT Integration
 
-This document outlines the dataflow of the NIS (Neuro-Inspired System) Protocol with the GPT integration that powers the reasoning and vision capabilities.
+This document outlines the dataflow of the NIS (Neuro-Inspired System) Protocol, emphasizing its LangGraph-based orchestration and GPT integration.
 
 ## System Architecture Overview
 
-The NIS Protocol is organized as a multi-agent system coordinated by the MetaProtocolCoordinator, which orchestrates communication between specialized agents. The system follows a modular design where each agent focuses on a specific aspect of the archaeological discovery process.
+The NIS Protocol uses LangGraph to define and execute its core analysis pipeline. This pipeline is a stateful graph where nodes represent specific processing stages, and edges define the flow of control and data. The `NISProtocol` class in `api/agent_integrator.py` builds and runs this graph. Specialized agents perform the work within these nodes.
 
 ```
-                    +-----------------+
-                    |     REST API    |
-                    |  /api/analyze   |
-                    +--------+--------+
-                             |
-                             v
-                  +----------+-----------+
-                  | MetaProtocolCoordinator |
-                  +----------+-----------+
-                             |
-         +------------------+-------------------+-------------------+
-         |                  |                   |                   |
-+--------v-------+ +--------v-------+ +---------v------+ +---------v------+
-|  Vision Agent  | | Reasoning Agent | |  Memory Agent  | |  Action Agent  |
-+----------------+ +----------------+ +----------------+ +----------------+
-         |                  |                   |                   |
-         |                  |                   |                   |
-+--------v-------+ +--------v-------+           |                   |
-|   GPT Vision   | |   GPT Turbo    |           |                   |
-+----------------+ +----------------+           |                   |
-                                                |                   |
-                                                v                   v
++-----------------+         +---------------------------+
+|   REST API      | ------> |      NISProtocol          |
+| /api/analyze    |         | (LangGraph Orchestrator)  |
++-----------------+         +---------------------------+
+                              |   ^ (GraphState updates)  |
+                              |   |                       |
+                              v   | (Invoke Agent Methods)|
+      +-----------------------+-------------------------+
+      |                 LangGraph Nodes                 |
+      | +---------------------+ +---------------------+ |
+      | | VisionAnalysisNode  | | PatternDetectNode   | |
+      | +--------+------------+ +---------+-----------+ |
+      |          |                        |             |
+      | +--------v------------+ +---------v-----------+ |
+      | | ReasoningNode       | | ActionStrategyNode  | |
+      | +--------+------------+ +---------+-----------+ |
+      |          |                        |   (Iterate) |
+      | +--------v------------+           |             |
+      | | FinalReportNode     | <---------+             |
+      | +---------------------+                         |
+      +-------------------------------------------------+
 ```
 
-## Dataflow Process
+Agents like `VisionAgent`, `ReasoningAgent`, `MemoryAgent`, `ActionAgent`, and `PatternDetectionEngine` are initialized by `NISProtocol` and their methods are called by the respective LangGraph nodes.
 
-1. **API Request** → The process begins when a user sends coordinates to the `/api/analyze` endpoint
-2. **Coordinator Pipeline** → The MetaProtocolCoordinator sets up a pipeline with three main steps:
-   - Vision Analysis
-   - Reasoning Analysis
-   - Action Generation
-3. **Vision Agent** → Processes satellite imagery and LIDAR data
-   - Now powered by **GPT-4 Vision** for image analysis
-   - Falls back to mock implementations if GPT is unavailable
-4. **Reasoning Agent** → Analyzes the visual findings with historical and indigenous context
-   - Now powered by **GPT-4 Turbo** for contextual reasoning
-   - Combines multiple data sources for comprehensive analysis
-5. **Action Agent** → Generates final reports and recommendations
-6. **API Response** → The results are returned to the user
+The `MetaProtocolCoordinator` remains available for agents to use (e.g., `ReasoningAgent` for web search via MCP, `ActionAgent` for memory access) for capabilities outside the primary graph flow or for tool use.
+
+## Dataflow Process using LangGraph
+
+1.  **API Request**: User submits coordinates to `/api/analyze`.
+2.  **Graph Invocation**: `NISProtocol.analyze_coordinates` initializes a `GraphState` dictionary and invokes the compiled LangGraph.
+3.  **Node Execution & State Updates** (Simplified Flow):
+    *   **`vision_analysis_node`**: Calls `VisionAgent` to process imagery. Updates `GraphState.raw_vision_data`.
+    *   **`pattern_detection_node`**: Calls `PatternDetectionEngine` using `raw_vision_data`. Updates `GraphState.detected_patterns`, `processed_historical_texts`, `processed_indigenous_knowledge`.
+    *   **`reasoning_node`**: Calls `ReasoningAgent` with `raw_vision_data`, `detected_patterns`, and contextual data. `ReasoningAgent` may use `MetaProtocolCoordinator` (MCP) for web searches. Updates `GraphState.reasoning_interpretation`.
+    *   **`action_strategy_node`**: Calls `ActionAgent.strategize_next_step` with the current `GraphState`. `ActionAgent` might consult `MemoryAgent`. Returns `action_decision` (e.g., "finalize", "rerun_vision") and `decision_params`. Updates `GraphState.action_decision`, `GraphState.decision_params`, `GraphState.iteration_count`.
+    *   **Conditional Edges**: Based on `action_decision` and `error_message`, the graph routes to the next appropriate node (e.g., back to `vision_analysis_node` for a re-run, or to `final_report_node`).
+    *   **`final_report_node`**: If `action_decision` is "finalize", calls `ActionAgent.generate_finding_report`. Updates `GraphState.final_report`.
+    *   **`error_handler_node`**: If any node sets `error_message`, flow is routed here.
+4.  **API Response**: The content of `GraphState.final_report` (or an error) is formatted and returned.
 
 ## Protocol Integration
 
-The NIS Protocol uses three distinct protocols for communication:
+The NIS Protocol uses three distinct protocols for communication, primarily facilitated by the `MetaProtocolCoordinator` when agents need to interact outside the direct LangGraph data flow or use external tools:
 
-1. **MCP (Managed Compute Protocol)** → For external API calls
-   - Powers the connection to OpenAI API
-   - Handles authentication and request formatting
-2. **ACP (Agent Communication Protocol)** → For structured agent function calls
-   - Used for the main pipeline steps
-   - Maintains consistent data format between agents
-3. **A2A (Agent-to-Agent Protocol)** → For direct peer-to-peer agent communication
-   - Used for supplementary communication
+1.  **MCP (Managed Compute Protocol)**: For external API calls (e.g., OpenAI, web search tools).
+2.  **ACP (Agent Communication Protocol)**: For structured agent function calls if direct method invocation isn't suitable.
+3.  **A2A (Agent-to-Agent Protocol)**: For direct peer-to-peer agent communication.
 
 ## GPT Integration Details
 
-The new GPT integration enhances the system in the following ways:
-
 ### Vision Agent Enhancements
 
-- **GPT-4 Vision Analysis**: The Vision Agent now uses GPT-4 Vision to analyze satellite and LIDAR imagery
-- **Natural Language Understanding**: Can extract patterns from unstructured image descriptions
-- **Confidence Scoring**: Provides confidence scores based on language used in descriptions
-- **Graceful Degradation**: Falls back to mock implementations if GPT is unavailable
+-   **GPT-4 Vision Analysis**: The `VisionAgent` includes an `analyze_image` method that directly uses GPT-4 Vision to analyze satellite and LIDAR imagery for detailed insights on specific files.
+-   **Main Pipeline**: The primary analysis path within the LangGraph flow currently uses image patching and mock feature detection for broader area scanning.
+-   **Graceful Degradation**: GPT-dependent methods fall back to mock implementations or raise errors if GPT is unavailable.
 
 ### Reasoning Agent Enhancements
 
-- **GPT-4 Turbo Analysis**: The Reasoning Agent uses GPT-4 Turbo for contextual analysis
-- **Historical Integration**: Combines historical sources with visual findings
-- **Indigenous Knowledge**: Incorporates indigenous perspectives
-- **Recommendations**: Generates scientific recommendations for verification
-- **Structured Format**: Returns consistent JSON structures for further processing
+-   **GPT-4 Turbo Analysis**: The `ReasoningAgent` uses GPT-4 Turbo for contextual analysis via the `GPTIntegration` class.
+-   **Web Search Capability**: Can perform web searches (via `MetaProtocolCoordinator` and MCP) to gather additional context when local data (historical texts, indigenous knowledge) is sparse or when directed by the `ActionAgent`. Search results are incorporated into the reasoning prompt.
+-   **Comprehensive Context**: Combines visual findings, pattern detection results, historical sources, indigenous knowledge, and web search results for reasoning.
+-   **Structured Format**: Aims to get structured JSON from GPT, with fallbacks for plain text responses.
 
 ## Context Preservation
 
-Data flows between agents with context preserved through the MetaProtocolCoordinator:
+Context is preserved and passed between nodes via the `GraphState` object within the LangGraph. This typed dictionary holds all relevant data generated throughout the pipeline, such as raw vision data, detected patterns, interpretations, and iteration control flags.
 
-1. Vision Agent findings → Reasoning Agent input
-2. Reasoning Agent analysis → Action Agent input
-3. All agent data → Final report
-
-GPT models are seamlessly integrated into this flow, replacing mock implementations when available.
-
-## Sample Flow for Coordinate Analysis
+## Sample Flow for Coordinate Analysis (Conceptual LangGraph Steps)
 
 ```
-1. User submits coordinates: (-3.4653, -62.2159)
-2. MetaProtocolCoordinator initiates pipeline:
-   a. Vision Agent uses GPT Vision to analyze satellite imagery
-      - Detects "circular geometric structures"
-      - Confidence: 0.75
-   b. Reasoning Agent uses GPT Turbo to interpret findings
-      - Analyzes with historical context
-      - Incorporates indigenous knowledge
-      - Confidence: 0.82
-   c. Action Agent generates report and recommendations
-3. User receives comprehensive analysis
+1. User submits coordinates: (-3.4653, -62.2159) -> Initial GraphState created.
+2. Graph execution starts at vision_analysis_node:
+   - VisionAgent processes data -> raw_vision_data in GraphState.
+3. pattern_detection_node:
+   - PatternDetectionEngine runs -> detected_patterns, processed_historical_texts, etc., in GraphState.
+4. reasoning_node:
+   - ReasoningAgent interprets (may trigger web search if local context + visual findings are sparse) -> reasoning_interpretation in GraphState.
+5. action_strategy_node:
+   - ActionAgent decides next step. If confidence is low, might suggest 'rerun_vision' with new params or 'clarify_reasoning' with web_search=True.
+   - iteration_count in GraphState increments if re-running.
+6. (Loop if not finalizing) ... Graph may route back to an earlier node with updated decision_params.
+7. final_report_node (once action_decision is 'finalize'):
+   - ActionAgent generates report -> final_report in GraphState.
+8. User receives comprehensive analysis from final_report.
 ```
 
-## Benefits of GPT Integration
+## Benefits of LangGraph & GPT Integration
 
-1. **Enhanced Accuracy**: GPT models provide more nuanced analysis
-2. **Multi-Modal Integration**: Combines vision and language capabilities
-3. **Contextual Understanding**: Better integration of multiple data sources
-4. **Fallback Mechanisms**: System remains functional even without GPT
-5. **Scalability**: Can leverage the latest GPT models as they become available 
+1.  **Enhanced Accuracy & Nuance**: GPT models provide more sophisticated analysis.
+2.  **Flexible Workflow**: LangGraph allows complex, conditional, and iterative execution flows.
+3.  **Multi-Modal Integration**: Combines vision, text processing, and structured data analysis.
+4.  **Improved Contextual Understanding**: ReasoningAgent integrates multiple data sources, including dynamic web search results.
+5.  **Iterative Refinement**: The system can loop and re-analyze data based on intermediate findings.
+6.  **Fallback Mechanisms**: System attempts to remain functional or provide partial results even if some components (like live LLM calls) fail.
+7.  **Scalability & Modularity**: Agents and graph nodes can be updated or replaced independently. 

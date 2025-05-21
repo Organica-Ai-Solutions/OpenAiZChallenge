@@ -13,6 +13,7 @@ from datetime import datetime
 import base64
 from openai import OpenAI, OpenAIError
 from openai.types.chat import ChatCompletion
+import httpx
 from ..config import OPENAI_API_KEY
 
 logger = logging.getLogger(__name__)
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 class GPTIntegration:
     """Integration with OpenAI's GPT models for the NIS Protocol."""
     
-    def __init__(self, model_name: str = "gpt-4"):
+    def __init__(self, model_name: str = "gpt-4-turbo"):
         """Initialize the GPT integration.
         
         Args:
@@ -33,12 +34,14 @@ class GPTIntegration:
             # Explicitly set OpenAI configuration
             os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
             
-            # Disable any proxy settings
+            # Disable any proxy settings by unsetting environment variables
+            # httpx default client honors these
             os.environ.pop('HTTP_PROXY', None)
             os.environ.pop('HTTPS_PROXY', None)
+            os.environ.pop('ALL_PROXY', None) # Add ALL_PROXY as well
             
-            # Initialize the client
-            self.client = OpenAI()
+            # Initialize the client with an explicit httpx client
+            self.client = OpenAI(http_client=httpx.Client()) # Pass explicit client
             self.model = model_name
             self.max_tokens = 4096
             self.temperature = 0.7
@@ -133,7 +136,7 @@ class GPTIntegration:
             
             # Get analysis
             response = self.client.chat.completions.create(
-                model="gpt-4-vision-preview",
+                model=self.model,
                 messages=messages,
                 max_tokens=max_tokens or self.max_tokens
             )
@@ -144,7 +147,7 @@ class GPTIntegration:
             return {
                 "analysis": analysis,
                 "timestamp": datetime.now().isoformat(),
-                "model": "gpt-4-vision-preview",
+                "model": self.model,
                 "prompt": prompt
             }
             
@@ -154,33 +157,29 @@ class GPTIntegration:
     
     def reasoning_analysis(
         self,
-        context: Dict,
-        prompt: Optional[str] = None,
+        user_prompt_string: str,
+        system_prompt: Optional[str] = None,
         max_tokens: Optional[int] = None
     ) -> Dict:
         """
         Perform reasoning analysis on findings.
         
         Args:
-            context: Dictionary containing analysis context
-            prompt: Custom prompt for analysis
+            user_prompt_string: The detailed prompt string from the user/agent incorporating all context.
+            system_prompt: Optional custom system prompt for analysis.
             max_tokens: Maximum tokens for response
             
         Returns:
             Dictionary containing reasoning results
         """
         try:
-            # Use default reasoning prompt if none provided
-            if not prompt:
-                prompt = self.prompts.get('reasoning_analysis',
-                    "Analyze the following findings and provide insights:")
-            
-            # Format context for GPT
-            context_str = json.dumps(context, indent=2)
+            # Use default reasoning system prompt if none provided
+            final_system_prompt = system_prompt or self.prompts.get('reasoning_analysis_system',
+                    "You are an expert archaeological analyst. Analyze the following information comprehensively.")
             
             messages = [
-                {"role": "system", "content": prompt},
-                {"role": "user", "content": context_str}
+                {"role": "system", "content": final_system_prompt},
+                {"role": "user", "content": user_prompt_string}
             ]
             
             # Get analysis
@@ -198,7 +197,8 @@ class GPTIntegration:
                 "analysis": analysis,
                 "timestamp": datetime.now().isoformat(),
                 "model": self.model,
-                "prompt": prompt
+                "prompt": final_system_prompt,
+                "user_prompt": user_prompt_string
             }
             
         except Exception as e:

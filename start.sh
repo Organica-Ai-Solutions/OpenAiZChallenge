@@ -3,6 +3,11 @@
 # Strict mode for better error handling
 set -euo pipefail
 
+# Docker container names
+REDIS_CONTAINER_NAME="nis-redis"
+ZOOKEEPER_CONTAINER_NAME="nis-zookeeper"
+KAFKA_CONTAINER_NAME="nis-kafka"
+
 # Enhanced Logging and Error Handling
 SCRIPT_NAME=$(basename "$0")
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
@@ -13,6 +18,10 @@ ERROR_LOG_FILE="${LOG_DIR}/nis_startup_error_${TIMESTAMP}.log"
 
 # Create logs directory if it doesn't exist
 mkdir -p "$LOG_DIR"
+
+# Clear/Initialize log files at the beginning of the script execution
+> "$LOG_FILE"
+> "$ERROR_LOG_FILE"
 
 # ANSI Color Codes
 GREEN='\033[0;32m'
@@ -242,6 +251,17 @@ function install_dependencies() {
     while [ $retry_count -lt $max_retries ]; do
         if pip install -r requirements.txt; then
             log "Python dependencies installed successfully"
+            # Download spacy model if spacy is installed
+            if python -c "import spacy; spacy.load('pt_core_news_lg')" &> /dev/null; then
+                log "Spacy model 'pt_core_news_lg' already installed."
+            else
+                log "Downloading Spacy model 'pt_core_news_lg'..."
+                if python -m spacy download pt_core_news_lg; then
+                    log "Spacy model 'pt_core_news_lg' downloaded successfully."
+                else
+                    log "Failed to download 'pt_core_news_lg'. Manual installation may be required." "WARNING"
+                fi
+            fi
             break
         else
             ((retry_count++))
@@ -274,10 +294,6 @@ function find_available_port() {
 
 # Main Startup Function
 function startup_nis_protocol() {
-    # Clear previous log files
-    > "$LOG_FILE"
-    > "$ERROR_LOG_FILE"
-    
     # Display Banner and Run Compatibility Check
     nis_banner
     check_system_compatibility
@@ -344,6 +360,79 @@ function main() {
     # Run the main startup protocol
     startup_nis_protocol
 }
+
+set -x # Enable command tracing
+# --- Docker Service Management (Redis & Kafka) ---
+log "🐳 Ensuring Docker services (Redis, Zookeeper, Kafka) are (re)started..."
+
+# Stop and remove existing containers (ignore errors if they don't exist)
+log "Stopping and removing existing Docker containers if they exist..."
+docker stop "$REDIS_CONTAINER_NAME" > /dev/null 2>&1 || true
+docker rm -f "$REDIS_CONTAINER_NAME" > /dev/null 2>&1 || true
+docker stop "$KAFKA_CONTAINER_NAME" > /dev/null 2>&1 || true
+docker rm -f "$KAFKA_CONTAINER_NAME" > /dev/null 2>&1 || true
+docker stop "$ZOOKEEPER_CONTAINER_NAME" > /dev/null 2>&1 || true
+docker rm -f "$ZOOKEEPER_CONTAINER_NAME" > /dev/null 2>&1 || true
+
+log "Waiting a moment for ports to be released..."
+sleep 3 # Wait for 3 seconds
+
+# Start Redis
+log "Starting Redis container '$REDIS_CONTAINER_NAME'..."
+if ! docker run -d --name "$REDIS_CONTAINER_NAME" -p 127.0.0.1:6379:6379 redis:alpine; then
+    log "Failed to start Redis container '$REDIS_CONTAINER_NAME'." "ERROR"
+else
+    log "Waiting for Redis ($REDIS_CONTAINER_NAME) to initialize..."
+    sleep 5 # Give Redis a moment to start
+    if docker ps -q -f name=^/${REDIS_CONTAINER_NAME}$ > /dev/null 2>&1; then
+        log "Redis container '$REDIS_CONTAINER_NAME' started successfully."
+    else
+        log "Redis container '$REDIS_CONTAINER_NAME' failed to become ready." "ERROR"
+    fi
+fi
+
+# Start Zookeeper
+log "Starting Zookeeper container '$ZOOKEEPER_CONTAINER_NAME'..."
+if ! docker run -d --name "$ZOOKEEPER_CONTAINER_NAME" -p 127.0.0.1:2181:2181 \
+    -e ZOOKEEPER_CLIENT_PORT=2181 \
+    -e ZOOKEEPER_TICK_TIME=2000 \
+    confluentinc/cp-zookeeper:latest; then
+    log "Failed to start Zookeeper container '$ZOOKEEPER_CONTAINER_NAME'." "ERROR"
+else
+    log "Waiting for Zookeeper ($ZOOKEEPER_CONTAINER_NAME) to initialize..."
+    sleep 20 # Give Zookeeper more time to initialize
+    if docker ps -q -f name=^/${ZOOKEEPER_CONTAINER_NAME}$ > /dev/null 2>&1; then
+        log "Zookeeper container '$ZOOKEEPER_CONTAINER_NAME' started successfully."
+    else
+        log "Zookeeper container '$ZOOKEEPER_CONTAINER_NAME' failed to become ready." "ERROR"
+    fi
+fi
+
+# Start Kafka
+log "Starting Kafka container '$KAFKA_CONTAINER_NAME'..."
+if ! docker run -d --name "$KAFKA_CONTAINER_NAME" \
+    -p 127.0.0.1:9092:9092 \
+    -e KAFKA_ZOOKEEPER_CONNECT=${ZOOKEEPER_CONTAINER_NAME}:2181 \
+    -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092 \
+    -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 \
+    -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
+    -e KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0 \
+    -e KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT \
+    -e KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS=6000 \
+    -e KAFKA_CREATE_TOPICS="nis.analysis.events:1:1,nis.batch.events:1:1,nis.statistics.events:1:1" \
+    confluentinc/cp-kafka:latest; then
+    log "Failed to start Kafka container '$KAFKA_CONTAINER_NAME'." "ERROR"
+else
+    log "Waiting for Kafka ($KAFKA_CONTAINER_NAME) to initialize..."
+    sleep 60 # Give Kafka more time to initialize fully
+    if docker ps -q -f name=^/${KAFKA_CONTAINER_NAME}$ > /dev/null 2>&1; then
+        log "Kafka container '$KAFKA_CONTAINER_NAME' started successfully."
+    else
+        log "Kafka container '$KAFKA_CONTAINER_NAME' failed to become ready." "ERROR"
+    fi
+fi
+# --- End Docker Service Management ---
+set +x # Disable command tracing
 
 # Execute main function
 main 

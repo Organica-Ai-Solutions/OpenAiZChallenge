@@ -9,14 +9,14 @@ This branch adds integration with the latest OpenAI GPT models to power the NIS 
    - Provides a unified API for text and vision capabilities
 
 2. **Updated Reasoning Agent**:
-   - Now uses GPT-4 Turbo for contextual analysis
-   - Integrates historical sources and indigenous knowledge
-   - Provides confidence scores and recommended next steps
+   - Now uses GPT-4 Turbo for contextual analysis via `GPTIntegration`.
+   - Integrates historical sources, indigenous knowledge, and **can perform web searches (via `MetaProtocolCoordinator`) to gather additional external context.**
+   - Provides confidence scores and recommended next steps.
 
 3. **Enhanced Vision Agent**:
-   - Uses GPT-4 Vision for satellite and LIDAR image analysis
-   - Extracts pattern types from natural language descriptions
-   - Gracefully falls back to mock implementations when GPT is unavailable
+   - Includes a method (`analyze_image`) to directly use GPT-4 Vision for satellite and LIDAR image analysis on specific files.
+   - The main analysis pipeline (LangGraph flow) currently uses traditional image processing techniques with mock feature detection for broader area scanning.
+   - GPT-dependent methods gracefully fall back to mock implementations or raise errors when GPT is unavailable.
 
 ## Setup Instructions
 

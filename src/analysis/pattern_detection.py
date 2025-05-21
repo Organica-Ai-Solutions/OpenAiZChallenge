@@ -12,6 +12,10 @@ from enum import Enum
 
 logger = logging.getLogger(__name__)
 
+# Import the processors from the data_processing directory
+from ..data_processing.indigenous_maps import IndigenousMapProcessor
+from ..data_processing.historical_texts import HistoricalTextProcessor
+
 class PatternType(Enum):
     GEOMETRIC = "geometric"
     TEMPORAL = "temporal"
@@ -39,6 +43,10 @@ class PatternDetectionEngine:
             eps=0.1,  # 100m in decimal degrees
             min_samples=self.min_pattern_size
         )
+        
+        # Initialize contextual processors
+        self.indigenous_map_processor = IndigenousMapProcessor()
+        self.historical_text_processor = HistoricalTextProcessor()
     
     def detect_patterns(
         self,
@@ -49,7 +57,9 @@ class PatternDetectionEngine:
         Detect patterns in the analysis data.
         
         Args:
-            data: Dictionary containing analysis results
+            data: Dictionary containing analysis results. 
+                  It's expected to have a 'location' key with 'lat', 'lon', 
+                  and optionally 'radius_km'.
             pattern_types: Optional list of pattern types to detect
             
         Returns:
@@ -60,6 +70,39 @@ class PatternDetectionEngine:
                 pattern_types = list(PatternType)
             
             patterns = []
+            
+            # Extract location data for contextual processors
+            location_info = data.get("location", {})
+            lat = location_info.get("lat")
+            lon = location_info.get("lon")
+            radius_km = location_info.get("radius_km", 50.0) # Default radius if not provided
+
+            # Process indigenous knowledge
+            if lat is not None and lon is not None:
+                try:
+                    indigenous_data = self.indigenous_map_processor.process_indigenous_knowledge(
+                        lat=lat, lon=lon, radius_km=radius_km
+                    )
+                    # Merge indigenous_data into the main data dictionary
+                    # We'll store it under a specific key, e.g., "indigenous_knowledge"
+                    data["indigenous_knowledge"] = indigenous_data
+                except Exception as e:
+                    logger.error(f"Error processing indigenous knowledge: {str(e)}")
+
+                # Process historical texts
+                try:
+                    historical_text_data = self.historical_text_processor.process_historical_texts(
+                        lat=lat, lon=lon, radius_km=radius_km
+                    )
+                    # Merge historical_text_data into the main data dictionary
+                    # We'll store it under a specific key, e.g., "historical_texts_processed"
+                    # to avoid collision if 'historical' key is already used.
+                    data["historical_texts_processed"] = historical_text_data
+                except Exception as e:
+                    logger.error(f"Error processing historical texts: {str(e)}")
+            else:
+                logger.warning("Latitude or Longitude not provided in data['location'], skipping contextual processors.")
+
             
             # Process each pattern type
             for pattern_type in pattern_types:
@@ -336,20 +379,82 @@ class PatternDetectionEngine:
             
             # Extract dates and values
             if "satellite" in data:
-                dates = [item["date"] for item in data["satellite"]]
-                values = [item["value"] for item in data["satellite"]]
-                temporal_features["satellite"] = {
-                    "dates": dates,
-                    "values": values
-                }
+                # Ensure data["satellite"] is a list of dicts with "date" and "value"
+                if isinstance(data["satellite"], list) and \
+                   all(isinstance(item, dict) and "date" in item and "value" in item for item in data["satellite"]):
+                    dates = [item["date"] for item in data["satellite"]]
+                    values = [item["value"] for item in data["satellite"]]
+                    temporal_features["satellite"] = {
+                        "dates": dates,
+                        "values": values
+                    }
+                else:
+                    logger.warning("Satellite data is not in the expected format for temporal feature extraction.")
+
             
+            # Existing historical data extraction (if any, distinct from new historical_texts_processed)
             if "historical" in data:
-                dates = [item["date"] for item in data["historical"]]
-                values = [item["value"] for item in data["historical"]]
-                temporal_features["historical"] = {
-                    "dates": dates,
-                    "values": values
-                }
+                 # Ensure data["historical"] is a list of dicts with "date" and "value"
+                if isinstance(data["historical"], list) and \
+                   all(isinstance(item, dict) and "date" in item and "value" in item for item in data["historical"]):
+                    dates = [item["date"] for item in data["historical"]]
+                    values = [item["value"] for item in data["historical"]]
+                    temporal_features["historical_original"] = { # Renamed to avoid conflict
+                        "dates": dates,
+                        "values": values
+                    }
+                else:
+                    logger.warning("Original historical data is not in the expected format for temporal feature extraction.")
+
+            # Extract temporal data from historical_texts_processed
+            if "historical_texts_processed" in data and isinstance(data["historical_texts_processed"], dict):
+                processed_texts = data["historical_texts_processed"]
+                # Assuming 'references' is a list of dicts, each with a 'year' or 'date'
+                # This needs to align with the actual output structure of HistoricalTextProcessor
+                # From HistoricalTextProcessor: it returns a dict with "references": List[HistoricalReference]
+                # HistoricalReference has a 'date' field.
+                # And the aggregated output has 'temporal_range': {'earliest': min(dates), 'latest': max(dates), ...}
+                
+                # Let's try to extract from 'references' if available
+                # The HistoricalTextProcessor from src/data_collection has a 'references' list
+                # and each reference has a 'date'.
+                # The one from src/data_processing returns a dict with 'references' which is a list of scored_references.
+                # Each scored_reference has 'earliest_reference' (year) and 'references' (list of detailed refs with 'year')
+                
+                # For src/data_processing.historical_texts.HistoricalTextProcessor:
+                # The main output `processed_results` contains `references`: list of `scored_references`.
+                # Each `scored_reference` has `earliest_reference` (a year).
+                # And each `scored_reference` also has `references` (list of dicts), where each dict has a `year`.
+                
+                # Let's focus on the output of `src/data_processing.historical_texts.HistoricalTextProcessor`
+                # `process_historical_texts` returns `processed_results` which is a Dict.
+                # This dict contains a key `references` which is a List[Dict] (scored_references).
+                # Each dict in `scored_references` has an `earliest_reference` (year) and `references` (list of detailed text objects, each with a `year`).
+                
+                ht_references = processed_texts.get("references", [])
+                historical_dates = []
+                historical_values = [] # Placeholder for values if applicable, often not direct for texts
+
+                for ref_group in ht_references: # ref_group is a scored_reference
+                    if isinstance(ref_group.get("references"), list):
+                        for detailed_ref in ref_group["references"]:
+                            if detailed_ref and isinstance(detailed_ref, dict) and detailed_ref.get("year"):
+                                try:
+                                    # Attempt to parse year, could be string or int
+                                    year_str = str(detailed_ref["year"])
+                                    # For simplicity, we'll treat each mention as an event at that year.
+                                    # We might need a more nuanced way to represent text "values".
+                                    # For now, let's assume '1' as a value indicating presence/mention.
+                                    historical_dates.append(f"{year_str}-01-01") # Convert year to a full date string for pd.to_datetime
+                                    historical_values.append(detailed_ref.get("confidence", 1.0)) # Use confidence or a dummy value
+                                except (ValueError, TypeError) as e:
+                                    logger.warning(f"Could not parse year from historical text reference: {detailed_ref.get('year')}, error: {e}")
+                
+                if historical_dates:
+                    temporal_features["historical_texts"] = {
+                        "dates": historical_dates,
+                        "values": historical_values
+                    }
             
             return temporal_features if temporal_features else None
             
@@ -493,27 +598,125 @@ class PatternDetectionEngine:
             return patterns
     
     def _extract_coordinates(self, data: Dict) -> List[Tuple[float, float]]:
-        """Extract coordinates from the data dictionary."""
+        """Extract coordinates (longitude, latitude) from the data dictionary."""
         coordinates = []
         
         try:
-            if isinstance(data, dict):
-                for key, value in data.items():
-                    if isinstance(value, (list, tuple)) and len(value) == 2:
-                        try:
-                            lat, lon = float(value[0]), float(value[1])
-                            coordinates.append((lat, lon))
-                        except (ValueError, TypeError):
-                            continue
-                    elif isinstance(value, dict):
-                        coordinates.extend(self._extract_coordinates(value))
-                    elif isinstance(value, list):
-                        for item in value:
-                            if isinstance(item, dict):
-                                coordinates.extend(self._extract_coordinates(item))
+            # First, try to get coordinates from a potential 'location' key if it's a simple lat/lon dict
+            if 'location' in data and isinstance(data['location'], dict):
+                loc = data['location']
+                if 'longitude' in loc and 'latitude' in loc:
+                    try:
+                        lon = float(loc['longitude'])
+                        lat = float(loc['latitude'])
+                        coordinates.append((lon, lat))
+                        # If this top-level location is the primary point of interest, 
+                        # we might stop here or continue to gather more from nested structures.
+                        # For pattern detection, we usually want all available points.
+                    except (ValueError, TypeError):
+                        logger.warning(f"Could not parse longitude/latitude from data['location']: {loc}")
             
-            return coordinates
+            # Recursive extraction from the rest of the data structure
+            # This will also explore data['indigenous_knowledge'] and data['historical_texts_processed']
+            
+            # Define a recursive helper function to avoid code duplication for different main keys
+            def _recursive_extract(sub_data):
+                extracted_coords = []
+                if isinstance(sub_data, dict):
+                    # Check for direct longitude/latitude keys
+                    if 'longitude' in sub_data and 'latitude' in sub_data:
+                        try:
+                            lon = float(sub_data['longitude'])
+                            lat = float(sub_data['latitude'])
+                            extracted_coords.append((lon, lat))
+                        except (ValueError, TypeError):
+                            logger.warning(f"Could not parse longitude/latitude from dict: {sub_data}")
+                    
+                    # Check for 'geometry' field with 'coordinates' (common in GeoJSON-like structures)
+                    # IndigenousMapProcessor (src/data_collection) uses this.
+                    # IndigenousMapProcessor (src/data_processing) output: 'map_evidence' (list of dicts). Each dict can have 'bounds'.
+                    #   'oral_evidence' (list of dicts). Each section can have 'locations' with 'coordinates'.
+                    # HistoricalTextProcessor (src/data_collection) output: 'references' (list of HistoricalReference). Each has 'location': {'lat': ..., 'lon': ...}.
+                    # HistoricalTextProcessor (src/data_processing) output: 'references' (list of scored_references).
+                    #   Each scored_reference has 'references' (list of text dicts). Each text dict's 'locations' field (from NER) might have coordinates.
+                    #   The NER output format for locations: [{'word': 'Amazon', 'entity_group': 'LOC', 'score': ..., 'start':..., 'end':...}] - no direct coords.
+                    #   However, the input `historical_places.csv` for `src/data_processing/historical_texts.py` has lat/lon.
+                    #   The `_process_document` method extracts 'locations' using NER, but these are entity mentions, not coords.
+                    #   The `_find_relevant_documents` method uses `historical_places` (which has coords) to find relevant docs.
+                    #   The output `processed_results` has 'references' -> list of scored_references. Each scored_reference has 'references' -> list of actual text segments.
+                    #   These text segments have `locations` (NER output).
+                    #   The `IndigenousMapProcessor` from `src/data_processing/indigenous_maps.py` has `known_locations` GeoDataFrame.
+                    #   Its `_extract_locations` function (used for oral histories) returns `coordinates`: [lon, lat].
+
+                    if 'geometry' in sub_data and isinstance(sub_data['geometry'], dict):
+                        geom = sub_data['geometry']
+                        if geom.get('type') == 'Point' and 'coordinates' in geom and isinstance(geom['coordinates'], (list, tuple)) and len(geom['coordinates']) == 2:
+                            try:
+                                lon, lat = float(geom['coordinates'][0]), float(geom['coordinates'][1])
+                                extracted_coords.append((lon, lat))
+                            except (ValueError, TypeError):
+                                logger.warning(f"Could not parse Point geometry coordinates: {geom['coordinates']}")
+                        elif geom.get('type') == 'Polygon' and 'coordinates' in geom and isinstance(geom['coordinates'], list):
+                            # For polygons, we can take the centroid or all vertices.
+                            # Taking all vertices might be too many for some pattern algos.
+                            # For simplicity, let's try to get a representative point (e.g., first vertex of exterior ring).
+                            try:
+                                exterior_ring = geom['coordinates'][0]
+                                if exterior_ring and isinstance(exterior_ring[0], (list, tuple)) and len(exterior_ring[0]) == 2:
+                                    lon, lat = float(exterior_ring[0][0]), float(exterior_ring[0][1])
+                                    extracted_coords.append((lon, lat))
+                            except (IndexError, ValueError, TypeError):
+                                logger.warning(f"Could not parse Polygon geometry coordinates: {geom['coordinates']}")
+                    
+                    # For HistoricalTextProcessor (src/data_collection format)
+                    if 'location' in sub_data and isinstance(sub_data['location'], dict) and \
+                       'lat' in sub_data['location'] and 'lon' in sub_data['location']:
+                        try:
+                            lat = float(sub_data['location']['lat'])
+                            lon = float(sub_data['location']['lon'])
+                            extracted_coords.append((lon, lat))
+                        except (ValueError, TypeError):
+                             logger.warning(f"Could not parse lat/lon from 'location' dict: {sub_data['location']}")
+
+
+                    # Iterate over values for further recursion or direct coordinate extraction
+                    for key, value in sub_data.items():
+                        if key in ['longitude', 'latitude', 'geometry', 'location'] and isinstance(value, (dict, str, float, int)): # Already handled above or not coordinate container
+                            continue
+                        
+                        extracted_coords.extend(_recursive_extract(value))
+
+                elif isinstance(sub_data, list):
+                    for item in sub_data:
+                        extracted_coords.extend(_recursive_extract(item))
+                
+                # Handling tuples that might directly be coordinates (lon, lat)
+                # This was in the original logic, keep as a fallback.
+                elif isinstance(sub_data, (list, tuple)) and len(sub_data) == 2:
+                    try:
+                        v1, v2 = float(sub_data[0]), float(sub_data[1])
+                        # Basic check to see if they look like lon/lat
+                        if -180 <= v1 <= 180 and -90 <= v2 <= 90:
+                             extracted_coords.append((v1, v2))
+                        elif -180 <= v2 <= 180 and -90 <= v1 <= 90: # (lat, lon) case
+                             extracted_coords.append((v2, v1))
+                    except (ValueError, TypeError):
+                        pass # Not a coordinate tuple
+
+                return extracted_coords
+
+            # Apply recursive extraction to the entire data dictionary
+            # The initial coordinate from data['location'] (if present) is already added.
+            # _recursive_extract will explore all other parts.
+            all_extracted_coords = _recursive_extract(data)
+            coordinates.extend(all_extracted_coords)
+            
+            # Remove duplicates and sort for deterministic output
+            if coordinates:
+                unique_coordinates = sorted(list(set(coordinates)))
+                return unique_coordinates
+            return []
             
         except Exception as e:
             logger.error(f"Error extracting coordinates: {str(e)}")
-            return coordinates 
+            return [] 

@@ -19,20 +19,139 @@ logger = logging.getLogger(__name__)
 class ActionAgent:
     """Agent for generating outputs and recommendations based on findings."""
     
-    def __init__(self, output_dir: Optional[Path] = None, meta_coordinator=None):
+    def __init__(self, output_dir: Optional[Path] = None, meta_coordinator=None, memory_agent=None):
         """Initialize the Action Agent.
         
         Args:
             output_dir: Directory to store outputs
             meta_coordinator: NIS MetaProtocolCoordinator for agent communication
+            memory_agent: Instance of MemoryAgent for direct memory operations
         """
         self.output_dir = output_dir or Path("outputs") / "findings"
         self.output_dir.mkdir(parents=True, exist_ok=True)
         
         # Store reference to MetaProtocolCoordinator if provided
         self.meta_coordinator = meta_coordinator
+        # Store reference to MemoryAgent if provided
+        self.memory_agent = memory_agent
         
         logger.info(f"Action Agent initialized with output dir at {self.output_dir}")
+    
+    def strategize_next_step(self, current_graph_state: Dict) -> Dict:
+        """
+        Analyzes the current state of findings and decides the next course of action.
+        This can be to finalize the report or to suggest further analytical iterations.
+
+        Args:
+            current_graph_state (Dict): The current state from the LangGraph execution.
+                                        Expected to contain fields like 'reasoning_interpretation',
+                                        'iteration_count', 'max_iterations', etc.
+
+        Returns:
+            Dict: A dictionary containing "action_decision" (e.g., "finalize", "rerun_vision")
+                  and "decision_params" (parameters for the chosen action).
+        """
+        logger.info(f"ActionAgent strategizing next step. Iteration: {current_graph_state.get('iteration_count')}")
+
+        action_decision = "finalize"  # Default to finalizing
+        decision_params = {}
+        
+        iteration_count = current_graph_state.get("iteration_count", 0)
+        max_iterations = current_graph_state.get("max_iterations", 3)
+
+        reasoning_interpretation = current_graph_state.get("reasoning_interpretation", {})
+        reasoning_confidence = reasoning_interpretation.get("confidence", 0.0)
+        current_pattern_type = reasoning_interpretation.get("pattern_type", visual_findings.get("pattern_type", "")) # Get pattern from reasoning or visual
+
+        # Access visual_findings from the state for pattern_type fallback
+        visual_findings = current_graph_state.get("raw_vision_data", {}).get("combined_analysis", {})
+        if not current_pattern_type:
+            # If reasoning_interpretation didn't yield a pattern_type, try to get it from the primary visual feature.
+            # This assumes `raw_vision_data` structure as synthesized by _reasoning_node or directly from VisionAgent.
+            # The _reasoning_node synthesizes visual_findings which has pattern_type, so that should be preferred.
+            # However, direct access to raw_vision_data is also possible.
+            # Let's assume reasoning_interpretation is the primary source for pattern_type after reasoning node.
+            # If reasoning_interpretation exists but pattern_type is empty, it implies no clear pattern from reasoning.
+            # If reasoning_interpretation itself is empty/None, then visual_findings might be the only source.
+            reasoned_pattern = reasoning_interpretation.get("pattern_type") # More direct from reasoning
+            if reasoned_pattern:
+                current_pattern_type = reasoned_pattern
+            else:
+                # Fallback to visual_findings if reasoning_interpretation is missing or has no pattern_type
+                # This needs to be consistent with how visual_findings is structured in the state by _vision_analysis_node
+                # or synthesized by _reasoning_node before being passed to reasoning_agent.
+                # Let's assume the `synthesized_visual_findings` by _reasoning_node is what we should rely on
+                # if we were to look at `visual_findings` directly in this state.
+                # For simplicity, if reasoning_interpretation is the main input here, its pattern_type is key.
+                pass # current_pattern_type would remain empty if not in reasoning_interpretation
+
+        # Example Logic:
+        # 1. If confidence is high, finalize.
+        # 2. If confidence is very low, and iterations left, try to get broader context or different patterns.
+        # 3. If confidence is moderate, and iterations left, try to refine vision or reasoning.
+
+        if reasoning_confidence >= 0.85:
+            action_decision = "finalize"
+            logger.info("Strategy: High confidence. Finalizing.")
+        elif iteration_count < max_iterations:
+            # Memory Agent Consultation for moderate/low confidence
+            consulted_memory = False
+            if self.memory_agent and current_pattern_type and 0.5 <= reasoning_confidence < 0.85:
+                try:
+                    logger.info(f"Moderate confidence ({reasoning_confidence}) for pattern '{current_pattern_type}'. Consulting MemoryAgent.")
+                    # Note: Region finding logic is basic here. Could be improved.
+                    # For now, not using region to keep it simple.
+                    similar_sites = self.memory_agent.find_similar_sites(pattern_type=current_pattern_type, max_results=3)
+                    if similar_sites:
+                        # Simple heuristic: if confident similar sites exist, it might bolster the current finding.
+                        # Or, it might suggest the current analysis is on the right track.
+                        # For now, just log and potentially lean towards finalize if strong matches.
+                        logger.info(f"MemoryAgent found {len(similar_sites)} similar sites for pattern '{current_pattern_type}'. First one: {similar_sites[0].get('data',{}).get('finding_id', 'N/A')}")
+                        # Example: if similar_sites[0].get("data",{}).get("confidence", 0) > 0.8:
+                        #     action_decision = "finalize" # Bolstered by similar findings
+                        #     logger.info("Decision to finalize bolstered by similar high-confidence sites in memory.")
+                        #     consulted_memory = True # Mark that memory influenced decision
+                    else:
+                        logger.info(f"MemoryAgent found no similar sites for pattern '{current_pattern_type}'.")
+                    consulted_memory = True # Mark that memory was consulted, even if no decision change yet
+                except Exception as e:
+                    logger.error(f"Error consulting MemoryAgent in strategize_next_step: {e}")
+            
+            # If memory consultation didn't lead to finalization, proceed with other rules.
+            if action_decision == "finalize" and consulted_memory:
+                pass # Decision already made based on memory
+            elif reasoning_confidence < 0.5 and reasoning_confidence > 0.0: # Very low but not zero
+                action_decision = "rerun_patterns"
+                decision_params = {
+                    "radius_km": current_graph_state.get("radius_km", 50.0) * 1.5, # Expand search radius
+                    "pattern_types": None # Search for all pattern types
+                }
+                logger.info(f"Strategy: Very low confidence ({reasoning_confidence}). Expanding pattern search.")
+            elif reasoning_confidence < 0.75 and reasoning_confidence > 0.0: # Moderate/low
+                # Alternate between rerunning vision and clarifying reasoning on subsequent iterations
+                if iteration_count % 2 == 0: # Even iterations (0, 2)
+                    action_decision = "rerun_vision"
+                    # Potentially request different parameters for vision, e.g., specific bands, different dates if supported
+                    decision_params = {"use_satellite": True, "use_lidar": True, "enhance_contrast": True} # Example param
+                    logger.info(f"Strategy: Moderate confidence ({reasoning_confidence}). Rerunning vision.")
+                else: # Odd iterations (1)
+                    action_decision = "clarify_reasoning" 
+                    # This would imply reasoning_agent.interpret_findings might take some params to guide its LLM,
+                    # or we are just re-running it hoping for a different stochastic outcome from the LLM.
+                    # For now, no specific params, just re-triggering it.
+                    decision_params = {} 
+                    logger.info(f"Strategy: Moderate confidence ({reasoning_confidence}). Clarifying reasoning.")
+            else: # Confidence is acceptable or no clear strategy for low confidence and iterations left
+                action_decision = "finalize"
+                logger.info(f"Strategy: Confidence ({reasoning_confidence}) acceptable or no specific rerun strategy. Finalizing.")
+        else:
+            logger.info(f"Strategy: Max iterations reached or high confidence. Finalizing. Confidence: {reasoning_confidence}")
+            action_decision = "finalize"
+
+        return {
+            "action_decision": action_decision,
+            "decision_params": decision_params
+        }
     
     def generate_finding_report(self, 
                               lat: float, 
@@ -92,22 +211,43 @@ class ActionAgent:
             )
         }
         
-        # If we have a MetaProtocolCoordinator, notify it about the new finding
-        if self.meta_coordinator:
+        # Store the finding using the MemoryAgent directly
+        if self.memory_agent:
+            try:
+                success = self.memory_agent.store_site_data(
+                    lat=report['location']['lat'], 
+                    lon=report['location']['lon'], 
+                    data=report # Storing the whole report as the site data
+                )
+                if success:
+                    logger.info(f"Successfully stored finding {finding_id} in MemoryAgent.")
+                else:
+                    logger.error(f"Failed to store finding {finding_id} in MemoryAgent.")
+            except Exception as e:
+                logger.error(f"Error directly storing finding {finding_id} in MemoryAgent: {str(e)}")
+        elif self.meta_coordinator: # Fallback to old method if direct memory_agent is not available
+            logger.warning("MemoryAgent not directly available to ActionAgent, attempting to use MetaProtocolCoordinator.")
             try:
                 # Using Agent-to-Agent protocol to notify other agents about this finding
+                # This part needs to align with how MemoryAgent handles A2A messages or have a specific handler.
+                # For store_site_data, it expects lat, lon, data directly, not in a nested message.
+                # This fallback might not work as intended without MemoryAgent A2A handling for "store_site_data".
                 self.meta_coordinator.send_message(
-                    protocol="a2a",
+                    protocol="acp", # ACP is for agent function calls
                     source="action_agent",
-                    target="memory_agent",
+                    target="memory_agent", # Target agent ID
                     message={
-                        "action": "store_finding",
-                        "data": report
+                        "action": "store_site_data", # Method name on MemoryAgent
+                        "params": { # Parameters for the method
+                            "lat": report['location']['lat'], 
+                            "lon": report['location']['lon'], 
+                            "data": report
+                        }
                     }
                 )
-                logger.info(f"Notified memory agent about new finding {finding_id} via MetaProtocol")
+                logger.info(f"Attempted to notify memory agent about new finding {finding_id} via MetaProtocol.")
             except Exception as e:
-                logger.error(f"Error notifying memory agent: {str(e)}")
+                logger.error(f"Error notifying memory agent via MetaProtocol: {str(e)}")
         
         # Save the report to a file
         self._save_report(report)

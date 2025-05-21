@@ -34,6 +34,7 @@ Our Neuro-Inspired System (NIS) Protocol deploys a sophisticated multi-agent eco
 - **Frontend**: Next.js with shadcn/ui
 - **AI Models**: GPT-4.1, YOLOv8/WALDO
 - **Mapping**: Leaflet Interactive Maps
+- **Workflow Orchestration**: LangGraph
 
 ## 🌈 Key Differentiators
 
@@ -129,14 +130,14 @@ This project leverages the NIS (Neuro-Inspired System) Protocol to discover pote
 
 ## Architecture
 
-The NIS Protocol is a biologically inspired multi-agent architecture that coordinates various AI agents:
+The NIS Protocol is a biologically inspired multi-agent architecture. The execution of its core analysis pipeline is orchestrated using **LangGraph**, defining a stateful graph where each node represents a processing step performed by one or more agents. Agents include:
 
-- **Vision Agent**: Processes raw data (satellite images, LIDAR scans) to detect anomalies or structures
-- **Memory Agent**: Stores and retrieves contextual information (previous findings, historical texts)
-- **Reasoning Agent**: Analyzes inputs using GPT-4.1 to determine the likelihood of archaeological sites
-- **Action Agent**: Produces final outputs (compiled reports, map markers, recommendations)
+- **Vision Agent**: Processes raw data (satellite images, LIDAR scans). Its main analysis path uses image patching with mock feature detection, but it also has a separate capability to analyze specific images using GPT-4 Vision.
+- **Memory Agent**: Stores and retrieves contextual information (previous findings, historical texts), accessible by other agents, particularly the ActionAgent.
+- **Reasoning Agent**: Analyzes inputs using GPT-4 Turbo to determine the likelihood of archaeological sites. Can leverage web search (via MetaProtocolCoordinator) for additional context.
+- **Action Agent**: Produces final outputs (compiled reports, map markers, recommendations) and can guide iterative refinement of the analysis through LangGraph's conditional logic.
 
-These agents communicate via the MetaProtocolCoordinator, which implements three protocols:
+These agents can still communicate via the MetaProtocolCoordinator for specific out-of-band tasks or tool usage, which implements three protocols:
 - **MCP** (Managed Compute Protocol): For orchestrating external API calls
 - **ACP** (Agent Communication Protocol): For structured agent function calls
 - **A2A** (Agent-to-Agent Protocol): For direct peer-to-peer agent communication
@@ -252,6 +253,7 @@ npm run dev
 The project is built with:
 - **Backend**: FastAPI for the API server
 - **Frontend**: Next.js with shadcn/ui components
+- **Workflow Orchestration**: LangGraph for the main analysis pipeline
 - **Map Integration**: Leaflet for interactive maps
 - **AI Models**: GPT-4.1 for reasoning, YOLOv8/WALDO for computer vision
 

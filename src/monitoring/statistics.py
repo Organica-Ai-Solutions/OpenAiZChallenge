@@ -42,7 +42,7 @@ class StatisticsCollector:
             topics = ["nis.analysis.events", "nis.batch.events"]
             
             for topic in topics:
-                await self.kafka.consume(
+                self.kafka.consume(
                     topic=topic,
                     callback=self._process_event,
                     group_id="nis-statistics-collector"
@@ -121,21 +121,21 @@ class StatisticsCollector:
                     json.dump(snapshot, f, indent=2, default=str)
                 
                 # Update Redis with latest statistics
-                await self.redis.set(
+                self.redis.cache_set(
                     "latest_statistics",
                     snapshot,
-                    expire=3600  # 1 hour expiration
+                    ttl=3600  # 1 hour expiration
                 )
                 
                 # Publish statistics update event
-                await self.kafka.produce(
+                self.kafka.produce(
                     topic="nis.statistics.events",
-                    key="snapshot",
-                    value={
+                    message={
                         "type": "statistics_update",
                         "timestamp": datetime.now().isoformat(),
                         "snapshot": snapshot
-                    }
+                    },
+                    key="snapshot"
                 )
                 
                 # Sleep for 5 minutes
@@ -230,7 +230,7 @@ class StatisticsCollector:
     async def get_latest_statistics(self) -> Dict:
         """Get the latest statistics snapshot."""
         try:
-            stats = await self.redis.get("latest_statistics")
+            stats = self.redis.cache_get("latest_statistics")
             return stats if stats else self._generate_snapshot()
         except Exception as e:
             logger.error(f"Error getting latest statistics: {str(e)}")

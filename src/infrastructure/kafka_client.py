@@ -17,7 +17,7 @@ class KafkaClient:
     """Kafka client for the NIS Protocol."""
     
     def __init__(self, 
-                bootstrap_servers: str = "localhost:9092", 
+                bootstrap_servers: str = "127.0.0.1:9092",
                 client_id: str = "nis-protocol"):
         """Initialize the Kafka client.
         
@@ -217,7 +217,7 @@ def get_kafka_client() -> KafkaClient:
     """
     global _kafka_client
     if _kafka_client is None:
-        bootstrap_servers = os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+        bootstrap_servers = os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "127.0.0.1:9092")
         client_id = os.environ.get("KAFKA_CLIENT_ID", "nis-protocol")
         
         _kafka_client = KafkaClient(bootstrap_servers=bootstrap_servers, client_id=client_id)

@@ -103,9 +103,8 @@ class IndigenousMapProcessor:
         """Load the feature extraction model."""
         # Use a pre-trained vision model
         return pipeline(
-            "image-classification",
-            model="microsoft/resnet-50",
-            feature_extraction=True
+            "feature-extraction",
+            model="microsoft/resnet-50"
         )
     
     def _load_reference_features(self) -> Dict:
