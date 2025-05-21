@@ -1,0 +1,81 @@
+INFO:     Will watch for changes in these directories: ['/Users/diegofuego/Desktop/openai-to-z-nis']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [98769] using StatReload
+Starting NIS Protocol API server on 0.0.0.0:8000
+2025-05-21 14:30:46,185 - src.meta.coordinator - INFO - MetaProtocolCoordinator initialized
+2025-05-21 14:30:47,421 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-21 14:30:47,426 - src.agents.vision_agent - INFO - Vision Agent initialized with GPTIntegration (gpt-4-turbo)
+2025-05-21 14:30:47,427 - src.agents.reasoning_agent - INFO - Loaded reasoning prompt from src/prompts/reasoning_prompt.txt
+2025-05-21 14:30:48,266 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-21 14:30:48,266 - src.agents.reasoning_agent - INFO - Initialized GPT integration with model: gpt-4-turbo
+2025-05-21 14:30:48,266 - src.agents.reasoning_agent - INFO - Reasoning Agent initialized
+2025-05-21 14:30:48,784 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-21 14:30:48,786 - src.agents.memory_agent - INFO - Initialized GPT integration for Memory Agent with model: gpt-4o
+2025-05-21 14:30:48,964 - src.infrastructure.redis_client - INFO - Connected to Redis at localhost:6379
+2025-05-21 14:30:48,964 - src.agents.memory_agent - INFO - Initialized Redis for Memory Agent caching
+2025-05-21 14:30:49,179 - src.infrastructure.kafka_client - INFO - Kafka producer initialized for 127.0.0.1:9092
+2025-05-21 14:30:49,179 - src.agents.memory_agent - INFO - Initialized Kafka for Memory Agent events
+2025-05-21 14:30:49,179 - src.agents.memory_agent - INFO - Memory Agent initialized with storage at outputs/memory
+2025-05-21 14:30:49,179 - src.agents.action_agent - INFO - Action Agent initialized with output dir at outputs/findings
+/Users/diegofuego/Desktop/openai-to-z-nis/venv/lib/python3.10/site-packages/huggingface_hub/file_download.py:943: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Could not find image processor class in the image processor config or the model config. Loading based on pattern matching with the model's feature extractor configuration. Please open a PR/issue to update `preprocessor_config.json` to use `image_processor_type` instead of `feature_extractor_type`. This warning will be removed in v4.40.
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-multilingual-uncased and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+/Users/diegofuego/Desktop/openai-to-z-nis/venv/lib/python3.10/site-packages/transformers/pipelines/text_classification.py:104: UserWarning: `return_all_scores` is now deprecated,  if want a similar functionality use `top_k=None` instead of `return_all_scores=True` or `top_k=1` instead of `return_all_scores=False`.
+  warnings.warn(
+2025-05-21 14:30:53,019 - src.data_processing.indigenous_maps - WARNING - Could not load reference features: [Errno 2] No such file or directory: 'data/indigenous_maps/reference_features.json'
+2025-05-21 14:30:53,249 - src.data_processing.indigenous_maps - WARNING - Could not load known locations: data/indigenous_maps/known_locations.geojson: No such file or directory
+/Users/diegofuego/Desktop/openai-to-z-nis/venv/lib/python3.10/site-packages/huggingface_hub/file_download.py:943: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Some weights of the model checkpoint at dslim/bert-base-NER were not used when initializing BertForTokenClassification: ['bert.pooler.dense.bias', 'bert.pooler.dense.weight']
+- This IS expected if you are initializing BertForTokenClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForTokenClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+2025-05-21 14:30:56,777 - src.data_processing.historical_texts - WARNING - Could not load historical places database: [Errno 2] No such file or directory: 'data/historical_texts/historical_places.csv'
+2025-05-21 14:30:56,782 - src.meta.coordinator - INFO - Registered protocol adapter: mcp
+2025-05-21 14:30:56,782 - src.meta.coordinator - INFO - Registered protocol adapter: acp
+2025-05-21 14:30:56,782 - src.meta.coordinator - INFO - Registered protocol adapter: a2a
+2025-05-21 14:30:56,782 - src.meta.coordinator - INFO - Registered agent: vision_agent
+2025-05-21 14:30:56,782 - src.meta.coordinator - INFO - Registered agent: reasoning_agent
+2025-05-21 14:30:56,782 - src.meta.coordinator - INFO - Registered agent: memory_agent
+2025-05-21 14:30:56,782 - src.meta.coordinator - INFO - Registered agent: action_agent
+2025-05-21 14:30:56,782 - api.agent_integrator - INFO - NIS Protocol agents and coordinator initialized successfully
+INFO:     Started server process [98772]
+INFO:     Waiting for application startup.
+2025-05-21 14:30:57,530 - src.infrastructure.kafka_client - INFO - Started consumer for topic nis.analysis.events
+2025-05-21 14:30:57,531 - src.infrastructure.kafka_client - INFO - Started consumer for topic nis.batch.events
+2025-05-21 14:30:57,848 - nis_api - INFO - API server starting up
+2025-05-21 14:30:57,849 - nis_api - INFO - Redis client initialized
+2025-05-21 14:30:57,849 - nis_api - INFO - Kafka client initialized
+2025-05-21 14:30:57,849 - src.infrastructure.kafka_client - WARNING - Consumer for topic nis.analysis.events is already running
+2025-05-21 14:30:57,849 - src.infrastructure.kafka_client - WARNING - Consumer for topic nis.batch.events is already running
+2025-05-21 14:30:57,849 - src.infrastructure.kafka_client - INFO - Started consumer for topic nis.statistics.events
+INFO:     Application startup complete.
+2025-05-21 14:30:59,446 - nis_api - INFO - nis.statistics.events event: {'type': 'statistics_update', 'timestamp': '2025-05-21T14:30:57.848065', 'snapshot': {'timestamp': '2025-05-21T14:30:57.531455', 'hourly_statistics': {'total_analyses': 0, 'average_processing_time': 0, 'success_rate': 0, 'data_source_distribution': {}}, 'daily_statistics': {'total_analyses': 0, 'average_processing_time': 0, 'success_rate': 0, 'data_source_distribution': {}}, 'batch_statistics': {}, 'total_statistics': {'total_analyses': 0, 'total_batches': 0, 'data_source_usage': {}, 'error_distribution': {}}}}
+2025-05-21 14:30:59,577 - src.infrastructure.kafka_client - ERROR - Consumer error: KafkaError{code=UNKNOWN_TOPIC_OR_PART,val=3,str="Subscribed topic not available: nis.batch.events: Broker: Unknown topic or partition"}
+2025-05-21 14:30:59,577 - src.infrastructure.kafka_client - ERROR - Consumer error: KafkaError{code=UNKNOWN_TOPIC_OR_PART,val=3,str="Subscribed topic not available: nis.analysis.events: Broker: Unknown topic or partition"}
+2025-05-21 14:30:59,580 - src.infrastructure.kafka_client - INFO - Consumer closed for topic nis.analysis.events
+2025-05-21 14:30:59,581 - src.infrastructure.kafka_client - INFO - Consumer closed for topic nis.batch.events
+2025-05-21 14:35:58,320 - nis_api - INFO - nis.statistics.events event: {'type': 'statistics_update', 'timestamp': '2025-05-21T14:35:58.286808', 'snapshot': {'timestamp': '2025-05-21T14:35:57.844245', 'hourly_statistics': {'total_analyses': 0, 'average_processing_time': 0, 'success_rate': 0, 'data_source_distribution': {}}, 'daily_statistics': {'total_analyses': 0, 'average_processing_time': 0, 'success_rate': 0, 'data_source_distribution': {}}, 'batch_statistics': {}, 'total_statistics': {'total_analyses': 0, 'total_batches': 0, 'data_source_usage': {}, 'error_distribution': {}}}}
+2025-05-21 14:40:58,646 - nis_api - INFO - nis.statistics.events event: {'type': 'statistics_update', 'timestamp': '2025-05-21T14:40:58.613771', 'snapshot': {'timestamp': '2025-05-21T14:40:58.290371', 'hourly_statistics': {'total_analyses': 0, 'average_processing_time': 0, 'success_rate': 0, 'data_source_distribution': {}}, 'daily_statistics': {'total_analyses': 0, 'average_processing_time': 0, 'success_rate': 0, 'data_source_distribution': {}}, 'batch_statistics': {}, 'total_statistics': {'total_analyses': 0, 'total_batches': 0, 'data_source_usage': {}, 'error_distribution': {}}}}
+2025-05-21 14:45:58,942 - nis_api - INFO - nis.statistics.events event: {'type': 'statistics_update', 'timestamp': '2025-05-21T14:45:58.887568', 'snapshot': {'timestamp': '2025-05-21T14:45:58.619053', 'hourly_statistics': {'total_analyses': 0, 'average_processing_time': 0, 'success_rate': 0, 'data_source_distribution': {}}, 'daily_statistics': {'total_analyses': 0, 'average_processing_time': 0, 'success_rate': 0, 'data_source_distribution': {}}, 'batch_statistics': {}, 'total_statistics': {'total_analyses': 0, 'total_batches': 0, 'data_source_usage': {}, 'error_distribution': {}}}}
+2025-05-21 14:50:59,140 - nis_api - INFO - nis.statistics.events event: {'type': 'statistics_update', 'timestamp': '2025-05-21T14:50:59.110110', 'snapshot': {'timestamp': '2025-05-21T14:50:58.892517', 'hourly_statistics': {'total_analyses': 0, 'average_processing_time': 0, 'success_rate': 0, 'data_source_distribution': {}}, 'daily_statistics': {'total_analyses': 0, 'average_processing_time': 0, 'success_rate': 0, 'data_source_distribution': {}}, 'batch_statistics': {}, 'total_statistics': {'total_analyses': 0, 'total_batches': 0, 'data_source_usage': {}, 'error_distribution': {}}}}
+2025-05-21 14:55:59,436 - nis_api - INFO - nis.statistics.events event: {'type': 'statistics_update', 'timestamp': '2025-05-21T14:55:59.401089', 'snapshot': {'timestamp': '2025-05-21T14:55:59.115324', 'hourly_statistics': {'total_analyses': 0, 'average_processing_time': 0, 'success_rate': 0, 'data_source_distribution': {}}, 'daily_statistics': {'total_analyses': 0, 'average_processing_time': 0, 'success_rate': 0, 'data_source_distribution': {}}, 'batch_statistics': {}, 'total_statistics': {'total_analyses': 0, 'total_batches': 0, 'data_source_usage': {}, 'error_distribution': {}}}}
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2025-05-21 14:57:51,520 - nis_api - INFO - API server shutting down
+2025-05-21 14:57:51,585 - src.infrastructure.redis_client - INFO - Redis connection closed
+2025-05-21 14:57:51,585 - nis_api - INFO - Redis connection closed
+2025-05-21 14:57:56,590 - src.infrastructure.kafka_client - WARNING - Consumer thread for topic nis.statistics.events is still running
+2025-05-21 14:57:56,596 - src.infrastructure.kafka_client - INFO - Kafka client closed
+2025-05-21 14:57:56,597 - nis_api - INFO - Kafka connection closed
+INFO:     Application shutdown complete.
+INFO:     Finished server process [98772]
+%6|1747853876.688|FAIL|rdkafka#consumer-4| [thrd:GroupCoordinator]: GroupCoordinator: 127.0.0.1:9092: Disconnected (after 1617805ms in state UP)
+%6|1747853876.689|FAIL|rdkafka#consumer-4| [thrd:127.0.0.1:9092/bootstrap]: 127.0.0.1:9092/1001: Disconnected (after 1618829ms in state UP)
+%6|1747853876.692|FAIL|rdkafka#consumer-4| [thrd:127.0.0.1:9092/bootstrap]: 127.0.0.1:9092/1001: Disconnected while requesting ApiVersion: might be caused by incorrect security.protocol configuration (connecting to a SSL listener?) or broker version is < 0.10 (see api.version.request) (after 2ms in state APIVERSION_QUERY)
+%6|1747853876.692|FAIL|rdkafka#consumer-4| [thrd:GroupCoordinator]: GroupCoordinator: 127.0.0.1:9092: Disconnected (after 3ms in state APIVERSION_QUERY, 1 identical error(s) suppressed)
+%6|1747853876.906|FAIL|rdkafka#consumer-4| [thrd:127.0.0.1:9092/bootstrap]: 127.0.0.1:9092/1001: Disconnected while requesting ApiVersion: might be caused by incorrect security.protocol configuration (connecting to a SSL listener?) or broker version is < 0.10 (see api.version.request) (after 1ms in state APIVERSION_QUERY, 1 identical error(s) suppressed)
+%6|1747853877.393|FAIL|nis-protocol#producer-1| [thrd:127.0.0.1:9092/bootstrap]: 127.0.0.1:9092/1001: Disconnected while requesting ApiVersion: might be caused by incorrect security.protocol configuration (connecting to a SSL listener?) or broker version is < 0.10 (see api.version.request) (after 6ms in state APIVERSION_QUERY)
+%6|1747853877.688|FAIL|nis-protocol#producer-1| [thrd:127.0.0.1:9092/bootstrap]: 127.0.0.1:9092/1001: Disconnected while requesting ApiVersion: might be caused by incorrect security.protocol configuration (connecting to a SSL listener?) or broker version is < 0.10 (see api.version.request) (after 3ms in state APIVERSION_QUERY, 1 identical error(s) suppressed)
+INFO:     Stopping reloader process [98769]

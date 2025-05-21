@@ -3,10 +3,13 @@
 # Strict mode for better error handling
 set -euo pipefail
 
-# Docker container names
+# Docker container names and ports
 REDIS_CONTAINER_NAME="nis-redis"
+REDIS_PORT=6380  # Changed from 6379
 ZOOKEEPER_CONTAINER_NAME="nis-zookeeper"
+ZOOKEEPER_PORT=2182  # Changed from 2181
 KAFKA_CONTAINER_NAME="nis-kafka"
+KAFKA_PORT=9093  # Changed from 9092
 
 # Enhanced Logging and Error Handling
 SCRIPT_NAME=$(basename "$0")
@@ -377,59 +380,118 @@ docker rm -f "$ZOOKEEPER_CONTAINER_NAME" > /dev/null 2>&1 || true
 log "Waiting a moment for ports to be released..."
 sleep 3 # Wait for 3 seconds
 
-# Start Redis
+# Force remove and recreate the docker network
+DOCKER_NETWORK="nis-network"
+log "Attempting to remove Docker network '$DOCKER_NETWORK' if it exists..."
+docker network rm "$DOCKER_NETWORK" > /dev/null 2>&1 || true # Best effort removal
+
+log "Creating Docker network '$DOCKER_NETWORK'..."
+if ! docker network create "$DOCKER_NETWORK"; then
+    error_log "CRITICAL: Failed to create Docker network '$DOCKER_NETWORK'. Startup cannot continue."
+    # error_log function (defined earlier in the script) will exit
+fi
+log "Docker network '$DOCKER_NETWORK' created successfully."
+
+# Start Redis with updated port configuration
 log "Starting Redis container '$REDIS_CONTAINER_NAME'..."
-if ! docker run -d --name "$REDIS_CONTAINER_NAME" -p 127.0.0.1:6379:6379 redis:alpine; then
+if ! docker run -d --name "$REDIS_CONTAINER_NAME" --network host \
+    -e REDIS_ARGS="--maxmemory 256mb --maxmemory-policy allkeys-lru" \
+    redis:alpine redis-server --appendonly yes; then
     log "Failed to start Redis container '$REDIS_CONTAINER_NAME'." "ERROR"
+    exit 1
 else
     log "Waiting for Redis ($REDIS_CONTAINER_NAME) to initialize..."
-    sleep 5 # Give Redis a moment to start
+    sleep 5
     if docker ps -q -f name=^/${REDIS_CONTAINER_NAME}$ > /dev/null 2>&1; then
         log "Redis container '$REDIS_CONTAINER_NAME' started successfully."
     else
         log "Redis container '$REDIS_CONTAINER_NAME' failed to become ready." "ERROR"
+        exit 1
     fi
 fi
 
-# Start Zookeeper
+# Start Zookeeper with enhanced configuration
 log "Starting Zookeeper container '$ZOOKEEPER_CONTAINER_NAME'..."
-if ! docker run -d --name "$ZOOKEEPER_CONTAINER_NAME" -p 127.0.0.1:2181:2181 \
+if ! docker run -d --name "$ZOOKEEPER_CONTAINER_NAME" --network host \
+    -e ZOOKEEPER_SERVER_ID=1 \
     -e ZOOKEEPER_CLIENT_PORT=2181 \
     -e ZOOKEEPER_TICK_TIME=2000 \
+    -e ZOOKEEPER_INIT_LIMIT=5 \
+    -e ZOOKEEPER_SYNC_LIMIT=2 \
+    -e ZOOKEEPER_SERVERS="server.1=localhost:2888:3888" \
+    -e ZOOKEEPER_MAX_CLIENT_CNXNS=60 \
+    -e ZOOKEEPER_AUTOPURGE_INTERVAL=1 \
+    -e ZOOKEEPER_AUTOPURGE_SNAP_RETAIN_COUNT=3 \
+    -e ZOOKEEPER_STANDALONE_ENABLED=true \
+    -e ZOOKEEPER_ADMIN_SERVER_PORT=8080 \
     confluentinc/cp-zookeeper:latest; then
     log "Failed to start Zookeeper container '$ZOOKEEPER_CONTAINER_NAME'." "ERROR"
+    exit 1
 else
     log "Waiting for Zookeeper ($ZOOKEEPER_CONTAINER_NAME) to initialize..."
-    sleep 20 # Give Zookeeper more time to initialize
+    sleep 45 # Increased wait time for Zookeeper initialization
     if docker ps -q -f name=^/${ZOOKEEPER_CONTAINER_NAME}$ > /dev/null 2>&1; then
         log "Zookeeper container '$ZOOKEEPER_CONTAINER_NAME' started successfully."
     else
         log "Zookeeper container '$ZOOKEEPER_CONTAINER_NAME' failed to become ready." "ERROR"
+        exit 1
     fi
 fi
 
-# Start Kafka
+# Start Kafka with more robust configuration
 log "Starting Kafka container '$KAFKA_CONTAINER_NAME'..."
-if ! docker run -d --name "$KAFKA_CONTAINER_NAME" \
-    -p 127.0.0.1:9092:9092 \
-    -e KAFKA_ZOOKEEPER_CONNECT=${ZOOKEEPER_CONTAINER_NAME}:2181 \
-    -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092 \
+if ! docker run -d --name "$KAFKA_CONTAINER_NAME" --network host \
+    -e KAFKA_BROKER_ID=1 \
+    -e KAFKA_ZOOKEEPER_CONNECT=localhost:2181 \
+    -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 \
     -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 \
+    -e KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT \
+    -e KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT \
     -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
     -e KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0 \
-    -e KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT \
     -e KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS=6000 \
-    -e KAFKA_CREATE_TOPICS="nis.analysis.events:1:1,nis.batch.events:1:1,nis.statistics.events:1:1" \
+    -e KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS=6000 \
+    -e KAFKA_AUTO_CREATE_TOPICS_ENABLE=true \
+    -e KAFKA_DELETE_TOPIC_ENABLE=true \
+    -e KAFKA_NUM_PARTITIONS=1 \
+    -e KAFKA_DEFAULT_REPLICATION_FACTOR=1 \
     confluentinc/cp-kafka:latest; then
     log "Failed to start Kafka container '$KAFKA_CONTAINER_NAME'." "ERROR"
+    exit 1
 else
     log "Waiting for Kafka ($KAFKA_CONTAINER_NAME) to initialize..."
-    sleep 60 # Give Kafka more time to initialize fully
-    if docker ps -q -f name=^/${KAFKA_CONTAINER_NAME}$ > /dev/null 2>&1; then
-        log "Kafka container '$KAFKA_CONTAINER_NAME' started successfully."
-    else
-        log "Kafka container '$KAFKA_CONTAINER_NAME' failed to become ready." "ERROR"
-    fi
+    sleep 60 # Increased wait time for Kafka initialization
+    
+    # Manually create topics
+    log "Manually creating Kafka topics..."
+    TOPICS=("nis.analysis.events" "nis.batch.events" "nis.statistics.events")
+    
+    for TOPIC in "${TOPICS[@]}"; do
+        log "Creating topic: $TOPIC"
+        if docker exec "$KAFKA_CONTAINER_NAME" kafka-topics --create \
+            --bootstrap-server localhost:9092 \
+            --replication-factor 1 \
+            --partitions 1 \
+            --topic "$TOPIC"; then
+            log "Successfully created topic: $TOPIC"
+        else
+            log "Failed to create topic: $TOPIC" "ERROR"
+            exit 1
+        fi
+    done
+    
+    # Verify topics
+    log "Verifying created topics..."
+    LISTED_TOPICS=$(docker exec "$KAFKA_CONTAINER_NAME" kafka-topics --list --bootstrap-server localhost:9092)
+    
+    for TOPIC in "${TOPICS[@]}"; do
+        if ! echo "$LISTED_TOPICS" | grep -q -w "$TOPIC"; then
+            log "Topic $TOPIC not found in Kafka" "ERROR"
+            exit 1
+        fi
+    done
+    
+    log "All required Kafka topics successfully created and verified." "SUCCESS"
 fi
 # --- End Docker Service Management ---
 set +x # Disable command tracing

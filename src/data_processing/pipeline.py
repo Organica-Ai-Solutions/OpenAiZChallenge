@@ -574,12 +574,12 @@ async def process_research_location(
 
     if area_height_deg <= tile_size_deg_lat and area_width_deg <= tile_size_deg_lon:
         logger.info(f"Processing {site_id} as a single tile.")
-    data_point = await pipeline.collect_data(
-        site_id, 
+        data_point = await pipeline.collect_data(
+            site_id, 
             area_definition, # Pass the full area_definition as the bounds for this single tile
-        data_sources
-    )
-    return pipeline.analyze_data(data_point) 
+            data_sources
+        )
+        return pipeline.analyze_data(data_point) 
     else: # Correctly paired with the 'if'
         # Area is larger than a single tile, initiate tiled processing
         logger.info(f"Processing {site_id} using tiling for large area.")
