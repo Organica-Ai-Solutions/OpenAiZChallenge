@@ -1,0 +1,1797 @@
+INFO:     Will watch for changes in these directories: ['/Users/diegofuego/Desktop/openai-to-z-nis']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [86416] using StatReload
+Starting NIS Protocol API server on 0.0.0.0:8000
+2025-05-20 06:17:19,642 - src.meta.coordinator - INFO - MetaProtocolCoordinator initialized
+2025-05-20 06:17:19,643 - src.meta.gpt_integration - ERROR - Failed to initialize GPT integration: Client.__init__() got an unexpected keyword argument 'proxies'
+2025-05-20 06:17:19,643 - src.agents.vision_agent - WARNING - Failed to initialize GPT Vision: Client.__init__() got an unexpected keyword argument 'proxies'. Falling back to mock responses.
+2025-05-20 06:17:19,644 - src.agents.reasoning_agent - INFO - Loaded reasoning prompt from src/prompts/reasoning_prompt.txt
+2025-05-20 06:17:19,644 - src.meta.gpt_integration - ERROR - Failed to initialize GPT integration: Client.__init__() got an unexpected keyword argument 'proxies'
+2025-05-20 06:17:19,644 - src.agents.reasoning_agent - WARNING - Failed to initialize GPT integration: Client.__init__() got an unexpected keyword argument 'proxies'. Falling back to mock responses.
+2025-05-20 06:17:19,644 - src.agents.reasoning_agent - INFO - Reasoning Agent initialized
+2025-05-20 06:17:19,644 - src.meta.gpt_integration - ERROR - Failed to initialize GPT integration: Client.__init__() got an unexpected keyword argument 'proxies'
+2025-05-20 06:17:19,644 - src.agents.memory_agent - WARNING - Failed to initialize GPT integration: Client.__init__() got an unexpected keyword argument 'proxies'. Using basic memory functions.
+2025-05-20 06:17:19,963 - src.infrastructure.redis_client - INFO - Connected to Redis at localhost:6379
+2025-05-20 06:17:19,965 - src.agents.memory_agent - INFO - Initialized Redis for Memory Agent caching
+2025-05-20 06:17:20,029 - src.infrastructure.kafka_client - INFO - Kafka producer initialized for localhost:9092
+2025-05-20 06:17:20,029 - src.agents.memory_agent - INFO - Initialized Kafka for Memory Agent events
+2025-05-20 06:17:20,029 - src.agents.memory_agent - INFO - Memory Agent initialized with storage at outputs/memory
+2025-05-20 06:17:20,029 - src.agents.action_agent - INFO - Action Agent initialized with output dir at outputs/findings
+2025-05-20 06:17:20,029 - src.meta.coordinator - INFO - Registered protocol adapter: mcp
+2025-05-20 06:17:20,029 - src.meta.coordinator - INFO - Registered protocol adapter: acp
+2025-05-20 06:17:20,029 - src.meta.coordinator - INFO - Registered protocol adapter: a2a
+2025-05-20 06:17:20,029 - src.meta.coordinator - INFO - Registered agent: vision_agent
+2025-05-20 06:17:20,029 - src.meta.coordinator - INFO - Registered agent: reasoning_agent
+2025-05-20 06:17:20,029 - src.meta.coordinator - INFO - Registered agent: memory_agent
+2025-05-20 06:17:20,029 - src.meta.coordinator - INFO - Registered agent: action_agent
+2025-05-20 06:17:20,029 - api.agent_integrator - INFO - NIS Protocol agents and coordinator initialized successfully
+INFO:     Started server process [86419]
+INFO:     Waiting for application startup.
+2025-05-20 06:18:05,134 - src.infrastructure.kafka_client - INFO - Started consumer for topic nis.analysis.events
+2025-05-20 06:18:05,135 - src.monitoring.statistics - ERROR - Error consuming events: object NoneType can't be used in 'await' expression
+2025-05-20 06:18:05,136 - src.monitoring.statistics - ERROR - Error in periodic snapshot: 'RedisClient' object has no attribute 'set'
+2025-05-20 06:18:05,136 - nis_api - INFO - API server starting up
+2025-05-20 06:18:05,136 - nis_api - INFO - Redis client initialized
+2025-05-20 06:18:05,136 - nis_api - INFO - Kafka client initialized
+2025-05-20 06:18:05,136 - src.infrastructure.kafka_client - WARNING - Consumer for topic nis.analysis.events is already running
+2025-05-20 06:18:05,136 - src.infrastructure.kafka_client - INFO - Started consumer for topic nis.batch.events
+2025-05-20 06:18:05,136 - src.infrastructure.kafka_client - INFO - Started consumer for topic nis.statistics.events
+INFO:     Application startup complete.
+2025-05-20 06:18:06,765 - src.infrastructure.kafka_client - ERROR - Consumer error: KafkaError{code=UNKNOWN_TOPIC_OR_PART,val=3,str="Subscribed topic not available: nis.statistics.events: Broker: Unknown topic or partition"}
+2025-05-20 06:18:06,765 - src.infrastructure.kafka_client - ERROR - Consumer error: KafkaError{code=UNKNOWN_TOPIC_OR_PART,val=3,str="Subscribed topic not available: nis.analysis.events: Broker: Unknown topic or partition"}
+2025-05-20 06:18:06,766 - src.infrastructure.kafka_client - INFO - Consumer closed for topic nis.analysis.events
+2025-05-20 06:18:06,766 - src.infrastructure.kafka_client - INFO - Consumer closed for topic nis.statistics.events
+2025-05-20 06:18:07,131 - src.infrastructure.kafka_client - ERROR - Consumer error: KafkaError{code=UNKNOWN_TOPIC_OR_PART,val=3,str="Subscribed topic not available: nis.batch.events: Broker: Unknown topic or partition"}
+2025-05-20 06:18:07,132 - src.infrastructure.kafka_client - INFO - Consumer closed for topic nis.batch.events
+2025-05-20 06:19:05,141 - src.monitoring.statistics - ERROR - Error in periodic snapshot: 'RedisClient' object has no attribute 'set'
+2025-05-20 06:20:05,149 - src.monitoring.statistics - ERROR - Error in periodic snapshot: 'RedisClient' object has no attribute 'set'
+2025-05-20 06:21:05,153 - src.monitoring.statistics - ERROR - Error in periodic snapshot: 'RedisClient' object has no attribute 'set'
+2025-05-20 06:22:05,156 - src.monitoring.statistics - ERROR - Error in periodic snapshot: 'RedisClient' object has no attribute 'set'
+2025-05-20 06:23:05,160 - src.monitoring.statistics - ERROR - Error in periodic snapshot: 'RedisClient' object has no attribute 'set'
+2025-05-20 06:24:05,179 - src.monitoring.statistics - ERROR - Error in periodic snapshot: 'RedisClient' object has no attribute 'set'
+2025-05-20 06:25:05,185 - src.monitoring.statistics - ERROR - Error in periodic snapshot: 'RedisClient' object has no attribute 'set'
+2025-05-20 06:26:05,188 - src.monitoring.statistics - ERROR - Error in periodic snapshot: 'RedisClient' object has no attribute 'set'
+2025-05-20 06:27:05,192 - src.monitoring.statistics - ERROR - Error in periodic snapshot: 'RedisClient' object has no attribute 'set'
+2025-05-20 06:28:05,197 - src.monitoring.statistics - ERROR - Error in periodic snapshot: 'RedisClient' object has no attribute 'set'
+2025-05-20 06:29:05,205 - src.monitoring.statistics - ERROR - Error in periodic snapshot: 'RedisClient' object has no attribute 'set'
+2025-05-20 06:30:05,209 - src.monitoring.statistics - ERROR - Error in periodic snapshot: 'RedisClient' object has no attribute 'set'
+2025-05-20 06:31:05,218 - src.monitoring.statistics - ERROR - Error in periodic snapshot: 'RedisClient' object has no attribute 'set'
+2025-05-20 06:32:05,226 - src.monitoring.statistics - ERROR - Error in periodic snapshot: 'RedisClient' object has no attribute 'set'
+2025-05-20 06:33:05,231 - src.monitoring.statistics - ERROR - Error in periodic snapshot: 'RedisClient' object has no attribute 'set'
+2025-05-20 06:34:05,343 - src.monitoring.statistics - ERROR - Error in periodic snapshot: 'RedisClient' object has no attribute 'set'
+    ^^^^^^^^[0m
+ [2m10[0m |   title: "Archaeological Site Detection",
+ [2m11[0m |   description: "Advanced analysis tools for archaeological site detection",
+ [2m12[0m | }
+    `----
+
+Import trace for requested module:
+./app/layout.tsx
+ ⨯ ./app/layout.tsx
+Error: 
+  [31mx[0m You are attempting to export "metadata" from a component marked with "use client", which is disallowed. Either remove the export, or the "use client" directive. Read more: https://nextjs.org/
+  [31m|[0m docs/getting-started/react-essentials#the-use-client-directive
+  [31m|[0m 
+  [31m|[0m 
+    ,-[[36;1;4m/Users/diegofuego/Desktop/openai-to-z-nis/frontend/app/layout.tsx[0m:6:1]
+ [2m 6[0m | 
+ [2m 7[0m | const inter = Inter({ subsets: ["latin"] })
+ [2m 8[0m | 
+ [2m 9[0m | export const metadata: Metadata = {
+    : [31;1m             ^^^^^^^^[0m
+ [2m10[0m |   title: "Archaeological Site Detection",
+ [2m11[0m |   description: "Advanced analysis tools for archaeological site detection",
+ [2m12[0m | }
+    `----
+
+Import trace for requested module:
+./app/layout.tsx
+ ⨯ ./app/layout.tsx
+Error: 
+  [31mx[0m You are attempting to export "metadata" from a component marked with "use client", which is disallowed. Either remove the export, or the "use client" directive. Read more: https://nextjs.org/
+  [31m|[0m docs/getting-started/react-essentials#the-use-client-directive
+  [31m|[0m 
+  [31m|[0m 
+    ,-[[36;1;4m/Users/diegofuego/Desktop/openai-to-z-nis/frontend/app/layout.tsx[0m:6:1]
+ [2m 6[0m | 
+ [2m 7[0m | const inter = Inter({ subsets: ["latin"] })
+ [2m 8[0m | 
+ [2m 9[0m | export const metadata: Metadata = {
+    : [31;1m             ^^^^^^^^[0m
+ [2m10[0m |   title: "Archaeological Site Detection",
+ [2m11[0m |   description: "Advanced analysis tools for archaeological site detection",
+ [2m12[0m | }
+    `----
+
+Import trace for requested module:
+./app/layout.tsx
+ ⨯ ./app/layout.tsx
+Error: 
+  [31mx[0m You are attempting to export "metadata" from a component marked with "use client", which is disallowed. Either remove the export, or the "use client" directive. Read more: https://nextjs.org/
+  [31m|[0m docs/getting-started/react-essentials#the-use-client-directive
+  [31m|[0m 
+  [31m|[0m 
+    ,-[[36;1;4m/Users/diegofuego/Desktop/openai-to-z-nis/frontend/app/layout.tsx[0m:6:1]
+ [2m 6[0m | 
+ [2m 7[0m | const inter = Inter({ subsets: ["latin"] })
+ [2m 8[0m | 
+ [2m 9[0m | export const metadata: Metadata = {
+    : [31;1m             ^^^^^^^^[0m
+ [2m10[0m |   title: "Archaeological Site Detection",
+ [2m11[0m |   description: "Advanced analysis tools for archaeological site detection",
+ [2m12[0m | }
+    `----
+
+Import trace for requested module:
+./app/layout.tsx
+ ⨯ ./components/ui/slider.tsx:4:0
+Module not found: Can't resolve '@radix-ui/react-slider'
+[0m [90m 2 |[39m[0m
+[0m [90m 3 |[39m [36mimport[39m [33m*[39m [36mas[39m [33mReact[39m [36mfrom[39m [32m"react"[39m[0m
+[0m[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33m*[39m [36mas[39m [33mSliderPrimitive[39m [36mfrom[39m [32m"@radix-ui/react-slider"[39m[0m
+[0m [90m 5 |[39m[0m
+[0m [90m 6 |[39m [36mimport[39m { cn } [36mfrom[39m [32m"@/lib/utils"[39m[0m
+[0m [90m 7 |[39m[0m
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./components/AnalysisDashboard.tsx
+./app/page.tsx
+ ⨯ ./components/ui/slider.tsx:4:0
+Module not found: Can't resolve '@radix-ui/react-slider'
+[0m [90m 2 |[39m[0m
+[0m [90m 3 |[39m [36mimport[39m [33m*[39m [36mas[39m [33mReact[39m [36mfrom[39m [32m"react"[39m[0m
+[0m[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33m*[39m [36mas[39m [33mSliderPrimitive[39m [36mfrom[39m [32m"@radix-ui/react-slider"[39m[0m
+[0m [90m 5 |[39m[0m
+[0m [90m 6 |[39m [36mimport[39m { cn } [36mfrom[39m [32m"@/lib/utils"[39m[0m
+[0m [90m 7 |[39m[0m
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./components/AnalysisDashboard.tsx
+./app/page.tsx
+ ⨯ ./hooks/use-toast.ts
+Error: 
+  [31mx[0m the name `useToast` is defined multiple times
+     ,-[[36;1;4m/Users/diegofuego/Desktop/openai-to-z-nis/frontend/hooks/use-toast.ts[0m:172:1]
+ [2m172[0m |   }
+ [2m173[0m | }
+ [2m174[0m | 
+ [2m175[0m | function useToast() {
+     : [31;1m         ^^^^|^^^[0m
+     :              [31;1m`-- [31;1mprevious definition of `useToast` here[0m[0m
+ [2m176[0m |   const [state, setState] = React.useState<State>(memoryState)
+ [2m177[0m | 
+ [2m178[0m |   React.useEffect(() => {
+ [2m179[0m |     listeners.push(setState)
+ [2m180[0m |     return () => {
+ [2m181[0m |       const index = listeners.indexOf(setState)
+ [2m182[0m |       if (index > -1) {
+ [2m183[0m |         listeners.splice(index, 1)
+ [2m184[0m |       }
+ [2m185[0m |     }
+ [2m186[0m |   }, [state])
+ [2m187[0m | 
+ [2m188[0m |   return {
+ [2m189[0m |     ...state,
+ [2m190[0m |     toast,
+ [2m191[0m |     dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
+ [2m192[0m |   }
+ [2m193[0m | }
+ [2m194[0m | 
+ [2m195[0m | interface Toast {
+ [2m196[0m |   id: number;
+ [2m197[0m |   title: string;
+ [2m198[0m |   description: string;
+ [2m199[0m | }
+ [2m200[0m | 
+ [2m201[0m | export function useToast() {
+     : [33;1m                ^^^^|^^^[0m
+     :                     [33;1m`-- [33;1m`useToast` redefined here[0m[0m
+ [2m202[0m |   const [toasts, setToasts] = useState<Toast[]>([]);
+ [2m203[0m | 
+ [2m204[0m |   const toast = useCallback(({ title, description }: Omit<Toast, 'id'>) => {
+     `----
+
+Import trace for requested module:
+./hooks/use-toast.ts
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+ ⨯ ./hooks/use-toast.ts
+Error: 
+  [31mx[0m the name `useToast` is defined multiple times
+     ,-[[36;1;4m/Users/diegofuego/Desktop/openai-to-z-nis/frontend/hooks/use-toast.ts[0m:172:1]
+ [2m172[0m |   }
+ [2m173[0m | }
+ [2m174[0m | 
+ [2m175[0m | function useToast() {
+     : [31;1m         ^^^^|^^^[0m
+     :              [31;1m`-- [31;1mprevious definition of `useToast` here[0m[0m
+ [2m176[0m |   const [state, setState] = React.useState<State>(memoryState)
+ [2m177[0m | 
+ [2m178[0m |   React.useEffect(() => {
+ [2m179[0m |     listeners.push(setState)
+ [2m180[0m |     return () => {
+ [2m181[0m |       const index = listeners.indexOf(setState)
+ [2m182[0m |       if (index > -1) {
+ [2m183[0m |         listeners.splice(index, 1)
+ [2m184[0m |       }
+ [2m185[0m |     }
+ [2m186[0m |   }, [state])
+ [2m187[0m | 
+ [2m188[0m |   return {
+ [2m189[0m |     ...state,
+ [2m190[0m |     toast,
+ [2m191[0m |     dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
+ [2m192[0m |   }
+ [2m193[0m | }
+ [2m194[0m | 
+ [2m195[0m | interface Toast {
+ [2m196[0m |   id: number;
+ [2m197[0m |   title: string;
+ [2m198[0m |   description: string;
+ [2m199[0m | }
+ [2m200[0m | 
+ [2m201[0m | export function useToast() {
+     : [33;1m                ^^^^|^^^[0m
+     :                     [33;1m`-- [33;1m`useToast` redefined here[0m[0m
+ [2m202[0m |   const [toasts, setToasts] = useState<Toast[]>([]);
+ [2m203[0m | 
+ [2m204[0m |   const toast = useCallback(({ title, description }: Omit<Toast, 'id'>) => {
+     `----
+
+Import trace for requested module:
+./hooks/use-toast.ts
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+ ⨯ ./hooks/use-toast.ts
+Error: 
+  [31mx[0m the name `useToast` is defined multiple times
+     ,-[[36;1;4m/Users/diegofuego/Desktop/openai-to-z-nis/frontend/hooks/use-toast.ts[0m:172:1]
+ [2m172[0m |   }
+ [2m173[0m | }
+ [2m174[0m | 
+ [2m175[0m | function useToast() {
+     : [31;1m         ^^^^|^^^[0m
+     :              [31;1m`-- [31;1mprevious definition of `useToast` here[0m[0m
+ [2m176[0m |   const [state, setState] = React.useState<State>(memoryState)
+ [2m177[0m | 
+ [2m178[0m |   React.useEffect(() => {
+ [2m179[0m |     listeners.push(setState)
+ [2m180[0m |     return () => {
+ [2m181[0m |       const index = listeners.indexOf(setState)
+ [2m182[0m |       if (index > -1) {
+ [2m183[0m |         listeners.splice(index, 1)
+ [2m184[0m |       }
+ [2m185[0m |     }
+ [2m186[0m |   }, [state])
+ [2m187[0m | 
+ [2m188[0m |   return {
+ [2m189[0m |     ...state,
+ [2m190[0m |     toast,
+ [2m191[0m |     dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
+ [2m192[0m |   }
+ [2m193[0m | }
+ [2m194[0m | 
+ [2m195[0m | interface Toast {
+ [2m196[0m |   id: number;
+ [2m197[0m |   title: string;
+ [2m198[0m |   description: string;
+ [2m199[0m | }
+ [2m200[0m | 
+ [2m201[0m | export function useToast() {
+     : [33;1m                ^^^^|^^^[0m
+     :                     [33;1m`-- [33;1m`useToast` redefined here[0m[0m
+ [2m202[0m |   const [toasts, setToasts] = useState<Toast[]>([]);
+ [2m203[0m | 
+ [2m204[0m |   const toast = useCallback(({ title, description }: Omit<Toast, 'id'>) => {
+     `----
+
+Import trace for requested module:
+./hooks/use-toast.ts
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+ ⚠ ./components/ui/toaster.tsx
+Attempted import error: 'ToastProvider' is not exported from '@/components/ui/toast' (imported as 'ToastProvider').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastTitle' is not exported from '@/components/ui/toast' (imported as 'ToastTitle').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastDescription' is not exported from '@/components/ui/toast' (imported as 'ToastDescription').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastClose' is not exported from '@/components/ui/toast' (imported as 'ToastClose').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastViewport' is not exported from '@/components/ui/toast' (imported as 'ToastViewport').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastProvider' is not exported from '@/components/ui/toast' (imported as 'ToastProvider').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastTitle' is not exported from '@/components/ui/toast' (imported as 'ToastTitle').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastDescription' is not exported from '@/components/ui/toast' (imported as 'ToastDescription').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastClose' is not exported from '@/components/ui/toast' (imported as 'ToastClose').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastViewport' is not exported from '@/components/ui/toast' (imported as 'ToastViewport').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ ./components/ui/toaster.tsx
+Attempted import error: 'ToastProvider' is not exported from '@/components/ui/toast' (imported as 'ToastProvider').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastTitle' is not exported from '@/components/ui/toast' (imported as 'ToastTitle').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastDescription' is not exported from '@/components/ui/toast' (imported as 'ToastDescription').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastClose' is not exported from '@/components/ui/toast' (imported as 'ToastClose').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastViewport' is not exported from '@/components/ui/toast' (imported as 'ToastViewport').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastProvider' is not exported from '@/components/ui/toast' (imported as 'ToastProvider').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastTitle' is not exported from '@/components/ui/toast' (imported as 'ToastTitle').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastDescription' is not exported from '@/components/ui/toast' (imported as 'ToastDescription').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastClose' is not exported from '@/components/ui/toast' (imported as 'ToastClose').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastViewport' is not exported from '@/components/ui/toast' (imported as 'ToastViewport').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+ ⚠ ./components/ui/toaster.tsx
+Attempted import error: 'ToastProvider' is not exported from '@/components/ui/toast' (imported as 'ToastProvider').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastTitle' is not exported from '@/components/ui/toast' (imported as 'ToastTitle').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastDescription' is not exported from '@/components/ui/toast' (imported as 'ToastDescription').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastClose' is not exported from '@/components/ui/toast' (imported as 'ToastClose').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastViewport' is not exported from '@/components/ui/toast' (imported as 'ToastViewport').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastProvider' is not exported from '@/components/ui/toast' (imported as 'ToastProvider').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastTitle' is not exported from '@/components/ui/toast' (imported as 'ToastTitle').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastDescription' is not exported from '@/components/ui/toast' (imported as 'ToastDescription').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastClose' is not exported from '@/components/ui/toast' (imported as 'ToastClose').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastViewport' is not exported from '@/components/ui/toast' (imported as 'ToastViewport').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+Warning: React.jsx: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+
+Check your code at toaster.tsx:32.
+    at Toaster (webpack-internal:///(ssr)/./components/ui/toaster.tsx:13:82)
+    at V (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:47:24)
+    at J (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:42:48)
+    at ThemeProvider (webpack-internal:///(ssr)/./components/theme-provider.tsx:13:26)
+    at ToastProvider (webpack-internal:///(ssr)/./contexts/toast-context.tsx:13:26)
+    at ClientProviders (webpack-internal:///(ssr)/./components/client-providers.tsx:17:28)
+    at Lazy
+    at body
+    at html
+    at RedirectErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:72:9)
+    at RedirectBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:80:11)
+    at ReactDevOverlay (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/internal/ReactDevOverlay.js:84:9)
+    at HotReload (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/hot-reloader-client.js:308:11)
+    at Router (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:176:11)
+    at ErrorBoundaryHandler (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:159:11)
+    at AppRouter (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:515:13)
+    at Lazy
+    at Lazy
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at ServerInsertedHTMLProvider (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:21176)
+Warning: React.jsx: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+
+Check your code at toaster.tsx:17.
+    at Toaster (webpack-internal:///(ssr)/./components/ui/toaster.tsx:13:82)
+    at V (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:47:24)
+    at J (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:42:48)
+    at ThemeProvider (webpack-internal:///(ssr)/./components/theme-provider.tsx:13:26)
+    at ToastProvider (webpack-internal:///(ssr)/./contexts/toast-context.tsx:13:26)
+    at ClientProviders (webpack-internal:///(ssr)/./components/client-providers.tsx:17:28)
+    at Lazy
+    at body
+    at html
+    at RedirectErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:72:9)
+    at RedirectBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:80:11)
+    at ReactDevOverlay (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/internal/ReactDevOverlay.js:84:9)
+    at HotReload (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/hot-reloader-client.js:308:11)
+    at Router (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:176:11)
+    at ErrorBoundaryHandler (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:159:11)
+    at AppRouter (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:515:13)
+    at Lazy
+    at Lazy
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at ServerInsertedHTMLProvider (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:21176)
+ ⨯ Internal error: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:43579)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:41912)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/z/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:41912)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:43309)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:38912
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:39398)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:38912
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:39398)
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ ./components/ui/toaster.tsx
+Attempted import error: 'ToastProvider' is not exported from '@/components/ui/toast' (imported as 'ToastProvider').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastTitle' is not exported from '@/components/ui/toast' (imported as 'ToastTitle').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastDescription' is not exported from '@/components/ui/toast' (imported as 'ToastDescription').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastClose' is not exported from '@/components/ui/toast' (imported as 'ToastClose').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastViewport' is not exported from '@/components/ui/toast' (imported as 'ToastViewport').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastProvider' is not exported from '@/components/ui/toast' (imported as 'ToastProvider').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastTitle' is not exported from '@/components/ui/toast' (imported as 'ToastTitle').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastDescription' is not exported from '@/components/ui/toast' (imported as 'ToastDescription').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastClose' is not exported from '@/components/ui/toast' (imported as 'ToastClose').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastViewport' is not exported from '@/components/ui/toast' (imported as 'ToastViewport').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+ ⚠ ./components/ui/toaster.tsx
+Attempted import error: 'ToastProvider' is not exported from '@/components/ui/toast' (imported as 'ToastProvider').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastTitle' is not exported from '@/components/ui/toast' (imported as 'ToastTitle').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastDescription' is not exported from '@/components/ui/toast' (imported as 'ToastDescription').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastClose' is not exported from '@/components/ui/toast' (imported as 'ToastClose').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastViewport' is not exported from '@/components/ui/toast' (imported as 'ToastViewport').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastProvider' is not exported from '@/components/ui/toast' (imported as 'ToastProvider').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastTitle' is not exported from '@/components/ui/toast' (imported as 'ToastTitle').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastDescription' is not exported from '@/components/ui/toast' (imported as 'ToastDescription').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastClose' is not exported from '@/components/ui/toast' (imported as 'ToastClose').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastViewport' is not exported from '@/components/ui/toast' (imported as 'ToastViewport').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+ ⚠ ./components/ui/toaster.tsx
+Attempted import error: 'ToastProvider' is not exported from '@/components/ui/toast' (imported as 'ToastProvider').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastTitle' is not exported from '@/components/ui/toast' (imported as 'ToastTitle').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastDescription' is not exported from '@/components/ui/toast' (imported as 'ToastDescription').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastClose' is not exported from '@/components/ui/toast' (imported as 'ToastClose').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastViewport' is not exported from '@/components/ui/toast' (imported as 'ToastViewport').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastProvider' is not exported from '@/components/ui/toast' (imported as 'ToastProvider').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastTitle' is not exported from '@/components/ui/toast' (imported as 'ToastTitle').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastDescription' is not exported from '@/components/ui/toast' (imported as 'ToastDescription').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastClose' is not exported from '@/components/ui/toast' (imported as 'ToastClose').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastViewport' is not exported from '@/components/ui/toast' (imported as 'ToastViewport').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+Warning: React.jsx: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+
+Check your code at toaster.tsx:32.
+    at Toaster (webpack-internal:///(ssr)/./components/ui/toaster.tsx:13:82)
+    at V (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:47:24)
+    at J (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:42:48)
+    at ThemeProvider (webpack-internal:///(ssr)/./components/theme-provider.tsx:13:26)
+    at ToastProvider (webpack-internal:///(ssr)/./contexts/toast-context.tsx:13:26)
+    at ClientProviders (webpack-internal:///(ssr)/./components/client-providers.tsx:17:28)
+    at Lazy
+    at body
+    at html
+    at RedirectErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:72:9)
+    at RedirectBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:80:11)
+    at ReactDevOverlay (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/internal/ReactDevOverlay.js:84:9)
+    at HotReload (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/hot-reloader-client.js:308:11)
+    at Router (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:176:11)
+    at ErrorBoundaryHandler (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:159:11)
+    at AppRouter (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:515:13)
+    at Lazy
+    at Lazy
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at ServerInsertedHTMLProvider (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:21176)
+Warning: React.jsx: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+
+Check your code at toaster.tsx:17.
+    at Toaster (webpack-internal:///(ssr)/./components/ui/toaster.tsx:13:82)
+    at V (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:47:24)
+    at J (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:42:48)
+    at ThemeProvider (webpack-internal:///(ssr)/./components/theme-provider.tsx:13:26)
+    at ToastProvider (webpack-internal:///(ssr)/./contexts/toast-context.tsx:13:26)
+    at ClientProviders (webpack-internal:///(ssr)/./components/client-providers.tsx:17:28)
+    at Lazy
+    at body
+    at html
+    at RedirectErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:72:9)
+    at RedirectBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:80:11)
+    at ReactDevOverlay (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/internal/ReactDevOverlay.js:84:9)
+    at HotReload (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/hot-reloader-client.js:308:11)
+    at Router (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:176:11)
+    at ErrorBoundaryHandler (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:159:11)
+    at AppRouter (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:515:13)
+    at Lazy
+    at Lazy
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at ServerInsertedHTMLProvider (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:21176)
+Warning: React.jsx: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+
+Check your code at toaster.tsx:32.
+    at Toaster (webpack-internal:///(ssr)/./components/ui/toaster.tsx:13:82)
+    at V (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:47:24)
+    at J (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:42:48)
+    at ThemeProvider (webpack-internal:///(ssr)/./components/theme-provider.tsx:13:26)
+    at ToastProvider (webpack-internal:///(ssr)/./contexts/toast-context.tsx:13:26)
+    at ClientProviders (webpack-internal:///(ssr)/./components/client-providers.tsx:17:28)
+    at Lazy
+    at body
+    at html
+    at RedirectErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:72:9)
+    at RedirectBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:80:11)
+    at ReactDevOverlay (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/internal/ReactDevOverlay.js:84:9)
+    at HotReload (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/hot-reloader-client.js:308:11)
+    at Router (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:176:11)
+    at ErrorBoundaryHandler (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:159:11)
+    at AppRouter (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:515:13)
+    at Lazy
+    at Lazy
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at ServerInsertedHTMLProvider (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:21176)
+Warning: React.jsx: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+
+Check your code at toaster.tsx:17.
+    at Toaster (webpack-internal:///(ssr)/./components/ui/toaster.tsx:13:82)
+    at V (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:47:24)
+    at J (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:42:48)
+    at ThemeProvider (webpack-internal:///(ssr)/./components/theme-provider.tsx:13:26)
+    at ToastProvider (webpack-internal:///(ssr)/./contexts/toast-context.tsx:13:26)
+    at ClientProviders (webpack-internal:///(ssr)/./components/client-providers.tsx:17:28)
+    at Lazy
+    at body
+    at html
+    at RedirectErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:72:9)
+    at RedirectBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:80:11)
+    at ReactDevOverlay (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/internal/ReactDevOverlay.js:84:9)
+    at HotReload (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/hot-reloader-client.js:308:11)
+    at Router (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:176:11)
+    at ErrorBoundaryHandler (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:159:11)
+    at AppRouter (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:515:13)
+    at Lazy
+    at Lazy
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at ServerInsertedHTMLProvider (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:21176)
+ ⨯ Internal error: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:43579)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:41912)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:41912)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:43309)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:38912
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:39398)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:38912
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:39398)
+ ⨯ Internal error: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:43579)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:41912)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:41912)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:43309)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:38912
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:39398)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:38912
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:39398)
+ ⚠ ./components/ui/toaster.tsx
+Attempted import error: 'ToastProvider' is not exported from '@/components/ui/toast' (imported as 'ToastProvider').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastTitle' is not exported from '@/components/ui/toast' (imported as 'ToastTitle').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastDescription' is not exported from '@/components/ui/toast' (imported as 'ToastDescription').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastClose' is not exported from '@/components/ui/toast' (imported as 'ToastClose').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastViewport' is not exported from '@/components/ui/toast' (imported as 'ToastViewport').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastProvider' is not exported from '@/components/ui/toast' (imported as 'ToastProvider').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastTitle' is not exported from '@/components/ui/toast' (imported as 'ToastTitle').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastDescription' is not exported from '@/components/ui/toast' (imported as 'ToastDescription').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastClose' is not exported from '@/components/ui/toast' (imported as 'ToastClose').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastViewport' is not exported from '@/components/ui/toast' (imported as 'ToastViewport').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+Warning: React.jsx: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+
+Check your code at toaster.tsx:32.
+    at Toaster (webpack-internal:///(ssr)/./components/ui/toaster.tsx:13:82)
+    at V (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:47:24)
+    at J (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:42:48)
+    at ThemeProvider (webpack-internal:///(ssr)/./components/theme-provider.tsx:13:26)
+    at ToastProvider (webpack-internal:///(ssr)/./contexts/toast-context.tsx:13:26)
+    at ClientProviders (webpack-internal:///(ssr)/./components/client-providers.tsx:17:28)
+    at Lazy
+    at body
+    at html
+    at RedirectErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:72:9)
+    at RedirectBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:80:11)
+    at ReactDevOverlay (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/internal/ReactDevOverlay.js:84:9)
+    at HotReload (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/hot-reloader-client.js:308:11)
+    at Router (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:176:11)
+    at ErrorBoundaryHandler (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:159:11)
+    at AppRouter (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:515:13)
+    at Lazy
+    at Lazy
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at ServerInsertedHTMLProvider (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:21176)
+Warning: React.jsx: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+
+Check your code at toaster.tsx:17.
+    at Toaster (webpack-internal:///(ssr)/./components/ui/toaster.tsx:13:82)
+    at V (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:47:24)
+    at J (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:42:48)
+    at ThemeProvider (webpack-internal:///(ssr)/./components/theme-provider.tsx:13:26)
+    at ToastProvider (webpack-internal:///(ssr)/./contexts/toast-context.tsx:13:26)
+    at ClientProviders (webpack-internal:///(ssr)/./components/client-providers.tsx:17:28)
+    at Lazy
+    at body
+    at html
+    at RedirectErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:72:9)
+    at RedirectBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:80:11)
+    at ReactDevOverlay (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/internal/ReactDevOverlay.js:84:9)
+    at HotReload (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/hot-reloader-client.js:308:11)
+    at Router (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:176:11)
+    at ErrorBoundaryHandler (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:159:11)
+    at AppRouter (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:515:13)
+    at Lazy
+    at Lazy
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at ServerInsertedHTMLProvider (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:21176)
+ ⨯ Internal error: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:43579)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:41912)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:41912)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:43309)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:38912
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:39398)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:38912
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:39398)
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ ./components/ui/toaster.tsx
+Attempted import error: 'ToastProvider' is not exported from '@/components/ui/toast' (imported as 'ToastProvider').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastTitle' is not exported from '@/components/ui/toast' (imported as 'ToastTitle').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastDescription' is not exported from '@/components/ui/toast' (imported as 'ToastDescription').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastClose' is not exported from '@/components/ui/toast' (imported as 'ToastClose').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastViewport' is not exported from '@/components/ui/toast' (imported as 'ToastViewport').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastProvider' is not exported from '@/components/ui/toast' (imported as 'ToastProvider').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastTitle' is not exported from '@/components/ui/toast' (imported as 'ToastTitle').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastDescription' is not exported from '@/components/ui/toast' (imported as 'ToastDescription').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastClose' is not exported from '@/components/ui/toast' (imported as 'ToastClose').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastViewport' is not exported from '@/components/ui/toast' (imported as 'ToastViewport').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+ ⚠ ./components/ui/toaster.tsx
+Attempted import error: 'ToastProvider' is not exported from '@/components/ui/toast' (imported as 'ToastProvider').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastTitle' is not exported from '@/components/ui/toast' (imported as 'ToastTitle').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastDescription' is not exported from '@/components/ui/toast' (imported as 'ToastDescription').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastClose' is not exported from '@/components/ui/toast' (imported as 'ToastClose').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastViewport' is not exported from '@/components/ui/toast' (imported as 'ToastViewport').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastProvider' is not exported from '@/components/ui/toast' (imported as 'ToastProvider').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastTitle' is not exported from '@/components/ui/toast' (imported as 'ToastTitle').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastDescription' is not exported from '@/components/ui/toast' (imported as 'ToastDescription').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastClose' is not exported from '@/components/ui/toast' (imported as 'ToastClose').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastViewport' is not exported from '@/components/ui/toast' (imported as 'ToastViewport').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+ ⚠ ./components/ui/toaster.tsx
+Attempted import error: 'ToastProvider' is not exported from '@/components/ui/toast' (imported as 'ToastProvider').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastTitle' is not exported from '@/components/ui/toast' (imported as 'ToastTitle').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastDescription' is not exported from '@/components/ui/toast' (imported as 'ToastDescription').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastClose' is not exported from '@/components/ui/toast' (imported as 'ToastClose').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastViewport' is not exported from '@/components/ui/toast' (imported as 'ToastViewport').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastProvider' is not exported from '@/components/ui/toast' (imported as 'ToastProvider').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastTitle' is not exported from '@/components/ui/toast' (imported as 'ToastTitle').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastDescription' is not exported from '@/components/ui/toast' (imported as 'ToastDescription').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastClose' is not exported from '@/components/ui/toast' (imported as 'ToastClose').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+
+./components/ui/toaster.tsx
+Attempted import error: 'ToastViewport' is not exported from '@/components/ui/toast' (imported as 'ToastViewport').
+
+Import trace for requested module:
+./components/ui/toaster.tsx
+./components/client-providers.tsx
+Warning: React.jsx: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+
+Check your code at toaster.tsx:32.
+    at Toaster (webpack-internal:///(ssr)/./components/ui/toaster.tsx:13:82)
+    at V (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:47:24)
+    at J (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:42:48)
+    at ThemeProvider (webpack-internal:///(ssr)/./components/theme-provider.tsx:13:26)
+    at ToastProvider (webpack-internal:///(ssr)/./contexts/toast-context.tsx:13:26)
+    at ClientProviders (webpack-internal:///(ssr)/./components/client-providers.tsx:17:28)
+    at Lazy
+    at body
+    at html
+    at RedirectErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:72:9)
+    at RedirectBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:80:11)
+    at ReactDevOverlay (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/internal/ReactDevOverlay.js:84:9)
+    at HotReload (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/hot-reloader-client.js:308:11)
+    at Router (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:176:11)
+    at ErrorBoundaryHandler (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:159:11)
+    at AppRouter (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:515:13)
+    at Lazy
+    at Lazy
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at ServerInsertedHTMLProvider (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:21176)
+Warning: React.jsx: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+
+Check your code at toaster.tsx:17.
+    at Toaster (webpack-internal:///(ssr)/./components/ui/toaster.tsx:13:82)
+    at V (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:47:24)
+    at J (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:42:48)
+    at ThemeProvider (webpack-internal:///(ssr)/./components/theme-provider.tsx:13:26)
+    at ToastProvider (webpack-internal:///(ssr)/./contexts/toast-context.tsx:13:26)
+    at ClientProviders (webpack-internal:///(ssr)/./components/client-providers.tsx:17:28)
+    at Lazy
+    at body
+    at html
+    at RedirectErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:72:9)
+    at RedirectBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:80:11)
+    at ReactDevOverlay (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/internal/ReactDevOverlay.js:84:9)
+    at HotReload (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/hot-reloader-client.js:308:11)
+    at Router (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:176:11)
+    at ErrorBoundaryHandler (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:159:11)
+    at AppRouter (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:515:13)
+    at Lazy
+    at Lazy
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at ServerInsertedHTMLProvider (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:21176)
+ ⨯ Internal error: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:43579)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:41912)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:41912)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:43309)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:38912
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:39398)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:38912
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:39398)
+Warning: React.jsx: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+
+Check your code at toaster.tsx:32.
+    at Toaster (webpack-internal:///(ssr)/./components/ui/toaster.tsx:13:82)
+    at V (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:47:24)
+    at J (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:42:48)
+    at ThemeProvider (webpack-internal:///(ssr)/./components/theme-provider.tsx:13:26)
+    at ToastProvider (webpack-internal:///(ssr)/./contexts/toast-context.tsx:13:26)
+    at ClientProviders (webpack-internal:///(ssr)/./components/client-providers.tsx:17:28)
+    at Lazy
+    at body
+    at html
+    at RedirectErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:72:9)
+    at RedirectBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:80:11)
+    at ReactDevOverlay (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/internal/ReactDevOverlay.js:84:9)
+    at HotReload (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/hot-reloader-client.js:308:11)
+    at Router (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:176:11)
+    at ErrorBoundaryHandler (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:159:11)
+    at AppRouter (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:515:13)
+    at Lazy
+    at Lazy
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at ServerInsertedHTMLProvider (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:21176)
+Warning: React.jsx: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+
+Check your code at toaster.tsx:17.
+    at Toaster (webpack-internal:///(ssr)/./components/ui/toaster.tsx:13:82)
+    at V (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:47:24)
+    at J (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:42:48)
+    at ThemeProvider (webpack-internal:///(ssr)/./components/theme-provider.tsx:13:26)
+    at ToastProvider (webpack-internal:///(ssr)/./contexts/toast-context.tsx:13:26)
+    at ClientProviders (webpack-internal:///(ssr)/./components/client-providers.tsx:17:28)
+    at Lazy
+    at body
+    at html
+    at RedirectErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:72:9)
+    at RedirectBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:80:11)
+    at ReactDevOverlay (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/internal/ReactDevOverlay.js:84:9)
+    at HotReload (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/hot-reloader-client.js:308:11)
+    at Router (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:176:11)
+    at ErrorBoundaryHandler (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:159:11)
+    at AppRouter (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:515:13)
+    at Lazy
+    at Lazy
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at ServerInsertedHTMLProvider (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:21176)
+ ⨯ Internal error: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:43579)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:41912)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:41912)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:43309)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:38912
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:39398)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:38912
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:39398)
+Warning: React.jsx: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+
+Check your code at toaster.tsx:32.
+    at Toaster (webpack-internal:///(ssr)/./components/ui/toaster.tsx:13:82)
+    at V (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:47:24)
+    at J (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:42:48)
+    at ThemeProvider (webpack-internal:///(ssr)/./components/theme-provider.tsx:13:26)
+    at ToastProvider (webpack-internal:///(ssr)/./contexts/toast-context.tsx:13:26)
+    at ClientProviders (webpack-internal:///(ssr)/./components/client-providers.tsx:17:28)
+    at Lazy
+    at body
+    at html
+    at RedirectErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:72:9)
+    at RedirectBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:80:11)
+    at ReactDevOverlay (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/internal/ReactDevOverlay.js:84:9)
+    at HotReload (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/hot-reloader-client.js:308:11)
+    at Router (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:176:11)
+    at ErrorBoundaryHandler (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:159:11)
+    at AppRouter (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:515:13)
+    at Lazy
+    at Lazy
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at ServerInsertedHTMLProvider (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:21176)
+Warning: React.jsx: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+
+Check your code at toaster.tsx:17.
+    at Toaster (webpack-internal:///(ssr)/./components/ui/toaster.tsx:13:82)
+    at V (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:47:24)
+    at J (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:42:48)
+    at ThemeProvider (webpack-internal:///(ssr)/./components/theme-provider.tsx:13:26)
+    at ToastProvider (webpack-internal:///(ssr)/./contexts/toast-context.tsx:13:26)
+    at ClientProviders (webpack-internal:///(ssr)/./components/client-providers.tsx:17:28)
+    at Lazy
+    at body
+    at html
+    at RedirectErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:72:9)
+    at RedirectBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:80:11)
+    at ReactDevOverlay (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/internal/ReactDevOverlay.js:84:9)
+    at HotReload (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/hot-reloader-client.js:308:11)
+    at Router (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:176:11)
+    at ErrorBoundaryHandler (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:159:11)
+    at AppRouter (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:515:13)
+    at Lazy
+    at Lazy
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at ServerInsertedHTMLProvider (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:21176)
+ ⨯ Internal error: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:43579)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:41912)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:41912)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:43309)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:38912
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:39398)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:38912
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:39398)
+Warning: React.jsx: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+
+Check your code at toaster.tsx:32.
+    at Toaster (webpack-internal:///(ssr)/./components/ui/toaster.tsx:13:82)
+    at V (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:47:24)
+    at J (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:42:48)
+    at ThemeProvider (webpack-internal:///(ssr)/./components/theme-provider.tsx:13:26)
+    at ToastProvider (webpack-internal:///(ssr)/./contexts/toast-context.tsx:13:26)
+    at ClientProviders (webpack-internal:///(ssr)/./components/client-providers.tsx:17:28)
+    at Lazy
+    at body
+    at html
+    at RedirectErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:72:9)
+    at RedirectBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:80:11)
+    at ReactDevOverlay (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/internal/ReactDevOverlay.js:84:9)
+    at HotReload (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/hot-reloader-client.js:308:11)
+    at Router (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:176:11)
+    at ErrorBoundaryHandler (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:159:11)
+    at AppRouter (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:515:13)
+    at Lazy
+    at Lazy
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at ServerInsertedHTMLProvider (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:21176)
+Warning: React.jsx: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+
+Check your code at toaster.tsx:17.
+    at Toaster (webpack-internal:///(ssr)/./components/ui/toaster.tsx:13:82)
+    at V (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:47:24)
+    at J (webpack-internal:///(ssr)/../../../node_modules/next-themes/dist/index.mjs:42:48)
+    at ThemeProvider (webpack-internal:///(ssr)/./components/theme-provider.tsx:13:26)
+    at ToastProvider (webpack-internal:///(ssr)/./contexts/toast-context.tsx:13:26)
+    at ClientProviders (webpack-internal:///(ssr)/./components/client-providers.tsx:17:28)
+    at Lazy
+    at body
+    at html
+    at RedirectErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:72:9)
+    at RedirectBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/redirect-boundary.js:80:11)
+    at ReactDevOverlay (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/internal/ReactDevOverlay.js:84:9)
+    at HotReload (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/react-dev-overlay/hot-reloader-client.js:308:11)
+    at Router (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:176:11)
+    at ErrorBoundaryHandler (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:159:11)
+    at AppRouter (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/app-router.js:515:13)
+    at Lazy
+    at Lazy
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at rS (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:15614)
+    at ServerInsertedHTMLProvider (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:39:21176)
+ ⨯ Internal error: Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:43579)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:41912)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:41912)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at av (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:7809)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:12972
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:13009)
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:43309)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:38912
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:39398)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46552)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at a_ (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49564)
+    at ak (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:46881)
+    at ax (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:50458)
+    at /Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:38912
+    at aw (/Users/diegofuego/Desktop/openai-to-z-nis/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:39398)
