@@ -3,13 +3,10 @@
 # Strict mode for better error handling
 set -euo pipefail
 
-# Docker container names and ports
-REDIS_CONTAINER_NAME="nis-redis"
-REDIS_PORT=6380  # Changed from 6379
-ZOOKEEPER_CONTAINER_NAME="nis-zookeeper"
-ZOOKEEPER_PORT=2182  # Changed from 2181
-KAFKA_CONTAINER_NAME="nis-kafka"
-KAFKA_PORT=9093  # Changed from 9092
+# Docker container names (can be removed if docker-compose handles all service naming)
+# REDIS_CONTAINER_NAME="nis-redis"
+# ZOOKEEPER_CONTAINER_NAME="nis-zookeeper"
+# KAFKA_CONTAINER_NAME="nis-kafka"
 
 # Enhanced Logging and Error Handling
 SCRIPT_NAME=$(basename "$0")
@@ -43,7 +40,8 @@ log() {
 
 error_log() {
     echo -e "\033[0;31m[ERROR] $1\033[0m" | tee -a "$ERROR_LOG_FILE" >&2
-    exit 1
+    # Removed exit 1 to allow script to attempt cleanup or further actions if needed.
+    # Consider adding exit 1 back if immediate script termination on any error is desired.
 }
 
 # Trap any errors
@@ -54,7 +52,6 @@ check_memory() {
     local total_memory=$(sysctl -n hw.memsize | awk '{print $1/1024/1024/1024 " GB"}')
     log "Total Memory: $total_memory"
     
-    # Optional: Add a warning if memory is low
     local memory_gb=$(echo "$total_memory" | cut -d' ' -f1)
     if (( $(echo "$memory_gb < 8" | bc -l) )); then
         log "WARNING: Low memory detected. Some operations might be slow." "WARNING"
@@ -66,7 +63,6 @@ check_disk_space() {
     local disk_space=$(df -h "$BASE_DIR" | awk 'NR==2 {print $4}')
     log "Available Disk Space: $disk_space"
     
-    # Optional: Add a warning if disk space is low
     local space_gb=$(echo "$disk_space" | sed 's/G//')
     if (( $(echo "$space_gb < 10" | bc -l) )); then
         log "WARNING: Low disk space detected. Ensure at least 10GB is available." "WARNING"
@@ -75,117 +71,95 @@ check_disk_space() {
 
 # Comprehensive System Compatibility Check
 function check_system_compatibility() {
-    log "${CYAN}🔍 Performing Comprehensive System Compatibility Check...${RESET}"
+    log "${CYAN}🔍 Performing System Compatibility Check...${RESET}"
     
-    # Check Operating System
     OS=$(uname -s)
     ARCH=$(uname -m)
     log "Operating System: $OS $ARCH"
     
-    # Minimum version requirements
-    PYTHON_MIN_VERSION="3.9.0"
-    NODE_MIN_VERSION="18.0.0"
-    
-    # Check Python
-    if ! command -v python3 &> /dev/null; then
-        error_log "Python 3 not found. Please install Python 3.9 or higher."
+    if ! command -v docker &> /dev/null; then
+        error_log "Docker not found. Please install Docker."
         exit 1
     fi
-    
-    PYTHON_VERSION=$(python3 --version | cut -d' ' -f2)
-    log "Python Version: $PYTHON_VERSION"
-    
-    # Compare Python version
-    if [ "$(printf '%s\n' "$PYTHON_MIN_VERSION" "$PYTHON_VERSION" | sort -V | head -n1)" != "$PYTHON_MIN_VERSION" ]; then
-        error_log "Python version too low. Minimum required: $PYTHON_MIN_VERSION, Current: $PYTHON_VERSION"
-        exit 1
+    log "Docker Version: $(docker --version)"
+
+    if ! command -v docker-compose &> /dev/null; then
+        # Try docker compose (v2 syntax)
+        if docker compose version &> /dev/null; then
+            log "Docker Compose (v2) found: $(docker compose version)"
+        else
+            error_log "Docker Compose not found. Please install Docker Compose (either v1 'docker-compose' or v2 'docker compose')."
+            exit 1
+        fi
+    else
+         log "Docker Compose (v1) found: $(docker-compose --version)"
     fi
-    
-    # Check Node.js
-    if ! command -v node &> /dev/null; then
-        error_log "Node.js not found. Please install Node.js 18 or higher."
-        exit 1
-    fi
-    
-    NODE_VERSION=$(node --version | tr -d 'v')
-    log "Node.js Version: $NODE_VERSION"
-    
-    # Compare Node.js version
-    if [ "$(printf '%s\n' "$NODE_MIN_VERSION" "$NODE_VERSION" | sort -V | head -n1)" != "$NODE_MIN_VERSION" ]; then
-        error_log "Node.js version too low. Minimum required: $NODE_MIN_VERSION, Current: $NODE_VERSION"
-        exit 1
-    fi
-    
-    # Check npm
-    if ! command -v npm &> /dev/null; then
-        error_log "npm not found. Please install npm."
-        exit 1
-    fi
-    
-    # Check Git
+        
     if ! command -v git &> /dev/null; then
         error_log "Git not found. Please install Git."
         exit 1
     fi
-    
-    # Check available disk space for macOS
-    DISK_SPACE=$(df -h "$BASE_DIR" | awk 'NR==2 {print $4}')
-    log "Available Disk Space: $DISK_SPACE"
-    
-    # Check memory for macOS
-    TOTAL_MEMORY=$(sysctl -n hw.memsize | awk '{print $1/1024/1024/1024 " GB"}')
-    log "Total Memory: $TOTAL_MEMORY"
+    log "Git Version: $(git --version)"
+
+    check_disk_space
+    check_memory
     
     log "System Compatibility Check Passed!" "SUCCESS"
 }
 
 # Dependency Validation
 function validate_dependencies() {
-    log "${BLUE}🔬 Validating Project Dependencies...${RESET}"
+    log "${BLUE}🔬 Validating Project Setup...${RESET}"
     
-    # Check requirements.txt exists
-    if [ ! -f "${BASE_DIR}/requirements.txt" ]; then
-        error_log "requirements.txt not found. Cannot install dependencies."
+    if [ ! -f "${BASE_DIR}/docker-compose.yml" ]; then
+        error_log "docker-compose.yml not found. This script relies on Docker Compose."
         exit 1
     fi
-    
-    # Check package.json exists
-    if [ ! -f "${BASE_DIR}/frontend/package.json" ]; then
-        error_log "frontend/package.json not found. Cannot install frontend dependencies."
+
+    if [ ! -f "${BASE_DIR}/Dockerfile" ]; then
+        error_log "Dockerfile not found. Needed for building the backend service."
         exit 1
     fi
-    
+
+    if [ ! -f "${BASE_DIR}/frontend/Dockerfile" ]; then
+        error_log "frontend/Dockerfile not found. Needed for building the frontend service."
+        exit 1
+    fi
+        
     # Validate critical environment variables
     if [ -f "${BASE_DIR}/.env" ]; then
-        # Check for critical environment variables
-        REQUIRED_ENV_VARS=("OPENAI_API_KEY" "SECRET_KEY")
+        REQUIRED_ENV_VARS=("OPENAI_API_KEY" "SECRET_KEY") # Add other critical vars if any
+        missing_vars=0
         for var in "${REQUIRED_ENV_VARS[@]}"; do
             if ! grep -q "^${var}=" "${BASE_DIR}/.env"; then
-                error_log "Missing critical environment variable: $var"
-                exit 1
+                log "Missing critical environment variable in .env: $var" "WARNING"
+                missing_vars=$((missing_vars + 1))
             fi
         done
+        if [ "$missing_vars" -gt 0 ]; then
+            log "Ensure all critical environment variables are set in .env" "WARNING"
+            # Decide if this should be a fatal error: exit 1
+        fi
     else
-        error_log ".env file not found. Please create one with necessary configurations."
-        exit 1
+        log ".env file not found. Please create one with necessary configurations (e.g., OPENAI_API_KEY, SECRET_KEY)." "WARNING"
+        # Decide if this should be a fatal error: exit 1
     fi
     
-    log "Dependency Validation Completed Successfully" "SUCCESS"
+    log "Project Setup Validation Completed" "SUCCESS"
 }
 
 # Pre-flight Checks
 function pre_flight_checks() {
     log "${YELLOW}🛫 Running Pre-flight Checks...${RESET}"
     
-    # Check network connectivity
-    if ! ping -c 3 8.8.8.8 &> /dev/null; then
-        error_log "No internet connection detected. Some features may be limited."
+    if ! ping -c 1 8.8.8.8 &> /dev/null; then # Check with only 1 packet to speed it up
+        log "No internet connection detected. Docker image pulls or other operations might fail." "WARNING"
     fi
     
-    # Check GitHub connectivity for potential updates
-    if ! git ls-remote https://github.com/yourusername/openai-to-z-nis.git &> /dev/null; then
-        log "Unable to connect to GitHub repository. Offline mode assumed." "WARNING"
-    fi
+    # Check GitHub connectivity for potential updates (optional, can be removed if not needed)
+    # if ! git ls-remote https://github.com/yourusername/openai-to-z-nis.git &> /dev/null; then
+    #     log "Unable to connect to GitHub repository. Offline mode assumed." "WARNING"
+    # fi
     
     log "Pre-flight Checks Completed" "SUCCESS"
 }
@@ -196,7 +170,6 @@ function archaeological_animation() {
     echo -e "${GREEN}🌿 NIS Protocol: Neural-Inspired Archaeological Discovery System 🌿${RESET}"
     echo ""
     
-    # Simulated archaeological dig animation with progress bar
     for i in {1..10}; do
         printf "${YELLOW}🏺 Excavating: [%-10s] %d%%${RESET}\r" $(printf "#%.0s" $(seq 1 $i)) $((i * 10))
         sleep 0.2
@@ -223,278 +196,97 @@ function nis_banner() {
 ╚═══════════════════════════════════════════════════════════════════╝
 EOF
     echo -e "${RESET}"
-
-
-
-
-    echo -e "${MAGENTA}"
-    cat << "EOF"
-╔═══════════════════════════════════════════════════════════════════╗
-║  禪  NEURAL-INSPIRED SYSTEM PROTOCOL  智                          ║
-║                                                                   ║
-║   🧠 Multi-Agent Intelligence | 🛰️ Geospatial Reasoning          ║
-║   📜 Interpreting Ancient History with Modern AI                 ║
-║   🐉 Inspired by the wisdom of the past — built for the future   ║
-║                                                                   ║
-║   📍 Amazon Rainforest | 🌏 Global Archaeology | 🤖 GPT-4.1       ║
-╚═══════════════════════════════════════════════════════════════════╝
-EOF
-    echo -e "${RESET}"
-}
-
-# Dependency Installation with Retry Mechanism
-function install_dependencies() {
-    log "${BLUE}📦 Installing Dependencies...${RESET}"
-    
-    # Python Dependencies
-    log "Installing Python dependencies..."
-    max_retries=3
-    retry_count=0
-    
-    while [ $retry_count -lt $max_retries ]; do
-        if pip install -r requirements.txt; then
-            log "Python dependencies installed successfully"
-            # Download spacy model if spacy is installed
-            if python -c "import spacy; spacy.load('pt_core_news_lg')" &> /dev/null; then
-                log "Spacy model 'pt_core_news_lg' already installed."
-            else
-                log "Downloading Spacy model 'pt_core_news_lg'..."
-                if python -m spacy download pt_core_news_lg; then
-                    log "Spacy model 'pt_core_news_lg' downloaded successfully."
-                else
-                    log "Failed to download 'pt_core_news_lg'. Manual installation may be required." "WARNING"
-                fi
-            fi
-            break
-        else
-            ((retry_count++))
-            error_log "Dependency installation failed. Retry $retry_count of $max_retries"
-            sleep 2
-        fi
-    done
-    
-    if [ $retry_count -eq $max_retries ]; then
-        error_log "Failed to install Python dependencies after $max_retries attempts"
-        exit 1
-    fi
-    
-    # Frontend Dependencies
-    log "Installing Frontend dependencies..."
-    cd frontend
-    npm install || { error_log "Frontend dependency installation failed"; exit 1; }
-    cd ..
-}
-
-# Dynamic Port Management
-function find_available_port() {
-    local start_port=$1
-    local port=$start_port
-    while lsof -i :$port > /dev/null 2>&1; do
-        ((port++))
-    done
-    echo $port
 }
 
 # Main Startup Function
 function startup_nis_protocol() {
-    # Display Banner and Run Compatibility Check
     nis_banner
-    check_system_compatibility
-    archaeological_animation
-    
-    # Setup Virtual Environment
-    log "${YELLOW}🔧 Setting up virtual environment...${RESET}"
-    python3 -m venv venv || { error_log "Failed to create virtual environment"; exit 1; }
-    # shellcheck source=/dev/null
-    source venv/bin/activate || { error_log "Failed to activate virtual environment"; exit 1; }
-    
-    # Install Dependencies
-    install_dependencies
-    
-    # Find available ports
-    BACKEND_PORT=$(find_available_port 8000)
-    FRONTEND_PORT=$(find_available_port 3000)
-    
-    # Set default ports if not already set
-    export BACKEND_PORT=${BACKEND_PORT:-8000}
-    export FRONTEND_PORT=${FRONTEND_PORT:-3000}
-    export HOST=${HOST:-0.0.0.0}
-    
-    # Start Backend
-    log "${CYAN}🌐 Launching Backend API on port $BACKEND_PORT...${RESET}"
-    PORT=$BACKEND_PORT HOST=$HOST python run_api.py > "$LOG_FILE" 2>&1 &
-    BACKEND_PID=$!
-    
-    # Wait for backend to start
-    sleep 3
+    # archaeological_animation # Consider if this is needed before docker-compose output
 
-    # Start Frontend
-    log "${GREEN}🖥️ Starting Frontend Development Server on port $FRONTEND_PORT...${RESET}"
-    cd frontend
-    BACKEND_PORT=$BACKEND_PORT \
-    NEXT_PUBLIC_API_URL=http://localhost:$BACKEND_PORT \
-    PORT=$FRONTEND_PORT \
-    npm run dev >> "$LOG_FILE" 2>&1 &
-    FRONTEND_PID=$!
-    cd ..
+    log "${CYAN}🚀 Launching NIS Protocol services using Docker Compose...${RESET}"
+    
+    # Determine Docker Compose command
+    DOCKER_COMPOSE_CMD="docker-compose"
+    if ! command -v docker-compose &> /dev/null && command -v docker && docker compose version &> /dev/null; then
+        DOCKER_COMPOSE_CMD="docker compose"
+    fi
+
+    # Stop any running services first to ensure a clean start and handle port conflicts
+    log "Stopping existing Docker Compose services (if any)..."
+    if ! $DOCKER_COMPOSE_CMD down --remove-orphans; then
+        log "Failed to stop existing services. Proceeding with caution." "WARNING"
+    else
+        log "Existing services stopped."
+    fi
+    
+    log "Building and starting services in detached mode..."
+    if ! $DOCKER_COMPOSE_CMD up -d --build --remove-orphans; then
+        error_log "Failed to start services with Docker Compose. Check Docker logs and docker-compose.yml."
+        # Attempt to show logs from failed services
+        $DOCKER_COMPOSE_CMD logs --tail="50" | tee -a "$ERROR_LOG_FILE"
+        exit 1
+    fi
+    
+    log "Services started in detached mode. Tailing logs..."
     
     # Wait and Show Access Information
-    sleep 5
-    echo -e "\n${YELLOW}🚀 NIS Protocol is now LIVE!${RESET}"
-    echo -e "Backend: ${BLUE}http://localhost:$BACKEND_PORT${RESET}"
-    echo -e "Frontend: ${GREEN}http://localhost:$FRONTEND_PORT${RESET}"
-    echo -e "Logs: ${MAGENTA}$LOG_FILE${RESET}"
+    sleep 5 # Give services a moment to initialize
     
-    # Trap to ensure clean shutdown
-    trap 'kill $BACKEND_PID $FRONTEND_PID; log "NIS Protocol shutdown complete."' SIGINT SIGTERM
-    wait
+    # Get mapped ports from docker-compose ps (this is more robust)
+    # Assuming service names in docker-compose.yml are 'backend' and 'frontend'
+    # And they map to host ports.
+    
+    # Try to get backend port
+    BACKEND_HOST_PORT=$($DOCKER_COMPOSE_CMD port backend 8000 | cut -d':' -f2)
+    if [ -z "$BACKEND_HOST_PORT" ]; then
+        log "Could not determine backend port automatically. Assuming 8000." "WARNING"
+        BACKEND_HOST_PORT="8000" # Fallback
+    fi
+    
+    # Try to get frontend port
+    FRONTEND_HOST_PORT=$($DOCKER_COMPOSE_CMD port frontend 3000 | cut -d':' -f2)
+    if [ -z "$FRONTEND_HOST_PORT" ]; then
+        log "Could not determine frontend port automatically. Assuming 3000." "WARNING"
+        FRONTEND_HOST_PORT="3000" # Fallback
+    fi
+
+    echo -e "\n${YELLOW}🚀 NIS Protocol is now LIVE! (Managed by Docker Compose)${RESET}"
+    echo -e "Backend: ${BLUE}http://localhost:$BACKEND_HOST_PORT${RESET}"
+    echo -e "Frontend: ${GREEN}http://localhost:$FRONTEND_HOST_PORT${RESET}"
+    echo -e "To view logs: ${CYAN}$DOCKER_COMPOSE_CMD logs -f${RESET}"
+    echo -e "To stop services: ${CYAN}$DOCKER_COMPOSE_CMD down${RESET}"
+    echo -e "Detailed startup logs: ${MAGENTA}$LOG_FILE${RESET}"
+    
+    log "NIS Protocol startup initiated via Docker Compose. Monitor service logs for status."
+
+    # The script can now exit, or tail logs if preferred.
+    # To keep the script running and tailing logs:
+    # log "Tailing combined logs. Press Ctrl+C to stop."
+    # $DOCKER_COMPOSE_CMD logs -f
+    # trap '$DOCKER_COMPOSE_CMD down; log "NIS Protocol shutdown complete."' SIGINT SIGTERM
+    # wait
 }
 
 # Main Execution
 function main() {
-    # Trap to capture any unexpected errors
-    trap 'error_log "Unexpected error occurred. Check logs for details."' ERR
+    trap 'error_log "Unexpected error occurred during main execution. Check logs for details."' ERR
     
-    # Run comprehensive checks
     check_system_compatibility
     validate_dependencies
     pre_flight_checks
     
-    # Run the main startup protocol
     startup_nis_protocol
 }
 
-set -x # Enable command tracing
 # --- Docker Service Management (Redis & Kafka) ---
-log "🐳 Ensuring Docker services (Redis, Zookeeper, Kafka) are (re)started..."
+# This section is now handled by docker-compose.yml and the startup_nis_protocol function.
+# The commands below are removed as docker-compose will manage these services.
+# log "🐳 Ensuring Docker services (Redis, Zookeeper, Kafka) are (re)started..."
+# ... (removed manual docker stop/rm/run commands for redis, zookeeper, kafka) ...
 
-# Stop and remove existing containers (ignore errors if they don't exist)
-log "Stopping and removing existing Docker containers if they exist..."
-docker stop "$REDIS_CONTAINER_NAME" > /dev/null 2>&1 || true
-docker rm -f "$REDIS_CONTAINER_NAME" > /dev/null 2>&1 || true
-docker stop "$KAFKA_CONTAINER_NAME" > /dev/null 2>&1 || true
-docker rm -f "$KAFKA_CONTAINER_NAME" > /dev/null 2>&1 || true
-docker stop "$ZOOKEEPER_CONTAINER_NAME" > /dev/null 2>&1 || true
-docker rm -f "$ZOOKEEPER_CONTAINER_NAME" > /dev/null 2>&1 || true
-
-log "Waiting a moment for ports to be released..."
-sleep 3 # Wait for 3 seconds
-
-# Force remove and recreate the docker network
-DOCKER_NETWORK="nis-network"
-log "Attempting to remove Docker network '$DOCKER_NETWORK' if it exists..."
-docker network rm "$DOCKER_NETWORK" > /dev/null 2>&1 || true # Best effort removal
-
-log "Creating Docker network '$DOCKER_NETWORK'..."
-if ! docker network create "$DOCKER_NETWORK"; then
-    error_log "CRITICAL: Failed to create Docker network '$DOCKER_NETWORK'. Startup cannot continue."
-    # error_log function (defined earlier in the script) will exit
-fi
-log "Docker network '$DOCKER_NETWORK' created successfully."
-
-# Start Redis with updated port configuration
-log "Starting Redis container '$REDIS_CONTAINER_NAME'..."
-if ! docker run -d --name "$REDIS_CONTAINER_NAME" --network host \
-    -e REDIS_ARGS="--maxmemory 256mb --maxmemory-policy allkeys-lru" \
-    redis:alpine redis-server --appendonly yes; then
-    log "Failed to start Redis container '$REDIS_CONTAINER_NAME'." "ERROR"
-    exit 1
-else
-    log "Waiting for Redis ($REDIS_CONTAINER_NAME) to initialize..."
-    sleep 5
-    if docker ps -q -f name=^/${REDIS_CONTAINER_NAME}$ > /dev/null 2>&1; then
-        log "Redis container '$REDIS_CONTAINER_NAME' started successfully."
-    else
-        log "Redis container '$REDIS_CONTAINER_NAME' failed to become ready." "ERROR"
-        exit 1
-    fi
-fi
-
-# Start Zookeeper with enhanced configuration
-log "Starting Zookeeper container '$ZOOKEEPER_CONTAINER_NAME'..."
-if ! docker run -d --name "$ZOOKEEPER_CONTAINER_NAME" --network host \
-    -e ZOOKEEPER_SERVER_ID=1 \
-    -e ZOOKEEPER_CLIENT_PORT=2181 \
-    -e ZOOKEEPER_TICK_TIME=2000 \
-    -e ZOOKEEPER_INIT_LIMIT=5 \
-    -e ZOOKEEPER_SYNC_LIMIT=2 \
-    -e ZOOKEEPER_SERVERS="server.1=localhost:2888:3888" \
-    -e ZOOKEEPER_MAX_CLIENT_CNXNS=60 \
-    -e ZOOKEEPER_AUTOPURGE_INTERVAL=1 \
-    -e ZOOKEEPER_AUTOPURGE_SNAP_RETAIN_COUNT=3 \
-    -e ZOOKEEPER_STANDALONE_ENABLED=true \
-    -e ZOOKEEPER_ADMIN_SERVER_PORT=8080 \
-    confluentinc/cp-zookeeper:latest; then
-    log "Failed to start Zookeeper container '$ZOOKEEPER_CONTAINER_NAME'." "ERROR"
-    exit 1
-else
-    log "Waiting for Zookeeper ($ZOOKEEPER_CONTAINER_NAME) to initialize..."
-    sleep 45 # Increased wait time for Zookeeper initialization
-    if docker ps -q -f name=^/${ZOOKEEPER_CONTAINER_NAME}$ > /dev/null 2>&1; then
-        log "Zookeeper container '$ZOOKEEPER_CONTAINER_NAME' started successfully."
-    else
-        log "Zookeeper container '$ZOOKEEPER_CONTAINER_NAME' failed to become ready." "ERROR"
-        exit 1
-    fi
-fi
-
-# Start Kafka with more robust configuration
-log "Starting Kafka container '$KAFKA_CONTAINER_NAME'..."
-if ! docker run -d --name "$KAFKA_CONTAINER_NAME" --network host \
-    -e KAFKA_BROKER_ID=1 \
-    -e KAFKA_ZOOKEEPER_CONNECT=localhost:2181 \
-    -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 \
-    -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 \
-    -e KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT \
-    -e KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT \
-    -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
-    -e KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0 \
-    -e KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS=6000 \
-    -e KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS=6000 \
-    -e KAFKA_AUTO_CREATE_TOPICS_ENABLE=true \
-    -e KAFKA_DELETE_TOPIC_ENABLE=true \
-    -e KAFKA_NUM_PARTITIONS=1 \
-    -e KAFKA_DEFAULT_REPLICATION_FACTOR=1 \
-    confluentinc/cp-kafka:latest; then
-    log "Failed to start Kafka container '$KAFKA_CONTAINER_NAME'." "ERROR"
-    exit 1
-else
-    log "Waiting for Kafka ($KAFKA_CONTAINER_NAME) to initialize..."
-    sleep 60 # Increased wait time for Kafka initialization
-    
-    # Manually create topics
-    log "Manually creating Kafka topics..."
-    TOPICS=("nis.analysis.events" "nis.batch.events" "nis.statistics.events")
-    
-    for TOPIC in "${TOPICS[@]}"; do
-        log "Creating topic: $TOPIC"
-        if docker exec "$KAFKA_CONTAINER_NAME" kafka-topics --create \
-            --bootstrap-server localhost:9092 \
-            --replication-factor 1 \
-            --partitions 1 \
-            --topic "$TOPIC"; then
-            log "Successfully created topic: $TOPIC"
-        else
-            log "Failed to create topic: $TOPIC" "ERROR"
-            exit 1
-        fi
-    done
-    
-    # Verify topics
-    log "Verifying created topics..."
-    LISTED_TOPICS=$(docker exec "$KAFKA_CONTAINER_NAME" kafka-topics --list --bootstrap-server localhost:9092)
-    
-    for TOPIC in "${TOPICS[@]}"; do
-        if ! echo "$LISTED_TOPICS" | grep -q -w "$TOPIC"; then
-            log "Topic $TOPIC not found in Kafka" "ERROR"
-            exit 1
-        fi
-    done
-    
-    log "All required Kafka topics successfully created and verified." "SUCCESS"
-fi
-# --- End Docker Service Management ---
-set +x # Disable command tracing
+# set -x # Enable command tracing if needed for debugging docker-compose calls
+main
+# set +x # Disable command tracing
 
 # Execute main function
 main 

@@ -1,0 +1,72 @@
+services:
+  # Redis Service
+  redis:
+    image: redis:alpine
+    container_name: nis-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --loadmodule /usr/local/lib/redis/modules/redisearch.so --loadmodule /usr/local/lib/redis/modules/redisbloom.so
+
+  # Kafka Service
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: nis-kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      - zookeeper
+
+  # Zookeeper Service (required for Kafka)
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: nis-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  # Backend Service
+  backend:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: nis-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - ./data:/app/data
+      - ./outputs:/app/outputs
+    environment:
+      - PYTHONUNBUFFERED=1
+      - GDAL_VERSION=3.6.2
+    depends_on:
+      - redis
+
+  # Frontend Service
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nis-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      - backend
+
+volumes:
+  redis-data:
+  kafka-data:
+  zookeeper-data:
+
+networks:
+  default:
+    name: nis-network 

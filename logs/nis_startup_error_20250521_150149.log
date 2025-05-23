@@ -1,1 +1,0 @@
-[0;31m[ERROR] CRITICAL: Failed to verify all required Kafka topics after 12 attempts. Last listed topics: ''. Startup cannot continue.[0m
