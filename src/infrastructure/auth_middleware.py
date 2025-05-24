@@ -5,7 +5,7 @@ for the Indigenous Knowledge Research Platform.
 """
 
 import logging
-from typing import Dict, List, Optional, Callable, Any
+from typing import Dict, List, Optional, Callable, Any, TYPE_CHECKING
 from datetime import datetime, timedelta
 
 import jwt
@@ -15,7 +15,8 @@ from passlib.context import CryptContext
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import Response
 
-from ..models.user import User  # Assuming we have a User model
+if TYPE_CHECKING:
+    from ..models.user import User
 from ..infrastructure.distributed_processing import DistributedProcessingManager
 
 logger = logging.getLogger(__name__)
@@ -124,7 +125,7 @@ class AuthenticationManager:
         self, 
         username: str, 
         password: str
-    ) -> Optional[User]:
+    ) -> Optional['User']:
         """Authenticate user credentials.
         
         Args:
@@ -156,7 +157,7 @@ class AuthenticationManager:
             logger.error(f"Authentication error: {str(e)}")
             return None
     
-    def _lookup_user(self, username: str) -> Optional[User]:
+    def _lookup_user(self, username: str) -> Optional['User']:
         """Lookup user in the database.
         
         This is a placeholder method. Replace with actual database lookup.
@@ -173,6 +174,12 @@ class AuthenticationManager:
 class RBACMiddleware(BaseHTTPMiddleware):
     """Role-Based Access Control Middleware."""
     
+    PUBLIC_PATHS = [
+        "/docs", 
+        "/openapi.json", 
+        # Add other public paths like /redoc if you use it
+    ]
+
     def __init__(
         self, 
         app, 
@@ -204,6 +211,11 @@ class RBACMiddleware(BaseHTTPMiddleware):
         Returns:
             HTTP response
         """
+
+        # Check if the request path is public
+        if request.url.path in self.PUBLIC_PATHS:
+            return await call_next(request)
+
         # Extract token from Authorization header
         auth_header = request.headers.get('Authorization')
         if not auth_header or not auth_header.startswith('Bearer '):

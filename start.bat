@@ -1,148 +1,95 @@
 @echo off
-SETLOCAL EnableDelayedExpansion
+setlocal
 
-REM Start script for the NIS Protocol project
+REM --- Configuration ---
+set "BASE_DIR=%~dp0"
+set "LOG_DIR=%BASE_DIR%logs"
+set "TIMESTAMP_FORMAT=%date:~10,4%%date:~4,2%%date:~7,2%_%time:~0,2%%time:~3,2%%time:~6,2%"
+set "START_LOG_FILE=%LOG_DIR%\nis_startup_bat_%TIMESTAMP_FORMAT%.log"
+set "ERROR_LOG_FILE=%LOG_DIR%\nis_startup_bat_error_%TIMESTAMP_FORMAT%.log"
 
-REM Function to check if a port is in use
-FOR /F "tokens=1" %%A IN ('netstat -ano ^| findstr ":6379" ^| findstr "LISTENING"') DO (
-    SET REDIS_RUNNING=true
-)
-FOR /F "tokens=1" %%A IN ('netstat -ano ^| findstr ":2181" ^| findstr "LISTENING"') DO (
-    SET ZOOKEEPER_RUNNING=true
-)
-FOR /F "tokens=1" %%A IN ('netstat -ano ^| findstr ":9092" ^| findstr "LISTENING"') DO (
-    SET KAFKA_RUNNING=true
-)
-FOR /F "tokens=1" %%A IN ('netstat -ano ^| findstr ":3000" ^| findstr "LISTENING"') DO (
-    SET FRONTEND_RUNNING=true
+REM --- Create logs directory ---
+if not exist "%LOG_DIR%" (
+    mkdir "%LOG_DIR%"
+    echo [INFO] Created log directory: %LOG_DIR%
 )
 
-REM Create necessary directories
-echo Creating necessary directories...
-mkdir data\lidar 2>nul
-mkdir data\satellite 2>nul
-mkdir data\colonial_texts 2>nul
-mkdir data\overlays 2>nul
-mkdir outputs\findings 2>nul
-mkdir outputs\logs 2>nul
-mkdir outputs\memory 2>nul
+REM --- Logging function placeholder (batch file logging is less direct) ---
+REM For simplicity, critical messages will be echoed and can be redirected if needed.
 
-REM Check for required commands
-echo Checking required commands...
-where redis-server >nul 2>&1
-if %ERRORLEVEL% NEQ 0 (
-    echo Error: Redis is not installed. Install with: scoop install redis
-    exit /b 1
-)
+REM --- Helper to echo and log ---
+:log_message
+echo [%~1] [%date% %time%] %~2
+echo [%~1] [%date% %time%] %~2 >> "%START_LOG_FILE%"
+goto :eof
 
-where kafka-server-start.bat >nul 2>&1
-if %ERRORLEVEL% NEQ 0 (
-    echo Error: Kafka is not installed. Install with: scoop install kafka
-    exit /b 1
-)
+:log_error
+echo [ERROR] [%date% %time%] %~1
+echo [ERROR] [%date% %time%] %~1 >> "%ERROR_LOG_FILE%"
+goto :eof
 
-where npm >nul 2>&1
-if %ERRORLEVEL% NEQ 0 (
-    echo Error: npm is not installed. Install with: scoop install nodejs
-    exit /b 1
-)
+call :log_message INFO "NIS Protocol Startup Script (start.bat) Initialized"
 
-REM Set Kafka config paths for Windows
-SET KAFKA_CONFIG_DIR=%KAFKA_HOME%\config
-if not exist "%KAFKA_CONFIG_DIR%\server.properties" (
-    echo Error: Kafka configuration not found at %KAFKA_CONFIG_DIR%
-    exit /b 1
-)
-
-REM Setup Python environment
-echo Setting up Python environment...
-if exist "venv" (
-    echo Removing existing virtual environment...
-    rmdir /s /q venv
-)
-
-echo Creating new virtual environment...
-python -m venv venv
-if %ERRORLEVEL% NEQ 0 (
-    echo Error: Failed to create virtual environment
-    exit /b 1
-)
-
-call venv\Scripts\activate.bat
-if %ERRORLEVEL% NEQ 0 (
-    echo Error: Failed to activate virtual environment
-    exit /b 1
-)
-
-echo Installing Python dependencies...
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-if %ERRORLEVEL% NEQ 0 (
-    echo Error: Failed to install Python dependencies
-    exit /b 1
-)
-
-REM Start Redis Server (if not running)
-if not defined REDIS_RUNNING (
-    echo Starting Redis Server...
-    start /B redis-server
-    timeout /t 2 /nobreak >nul
-) else (
-    echo Redis Server is already running
-)
-
-REM Start Zookeeper (if not running)
-if not defined ZOOKEEPER_RUNNING (
-    echo Starting Zookeeper...
-    start /B zookeeper-server-start.bat "%KAFKA_CONFIG_DIR%\zookeeper.properties"
-    timeout /t 5 /nobreak >nul
-) else (
-    echo Zookeeper is already running
-)
-
-REM Start Kafka (if not running)
-if not defined KAFKA_RUNNING (
-    echo Starting Kafka Server...
-    start /B kafka-server-start.bat "%KAFKA_CONFIG_DIR%\server.properties"
-    timeout /t 5 /nobreak >nul
-) else (
-    echo Kafka Server is already running
-)
-
-REM Check if frontend directory exists
-if not exist "frontend" (
-    echo Error: Frontend directory not found
-    exit /b 1
-)
-
-REM Start Frontend (if not running)
-if not defined FRONTEND_RUNNING (
-    echo Starting Frontend...
-    cd frontend
-    call npm install
-    if %ERRORLEVEL% NEQ 0 (
-        echo Error: Failed to install frontend dependencies
-        exit /b 1
-    )
-    start /B npm start
-    cd ..
-    timeout /t 5 /nobreak >nul
-) else (
-    echo Frontend is already running on port 3000
-)
-
-REM Start the API server
-echo Starting NIS Protocol API server...
-start /B python run_api.py
-
-REM Wait for services to be ready
-echo Waiting for services to start...
-timeout /t 5 /nobreak >nul
-
-echo All services started successfully!
-echo Frontend running on: http://localhost:3000
-echo Backend API running on: http://localhost:8000
-echo Redis running on: localhost:6379
-echo Kafka running on: localhost:9092
+REM --- Welcome Banner ---
 echo.
-echo To stop all services, run: stop.bat 
+echo ^<----------------------------------------------------------------^>
+echo ^|                                                                ^|
+echo ^|          ZEN NEURAL-INSPIRED SYSTEM PROTOCOL  (NIS)            ^|
+echo ^|                                                                ^|
+echo ^|   Multi-Agent Intelligence | Geospatial Reasoning             ^|
+echo ^|   Interpreting Ancient History with Modern AI                  ^|
+echo ^|                                                                ^|
+echo ^<----------------------------------------------------------------^>
+echo.
+
+call :log_message INFO "Starting NIS Protocol services using Docker Compose..."
+
+REM --- Check for Docker and Docker Compose ---
+docker --version >nul 2>&1
+if %errorlevel% neq 0 (
+    call :log_error "Docker is not installed or not in PATH. Please install Docker Desktop."
+    goto :eof
+)
+call :log_message INFO "Docker found."
+
+docker-compose --version >nul 2>&1
+if %errorlevel% neq 0 (
+    call :log_error "Docker Compose is not installed or not in PATH. It's included with Docker Desktop."
+    goto :eof
+)
+call :log_message INFO "Docker Compose found."
+
+REM --- Navigate to script's directory (important for docker-compose) ---
+cd /D "%BASE_DIR%"
+
+REM --- Stop existing services (optional, but good practice) ---
+call :log_message INFO "Attempting to stop any existing NIS services..."
+docker-compose down --remove-orphans >> "%START_LOG_FILE%" 2>> "%ERROR_LOG_FILE%"
+if %errorlevel% equ 0 (
+    call :log_message INFO "Existing services stopped (if any)."
+) else (
+    call :log_message WARN "Could not stop existing services, or no services were running. Continuing..."
+)
+
+REM --- Build and Start services in detached mode ---
+call :log_message INFO "Building and starting services with 'docker-compose up --build -d'..."
+docker-compose up --build -d >> "%START_LOG_FILE%" 2>> "%ERROR_LOG_FILE%"
+
+if %errorlevel% equ 0 (
+    call :log_message SUCCESS "NIS Protocol services are starting in detached mode."
+    echo.
+    echo NIS Protocol is launching!
+    echo   Backend API: http://localhost:8000
+    echo   Frontend UI: http://localhost:3000
+    echo.
+    echo   To view logs: docker-compose logs -f
+    echo   To stop services: docker-compose down (or run stop.bat)
+    echo.
+    call :log_message INFO "View detailed startup logs at: %START_LOG_FILE%"
+    call :log_message INFO "View error logs (if any) at: %ERROR_LOG_FILE%"
+) else (
+    call :log_error "Failed to start services with Docker Compose. Check %ERROR_LOG_FILE% and %START_LOG_FILE% for details."
+    echo [ERROR] Failed to start services. See logs for details.
+)
+
+endlocal 

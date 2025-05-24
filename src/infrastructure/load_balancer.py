@@ -157,20 +157,24 @@ class APIGateway:
             version="1.0.0"
         )
         
-        # Configure middleware with enhanced options
-        self._configure_middleware(
-            rate_limit_config=rate_limit_config or {},
-            security_config=security_config or {}
-        )
-        
+        # Ensure rate_limit_config and security_config are dictionaries
+        current_rate_limit_config = rate_limit_config or {}
+        current_security_config = security_config or {}
+
         # Rate limiter and request tracker with configurable parameters
         self.rate_limiter = RateLimiter(
-            max_requests=rate_limit_config.get('max_requests', 100), 
-            window_seconds=rate_limit_config.get('window_seconds', 60),
+            max_requests=current_rate_limit_config.get('max_requests', 100), 
+            window_seconds=current_rate_limit_config.get('window_seconds', 60),
             distributed_manager=self.distributed_manager
         )
         self.request_tracker = RequestTracker(
             distributed_manager=self.distributed_manager
+        )
+
+        # Configure middleware with enhanced options
+        self._configure_middleware(
+            rate_limit_config=current_rate_limit_config, # Use the initialized dict
+            security_config=current_security_config    # Use the initialized dict
         )
     
     def _configure_middleware(

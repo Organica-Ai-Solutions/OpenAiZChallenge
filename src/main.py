@@ -110,9 +110,9 @@ class IndigenousKnowledgePlatform:
         app.include_router(health_router, prefix="/system")
         
         # Configure Role-Based Access Control
-        rbac_middleware = RBACMiddleware(
-            app, 
-            self.authentication_manager,
+        app.add_middleware(
+            RBACMiddleware,
+            auth_manager=self.authentication_manager,
             role_permissions={
                 'researcher': [
                     'read_research', 
@@ -126,7 +126,6 @@ class IndigenousKnowledgePlatform:
                 ]
             }
         )
-        app.add_middleware(rbac_middleware)
         
         # Add authentication routes
         self._add_authentication_routes(app)
@@ -173,13 +172,29 @@ class IndigenousKnowledgePlatform:
             workers=self.processing_config.max_workers
         )
 
-def main():
-    """Application entry point."""
-    platform = IndigenousKnowledgePlatform(
-        environment=Environment.DEVELOPMENT,
-        processing_mode='local'
-    )
-    platform.run()
+# Instantiate the platform and expose the FastAPI app for Uvicorn
+platform = IndigenousKnowledgePlatform(
+    environment=get_environment(), # Use get_environment() for flexibility
+    processing_mode=os.getenv("PROCESSING_MODE", "local") # Get mode from env or default
+)
+app = platform.app
+
+# Optional: Keep main() for direct execution if needed, but ensure it doesn't conflict with Docker CMD
+# For instance, the main() here would try to run uvicorn again if not careful.
+# If Docker's CMD is the primary way to run, this main() might only be for local non-Docker testing.
+def main_cli(): # Renamed to avoid confusion
+    """Application entry point for direct CLI execution (e.g., local testing)."""
+    # The platform is already instantiated globally, so platform.run() can be called
+    # But Uvicorn is started by Docker CMD, so this might be redundant or for a different purpose.
+    logger.info("Attempting to run platform via main_cli(). Note: Docker CMD is the primary runner.")
+    # To avoid running uvicorn twice if this script is imported by the Docker CMD's uvicorn:
+    # We might not want to call platform.run() here if uvicorn is started by Docker CMD.
+    # For now, let's assume this is for optional direct script execution.
+    platform.run() # This will start another Uvicorn if not careful with how the script is invoked.
 
 if __name__ == "__main__":
-    main() 
+    # This block will execute if you run `python src/main.py` directly.
+    # Docker's uvicorn command will import `src.main` and look for `app`.
+    # It will NOT run this __main__ block when importing.
+    logger.info("src/main.py executed directly. Starting server via main_cli().")
+    main_cli() 

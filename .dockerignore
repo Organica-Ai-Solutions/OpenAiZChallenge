@@ -1,0 +1,56 @@
+# General
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+.Python
+env/
+venv/
+ENV/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.mypy_cache/
+.pytest_cache/
+.hypothesis/
+
+# Docker
+Dockerfile
+docker-compose.yml
+# .dockerignore # It's good practice to not ignore the .dockerignore file itself, but for this specific case to ensure it's created, I'll comment it out temporarily if issues persist.
+
+# IDE / Editor
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+nbproject/
+*.swp
+*.swo
+
+# Git
+.git
+.gitignore
+
+# Node / Frontend
+node_modules/
+frontend/
+build/
+dist/
+.next/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Data / Outputs (if not needed in image, but often mounted as volumes)
+# data/ 
+# outputs/ 

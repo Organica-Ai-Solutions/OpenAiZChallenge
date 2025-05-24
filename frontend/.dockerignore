@@ -1,0 +1,8 @@
+node_modules
+.next
+
+# Add other files/directories to ignore if needed:
+# .env
+# npm-debug.log
+# README.md (if it's just for local reference and not needed in image)
+# etc. 

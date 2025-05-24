@@ -1,73 +1,62 @@
 @echo off
-SETLOCAL EnableDelayedExpansion
+setlocal
 
-:: Stop script for the NIS Protocol project
+REM --- Configuration ---
+set "BASE_DIR=%~dp0"
+set "LOG_DIR=%BASE_DIR%logs"
+set "TIMESTAMP_FORMAT=%date:~10,4%%date:~4,2%%date:~7,2%_%time:~0,2%%time:~3,2%%time:~6,2%"
+set "STOP_LOG_FILE=%LOG_DIR%\nis_stop_bat_%TIMESTAMP_FORMAT%.log"
+set "ERROR_LOG_FILE=%LOG_DIR%\nis_stop_bat_error_%TIMESTAMP_FORMAT%.log"
 
-echo Stopping all services...
-
-:: Stop the API server
-FOR /F "tokens=2" %%A IN ('tasklist /FI "IMAGENAME eq python.exe" /FI "WINDOWTITLE eq run_api.py" /NH') DO (
-    echo Stopping API server...
-    taskkill /PID %%A /F >nul 2>&1
-)
-timeout /t 2 /nobreak >nul
-
-:: Stop the frontend
-FOR /F "tokens=2" %%A IN ('tasklist /FI "IMAGENAME eq node.exe" /NH') DO (
-    echo Stopping frontend...
-    taskkill /PID %%A /F >nul 2>&1
-)
-timeout /t 2 /nobreak >nul
-
-:: Stop Kafka
-echo Stopping Kafka...
-call kafka-server-stop.bat
-timeout /t 3 /nobreak >nul
-
-:: Stop Zookeeper
-echo Stopping Zookeeper...
-call zookeeper-server-stop.bat
-timeout /t 2 /nobreak >nul
-
-:: Stop Redis
-echo Stopping Redis...
-redis-cli shutdown
-timeout /t 1 /nobreak >nul
-
-:: Verify all services are stopped
-echo Verifying all services are stopped...
-timeout /t 2 /nobreak >nul
-
-SET SERVICES_RUNNING=false
-
-:: Check if services are still running
-FOR /F "tokens=1" %%A IN ('netstat -ano ^| findstr ":8000" ^| findstr "LISTENING"') DO (
-    echo Warning: API server is still running on port 8000
-    SET SERVICES_RUNNING=true
+REM --- Create logs directory (if it doesn't exist) ---
+if not exist "%LOG_DIR%" (
+    mkdir "%LOG_DIR%"
+    echo [INFO] Created log directory: %LOG_DIR%
 )
 
-FOR /F "tokens=1" %%A IN ('netstat -ano ^| findstr ":3000" ^| findstr "LISTENING"') DO (
-    echo Warning: Frontend is still running on port 3000
-    SET SERVICES_RUNNING=true
-)
+REM --- Helper to echo and log ---
+:log_message
+echo [%~1] [%date% %time%] %~2
+echo [%~1] [%date% %time%] %~2 >> "%STOP_LOG_FILE%"
+goto :eof
 
-FOR /F "tokens=1" %%A IN ('netstat -ano ^| findstr ":9092" ^| findstr "LISTENING"') DO (
-    echo Warning: Kafka is still running on port 9092
-    SET SERVICES_RUNNING=true
-)
+:log_error
+echo [ERROR] [%date% %time%] %~1
+echo [ERROR] [%date% %time%] %~1 >> "%ERROR_LOG_FILE%"
+goto :eof
 
-FOR /F "tokens=1" %%A IN ('netstat -ano ^| findstr ":2181" ^| findstr "LISTENING"') DO (
-    echo Warning: Zookeeper is still running on port 2181
-    SET SERVICES_RUNNING=true
-)
+call :log_message INFO "NIS Protocol Shutdown Script (stop.bat) Initialized"
 
-FOR /F "tokens=1" %%A IN ('netstat -ano ^| findstr ":6379" ^| findstr "LISTENING"') DO (
-    echo Warning: Redis is still running on port 6379
-    SET SERVICES_RUNNING=true
+REM --- Check for Docker and Docker Compose ---
+docker --version >nul 2>&1
+if %errorlevel% neq 0 (
+    call :log_error "Docker is not installed or not in PATH. Please install Docker Desktop."
+    goto :eof
 )
+call :log_message INFO "Docker found."
 
-if "!SERVICES_RUNNING!"=="true" (
-    echo Some services are still running. You may need to stop them manually.
+docker-compose --version >nul 2>&1
+if %errorlevel% neq 0 (
+    call :log_error "Docker Compose is not installed or not in PATH. It's included with Docker Desktop."
+    goto :eof
+)
+call :log_message INFO "Docker Compose found."
+
+REM --- Navigate to script's directory (important for docker-compose) ---
+cd /D "%BASE_DIR%"
+
+call :log_message INFO "Stopping NIS Protocol services using Docker Compose..."
+
+docker-compose down --remove-orphans >> "%STOP_LOG_FILE%" 2>> "%ERROR_LOG_FILE%"
+
+if %errorlevel% equ 0 (
+    call :log_message SUCCESS "NIS Protocol services stopped and removed successfully."
+    echo NIS Protocol services have been shut down.
 ) else (
-    echo All services stopped successfully!
-) 
+    call :log_error "An error occurred while stopping services with Docker Compose. Check %ERROR_LOG_FILE% for details."
+    echo [ERROR] Failed to stop services cleanly. See logs for details.
+)
+
+call :log_message INFO "View detailed shutdown logs at: %STOP_LOG_FILE%"
+
+endlocal 

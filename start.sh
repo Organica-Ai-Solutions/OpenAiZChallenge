@@ -60,12 +60,44 @@ check_memory() {
 
 # Check disk space for macOS
 check_disk_space() {
-    local disk_space=$(df -h "$BASE_DIR" | awk 'NR==2 {print $4}')
-    log "Available Disk Space: $disk_space"
+    local df_output
+    df_output=$(df -h "$BASE_DIR" | awk 'NR==2 {print $4}')
+    log "Available Disk Space (raw): $df_output"
+
+    local unit="${df_output//[0-9.]/}" # Extract unit (G, M, T, etc.)
+    local value="${df_output//[^0-9.]/}" # Extract numeric value
+
+    if [[ -z "$value" ]]; then
+        log "Could not parse available disk space from: '$df_output'. Skipping check." "WARNING"
+        return
+    fi
+
+    local value_gb="$value"
+
+    if [[ "$unit" == "T" || "$unit" == "TB" ]]; then
+        value_gb=$(echo "$value * 1024" | bc -l)
+    elif [[ "$unit" == "M" || "$unit" == "MB" ]]; then
+        value_gb=$(echo "$value / 1024" | bc -l)
+    elif [[ "$unit" == "K" || "$unit" == "KB" ]]; then
+        value_gb=$(echo "$value / 1024 / 1024" | bc -l)
+    elif [[ "$unit" == "G" || "$unit" == "GB" || "$unit" == "Gi" ]]; then
+        # Value is already in a Gigabyte-compatible unit, no conversion needed for value_gb itself
+        # This case prevents falling into the "Unknown unit" log for G, GB, Gi
+        : # No operation needed, value_gb is already $value which is in G/GB/Gi
+    else
+        log "Unknown disk space unit '$unit' from output '$df_output'. Assuming Gigabytes for comparison, but this might be inaccurate." "WARNING"
+    fi
     
-    local space_gb=$(echo "$disk_space" | sed 's/G//')
-    if (( $(echo "$space_gb < 10" | bc -l) )); then
-        log "WARNING: Low disk space detected. Ensure at least 10GB is available." "WARNING"
+    # Ensure value_gb is not empty and is a number before comparison
+    if ! [[ "$value_gb" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+        log "Parsed value '$value_gb' is not a valid number for comparison. Skipping disk space check." "WARNING"
+        return
+    fi
+
+    log "Available Disk Space (parsed): $value_gb GB"
+
+    if (( $(echo "$value_gb < 10" | bc -l 2>/dev/null) )); then
+        log "WARNING: Low disk space detected ($value_gb GB). Ensure at least 10GB is available." "WARNING"
     fi
 }
 
@@ -289,4 +321,4 @@ main
 # set +x # Disable command tracing
 
 # Execute main function
-main 
+# main # This line is a duplicate and will be removed 

@@ -2,62 +2,47 @@
 
 # Stop script for the NIS Protocol project
 
-echo "Stopping all services..."
+# Enhanced Logging and Error Handling
+SCRIPT_NAME=$(basename "$0")
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOG_DIR="${BASE_DIR}/logs"
+STOP_LOG_FILE="${LOG_DIR}/nis_stop_${TIMESTAMP}.log"
+ERROR_LOG_FILE="${LOG_DIR}/nis_stop_error_${TIMESTAMP}.log"
 
-# Stop the API server
-pkill -f "python run_api.py"
-sleep 2
+# Create logs directory if it doesn't exist
+mkdir -p "$LOG_DIR"
 
-# Stop the frontend
-pkill -f "node.*start"
-sleep 2
+# Clear/Initialize log files
+> "$STOP_LOG_FILE"
+> "$ERROR_LOG_FILE"
 
-# Stop Kafka
-kafka-server-stop
-sleep 3
+# Logging function
+log() {
+    echo "[INFO] [$(date +'%Y-%m-%d %H:%M:%S')] $1" | tee -a "$STOP_LOG_FILE"
+}
 
-# Stop Zookeeper
-zookeeper-server-stop
-sleep 2
+error_log() {
+    echo "[ERROR] [$(date +'%Y-%m-%d %H:%M:%S')] $1" | tee -a "$ERROR_LOG_FILE" >&2
+}
 
-# Stop Redis
-redis-cli shutdown
-sleep 1
+trap 'error_log "An error occurred during shutdown. Check $ERROR_LOG_FILE"' ERR
 
-# Verify all services are stopped
-echo "Verifying all services are stopped..."
-sleep 2
+log "Stopping all NIS Protocol services managed by Docker Compose..."
 
-SERVICES_RUNNING=false
-
-# Check if services are still running
-if lsof -i :8000 > /dev/null; then
-    echo "Warning: API server is still running on port 8000"
-    SERVICES_RUNNING=true
+# Determine Docker Compose command
+DOCKER_COMPOSE_CMD="docker-compose"
+if ! command -v docker-compose &> /dev/null && command -v docker && docker compose version &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker compose"
 fi
 
-if lsof -i :3000 > /dev/null; then
-    echo "Warning: Frontend is still running on port 3000"
-    SERVICES_RUNNING=true
-fi
-
-if lsof -i :9092 > /dev/null; then
-    echo "Warning: Kafka is still running on port 9092"
-    SERVICES_RUNNING=true
-fi
-
-if lsof -i :2181 > /dev/null; then
-    echo "Warning: Zookeeper is still running on port 2181"
-    SERVICES_RUNNING=true
-fi
-
-if lsof -i :6379 > /dev/null; then
-    echo "Warning: Redis is still running on port 6379"
-    SERVICES_RUNNING=true
-fi
-
-if [ "$SERVICES_RUNNING" = true ]; then
-    echo "Some services are still running. You may need to stop them manually."
+if $DOCKER_COMPOSE_CMD down --remove-orphans; then
+    log "All Docker Compose services stopped successfully."
 else
-    echo "All services stopped successfully!"
-fi 
+    error_log "Failed to stop Docker Compose services. Check Docker daemon and logs."
+    # You might want to add specific checks here if needed, but `down` should handle it.
+    exit 1
+fi
+
+log "NIS Protocol shutdown complete."
+echo "All NIS services have been requested to stop via Docker Compose." 
