@@ -21,6 +21,7 @@ try:
     from src.agents.action_agent import ActionAgent
     from src.meta import MetaProtocolCoordinator
     from src.analysis.pattern_detection import PatternDetectionEngine
+    from src.agents.consciousness_module import GlobalWorkspace, ConsciousnessMonitor
     agents_available = True
 except ImportError as e:
     logging.warning(f"Could not import agent modules: {e}")
@@ -64,43 +65,11 @@ class MCPAdapter:
     
     def send_message(self, message: Dict[str, Any]) -> Dict[str, Any]:
         """Send a message via the MCP protocol."""
-        # In a real implementation, this would handle API calls to external services
-        # For now, we'll just log and mock the response
         target = message.get("target", "")
         content = message.get("content", {})
         action = content.get("action", "")
-        
         logger.info(f"MCP message to {target}: {action}")
-        
-        # Mock responses for different targets
-        if target == "openai":
-            # Mock OpenAI API call
-            return {"status": "success", "model": "gpt-4.1", "response": "Mock GPT-4.1 response"}
-        elif target == "vision_service":
-            # Mock external vision service
-            return {"status": "success", "detected_objects": ["mock object 1", "mock object 2"]}
-        elif target == "web_search_tool" and action == "search":
-            query = content.get("query", "")
-            logger.info(f"MCPAdapter: Would perform web search for query: '{query}'")
-            # In a real implementation, this would call an actual web search API/tool.
-            # For simulation, return mock search results.
-            return {
-                "status": "success",
-                "results": [
-                    {
-                        "title": f"Mock Search Result 1 for {query}",
-                        "link": f"http://example.com/search?q={query.replace(' ', '+')}&result=1",
-                        "snippet": f"This is a mock snippet for the query '{query}'. It mentions potential links to ancient civilizations or relevant geographical features."
-                    },
-                    {
-                        "title": f"Mock Search Result 2 for {query}",
-                        "link": f"http://example.com/search?q={query.replace(' ', '+')}&result=2",
-                        "snippet": f"Another mock snippet for '{query}', discussing related findings or alternative explanations for similar observations."
-                    }
-                ]
-            }
-        else:
-            return {"status": "error", "message": f"Unknown MCP target or action: {target}/{action}"}
+        raise NotImplementedError("MCPAdapter.send_message must be implemented for production use.")
 
 
 class ACPAdapter:
@@ -211,6 +180,17 @@ class NISProtocol:
                 self.action_agent = ActionAgent(meta_coordinator=self.coordinator, memory_agent=self.memory_agent)
                 self.pattern_engine = PatternDetectionEngine() # Initialize PatternDetectionEngine
                 
+                # Create the global workspace
+                self.workspace = GlobalWorkspace({
+                    'vision': self.vision_agent,
+                    'memory': self.memory_agent,
+                    'reasoning': self.reasoning_agent
+                })
+                
+                # Optionally, start the consciousness monitor in a background thread or async task
+                self.monitor = ConsciousnessMonitor(self.workspace)
+                # self.monitor.maintain_awareness(max_cycles=10)  # For testing, run 10 cycles
+                
                 # Register agents with the coordinator
                 self.agent_registry = {
                     "vision_agent": self.vision_agent,
@@ -247,9 +227,8 @@ class NISProtocol:
                                  use_indigenous: bool = True) -> Dict[str, Any]:
         """Run the full NIS Protocol analysis on coordinates using LangGraph."""
         if not self.agents_available or self.graph is None:
-            logger.info(f"Agents or graph not available. Using mock implementations for coordinates: {lat}, {lon}")
-            return self._mock_analyze(lat, lon, use_satellite, use_lidar, 
-                                      use_historical, use_indigenous)
+            logger.error("NISProtocol: Agents or graph not available. Real data/models are required in production.")
+            raise RuntimeError("NISProtocol: Agents or graph not available. Real data/models are required in production.")
         
         initial_state = GraphState(
             latitude=lat,
@@ -267,7 +246,7 @@ class NISProtocol:
             final_report=None,
             error_message=None,
             current_task_id=None,
-            # Iteration control
+            # Fields for iterative decision making by ActionAgent
             iteration_count=0,
             max_iterations=3, # Max 3 iterations of refinement
             action_decision=None,
@@ -280,8 +259,7 @@ class NISProtocol:
             
             if final_graph_output.get("error_message"):
                 logger.error(f"Error in NIS Protocol analysis: {final_graph_output['error_message']}", exc_info=True)
-                return self._mock_analyze(lat, lon, use_satellite, use_lidar,
-                                          use_historical, use_indigenous)
+                raise RuntimeError(f"NIS Protocol analysis failed: {final_graph_output['error_message']}")
             
             final_report = final_graph_output.get("final_report", {})
             
@@ -299,130 +277,7 @@ class NISProtocol:
             
         except Exception as e:
             logger.error(f"Error in NIS Protocol analysis: {e}", exc_info=True)
-            return self._mock_analyze(lat, lon, use_satellite, use_lidar,
-                                      use_historical, use_indigenous)
-    
-    def _mock_analyze(self, 
-                     lat: float, 
-                     lon: float, 
-                     use_satellite: bool,
-                     use_lidar: bool,
-                     use_historical: bool,
-                     use_indigenous: bool) -> Dict[str, Any]:
-        """Provide mock analysis when real agents are unavailable.
-        
-        This is a fallback that mimics the behavior of the full agent system.
-        
-        Args:
-            Same as analyze_coordinates
-            
-        Returns:
-            Mock analysis results
-        """
-        import random
-        
-        # Mock patterns to detect based on coordinates
-        patterns = [
-            "circular geometric structures",
-            "rectangular settlement patterns",
-            "linear earthworks",
-            "anthropogenic soil signatures",
-            "artificial mounds",
-            "road networks",
-            "water management systems",
-        ]
-        
-        # Deterministic selection based on coordinates
-        pattern_index = hash(f"{lat:.4f}_{lon:.4f}") % len(patterns)
-        pattern_type = patterns[pattern_index]
-        
-        # Mock description templates
-        descriptions = {
-            "circular geometric structures": "Potential settlement with circular housing arrangement, typical of {tribe} communities between {start_year}-{end_year}.",
-            "rectangular settlement patterns": "Evidence of organized habitation with rectangular structures, suggesting post-contact influence or {tribe} ceremonial grounds.",
-            "linear earthworks": "Possible defensive structures or boundaries, similar to those documented in the {region} region.",
-            "anthropogenic soil signatures": "Likely terra preta (Amazonian dark earth), indicating long-term human occupation and agricultural activity.",
-            "artificial mounds": "Elevated structures potentially used for habitation to avoid seasonal flooding, similar to documented sites at {similar_site}.",
-            "road networks": "Complex pathway system connecting to water sources or potentially other settlements {distance} km away.",
-            "water management systems": "Sophisticated hydrology controls, suggesting advanced understanding of seasonal water flow in the {river} basin."
-        }
-        
-        # Fill in template based on location
-        tribes = ["Tupi", "Arawak", "Carib", "Jê", "Yanomami"]
-        regions = ["Upper Xingu", "Tapajós", "Rio Negro", "Madeira", "Ucayali"]
-        rivers = ["Amazon", "Xingu", "Tapajós", "Negro", "Madeira"]
-        sites = ["Kuhikugu", "Geoglyphs of Acre", "Montegrande", "Cotoca"]
-        
-        # Deterministic selection based on coordinates
-        tribe_index = hash(f"{lat:.2f}") % len(tribes)
-        region_index = hash(f"{lon:.2f}") % len(regions)
-        start_year = 800 + (hash(f"{lat:.1f}_{lon:.1f}") % 700)  # Between 800-1500 CE
-        end_year = start_year + 200 + (hash(f"{lat:.3f}_{lon:.3f}") % 300)
-        distance = 5 + (hash(f"{lat:.4f}") % 20)
-        river_index = hash(f"{lon:.3f}") % len(rivers)
-        site_index = hash(f"{lat:.2f}_{lon:.2f}") % len(sites)
-        
-        # Fill template
-        description = descriptions[pattern_type].format(
-            tribe=tribes[tribe_index],
-            region=regions[region_index],
-            start_year=start_year,
-            end_year=end_year,
-            distance=distance,
-            river=rivers[river_index],
-            similar_site=sites[site_index]
-        )
-        
-        # Generate confidence score (deterministic based on coordinates)
-        base_confidence = 0.65 + (hash(f"{lat:.3f}_{lon:.3f}") % 25) / 100
-        
-        # Determine sources used
-        sources = []
-        historical_context = ""
-        indigenous_perspective = ""
-        
-        if use_satellite:
-            sources.append(f"Sentinel-2 Scene ID: S2A_MSIL2A_{20220101 + hash(f'{lat:.2f}_{lon:.2f}') % 10000}")
-        
-        if use_lidar:
-            sources.append(f"Earth Archive LIDAR Tile #{10000 + hash(f'{lat:.2f}_{lon:.2f}') % 90000}")
-        
-        if use_historical:
-            sources.append(f"Colonial Records (c. {1500 + hash(f'{lat:.1f}') % 300})")
-            historical_context = f"Colonial documents from the {regions[region_index]} region mention settlements that match the pattern detected in our analysis. These records describe {tribes[tribe_index]} communities establishing large settlements in this area between {start_year} and {end_year} CE."
-        
-        if use_indigenous:
-            sources.append(f"{tribes[tribe_index]} Oral Tradition Map")
-            indigenous_perspective = f"Traditional knowledge from {tribes[tribe_index]} communities describes this area as an ancestral settlement site. Oral histories recount how their ancestors built {pattern_type.lower()} for community gatherings and protection."
-        
-        # Generate mock recommendations
-        recommendations = [
-            {
-                "action": "lidar_survey",
-                "description": "Conduct higher-resolution LIDAR scan of the area.",
-                "priority": "high"
-            },
-            {
-                "action": "indigenous_consultation",
-                "description": f"Consult with local {tribes[tribe_index]} communities about the site.",
-                "priority": "high"
-            },
-            {
-                "action": "ground_verification",
-                "description": "Verify findings with a field expedition if possible.",
-                "priority": "medium"
-            }
-        ]
-        
-        return {
-            "location": {"lat": lat, "lon": lon},
-            "confidence": base_confidence,
-            "description": description,
-            "sources": sources,
-            "historical_context": historical_context,
-            "indigenous_perspective": indigenous_perspective,
-            "recommendations": recommendations
-        }
+            raise
 
     def _build_graph(self):
         if not self.agents_available:
@@ -438,7 +293,7 @@ class NISProtocol:
         workflow.add_node("action_strategy", self._action_strategy_node) # Renamed from action_generation
         workflow.add_node("error_handler", self._error_handler_node)
         workflow.add_node("final_report_generation", self._final_report_node)
-
+        workflow.add_node("consciousness", self.consciousness_node)
 
         # Define edges (flow)
         workflow.set_entry_point("vision_analysis")
@@ -469,7 +324,7 @@ class NISProtocol:
             "action_strategy",
             self._decide_next_step_from_action_strategy,
             {
-                "finalize": "final_report_generation",
+                "finalize": "consciousness",  # Route to consciousness node before final report
                 "rerun_vision": "vision_analysis",
                 "rerun_patterns": "pattern_detection",
                 "clarify_reasoning": "reasoning", # Example for re-running reasoning
@@ -477,6 +332,8 @@ class NISProtocol:
             }
         )
         
+        # Add edge from consciousness node to final report
+        workflow.add_edge("consciousness", "final_report_generation")
         # Final steps
         workflow.add_edge("final_report_generation", END)
         workflow.add_edge("error_handler", END) # Errors also lead to the end of the graph
@@ -695,7 +552,8 @@ class NISProtocol:
                 visual_findings=visual_findings_for_report,
                 reasoning_interpretation=state.get("reasoning_interpretation") or {}
             )
-            return {"final_report": final_report_data, "error_message": None} # Clear error on successful report
+            # Return all state keys, updating final_report and error_message
+            return {**state, "final_report": final_report_data, "error_message": None}
         except Exception as e:
             logger.error(f"Error in Final Report Generation Node: {e}", exc_info=True)
             # If report generation itself fails, preserve original error or set a new one
@@ -708,6 +566,17 @@ class NISProtocol:
         # The graph transitions to END from here, so no new state fields are strictly necessary
         # unless a subsequent node specifically needs to know it passed through the error handler.
         return {"error_message": error_msg} # Preserve error message
+
+    def consciousness_node(self, state: dict) -> dict:
+        import logging
+        logger = logging.getLogger(__name__)
+        # Use the workspace to integrate information
+        integrated = self.workspace.integrate_information()
+        logger.info(f"[Consciousness Node] Integrated info: {integrated}")
+        # Return a new dict with the consciousness key set
+        new_state = dict(state)
+        new_state['consciousness'] = integrated
+        return new_state
 
 
 # Create a singleton instance

@@ -14,6 +14,7 @@ import numpy as np
 import tempfile
 import asyncio
 from PIL import Image
+import time
 
 # Import the GPT integration for vision analysis
 from src.meta.gpt_integration import GPTIntegration
@@ -55,43 +56,16 @@ class VisionAgent:
     ) -> Dict:
         """
         Analyze an image using GPT Vision.
-        
-        Args:
-            image_path: Path to the image file
-            prompt: Optional custom prompt for analysis
-            
-        Returns:
-            Dictionary containing analysis results
         """
-        try:
-            if not self.gpt:
-                logger.warning("GPTIntegration not available, using mock analysis for analyze_image.")
-                return self._mock_analysis()
-                
-            result = await self.gpt.vision_analysis(
-                image_path=image_path,
-                prompt=prompt
-            )
-            
-            if not isinstance(result, dict):
-                logger.error(f"GPT Vision analysis returned non-dict type: {type(result)}. Content: {result}")
-                return {"error": "GPT Vision returned unexpected data type.", "details": str(result)}
-
-            return result
-            
-        except Exception as e:
-            logger.error(f"Error analyzing image with GPT Vision: {str(e)}")
-            return {"error": str(e), "analysis": "Error during GPT Vision call."}
-    
-    def _mock_analysis(self) -> Dict:
-        """Return mock analysis when GPT Vision is unavailable."""
-        logger.info("Generating mock analysis for an image.")
-        return {
-            "analysis": "Mock vision analysis - GPT Vision not available or failed.",
-            "confidence": random.uniform(0.1, 0.4),
-            "features_detected": [{"type": "Mock Feature", "confidence": random.uniform(0.1,0.4), "details": "Mock details"}],
-            "recommendations": ["Consider manual review due to mock analysis."]
-        }
+        if not self.gpt:
+            raise RuntimeError("GPTIntegration not available. Vision analysis requires a valid model/API.")
+        result = await self.gpt.vision_analysis(
+            image_path=image_path,
+            prompt=prompt
+        )
+        if not isinstance(result, dict):
+            raise RuntimeError(f"GPT Vision analysis returned non-dict type: {type(result)}. Content: {result}")
+        return result
     
     async def analyze_coordinates(self, lat: float, lon: float, 
                            use_satellite: bool = True, 
@@ -146,130 +120,69 @@ class VisionAgent:
         return results
     
     async def _process_satellite(self, lat: float, lon: float) -> Dict:
-        """Process satellite imagery for the given coordinates."""
         tile_path = get_tile_path(lat, lon, "satellite")
         if not tile_path.exists():
-            logger.warning(f"Satellite tile not found: {tile_path}. Using mock data.")
-            return self._generate_mock_satellite_result(lat, lon)
-
-        try:
-            data, metadata = load_raster_data(tile_path)
-            row, col = get_pixel_coords(lat, lon, metadata["transform"])
-            patch_data = extract_patch(data, row, col, size=256)
-
-            if patch_data is None or patch_data.size == 0:
-                logger.warning(f"Empty patch extracted for satellite data at {lat}, {lon}. Using mock data.")
-                return self._generate_mock_satellite_result(lat, lon)
-
-            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_file:
-                if patch_data.ndim == 3 and patch_data.shape[0] in [3,4]:
-                    patch_data_rgb = patch_data[:3,:,:]
-                    patch_data_rgb = np.moveaxis(patch_data_rgb, 0, -1)
-                elif patch_data.ndim == 2:
-                    patch_data_rgb = np.stack((patch_data,)*3, axis=-1)
-                else:
-                    logger.warning(f"Satellite patch has unexpected shape {patch_data.shape}. Saving first slice/band if possible.")
-                    if patch_data.ndim == 3: patch_data = patch_data[0]
-                    if patch_data.ndim == 2: patch_data_rgb = np.stack((patch_data,)*3, axis=-1)
-                    else:
-                         logger.error(f"Cannot convert satellite patch of shape {patch_data.shape} to image. Using mock.")
-                         return self._generate_mock_satellite_result(lat, lon)
-
-                patch_data_rgb = (patch_data_rgb - np.min(patch_data_rgb)) / (np.max(patch_data_rgb) - np.min(patch_data_rgb) + 1e-6) * 255
-                patch_data_rgb = patch_data_rgb.astype(np.uint8)
-                
-                img = Image.fromarray(patch_data_rgb)
-                img.save(tmp_file.name)
-                tmp_file_path = tmp_file.name
-
-            logger.info(f"Satellite patch saved to {tmp_file_path}")
-            
-            prompt = "Analyze this satellite image patch for any signs of archaeological significance, such as geometric patterns, unnatural formations, soil discolorations, or vegetation anomalies. Describe any detected features and estimate their potential relevance."
-            gpt_analysis = await self.analyze_image(image_path=tmp_file_path, prompt=prompt)
-            
-            os.unlink(tmp_file_path)
-
-            if "error" in gpt_analysis or not isinstance(gpt_analysis, dict):
-                logger.warning(f"GPT Vision analysis failed for satellite patch: {gpt_analysis.get('error', 'Unknown error')}. Using mock features.")
-                features = self._detect_archaeological_features(patch_data)
-                confidence = max([f.get('confidence', 0) for f in features] + [0])
+            raise FileNotFoundError(f"Satellite tile not found: {tile_path}.")
+        data, metadata = load_raster_data(tile_path)
+        row, col = get_pixel_coords(lat, lon, metadata["transform"])
+        patch_data = extract_patch(data, row, col, size=256)
+        if patch_data is None or patch_data.size == 0:
+            raise ValueError(f"Empty patch extracted for satellite data at {lat}, {lon}.")
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_file:
+            if patch_data.ndim == 3 and patch_data.shape[0] in [3,4]:
+                patch_data_rgb = patch_data[:3,:,:]
+                patch_data_rgb = np.moveaxis(patch_data_rgb, 0, -1)
+            elif patch_data.ndim == 2:
+                patch_data_rgb = np.stack((patch_data,)*3, axis=-1)
             else:
-                analysis_text = gpt_analysis.get("analysis", "")
-                if isinstance(analysis_text, dict) and "choices" in analysis_text and analysis_text["choices"]:
-                    analysis_text = analysis_text["choices"][0].get("message", {}).get("content","")
-
-                features = [{"type": "GPT Vision Feature", "details": analysis_text, "confidence": gpt_analysis.get("confidence", 0.5)}]
-                confidence = gpt_analysis.get("confidence", 0.5)
-
-            return {
-                "confidence": confidence,
-                "features_detected": features,
-                "source": f"Sentinel-2 Tile {tile_path.name} (GPT Vision Analyzed)",
-                "location": {"lat": lat, "lon": lon},
-                "raw_gpt_response": gpt_analysis
-            }
-
-        except FileNotFoundError:
-            logger.warning(f"Satellite tile not found for {lat}, {lon} at expected path. Using mock data.")
-            return self._generate_mock_satellite_result(lat, lon)
-        except Exception as e:
-            logger.error(f"Satellite processing with GPT Vision failed: {str(e)}", exc_info=True)
-            return self._generate_mock_satellite_result(lat, lon)
+                raise ValueError(f"Satellite patch has unexpected shape {patch_data.shape}.")
+            patch_data_rgb = (patch_data_rgb - np.min(patch_data_rgb)) / (np.max(patch_data_rgb) - np.min(patch_data_rgb) + 1e-6) * 255
+            patch_data_rgb = patch_data_rgb.astype(np.uint8)
+            img = Image.fromarray(patch_data_rgb)
+            img.save(tmp_file.name)
+            tmp_file_path = tmp_file.name
+        prompt = "Analyze this satellite image patch for any signs of archaeological significance, such as geometric patterns, unnatural formations, soil discolorations, or vegetation anomalies. Describe any detected features and estimate their potential relevance."
+        gpt_analysis = await self.analyze_image(image_path=tmp_file_path, prompt=prompt)
+        os.unlink(tmp_file_path)
+        analysis_text = gpt_analysis.get("analysis", "")
+        features = [{"type": "GPT Vision Feature", "details": analysis_text, "confidence": gpt_analysis.get("confidence", 0.5)}]
+        confidence = gpt_analysis.get("confidence", 0.5)
+        return {
+            "confidence": confidence,
+            "features_detected": features,
+            "source": f"Sentinel-2 Tile {tile_path.name} (GPT Vision Analyzed)",
+            "location": {"lat": lat, "lon": lon},
+            "raw_gpt_response": gpt_analysis
+        }
     
     async def _process_lidar(self, lat: float, lon: float) -> Dict:
-        """Process LIDAR data for the given coordinates."""
         tile_path = get_tile_path(lat, lon, "lidar")
         if not tile_path.exists():
-            logger.warning(f"LIDAR tile not found: {tile_path}. Using mock data.")
-            return self._generate_mock_lidar_result(lat, lon)
-            
-        try:
-            data, metadata = load_raster_data(tile_path)
-            row, col = get_pixel_coords(lat, lon, metadata["transform"])
-            patch_data = extract_patch(data, row, col, size=256)
-
-            if patch_data is None or patch_data.size == 0:
-                logger.warning(f"Empty patch extracted for LIDAR data at {lat}, {lon}. Using mock data.")
-                return self._generate_mock_lidar_result(lat, lon)
-
-            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_file:
-                patch_normalized = (patch_data - np.min(patch_data)) / (np.max(patch_data) - np.min(patch_data) + 1e-6) * 255
-                patch_img_data = patch_normalized.astype(np.uint8)
-                img = Image.fromarray(patch_img_data, mode='L')
-                img.save(tmp_file.name)
-                tmp_file_path = tmp_file.name
-            
-            logger.info(f"LIDAR patch saved to {tmp_file_path}")
-
-            prompt = "Analyze this LIDAR-derived image patch (representing terrain elevation) for archaeological signs like earthworks, mounds, depressions, or subtle geometric patterns not visible in regular satellite imagery. Describe detected features and their potential significance."
-            gpt_analysis = await self.analyze_image(image_path=tmp_file_path, prompt=prompt)
-            
-            os.unlink(tmp_file_path)
-
-            if "error" in gpt_analysis or not isinstance(gpt_analysis, dict):
-                logger.warning(f"GPT Vision analysis failed for LIDAR patch: {gpt_analysis.get('error', 'Unknown error')}. Using mock features.")
-                features = self._detect_archaeological_features(patch_data)
-                confidence = max([f.get('confidence', 0) for f in features] + [0])
-            else:
-                analysis_text = gpt_analysis.get("analysis", "")
-                if isinstance(analysis_text, dict) and "choices" in analysis_text and analysis_text["choices"]:
-                    analysis_text = analysis_text["choices"][0].get("message", {}).get("content","")
-                features = [{"type": "GPT Vision Feature (LIDAR)", "details": analysis_text, "confidence": gpt_analysis.get("confidence", 0.5)}]
-                confidence = gpt_analysis.get("confidence", 0.5)
-
-            return {
-                "confidence": confidence,
-                "features_detected": features,
-                "source": f"LIDAR Tile {tile_path.name} (GPT Vision Analyzed)",
-                "location": {"lat": lat, "lon": lon},
-                "raw_gpt_response": gpt_analysis
-            }
-        except FileNotFoundError:
-            logger.warning(f"LIDAR tile not found for {lat}, {lon} at expected path. Using mock data.")
-            return self._generate_mock_lidar_result(lat, lon)
-        except Exception as e:
-            logger.error(f"LIDAR processing with GPT Vision failed: {str(e)}", exc_info=True)
-            return self._generate_mock_lidar_result(lat, lon)
+            raise FileNotFoundError(f"LIDAR tile not found: {tile_path}.")
+        data, metadata = load_raster_data(tile_path)
+        row, col = get_pixel_coords(lat, lon, metadata["transform"])
+        patch_data = extract_patch(data, row, col, size=256)
+        if patch_data is None or patch_data.size == 0:
+            raise ValueError(f"Empty patch extracted for LIDAR data at {lat}, {lon}.")
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_file:
+            patch_normalized = (patch_data - np.min(patch_data)) / (np.max(patch_data) - np.min(patch_data) + 1e-6) * 255
+            patch_img_data = patch_normalized.astype(np.uint8)
+            img = Image.fromarray(patch_img_data, mode='L')
+            img.save(tmp_file.name)
+            tmp_file_path = tmp_file.name
+        prompt = "Analyze this LIDAR-derived image patch (representing terrain elevation) for archaeological signs like earthworks, mounds, depressions, or subtle geometric patterns not visible in regular satellite imagery. Describe detected features and their potential significance."
+        gpt_analysis = await self.analyze_image(image_path=tmp_file_path, prompt=prompt)
+        os.unlink(tmp_file_path)
+        analysis_text = gpt_analysis.get("analysis", "")
+        features = [{"type": "GPT Vision Feature (LIDAR)", "details": analysis_text, "confidence": gpt_analysis.get("confidence", 0.5)}]
+        confidence = gpt_analysis.get("confidence", 0.5)
+        return {
+            "confidence": confidence,
+            "features_detected": features,
+            "source": f"LIDAR Tile {tile_path.name} (GPT Vision Analyzed)",
+            "location": {"lat": lat, "lon": lon},
+            "raw_gpt_response": gpt_analysis
+        }
     
     def _detect_archaeological_features(self, data: np.ndarray) -> List[Dict]:
         """
@@ -410,17 +323,9 @@ class VisionAgent:
         return "Unable to generate recommendation."
     
     def _generate_mock_satellite_result(self, lat: float, lon: float) -> Dict:
-        """Generate mock satellite analysis results.
-        
-        Args:
-            lat: Latitude coordinate
-            lon: Longitude coordinate
-            
-        Returns:
-            Mock satellite analysis
-        """
+        """Generate mock satellite analysis results."""
         # Use hash of coordinates for deterministic results
-        seed = hash(f"{lat:.4f}_{lon:.4f}_sat")
+        seed = abs(hash(f"{lat:.4f}_{lon:.4f}_sat")) % (2**32 - 1)
         np.random.seed(seed)
         
         # Patterns to potentially detect
@@ -445,17 +350,9 @@ class VisionAgent:
         }
     
     def _generate_mock_lidar_result(self, lat: float, lon: float) -> Dict:
-        """Generate mock LIDAR analysis results.
-        
-        Args:
-            lat: Latitude coordinate
-            lon: Longitude coordinate
-            
-        Returns:
-            Mock LIDAR analysis
-        """
+        """Generate mock LIDAR analysis results."""
         # Use hash of coordinates for deterministic results
-        seed = hash(f"{lat:.4f}_{lon:.4f}_lidar")
+        seed = abs(hash(f"{lat:.4f}_{lon:.4f}_lidar")) % (2**32 - 1)
         np.random.seed(seed)
         
         # Patterns more commonly found in LIDAR
@@ -523,4 +420,7 @@ class VisionAgent:
                 "road networks",
                 "water management systems",
             ],
-        } 
+        }
+
+    def get_latest_observation(self) -> dict:
+        raise NotImplementedError("get_latest_observation must be implemented with real data tracking.") 

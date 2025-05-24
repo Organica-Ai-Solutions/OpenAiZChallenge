@@ -324,3 +324,58 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **Try the Agent**: Quickly start your archaeological exploration
 - **Chat with NIS**: Engage directly with our neural-inspired system
 - **Discover Hidden Histories**: Uncover archaeological sites in the Amazon 
+
+## NIS Protocol Backend API
+
+### Production-Ready: No Mock Data
+- **Warning:** This backend requires all real data, models, and infrastructure to be available. If any required data or model is missing, endpoints will return errors. There is no mock or fallback logic in production mode.
+
+### API Endpoints
+
+#### `/analyze` (POST)
+- **Description:** Analyze a single location for archaeological significance.
+- **Input:**
+  - `{ "lat": float, "lon": float, "dataSources": { ... } }` **or** `{ "coordinates": "lat,lon", "dataSources": { ... } }`
+  - `dataSources` is optional; defaults to all sources enabled.
+- **Output:**
+  - JSON object with location, confidence, description, sources, historical_context, indigenous_perspective, pattern_type, finding_id, recommendations.
+- **Example:**
+```json
+{
+  "lat": -3.4653,
+  "lon": -62.2159,
+  "dataSources": {"satellite": true, "lidar": true}
+}
+```
+
+#### `/batch/analyze` (POST)
+- **Description:** Submit a batch of coordinates for asynchronous analysis.
+- **Input:**
+  - `{ "coordinates_list": [{"lat": float, "lon": float}, ...], "data_sources": { ... } }`
+- **Output:**
+  - Batch status object with progress and results.
+
+#### `/statistics/statistics` (GET)
+- **Description:** Get system statistics.
+
+#### `/research/sites` (GET)
+- **Description:** List research sites with filters.
+
+#### `/research/sites/discover` (POST)
+- **Description:** Submit new site discoveries.
+
+#### `/agents/agents` (GET)
+- **Description:** List available agents.
+
+#### `/agents/process` (POST)
+- **Description:** Directly invoke an agent.
+
+#### `/system/health` (GET)
+- **Description:** Health check endpoint.
+
+#### `/system/diagnostics` (GET)
+- **Description:** System diagnostics.
+
+### Frontend Integration Notes
+- All endpoints require real data/models. If the backend is not fully provisioned, errors will be returned.
+- See `API_DOCS.md` for detailed endpoint documentation and examples. 

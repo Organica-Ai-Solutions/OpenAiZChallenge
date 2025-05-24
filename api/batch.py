@@ -53,7 +53,7 @@ async def batch_analyze(
         # Generate batch ID if not provided
         if not request.batch_id:
             request.batch_id = f"batch_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-            
+        
         # Initialize pipeline
         pipeline = AnalysisPipeline()
         
@@ -79,7 +79,12 @@ async def batch_analyze(
             process_batch,
             request.batch_id,
             request.coordinates_list,
-            request.data_sources
+            request.data_sources or {
+                "satellite": True,
+                "lidar": True,
+                "historical_texts": True,
+                "indigenous_maps": True,
+            }
         )
         
         return initial_status

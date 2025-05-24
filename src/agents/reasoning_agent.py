@@ -214,72 +214,8 @@ class ReasoningAgent:
         
         return result
     
-    def _fill_prompt_template(self, 
-                            pattern_type: str, 
-                            confidence: float, 
-                            lat: float, 
-                            lon: float,
-                            historical_sources: List[Dict],
-                            indigenous_knowledge: List[Dict],
-                            web_search_snippets: Optional[List[Dict]] = None) -> str:
-        """Fill the prompt template with the specific data.
-        
-        Args:
-            pattern_type: The type of pattern detected
-            confidence: Confidence score for the detection
-            lat: Latitude coordinate
-            lon: Longitude coordinate
-            historical_sources: List of historical source metadata
-            indigenous_knowledge: List of indigenous knowledge data
-            web_search_snippets: List of web search snippets
-            
-        Returns:
-            Filled prompt string
-        """
-        # Format historical sources as a string
-        historical_str = "\n".join([
-            f"- {source['title']} ({source['year']}): {source['excerpt']}"
-            for source in historical_sources
-        ]) if historical_sources else "No historical sources available."
-        
-        # Format indigenous knowledge as a string
-        indigenous_str = "\n".join([
-            f"- {source['source']}: {source['knowledge']}"
-            for source in indigenous_knowledge
-        ]) if indigenous_knowledge else "No indigenous knowledge available."
-        
-        web_context_str = "No additional web context found or searched."
-        if web_search_snippets:
-            web_context_str = "\n".join([
-                f"- [{snippet.get('title', 'Web Result')}]({snippet.get('link', '#' )}): {snippet.get('snippet', 'N/A')}"
-                for snippet in web_search_snippets
-            ])
-
-        # Create a simplified prompt that doesn't rely on the template's JSON example
-        # This avoids the KeyError with the template format string
-        simplified_prompt = f"""
-# NIS Protocol Analysis Request
-
-## Location: {lat}, {lon}
-
-## Visual Pattern Detected: {pattern_type}
-- Confidence: {confidence:.2f}
-
-## Historical Sources:
-{historical_str}
-
-## Indigenous Knowledge:
-{indigenous_str}
-
-## Additional Web Context:
-{web_context_str}
-
-Please analyze this potential archaeological site considering the visual pattern detected,
-historical context, indigenous knowledge, and any relevant web context. Determine the archaeological significance
-and provide recommendations for further investigation.
-"""
-        
-        return simplified_prompt
+    def _fill_prompt_template(self, pattern_type: str, confidence: float, lat: float, lon: float, historical_sources: List[Dict], indigenous_knowledge: List[Dict], web_search_snippets: Optional[List[Dict]] = None) -> str:
+        raise NotImplementedError("_fill_prompt_template must be implemented with real prompt logic and data.")
     
     def _call_llm(self, prompt: str) -> Dict:
         """Call the LLM with the prompt.
@@ -315,237 +251,13 @@ and provide recommendations for further investigation.
         }
     
     def _get_mock_historical_sources(self, lat: float, lon: float) -> List[Dict]:
-        """Get mock historical sources for the coordinates.
-        
-        Args:
-            lat: Latitude coordinate
-            lon: Longitude coordinate
-            
-        Returns:
-            List of historical source dictionaries
-        """
-        # In production, this would query a database or vector store of actual documents
-        # Here we'll generate deterministic mock data based on the coordinates
-        
-        # Use hash of coordinates to seed random, making results reproducible
-        seed = hash(f"{lat:.2f}_{lon:.2f}_hist")
-        import random
-        random.seed(seed)
-        
-        # Possible mock sources
-        sources = [
-            {
-                "title": "Chronicles of the Amazon",
-                "author": "Antonio de Herrera",
-                "year": 1601 + (seed % 150),
-                "excerpt": "The natives spoke of great settlements with circular houses arranged around a central plaza, where ceremonies were conducted under the full moon."
-            },
-            {
-                "title": "Travels in Brazil",
-                "author": "Johann Baptiste von Spix",
-                "year": 1817 + (seed % 30),
-                "excerpt": "We observed remnants of what appeared to be ancient earthworks stretching in straight lines across several leagues, their purpose unknown to the current inhabitants."
-            },
-            {
-                "title": "Expedition to the Headwaters",
-                "author": "Richard Spruce",
-                "year": 1849 + (seed % 20),
-                "excerpt": "The soil in certain areas was remarkably dark and fertile, unlike the surrounding terra firme. The Indians called it 'terra preta' and claimed it was made by their ancestors."
-            },
-            {
-                "title": "Mission Records of São Gabriel",
-                "author": "Father Manuel da Nóbrega",
-                "year": 1550 + (seed % 200),
-                "excerpt": "The heathens have constructed curious mounds upon which they place their dwellings, thus avoiding the seasonal floods that inundate the surrounding lands."
-            },
-            {
-                "title": "Survey of the Upper Amazon",
-                "author": "Colonel Percy Fawcett",
-                "year": 1914 + (seed % 12),
-                "excerpt": "Local legends speak of a vast network of ancient roads connecting major settlements, now overgrown but visible from elevated positions. I believe these accounts have merit."
-            },
-        ]
-        
-        # Select 1-3 sources based on coordinates
-        num_sources = 1 + (seed % 3)
-        selected_indices = random.sample(range(len(sources)), min(num_sources, len(sources)))
-        
-        return [sources[i] for i in selected_indices]
+        raise NotImplementedError("_get_mock_historical_sources must be replaced with real historical source retrieval.")
     
     def _get_mock_indigenous_knowledge(self, lat: float, lon: float) -> List[Dict]:
-        """Get mock indigenous knowledge for the coordinates.
-        
-        Args:
-            lat: Latitude coordinate
-            lon: Longitude coordinate
-            
-        Returns:
-            List of indigenous knowledge dictionaries
-        """
-        # In production, this would access a curated database of indigenous knowledge
-        # with proper attribution and permissions
-        
-        # Use hash of coordinates to seed random, making results reproducible
-        seed = hash(f"{lat:.2f}_{lon:.2f}_indig")
-        import random
-        random.seed(seed)
-        
-        # Possible mock sources
-        sources = [
-            {
-                "source": "Tupi Oral Tradition Map",
-                "tribe": "Tupi",
-                "knowledge": "Our ancestors built large villages with houses arranged in circles around the central plaza where the chief's house stood. Many such villages were connected by wide roads through the forest."
-            },
-            {
-                "source": "Arawak Elders' Accounts",
-                "tribe": "Arawak",
-                "knowledge": "The old ones made the black earth (terra preta) by mixing charcoal, bone, and pottery with the soil over many generations, creating fertile grounds for growing food in otherwise poor soils."
-            },
-            {
-                "source": "Yanomami Traditional Territory Map",
-                "tribe": "Yanomami",
-                "knowledge": "Before the great sickness came with the white men, our people had many more malocas (communal houses) throughout this region, connected by paths that our hunters still use today."
-            },
-            {
-                "source": "Kayapó Geographical Knowledge",
-                "tribe": "Kayapó",
-                "knowledge": "Our ancestors built raised fields in the wetlands using a system of canals that controlled the water during rainy seasons. These ancient gardens are marked by distinct plant species that still grow there."
-            },
-            {
-                "source": "Kalapalo Historical Narratives",
-                "tribe": "Kalapalo",
-                "knowledge": "The ancient ones built defensive ditches around their settlements to protect against rival groups. These ditches were connected to the rivers and filled with water during attacks."
-            },
-        ]
-        
-        # Select 0-2 sources based on coordinates
-        num_sources = seed % 3
-        if num_sources == 0:
-            return []
-        
-        selected_indices = random.sample(range(len(sources)), min(num_sources, len(sources)))
-        
-        return [sources[i] for i in selected_indices]
+        raise NotImplementedError("_get_mock_indigenous_knowledge must be replaced with real indigenous knowledge retrieval.")
     
-    def _mock_llm_interpretation(self, 
-                               pattern_type: str, 
-                               confidence: float, 
-                               lat: float, 
-                               lon: float,
-                               historical_sources: List[Dict],
-                               indigenous_knowledge: List[Dict],
-                               web_search_snippets: Optional[List[Dict]] = None) -> Dict:
-        """Generate a mock LLM interpretation.
-        
-        Args:
-            pattern_type: The type of pattern detected
-            confidence: Confidence score for the detection
-            lat: Latitude coordinate
-            lon: Longitude coordinate
-            historical_sources: List of historical source metadata
-            indigenous_knowledge: List of indigenous knowledge data
-            web_search_snippets: List of web search snippets
-            
-        Returns:
-            Mock interpretation dictionary
-        """
-        # In production, this would be the result of an actual LLM call
-        # Here we'll generate deterministic mock data based on the inputs
-        
-        # Pattern-specific interpretations
-        pattern_interpretations = {
-            "circular geometric structures": {
-                "description": "The circular patterns detected are consistent with traditional settlement layouts of Indigenous communities in the Amazon Basin. These typically feature concentric rings of housing around a central plaza used for ceremonies and community gatherings.",
-                "historical_context": "Colonial records from the early 17th century describe large, organized settlements with circular layouts throughout this region, though many were abandoned following European contact and the subsequent population collapse due to disease.",
-                "indigenous_perspective": "Oral traditions from multiple Indigenous groups confirm that circular village layouts held cosmological significance, reflecting their understanding of the universe and social organization.",
-                "confidence_base": 0.8,
-            },
-            "rectangular settlement patterns": {
-                "description": "The rectangular structures identified suggest a post-contact settlement pattern or specialized ceremonial site. The regularity and alignment indicate deliberate planning rather than natural formation.",
-                "historical_context": "European influence often led to the adoption of rectangular building patterns, though some pre-Columbian cultures in the region also constructed rectangular ceremonial structures for specific purposes.",
-                "indigenous_perspective": "Some Indigenous accounts describe special-purpose buildings with rectangular designs used for particular ceremonies or social functions, distinct from the typical circular residential structures.",
-                "confidence_base": 0.75,
-            },
-            "linear earthworks": {
-                "description": "The linear features detected are consistent with ancient earthworks that likely served as defensive structures, boundaries between territories, or ceremonial alignments.",
-                "historical_context": "Early explorers documented extensive earthwork systems throughout the Amazon, many of which were already abandoned and overgrown by the time of European contact.",
-                "indigenous_perspective": "Traditional knowledge holders describe these linear features as boundaries created by ancestral groups to mark territory or defend against rival groups.",
-                "confidence_base": 0.7,
-            },
-            "anthropogenic soil signatures": {
-                "description": "The soil patterns detected strongly suggest the presence of terra preta (Amazonian Dark Earth), anthropogenically modified soil created through centuries of human habitation and agricultural practices.",
-                "historical_context": "Terra preta soils are rich in carbon, bone fragments, and ceramic pieces, indicating long-term human occupation and sophisticated soil management practices that enhanced fertility.",
-                "indigenous_perspective": "Knowledge of creating enriched soils has been passed down through generations, with traditional understanding of mixing charcoal, organic waste, and pottery fragments to create fertile growing areas.",
-                "confidence_base": 0.85,
-            },
-            "artificial mounds": {
-                "description": "The elevated features detected appear to be artificial mounds that likely served as foundations for structures, raising them above seasonal flood levels or for ceremonial purposes.",
-                "historical_context": "Mound-building was a common adaptation to the Amazonian floodplain environment, allowing permanent settlements in otherwise seasonally inundated areas.",
-                "indigenous_perspective": "Raised areas are described in oral histories as places of safety during floods and as important markers of ancestral settlements that maintained dry living areas year-round.",
-                "confidence_base": 0.75,
-            },
-            "road networks": {
-                "description": "The linear patterns identified are consistent with ancient road networks that connected settlements, resource areas, or ceremonial sites across substantial distances.",
-                "historical_context": "Early colonial accounts describe wide, straight roads connecting major Indigenous settlements, contradicting the notion that Amazonian peoples lived in small, isolated groups.",
-                "indigenous_perspective": "Traditional knowledge confirms extensive networks of paths and roads that facilitated trade, communication, and seasonal movements between communities.",
-                "confidence_base": 0.7,
-            },
-            "water management systems": {
-                "description": "The features detected appear to be intentional water management systems, possibly including canals, dams, or fish weirs that demonstrate sophisticated environmental engineering.",
-                "historical_context": "Historical records document complex hydrological knowledge among Amazonian peoples, who modified waterways for transportation, flood control, and resource management.",
-                "indigenous_perspective": "Traditional ecological knowledge includes sophisticated understanding of water flow patterns and techniques for creating fish-rich environments through landscape modification.",
-                "confidence_base": 0.8,
-            },
-        }
-        
-        # Default values if pattern type isn't recognized
-        default_interpretation = {
-            "description": f"The detected pattern '{pattern_type}' suggests possible human modification of the landscape that warrants further investigation.",
-            "historical_context": "Limited historical documentation exists for this specific type of feature in the region.",
-            "indigenous_perspective": "Further consultation with Indigenous knowledge holders would be valuable to interpret this pattern.",
-            "confidence_base": 0.5,
-        }
-        
-        # Get the interpretation for this pattern type
-        interp = pattern_interpretations.get(pattern_type, default_interpretation)
-        
-        # Adjust confidence based on visual confidence and available sources
-        adjusted_confidence = interp["confidence_base"] * confidence
-        
-        # Boost confidence if we have corroborating historical or indigenous knowledge
-        if historical_sources:
-            adjusted_confidence += 0.05 * len(historical_sources)
-        if indigenous_knowledge:
-            adjusted_confidence += 0.07 * len(indigenous_knowledge)
-        if web_search_snippets: # Consider web search in confidence
-            adjusted_confidence += 0.03 * len(web_search_snippets) # Smaller boost for web context
-        
-        # Cap at 0.95
-        adjusted_confidence = min(adjusted_confidence, 0.95)
-        
-        # Format historical context if we have sources
-        historical_context = interp["historical_context"]
-        if historical_sources:
-            historical_context += " Specifically: "
-            historical_context += " ".join([source["excerpt"] for source in historical_sources])
-        
-        # Format indigenous perspective if we have sources
-        indigenous_perspective = interp["indigenous_perspective"]
-        if indigenous_knowledge:
-            indigenous_perspective += " Specifically: "
-            indigenous_perspective += " ".join([source["knowledge"] for source in indigenous_knowledge])
-        
-        web_context_summary = ""
-        if web_search_snippets:
-            web_context_summary = " Web context suggests: " + "; ".join([s.get("snippet","")[:100] + "..." for s in web_search_snippets])
-
-        return {
-            "description": interp["description"] + web_context_summary,
-            "confidence": adjusted_confidence,
-            "historical_context": historical_context,
-            "indigenous_perspective": indigenous_perspective,
-        }
+    def _mock_llm_interpretation(self, pattern_type: str, confidence: float, lat: float, lon: float, historical_sources: List[Dict], indigenous_knowledge: List[Dict], web_search_snippets: Optional[List[Dict]] = None) -> Dict:
+        raise NotImplementedError("_mock_llm_interpretation must be replaced with real LLM interpretation logic.")
     
     def _create_fallback_interpretation_from_text(self, text_response: str) -> Dict:
         """Creates a fallback interpretation dictionary if GPT response is not valid JSON."""
@@ -569,4 +281,17 @@ and provide recommendations for further investigation.
                 "indigenous knowledge integration",
                 "confidence assessment",
             ],
+        }
+
+    def synthesize(self, visual_data: dict, contextual_memories: dict) -> dict:
+        """
+        Combine visual and memory context into a reasoned output (mock for integration).
+        """
+        # In a real implementation, this would perform reasoning over both inputs.
+        # For now, return a mock synthesis for integration testing.
+        return {
+            "synthesis": "Mock synthesis of visual and contextual memory.",
+            "visual_data": visual_data,
+            "contextual_memories": contextual_memories,
+            "confidence": 0.5
         } 

@@ -1,6 +1,6 @@
 node_modules
 .next
-
+ 
 # Add other files/directories to ignore if needed:
 # .env
 # npm-debug.log

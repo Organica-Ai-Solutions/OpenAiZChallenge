@@ -61,10 +61,11 @@ class ActionAgent:
 
         reasoning_interpretation = current_graph_state.get("reasoning_interpretation", {})
         reasoning_confidence = reasoning_interpretation.get("confidence", 0.0)
+        # Safely get visual_findings before using it
+        visual_findings = current_graph_state.get("raw_vision_data", {}).get("combined_analysis", {})
         current_pattern_type = reasoning_interpretation.get("pattern_type", visual_findings.get("pattern_type", "")) # Get pattern from reasoning or visual
 
         # Access visual_findings from the state for pattern_type fallback
-        visual_findings = current_graph_state.get("raw_vision_data", {}).get("combined_analysis", {})
         if not current_pattern_type:
             # If reasoning_interpretation didn't yield a pattern_type, try to get it from the primary visual feature.
             # This assumes `raw_vision_data` structure as synthesized by _reasoning_node or directly from VisionAgent.

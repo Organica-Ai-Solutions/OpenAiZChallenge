@@ -13,7 +13,9 @@ app = APIRouter()
 
 
 class CoordinatesRequest(BaseModel):
-    coordinates: str = Field(..., description="Comma-separated latitude and longitude")
+    coordinates: Optional[str] = Field(None, description="Comma-separated latitude and longitude")
+    lat: Optional[float] = Field(None, description="Latitude coordinate")
+    lon: Optional[float] = Field(None, description="Longitude coordinate")
     dataSources: Optional[Dict[str, bool]] = Field(
         default_factory=lambda: {
             "satellite": True,
@@ -71,9 +73,14 @@ def parse_coordinates(coord_str: str) -> Tuple[float, float]:
 @app.post("/analyze", response_model=AnalysisResult)
 async def analyze_coordinates(request: CoordinatesRequest = Body(...)):
     """Analyze coordinates for potential archaeological sites using the NIS Protocol."""
-    # Parse and validate coordinates
-    lat, lon = parse_coordinates(request.coordinates)
-    
+    # Prefer explicit lat/lon if provided
+    if request.lat is not None and request.lon is not None:
+        lat, lon = request.lat, request.lon
+    elif request.coordinates:
+        lat, lon = parse_coordinates(request.coordinates)
+    else:
+        raise HTTPException(status_code=400, detail="Must provide either 'lat' and 'lon' or 'coordinates' field.")
+
     # Get active data sources
     data_sources = request.dataSources or {
         "satellite": True,

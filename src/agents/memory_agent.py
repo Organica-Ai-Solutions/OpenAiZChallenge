@@ -845,4 +845,341 @@ class MemoryAgent:
         if self.use_redis:
             self.redis.cache_set(cache_key, timeline, ttl=604800)  # Cache for 1 week
         
+        return timeline
+    
+    def recall_context(self, visual_data: dict) -> dict:
+        raise NotImplementedError("recall_context must be implemented with real memory/context retrieval.")
+    
+    def _get_site_id(self, lat: float, lon: float) -> str:
+        """Generate a unique ID for a site based on coordinates.
+        
+        Args:
+            lat: Latitude coordinate
+            lon: Longitude coordinate
+            
+        Returns:
+            Site ID string
+        """
+        # Format coordinates to 4 decimal places and combine
+        return f"site_{lat:.4f}_{lon:.4f}".replace("-", "n").replace(".", "p")
+    
+    def _update_pattern_index(self, pattern_type: str, site_id: str, coordinates: Dict) -> None:
+        """Update the index of sites with a particular pattern.
+        
+        Args:
+            pattern_type: Type of pattern
+            site_id: Site ID to add
+            coordinates: Site coordinates
+        """
+        pattern_file = self.patterns_dir / f"{self._sanitize_filename(pattern_type)}.json"
+        
+        if pattern_file.exists():
+            with open(pattern_file, "r", encoding="utf-8") as f:
+                pattern_data = json.load(f)
+        else:
+            pattern_data = {
+                "pattern_type": pattern_type,
+                "sites": []
+            }
+        
+        # Check if site already exists
+        site_exists = any(site["site_id"] == site_id for site in pattern_data["sites"])
+        
+        if not site_exists:
+            pattern_data["sites"].append({
+                "site_id": site_id,
+                "coordinates": coordinates
+            })
+        
+        with open(pattern_file, "w", encoding="utf-8") as f:
+            json.dump(pattern_data, f, indent=2)
+        
+        # Update Redis cache
+        if self.use_redis:
+            cache_key = f"pattern:{self._sanitize_filename(pattern_type)}"
+            self.redis.cache_set(cache_key, pattern_data)
+    
+    def _update_region_index(self, region: str, site_id: str, coordinates: Dict) -> None:
+        """Update the index of sites in a particular region.
+        
+        Args:
+            region: Region name
+            site_id: Site ID to add
+            coordinates: Site coordinates
+        """
+        region_file = self.regions_dir / f"{self._sanitize_filename(region)}.json"
+        
+        if region_file.exists():
+            with open(region_file, "r", encoding="utf-8") as f:
+                region_data = json.load(f)
+        else:
+            region_data = {
+                "region": region,
+                "sites": [],
+                "summary": {
+                    "description": f"Region {region}",
+                    "dominant_patterns": [],
+                    "time_periods": []
+                }
+            }
+        
+        # Check if site already exists
+        site_exists = any(site["site_id"] == site_id for site in region_data["sites"])
+        
+        if not site_exists:
+            region_data["sites"].append({
+                "site_id": site_id,
+                "coordinates": coordinates
+            })
+        
+        with open(region_file, "w", encoding="utf-8") as f:
+            json.dump(region_data, f, indent=2)
+        
+        # Update Redis cache
+        if self.use_redis:
+            cache_key = f"region:{self._sanitize_filename(region)}"
+            self.redis.cache_set(cache_key, region_data)
+            
+            # Also invalidate any regional summary cache
+            summary_key = f"summary:region:{region}"
+            self.redis.cache_delete(summary_key)
+    
+    def _sanitize_filename(self, text: str) -> str:
+        """Sanitize text for use in filenames.
+        
+        Args:
+            text: Text to sanitize
+            
+        Returns:
+            Sanitized text
+        """
+        # Replace characters that are invalid in filenames
+        return text.replace(" ", "_").replace("/", "_").replace("\\", "_").replace(":", "_").lower()
+    
+    def _get_region_for_coordinates(self, lat: float, lon: float) -> Optional[str]:
+        """Determine the region name for given coordinates.
+        
+        Args:
+            lat: Latitude coordinate
+            lon: Longitude coordinate
+            
+        Returns:
+            Region name or None
+        """
+        # This is a simplified approach - in production would use proper GIS
+        # Define regions based on coordinate ranges
+        regions = {
+            "Upper Xingu": (-13.0, -3.0, -55.0, -50.0),  # lat_min, lat_max, lon_min, lon_max
+            "Tapajós": (-8.0, -2.0, -60.0, -54.0),
+            "Rio Negro": (-3.0, 3.0, -68.0, -60.0),
+            "Llanos de Moxos": (-15.0, -10.0, -68.0, -63.0),
+            "Ucayali": (-10.0, -7.0, -76.0, -73.0)
+        }
+        
+        for region_name, bounds in regions.items():
+            lat_min, lat_max, lon_min, lon_max = bounds
+            if lat_min <= lat <= lat_max and lon_min <= lon <= lon_max:
+                return region_name
+        
+        # Default to a general name based on the quadrant
+        ns = "North" if lat >= 0 else "South"
+        ew = "East" if lon >= 0 else "West"
+        return f"{ns} Amazon {ew}"
+    
+    def _generate_region_summary(self, region: str, sites: List[Dict]) -> Dict:
+        """Generate a summary of a region using GPT.
+        
+        Args:
+            region: Region name
+            sites: List of sites in the region
+            
+        Returns:
+            Summary dictionary
+        """
+        if not self.use_live_gpt or not sites:
+            return {
+                "description": f"Region {region} contains {len(sites)} known archaeological sites.",
+                "dominant_patterns": self._get_dominant_patterns(sites),
+                "time_periods": []
+            }
+        
+        # Check Redis cache first
+        cache_key = f"summary_text:region:{region}"
+        if self.use_redis:
+            cached_summary = self.redis.cache_get(cache_key)
+            if cached_summary:
+                logger.debug(f"Retrieved region summary text from Redis cache")
+                return cached_summary
+        
+        # Format site data for GPT
+        site_contexts = []
+        for site in sites:
+            coord = site.get("coordinates", {})
+            data = site.get("data", {})
+            
+            context = {
+                "title": f"Site at {coord.get('lat', 0)}, {coord.get('lon', 0)}",
+                "type": "archaeological_site",
+                "content": (
+                    f"Pattern: {data.get('pattern_type', 'Unknown')}\n"
+                    f"Description: {data.get('description', '')}\n"
+                    f"Confidence: {data.get('confidence', 0)}\n"
+                )
+            }
+            site_contexts.append(context)
+        
+        # Call GPT for analysis
+        result = self.gpt.multimodal_research(
+            query=f"Summarize the archaeological significance of the {region} region based on these sites. Identify dominant patterns, likely time periods, and potential cultural connections.",
+            context=site_contexts
+        )
+        
+        # Extract time periods
+        time_periods = self.gpt._extract_time_periods(result.get("analysis", ""))
+        
+        # Create structured summary
+        summary = {
+            "description": result.get("analysis", f"Region {region} contains {len(sites)} known archaeological sites."),
+            "dominant_patterns": self._get_dominant_patterns(sites),
+            "time_periods": time_periods
+        }
+        
+        # Cache the summary
+        if self.use_redis:
+            self.redis.cache_set(cache_key, summary, ttl=86400)  # Cache for 24 hours
+        
+        # Publish event to Kafka
+        if self.use_kafka:
+            event_data = {
+                "event_type": "region_summary_generated",
+                "region": region,
+                "site_count": len(sites),
+                "timestamp": time.time()
+            }
+            self.kafka.produce("nis.analysis.events", event_data)
+        
+        return summary
+    
+    def _get_dominant_patterns(self, sites: List[Dict]) -> List[str]:
+        """Get the most common pattern types from a list of sites.
+        
+        Args:
+            sites: List of site data
+            
+        Returns:
+            List of dominant pattern types
+        """
+        pattern_counts = {}
+        
+        for site in sites:
+            data = site.get("data", {})
+            pattern = data.get("pattern_type", "unknown")
+            
+            if pattern in pattern_counts:
+                pattern_counts[pattern] += 1
+            else:
+                pattern_counts[pattern] = 1
+        
+        # Sort by count and return the patterns
+        sorted_patterns = sorted(pattern_counts.items(), key=lambda x: x[1], reverse=True)
+        return [p[0] for p in sorted_patterns]
+    
+    def _basic_connection_analysis(self, sites: List[Dict]) -> List[Dict]:
+        """Perform basic connection analysis without GPT.
+        
+        Args:
+            sites: List of site data
+            
+        Returns:
+            List of potential connections
+        """
+        connections = []
+        
+        # Look for sites with the same pattern type
+        pattern_groups = {}
+        for site in sites:
+            site_id = site.get("site_id", "")
+            pattern = site.get("data", {}).get("pattern_type", "unknown")
+            
+            if pattern in pattern_groups:
+                pattern_groups[pattern].append(site_id)
+            else:
+                pattern_groups[pattern] = [site_id]
+        
+        # Create connections for sites with the same pattern
+        for pattern, site_ids in pattern_groups.items():
+            if len(site_ids) > 1:
+                connections.append({
+                    "type": "shared_pattern",
+                    "pattern": pattern,
+                    "site_ids": site_ids,
+                    "strength": 0.7,
+                    "description": f"These sites share the same pattern type: {pattern}"
+                })
+        
+        return connections
+    
+    def _extract_connections_from_text(self, text: str) -> List[Dict]:
+        """Extract connection information from GPT analysis text.
+        
+        Args:
+            text: Analysis text from GPT
+            
+        Returns:
+            List of extracted connections
+        """
+        # This is a simplistic extraction - in production would use more sophisticated NLP
+        connections = []
+        
+        # Look for connection indicators in the text
+        connection_indicators = [
+            "connection", "relationship", "network", "linked", "route", 
+            "trade", "cultural exchange", "influence", "similar to"
+        ]
+        
+        # Simple sentence-based extraction
+        sentences = text.split(".")
+        for sentence in sentences:
+            for indicator in connection_indicators:
+                if indicator in sentence.lower():
+                    connections.append({
+                        "type": "inferred_connection",
+                        "strength": 0.6,
+                        "description": sentence.strip() + "."
+                    })
+                    break
+        
+        return connections
+    
+    def _get_default_historical_timeline(self) -> List[Dict]:
+        """Get a default historical timeline for the Amazon region.
+        
+        Returns:
+            List of historical events
+        """
+        # Try to get from Redis cache first
+        cache_key = "default_historical_timeline"
+        if self.use_redis:
+            cached_timeline = self.redis.cache_get(cache_key)
+            if cached_timeline:
+                return cached_timeline
+        
+        timeline = [
+            {"year": 500, "event": "Evidence of complex societies forming in the Upper Xingu region"},
+            {"year": 800, "event": "Expansion of earthwork construction throughout the Amazon basin"},
+            {"year": 1000, "event": "Peak of pre-Columbian population and cultural development"},
+            {"year": 1200, "event": "Widespread use of Terra Preta agricultural techniques"},
+            {"year": 1450, "event": "Development of complex road networks connecting settlements"},
+            {"year": 1500, "event": "European contact begins affecting Amazonian societies"},
+            {"year": 1600, "event": "Population collapse due to European diseases"},
+            {"year": 1750, "event": "Portuguese and Spanish colonization intensifies"},
+            {"year": 1900, "event": "Rubber boom brings new economic activity to the region"},
+            {"year": 1950, "event": "Modern archaeological research begins in the Amazon"},
+            {"year": 2000, "event": "LIDAR and remote sensing technologies reveal extent of ancient settlements"}
+        ]
+        
+        # Cache the timeline
+        if self.use_redis:
+            self.redis.cache_set(cache_key, timeline, ttl=604800)  # Cache for 1 week
+        
         return timeline 

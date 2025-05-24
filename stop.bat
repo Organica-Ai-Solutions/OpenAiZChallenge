@@ -55,7 +55,7 @@ if %errorlevel% equ 0 (
 ) else (
     call :log_error "An error occurred while stopping services with Docker Compose. Check %ERROR_LOG_FILE% for details."
     echo [ERROR] Failed to stop services cleanly. See logs for details.
-)
+) 
 
 call :log_message INFO "View detailed shutdown logs at: %STOP_LOG_FILE%"
 

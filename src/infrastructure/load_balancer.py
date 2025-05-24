@@ -160,7 +160,7 @@ class APIGateway:
         # Ensure rate_limit_config and security_config are dictionaries
         current_rate_limit_config = rate_limit_config or {}
         current_security_config = security_config or {}
-
+        
         # Rate limiter and request tracker with configurable parameters
         self.rate_limiter = RateLimiter(
             max_requests=current_rate_limit_config.get('max_requests', 100), 
