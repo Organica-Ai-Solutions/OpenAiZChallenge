@@ -261,18 +261,22 @@ class DistributedProcessingManager:
             Cluster status information
         """
         try:
+            scheduler_info = self.client.scheduler_info()
+            workers_info = scheduler_info.get('workers', {})
+            tasks_info = scheduler_info.get('tasks', [])
+
             return {
-                'workers': len(self.client.scheduler_info()['workers']),
+                'workers': len(workers_info),
                 'total_cpu': sum(
                     worker['resources'].get('CPU', 0) 
-                    for worker in self.client.scheduler_info()['workers'].values()
+                    for worker in workers_info.values()
                 ),
                 'total_memory': sum(
-                    worker['resources'].get('MEMORY', 0) 
-                    for worker in self.client.scheduler_info()['workers'].values()
+                    worker['resources'].get('MEMORY', 0) if isinstance(worker['resources'].get('MEMORY'), (int, float)) else 0
+                    for worker in workers_info.values()
                 ),
                 'processing_mode': self.processing_mode,
-                'task_queue_length': len(self.client.scheduler_info()['tasks'])
+                'task_queue_length': len(tasks_info)
             }
         except Exception as e:
             logger.error(f"Error retrieving cluster status: {str(e)}")

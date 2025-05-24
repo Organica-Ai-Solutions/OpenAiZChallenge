@@ -176,8 +176,11 @@ class RBACMiddleware(BaseHTTPMiddleware):
     
     PUBLIC_PATHS = [
         "/docs", 
-        "/openapi.json", 
-        # Add other public paths like /redoc if you use it
+        "/openapi.json",
+        "/system/health", # Added health check to public paths
+        # Consider adding a wildcard or prefix if all /system/ routes should be public
+        # e.g., using a regex match or by checking `request.url.path.startswith("/system/")`
+        # For now, let's be explicit.
     ]
 
     def __init__(
@@ -214,10 +217,16 @@ class RBACMiddleware(BaseHTTPMiddleware):
 
         # Check if the request path is public
         if request.url.path in self.PUBLIC_PATHS:
+            logger.debug(f"Public path accessed: {request.url.path}, skipping auth.")
+            return await call_next(request)
+        
+        # Also check for /system prefix for now, as health_router might add more routes under /system
+        if request.url.path.startswith("/system/"):
+            logger.debug(f"System path accessed: {request.url.path}, skipping auth.")
             return await call_next(request)
 
-        # Extract token from Authorization header
-        auth_header = request.headers.get('Authorization')
+        logger.debug(f"Protected path accessed: {request.url.path}, performing auth check.")
+        auth_header = request.headers.get("Authorization")
         if not auth_header or not auth_header.startswith('Bearer '):
             raise HTTPException(status_code=401, detail="Missing or invalid token")
         
