@@ -9,7 +9,7 @@ import logging
 from typing import Optional
 
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 # Configuration and Environment Management
@@ -31,6 +31,13 @@ from .infrastructure.health_monitoring import create_health_router
 # Processing Pipeline
 from .data_processing.pipeline import AnalysisPipeline
 
+# Import API routers
+from api.analyze import app as analyze_router
+from api.batch import app as batch_router
+from api.statistics import app as statistics_router
+from ikrp.src.api.research import router as research_router
+from ikrp.src.api.agents import router as agents_router
+
 # Logging Configuration
 logging.basicConfig(
     level=logging.INFO,
@@ -40,7 +47,7 @@ logger = logging.getLogger(__name__)
 
 class IndigenousKnowledgePlatform:
     """Centralized application orchestrator."""
-    
+
     def __init__(
         self, 
         environment: Optional[Environment] = None,
@@ -80,7 +87,7 @@ class IndigenousKnowledgePlatform:
         
         # Initialize application
         self.app = self._create_application()
-    
+
     def _create_application(self) -> FastAPI:
         """Create and configure FastAPI application."""
         app = FastAPI(
@@ -88,7 +95,7 @@ class IndigenousKnowledgePlatform:
             description="Advanced distributed platform for indigenous knowledge validation",
             version="1.0.0"
         )
-        
+
         # Configure CORS
         app.add_middleware(
             CORSMiddleware,
@@ -104,53 +111,60 @@ class IndigenousKnowledgePlatform:
             allow_methods=["*"],
             allow_headers=["*"],
         )
-        
+
         # Add health monitoring routes
         health_router = create_health_router()
         app.include_router(health_router, prefix="/system")
-        
+
+        # Include other API routers
+        app.include_router(analyze_router, prefix="") # Assuming /analyze is at root
+        app.include_router(batch_router, prefix="/batch")
+        app.include_router(statistics_router, prefix="/statistics")
+        app.include_router(research_router, prefix="/research")
+        app.include_router(agents_router, prefix="/agents")
+
         # Configure Role-Based Access Control
-        app.add_middleware(
-            RBACMiddleware,
-            auth_manager=self.authentication_manager,
-            role_permissions={
-                'researcher': [
-                    'read_research', 
-                    'create_research'
-                ],
-                'admin': [
-                    'read_research', 
-                    'create_research', 
-                    'update_research', 
-                    'delete_research'
-                ]
-            }
-        )
-        
+        # app.add_middleware(
+        #     RBACMiddleware,
+        #     auth_manager=self.authentication_manager,
+        #     role_permissions={
+        #         'researcher': [
+        #             'read_research',
+        #             'create_research'
+        #         ],
+        #         'admin': [
+        #             'read_research',
+        #             'create_research',
+        #             'update_research',
+        #             'delete_research'
+        #         ]
+        #     }
+        # )
+
         # Add authentication routes
-        self._add_authentication_routes(app)
-        
+        # self._add_authentication_routes(app)
+
         return app
-    
+
     def _add_authentication_routes(self, app: FastAPI):
         """Add authentication-related routes."""
-        @app.post("/token")
-        async def login(username: str, password: str):
-            """Generate access token for authenticated users."""
-            user = await self.authentication_manager.authenticate_user(username, password)
-            if not user:
-                raise HTTPException(
-                    status_code=401, 
-                    detail="Incorrect username or password"
-                )
-            
-            # Create access token
-            access_token = self.authentication_manager.create_access_token(
-                data={"sub": user.username, "role": user.role}
-            )
-            
-            return {"access_token": access_token, "token_type": "bearer"}
-    
+        # @app.post("/token")
+        # async def login(username: str = Form(...), password: str = Form(...)):
+        #     """Generate access token for authenticated users."""
+        #     user = await self.authentication_manager.authenticate_user(username, password)
+        #     if not user:
+        #         raise HTTPException(
+        #             status_code=401,
+        #             detail="Incorrect username or password"
+        #         )
+
+        #     # Create access token
+        #     access_token = self.authentication_manager.create_access_token(
+        #         data={"sub": user.username, "role": user.role}
+        #     )
+
+        #     return {"access_token": access_token, "token_type": "bearer"}
+
     def run(
         self, 
         host: str = '0.0.0.0', 
@@ -197,4 +211,4 @@ if __name__ == "__main__":
     # Docker's uvicorn command will import `src.main` and look for `app`.
     # It will NOT run this __main__ block when importing.
     logger.info("src/main.py executed directly. Starting server via main_cli().")
-    main_cli() 
+    main_cli()

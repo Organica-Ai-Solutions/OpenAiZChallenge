@@ -47,31 +47,29 @@ def authenticate_user(fake_db, username: str, password: str):
         return False
     return user
 
-@router.post("/token")
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    """
-    JWT token generation endpoint
-    """
-    # In a real application, replace with actual database lookup
-    user = authenticate_user(None, form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
-    # In a real app, generate a proper JWT token
-    access_token = f"fake_jwt_token_for_{user.username}"
-    
-    return {
-        "access_token": access_token, 
-        "token_type": "bearer"
-    }
+# @router.post("/token")
+# async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+#     """
+#     JWT token generation endpoint
+#     """
+#     # In a real application, replace with actual database lookup
+#     user = authenticate_user(None, form_data.username, form_data.password)
+#     if not user:
+#         raise HTTPException(
+#             status_code=status.HTTP_401_UNAUTHORIZED,
+#             detail="Incorrect username or password",
+#             headers={"WWW-Authenticate": "Bearer"},
+#         )
+#     # In a real app, generate a proper JWT token
+#     access_token = f"fake_jwt_token_for_{user.username}"
+#     return {
+#         "access_token": access_token, 
+#         "token_type": "bearer"
+#     }
 
 @router.get("/users/me")
 async def read_users_me():
     """
     Get current user information
     """
-    return {"username": "research_admin", "role": "admin"} 
+    return {"username": "research_admin", "role": "admin"}
