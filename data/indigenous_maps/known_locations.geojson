@@ -1,1 +1,21 @@
-{"type": "FeatureCollection", "features": []}
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -62.2159,
+          -3.4653
+        ]
+      },
+      "properties": {
+        "name": "Ancient Village Site",
+        "description": "Traditional settlement location",
+        "period": "Pre-Columbian",
+        "source": "Local Indigenous Knowledge"
+      }
+    }
+  ]
+}

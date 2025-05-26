@@ -1,0 +1,20 @@
+{
+  "metadata": {
+    "coordinates": [
+      -3.4653,
+      -62.2159
+    ],
+    "radius_km": 10,
+    "acquisition_date": "2025-05-25T14:11:35.600584",
+    "source": "Sentinel-2"
+  },
+  "data": {
+    "bands": [
+      "B02",
+      "B03",
+      "B04",
+      "B08"
+    ],
+    "resolution": "10m"
+  }
+}

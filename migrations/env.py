@@ -5,7 +5,7 @@ Provides database migration setup for the Indigenous Knowledge Research Platform
 
 import asyncio
 from logging.config import fileConfig
-from sqlalchemy import engine_from_config
+from sqlalchemy import engine_from_config, pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import AsyncEngine
 
@@ -50,11 +50,7 @@ def do_run_migrations(connection: Connection) -> None:
 async def run_async_migrations() -> None:
     """Run migrations asynchronously."""
     configuration = config.get_section(config.config_ini_section)
-    configuration['sqlalchemy.url'] = (
-        f"postgresql+asyncpg://{configuration['db_user']}:"
-        f"{configuration['db_pass']}@{configuration['db_host']}/"
-        f"{configuration['db_name']}"
-    )
+    configuration["sqlalchemy.url"] = config.get_main_option("sqlalchemy.url")
 
     connectable = AsyncEngine(
         engine_from_config(

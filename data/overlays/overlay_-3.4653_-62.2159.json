@@ -1,0 +1,25 @@
+{
+  "metadata": {
+    "coordinates": [-3.4653, -62.2159],
+    "created_at": "2025-05-25T14:15:00Z",
+    "type": "archaeological_features",
+    "source": "NIS Protocol Analysis"
+  },
+  "visualization": {
+    "opacity": 0.7,
+    "color_scheme": "archaeological",
+    "layer_order": 1
+  },
+  "features": [
+    {
+      "type": "circle",
+      "center": [-3.4653, -62.2159],
+      "radius_meters": 500,
+      "properties": {
+        "feature_type": "settlement",
+        "confidence": 0.92,
+        "period": "Pre-Columbian"
+      }
+    }
+  ]
+} 

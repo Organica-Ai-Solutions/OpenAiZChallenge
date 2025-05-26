@@ -1,0 +1,19 @@
+{
+  "metadata": {
+    "coordinates": [
+      -3.4653,
+      -62.2159
+    ],
+    "radius_km": 10,
+    "acquisition_date": "2025-05-25T14:11:35.601655",
+    "source": "Earth Archive"
+  },
+  "data": {
+    "point_density": "5 points/m\u00b2",
+    "classification": [
+      "ground",
+      "vegetation",
+      "buildings"
+    ]
+  }
+}

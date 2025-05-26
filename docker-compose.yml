@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   # Redis Service
   redis:
@@ -7,6 +9,8 @@ services:
       - "6379:6379"
     volumes:
       - redis-data:/data
+    networks:
+      - nis_network
 
   # Kafka Service
   kafka:
@@ -17,10 +21,14 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://nis-kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
       - zookeeper
+    networks:
+      - nis_network
 
   # Zookeeper Service (required for Kafka)
   zookeeper:
@@ -29,10 +37,12 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - nis_network
 
   # Backend Service
   backend:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
     container_name: nis-backend
@@ -40,20 +50,21 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
-      - ./data:/app/data
-      - ./outputs:/app/outputs
     environment:
-      - PYTHONUNBUFFERED=1
-      - GDAL_VERSION=3.6.2
-      - REDIS_HOST=redis
-      - KAFKA_SERVERS=kafka:9092
-      - SECRET_KEY=your-super-secret-and-long-key-for-testing # Added for consistent JWT token generation
+      - KAFKA_BOOTSTRAP_SERVERS=nis-kafka:9092
+      - REDIS_URL=redis://nis-redis:6379
+      - LOG_LEVEL=INFO
+      - USE_REAL_DATA=true
+      - DISABLE_MOCK_RESPONSES=true
     depends_on:
+      - kafka
       - redis
+    networks:
+      - nis_network
 
   # Frontend Service
   frontend:
-    build: 
+    build:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: nis-frontend
@@ -61,8 +72,12 @@ services:
       - "3000:3000"
     volumes:
       - ./frontend:/app
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
     depends_on:
       - backend
+    networks:
+      - nis_network
 
 volumes:
   redis-data:
@@ -70,5 +85,5 @@ volumes:
   zookeeper-data:
 
 networks:
-  default:
-    name: nis-network
+  nis_network:
+    driver: bridge

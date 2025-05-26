@@ -75,7 +75,7 @@ class UserModel(Base):
     
     # Advanced configurations
     permissions = Column(JSON)
-    metadata = Column(JSON)
+    user_info = Column(String, nullable=True)  # JSON string for additional user metadata
     
     # Relationships
     research_projects = relationship("ResearchProject", back_populates="owner")

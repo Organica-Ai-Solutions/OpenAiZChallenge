@@ -1,0 +1,33 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Frontend Integration Rules for Backend API
+
+1. **Do NOT modify UI/UX:**
+   - No changes to layout, styles, or user interface components.
+   - Only add backend integration and new functionality.
+
+2. **Read files completely before editing:**
+   - Always read the entire file before making any changes.
+   - Understand the context and structure to avoid breaking existing logic.
+
+3. **Check if a file exists before creating:**
+   - Never create a new file if it already exists.
+   - If a file does not exist, create it only if required for backend integration.
+
+4. **Edits must be precise:**
+   - Only modify the minimum necessary code to add backend integration.
+   - Avoid unrelated or broad changes.
+
+5. **Only add backend integration and functionality:**
+   - Do not refactor, re-style, or otherwise alter the UI/UX.
+   - Focus on connecting frontend logic to backend endpoints and handling responses.
+
+6. **Never change UI/UX:**
+   - No changes to component structure, CSS, or user-facing elements unless strictly required for backend data display (and only with explicit approval).
+
+---
+
+**These rules must be followed for all frontend/backend integration tasks.**
