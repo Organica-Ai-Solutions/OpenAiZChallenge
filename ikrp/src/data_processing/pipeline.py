@@ -9,7 +9,7 @@ import uuid
 import numpy as np
 import asyncio
 
-from ..core.config import get_settings
+from ...config import settings
 from ..core.enums import DataSourceType, ValidationStatus
 
 logger = logging.getLogger(__name__)
@@ -177,7 +177,7 @@ class ResearchPipeline:
     
     def __init__(self):
         """Initialize research pipeline with configuration."""
-        self.settings = get_settings()
+        self.settings = settings
         self.max_concurrent_agents = self.settings.MAX_CONCURRENT_AGENTS
     
     async def collect_data(

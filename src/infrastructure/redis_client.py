@@ -9,6 +9,9 @@ import logging
 from typing import Dict, List, Optional, Union, Any
 import redis
 
+# Import the global settings instance
+from ..config import settings
+
 # Setup logging
 logger = logging.getLogger(__name__)
 
@@ -151,10 +154,17 @@ def get_redis_client() -> RedisClient:
     """
     global _redis_client
     if _redis_client is None:
-        host = os.environ.get("REDIS_HOST", "localhost")
-        port = int(os.environ.get("REDIS_PORT", 6379))
-        db = int(os.environ.get("REDIS_DB", 0))
+        # Use the settings object for host, port, and db
+        host = settings.REDIS_HOST
+        port = settings.REDIS_PORT
+        db = settings.REDIS_DB
         
-        _redis_client = RedisClient(host=host, port=port, db=db)
+        try:
+            _redis_client = RedisClient(host=host, port=port, db=db)
+        except redis.exceptions.ConnectionError as e:
+            logger.error(f"CRITICAL: Could not connect to Redis at {host}:{port} during initial client creation: {e}")
+            # Depending on desired behavior, could raise here or return a non-functional client / None
+            # For now, let it propagate so the application fails fast if Redis is essential at startup.
+            raise
     
     return _redis_client 

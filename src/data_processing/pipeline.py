@@ -12,14 +12,15 @@ import asyncio
 
 import numpy as np
 import rasterio
-from ..config import get_settings
+# Use the global settings instance directly or the get_settings() function
+from ..config import settings, LIDAR_DATA_DIR, SATELLITE_DATA_DIR 
 from ..core.enums import DataSourceType, ValidationStatus
 from .satellite.sentinel_processor import SentinelProcessor
 from .lidar.lidar_processor import LidarProcessor
 from .lidar import LidarDataCollector
 from .image_processor import ImageProcessor
 from ..analysis.pattern_detection import PatternDetectionEngine, PatternType
-from .. import config as app_config # Assuming direct import of config.py works
+# Remove: from .. import config as app_config
 from .satellite import SatelliteDataCollector, SatelliteProcessor
 from .historical_texts import HistoricalTextProcessor
 from .indigenous_maps import IndigenousMapProcessor
@@ -38,67 +39,83 @@ class ResearchDataPoint:
     metadata: Dict[str, Any] = field(default_factory=dict)
     validation_status: ValidationStatus = ValidationStatus.PENDING
 
-# Dummy settings for now - replace with actual config loading if available
-class DummySettings:
-    LIDAR_ENABLED = True
-    SATELLITE_ENABLED = True
-    HISTORICAL_TEXTS_ENABLED = True
-    INDIGENOUS_MAPS_ENABLED = True
-    # Simulate credential structure based on Processor __init__ methods
-    SENTINEL_CREDENTIALS = {
-        "username": app_config.SENTINEL_USERNAME, 
-        "password": app_config.SENTINEL_PASSWORD
-    }
-    LIDAR_CREDENTIALS = {
-        "username": app_config.LIDAR_USERNAME,
-        "password": app_config.LIDAR_PASSWORD,
-        "token": os.getenv("LIDAR_TOKEN") # Attempt to get token if set, else None
-    }
+# Remove DummySettings class as we will use the actual settings
+# class DummySettings:
+#     LIDAR_ENABLED = True
+#     SATELLITE_ENABLED = True
+#     HISTORICAL_TEXTS_ENABLED = True
+#     INDIGENOUS_MAPS_ENABLED = True
+#     SENTINEL_CREDENTIALS = {
+#         "username": settings.SENTINEL_USERNAME, # Use actual settings
+#         "password": settings.SENTINEL_PASSWORD  # Use actual settings
+#     }
+#     LIDAR_CREDENTIALS = {
+#         "username": settings.LIDAR_USERNAME, # Use actual settings
+#         "password": settings.LIDAR_PASSWORD, # Use actual settings
+#         "token": settings.EARTHDATA_TOKEN # Use actual settings
+#     }
 
-settings = DummySettings() # Use dummy settings for now
+# settings_instance = settings # Use the imported settings directly
 
 class AnalysisPipeline:
     """Advanced research data processing pipeline."""
     
     def __init__(self):
         """Initialize research pipeline with configuration."""
-        self.settings = get_settings()
+        self.settings = settings # Use the imported global settings instance
         self.max_concurrent_agents = self.settings.MAX_CONCURRENT_AGENTS
         
+        # Assuming these enable flags are part of your Settings class now
+        # If not, they should be added to Settings or handled differently
+        self.historical_texts_enabled = getattr(self.settings, 'HISTORICAL_TEXTS_ENABLED', True) 
+        self.indigenous_maps_enabled = getattr(self.settings, 'INDIGENOUS_MAPS_ENABLED', True)
+        self.satellite_enabled = getattr(self.settings, 'SATELLITE_ENABLED', True)
+        self.lidar_enabled = getattr(self.settings, 'LIDAR_ENABLED', True)
+
         self.historical_text_processor = (
             HistoricalTextProcessor()
-            if settings.HISTORICAL_TEXTS_ENABLED
+            if self.historical_texts_enabled
             else None
         )
         self.indigenous_map_processor = (
             IndigenousMapProcessor()
-            if settings.INDIGENOUS_MAPS_ENABLED
+            if self.indigenous_maps_enabled
             else None
         )
 
+        # Prepare credentials from settings
+        sentinel_credentials = {
+            "username": self.settings.SENTINEL_USERNAME,
+            "password": self.settings.SENTINEL_PASSWORD
+        }
+        lidar_credentials = {
+            "username": self.settings.LIDAR_USERNAME,
+            "password": self.settings.LIDAR_PASSWORD,
+            "token": self.settings.EARTHDATA_TOKEN
+        }
+
         # Initialize data source processors
-        if settings.SATELLITE_ENABLED:
+        if self.satellite_enabled:
             self.satellite_collector = SatelliteDataCollector(
-                credentials=settings.SENTINEL_CREDENTIALS,
-                output_dir=str(app_config.SATELLITE_DATA_DIR) # Use defined data dir
+                credentials=sentinel_credentials,
+                output_dir=str(SATELLITE_DATA_DIR) # Use imported path
             )
             self.satellite_processor = SatelliteProcessor(
-                credentials=settings.SENTINEL_CREDENTIALS,
-                output_dir=str(app_config.SATELLITE_DATA_DIR)
+                credentials=sentinel_credentials,
+                output_dir=str(SATELLITE_DATA_DIR) # Use imported path
             )
         else:
             self.satellite_collector = None
             self.satellite_processor = None
         
-        # Initialize LidarDataCollector instead of LidarProcessor for primary LiDAR DEM fetching
-        if settings.LIDAR_ENABLED:
+        if self.lidar_enabled:
             self.lidar_collector = LidarDataCollector(
-                credentials=settings.LIDAR_CREDENTIALS,
-                output_dir=str(app_config.LIDAR_DATA_DIR) # Use defined data dir
+                credentials=lidar_credentials,
+                output_dir=str(LIDAR_DATA_DIR) # Use imported path
             )
             self.lidar_processor = LidarProcessor(
-                credentials=settings.LIDAR_CREDENTIALS,
-                output_dir=str(app_config.LIDAR_DATA_DIR)
+                credentials=lidar_credentials,
+                output_dir=str(LIDAR_DATA_DIR) # Use imported path
             )
         else:
             self.lidar_collector = None

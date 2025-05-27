@@ -129,6 +129,9 @@ RUN pip install --no-cache-dir \
     && pip install --no-cache-dir \
     -r requirements.txt
 
+# Download SpaCy model
+RUN python -m spacy download pt_core_news_lg
+
 # Copy the entire project
 COPY . .
 
