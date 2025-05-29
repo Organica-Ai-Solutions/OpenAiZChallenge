@@ -14,7 +14,7 @@ import base64
 from openai import OpenAI, OpenAIError
 from openai.types.chat import ChatCompletion
 import httpx
-from ..config import OPENAI_API_KEY
+from ..config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -31,17 +31,17 @@ class GPTIntegration:
             # Use environment variables to configure the client
             import os
             
-            # Explicitly set OpenAI configuration
-            os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
-            
             # Disable any proxy settings by unsetting environment variables
             # httpx default client honors these
             os.environ.pop('HTTP_PROXY', None)
             os.environ.pop('HTTPS_PROXY', None)
             os.environ.pop('ALL_PROXY', None) # Add ALL_PROXY as well
             
-            # Initialize the client with an explicit httpx client
-            self.client = OpenAI(http_client=httpx.Client()) # Pass explicit client
+            # Initialize the client with an explicit httpx client and API key
+            self.client = OpenAI(
+                api_key=settings.OPENAI_API_KEY,
+                http_client=httpx.Client()
+            )
             self.model = model_name
             self.max_tokens = 4096
             self.temperature = 0.7

@@ -9,7 +9,7 @@ import uuid
 import numpy as np
 import asyncio
 
-from ...config import settings
+from src.config import settings
 from ..core.enums import DataSourceType, ValidationStatus
 
 logger = logging.getLogger(__name__)

@@ -129,8 +129,8 @@ RUN pip install --no-cache-dir \
     && pip install --no-cache-dir \
     -r requirements.txt
 
-# Download SpaCy model
-RUN python -m spacy download pt_core_news_lg
+# Download SpaCy model with retries and timeout
+RUN pip install --no-cache-dir --timeout=600 --retries=5 "https://github.com/explosion/spacy-models/releases/download/pt_core_news_lg-3.8.0/pt_core_news_lg-3.8.0-py3-none-any.whl"
 
 # Copy the entire project
 COPY . .
@@ -138,6 +138,7 @@ COPY . .
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONPATH=/app
 
 # Expose the application port
 EXPOSE 8000

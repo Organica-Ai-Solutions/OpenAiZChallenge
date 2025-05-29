@@ -50,6 +50,8 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
+    env_file:
+      - .env
     environment:
       - KAFKA_BOOTSTRAP_SERVERS=nis-kafka:9092
       - REDIS_URL=redis://nis-redis:6379

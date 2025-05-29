@@ -7,6 +7,7 @@ import os
 import json
 import logging
 import threading
+import time
 from typing import Dict, List, Optional, Union, Any, Callable
 from confluent_kafka import Producer, Consumer, KafkaError, KafkaException
 
@@ -135,6 +136,10 @@ class KafkaClient:
             config: Consumer config
             callback: Callback function
         """
+        # Add a small startup delay
+        time.sleep(5) # Wait 5 seconds before starting to consume
+        logger.info(f"Consumer for topic {topic} starting poll loop after delay.")
+
         consumer = Consumer(config)
         consumer.subscribe([topic])
         
