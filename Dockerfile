@@ -43,6 +43,10 @@ FROM dependencies AS application
 # Copy the entire project
 COPY . .
 
+# --- BEGIN DEBUG ---
+RUN cat /app/api/batch.py
+# --- END DEBUG ---
+
 # Create necessary directories
 RUN mkdir -p /app/data /app/outputs /app/logs
 
@@ -134,6 +138,10 @@ RUN pip install --no-cache-dir --timeout=600 --retries=5 "https://github.com/exp
 
 # Copy the entire project
 COPY . .
+
+# --- BEGIN DEBUG ---
+RUN cat /app/api/batch.py
+# --- END DEBUG ---
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1

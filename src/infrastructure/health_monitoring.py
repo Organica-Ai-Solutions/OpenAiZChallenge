@@ -16,8 +16,9 @@ import kafka
 from fastapi import APIRouter, HTTPException, Request, Depends
 from pydantic import BaseModel
 
-# Import settings directly
-from ..config import settings, get_config, get_environment
+# MODIFIED: Import app_settings and the global config_manager instance
+from ..config import app_settings, config_manager as global_config_manager, Environment, DatabaseConfig
+
 from ..infrastructure.distributed_processing import DistributedProcessingManager
 
 logger = logging.getLogger(__name__)
@@ -47,9 +48,9 @@ class HealthMonitor:
     
     def __init__(self):
         """Initialize health monitoring system. Call startup() to initialize Dask."""
-        # Distributed manager will be started in the startup method
         self.distributed_manager: Optional[DistributedProcessingManager] = None
-        self.config_manager = get_config() # get_config() returns the ConfigManager instance
+        # Use the globally imported config_manager
+        self.config_manager = global_config_manager
 
     async def startup(self):
         """Initialize long-running resources like DistributedProcessingManager."""
@@ -77,11 +78,16 @@ class HealthMonitor:
     def check_redis_health(self) -> bool:
         """Check Redis connection health."""
         try:
-            # Use global settings for Redis connection
+            # Use app_settings directly or get DatabaseConfig from config_manager
+            db_config = self.config_manager.get_config("database")
+            if not isinstance(db_config, DatabaseConfig):
+                logger.error("Redis health check: Invalid DatabaseConfig from ConfigManager")
+                return False
+
             redis_client = redis.Redis(
-                host=settings.REDIS_HOST,
-                port=settings.REDIS_PORT,
-                db=settings.REDIS_DB,
+                host=db_config.redis_host, # MODIFIED
+                port=db_config.redis_port, # MODIFIED
+                db=db_config.redis_db,     # MODIFIED
                 socket_timeout=2
             )
             redis_client.ping()
@@ -93,12 +99,23 @@ class HealthMonitor:
     def check_kafka_health(self) -> bool:
         """Check Kafka broker health."""
         try:
-            # Use global settings for Kafka connection
+            # Use app_settings directly or get DatabaseConfig from config_manager
+            db_config = self.config_manager.get_config("database")
+            if not isinstance(db_config, DatabaseConfig):
+                logger.error("Kafka health check: Invalid DatabaseConfig from ConfigManager")
+                return False
+                
             kafka_client = kafka.KafkaConsumer(
-                bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
-                request_timeout_ms=2000
+                bootstrap_servers=db_config.kafka_bootstrap_servers, # MODIFIED
+                request_timeout_ms=2000,
+                # Add other necessary Kafka consumer configs if needed for a simple health check
+                # For example, if security protocols are enabled via app_settings
+                # security_protocol=app_settings.kafka_security_protocol or "PLAINTEXT", 
+                # ssl_cafile=app_settings.kafka_ssl_cafile,
+                # etc.
             )
             kafka_client.topics()  # Attempt to list topics
+            kafka_client.close() # Close the consumer
             return True
         except Exception as e:
             logger.error(f"Kafka health check failed: {e}")
@@ -137,21 +154,21 @@ class HealthMonitor:
     
     def generate_health_report(self) -> SystemHealth:
         """Generate comprehensive system health report."""
-        # Restore psutil and platform calls, assuming they are not the primary issue now
         resources = self.get_system_resources()
         
+        # Access feature flags through app_settings
         current_feature_flags = {
-            "distributed_processing": getattr(settings, 'DISTRIBUTED_PROCESSING_ENABLED', False), 
-            "caching": getattr(settings, 'CACHING_ENABLED', True), 
-            "event_logging": getattr(settings, 'EVENT_LOGGING_ENABLED', True), 
-            "performance_tracking": getattr(settings, 'PERFORMANCE_TRACKING_ENABLED', True), 
-            "gpt_vision": settings.ENABLE_GPT_VISION,
-            "web_search": settings.ENABLE_WEB_SEARCH
+            "distributed_processing": app_settings.processing.mode != "local", # Example, adjust as per actual flag
+            "caching": True, # Placeholder, link to actual app_settings if available
+            "event_logging": True, # Placeholder
+            "performance_tracking": True, # Placeholder
+            "gpt_vision": app_settings.OPENAI_API_KEY is not None, # Example: simple check if API key is set
+            "web_search": True # Placeholder
         }
 
         redis_ok = self.check_redis_health()
-        kafka_ok = self.check_kafka_health() # Restore Kafka check
-        processing_ok = self.check_processing_health() # Restore processing check
+        kafka_ok = self.check_kafka_health()
+        processing_ok = self.check_processing_health()
 
         return SystemHealth(
             status="healthy" if all([
@@ -160,7 +177,7 @@ class HealthMonitor:
                 processing_ok 
             ]) else "degraded",
             timestamp=time.time(),
-            environment=get_environment().name,
+            environment=self.config_manager.current_environment.value, # MODIFIED to use .value for Enum member
             
             cpu_usage=resources['cpu_usage'],
             memory_usage=resources['memory_usage'],
@@ -170,7 +187,7 @@ class HealthMonitor:
             kafka_status=kafka_ok, 
             processing_status=processing_ok, 
             
-            system_info=self.get_system_info(), # Restore platform calls
+            system_info=self.get_system_info(),
             feature_flags=current_feature_flags
         )
 

@@ -1,3 +1,13 @@
+"""
+Core configuration management for the NIS application.
+
+Handles loading settings from environment variables and YAML files, 
+providing a centralized point of access for configuration data throughout the application.
+"""
+print("DEBUG CONFIG: TOP LEVEL OF src.config.py EXECUTING NOW - SIMPLIFIED")
+# THIS IS A VERY PROMINENT COMMENT TO CHECK IF THE FILE IS UPDATING
+# ANOTHER LINE FOR THE PROMINENT COMMENT
+
 import yaml
 import os
 """Configuration Management for Indigenous Knowledge Research Platform.
@@ -150,99 +160,26 @@ class FeatureFlags(BaseModel):
     enable_performance_tracking: bool = True
 
 class ConfigManager:
-    """Centralized configuration management."""
-    
-    _instance = None
-    
-    def __new__(cls, environment: Optional[Environment] = None):
-        """Singleton implementation."""
-        if not cls._instance:
-            cls._instance = super().__new__(cls)
-            cls._instance._initialize(environment)
-        return cls._instance
-    
-    def _initialize(self, environment: Optional[Environment] = None):
-        """Initialize configuration based on environment."""
-        self.environment = environment or self._detect_environment()
-        
-        # Load base configuration
-        self.security = SecurityConfig()
-        self.processing = ProcessingConfig()
-        self.database = DatabaseConfig()
-        self.logging = LoggingConfig()
-        self.ml = MLConfig()
-        self.features = FeatureFlags()
-        
-        # Configure logging
-        self._configure_logging()
-    
-    @classmethod
-    def _detect_environment(cls) -> Environment:
-        """Detect current deployment environment."""
-        env_name = os.getenv("NIS_ENV", "local").upper()
-        return Environment[env_name]
-    
-    def _configure_logging(self):
-        """Configure logging based on environment settings."""
-        log_level = getattr(logging, self.logging.level.upper())
-        logging.basicConfig(
-            level=log_level,
-            format=self.logging.format,
-            filename=self.logging.file_path
-        )
-    
-    def get_config(self, config_type: str) -> BaseModel:
-        """Retrieve specific configuration."""
-        config_map = {
-            "security": self.security,
-            "processing": self.processing,
-            "database": self.database,
-            "logging": self.logging,
-            "ml": self.ml,
-            "features": self.features
-        }
-        return config_map.get(config_type)
-    
-    def export_config(self) -> Dict[str, Any]:
-        """Export current configuration as a dictionary."""
-        return {
-            "environment": self.environment.name,
-            "security": self.security.dict(),
-            "processing": self.processing.dict(),
-            "database": self.database.dict(),
-            "logging": self.logging.dict(),
-            "ml": self.ml.dict(),
-            "features": self.features.dict()
-        }
-    
-    def validate_config(self) -> bool:
-        """Validate all configurations."""
-        try:
-            # Validate each configuration section
-            SecurityConfig(**self.security.dict())
-            ProcessingConfig(**self.processing.dict())
-            DatabaseConfig(**self.database.dict())
-            LoggingConfig(**self.logging.dict())
-            MLConfig(**self.ml.dict())
-            FeatureFlags(**self.features.dict())
-            return True
-        except ValidationError as e:
-            logging.error(f"Configuration validation failed: {e}")
-            return False
+    def __init__(self):
+        print(f"DEBUG CONFIG: SIMPLIFIED ConfigManager.__init__ called. ID: {id(self)}")
+        self.message = "Hello from simplified ConfigManager"
+        # Try explicitly binding a method to see if it helps (highly unusual to need this)
+        # self.get_config = self._actual_get_config.__get__(self, ConfigManager)
 
-# Global configuration manager
+
+    def get_config(self, config_type: str) -> str:
+        print(f"DEBUG CONFIG: SIMPLIFIED ConfigManager.get_config called with type: {config_type}")
+        return f"Simplified config for {config_type}: {self.message}"
+
+    # def _actual_get_config(self, config_type: str) -> str:
+    #     print(f"DEBUG CONFIG: SIMPLIFIED ConfigManager._actual_get_config called with type: {config_type}")
+    #     return f"Simplified config for {config_type} (from _actual): {self.message}"
+
+print("DEBUG CONFIG: Instantiating simplified global config_manager")
 config_manager = ConfigManager()
+print(f"DEBUG CONFIG: Global simplified config_manager created. Has get_config: {hasattr(config_manager, 'get_config')}")
 
-# Convenience functions for accessing configurations
-def get_config(config_type: str) -> BaseModel:
-    """Get configuration by type."""
+# Keep a simple global helper for other parts of the app that might use it,
+# but DatabaseManager will import ConfigManager class directly.
+def get_global_config(config_type: str) -> str:
     return config_manager.get_config(config_type)
-
-def get_environment() -> Environment:
-    """Get current deployment environment."""
-    return config_manager.environment
-
-# Convenience function for getting settings
-def get_settings() -> Dict[str, Any]:
-    """Get all configuration settings."""
-    return config_manager.export_config()

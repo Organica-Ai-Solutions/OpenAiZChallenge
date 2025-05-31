@@ -3,8 +3,12 @@
 import os
 import enum
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
+import logging
+
+from pydantic import BaseModel, Field, ValidationError
 from pydantic_settings import BaseSettings
+from dotenv import load_dotenv
 
 from .data_sources import (
     DATA_DIR,
@@ -16,162 +20,200 @@ from .data_sources import (
     LIDAR_DATA_DIR
 )
 
+# Load environment variables from .env file - SHOULD BE AT THE VERY TOP
+load_dotenv()
+
+# Assuming these are still relevant or will be used by Settings/ConfigManager
+# API Keys
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
+# SENTINEL_USERNAME = os.getenv('SENTINEL_USERNAME') # Handled by Settings
+# SENTINEL_PASSWORD = os.getenv('SENTINEL_PASSWORD') # Handled by Settings
+
+# Data paths - these might be better defined within Settings or derived from a base dir in settings
+# BASE_DIR_CONFIG = Path(__file__).resolve().parent.parent # src directory
+# DATA_DIR_CONFIG = BASE_DIR_CONFIG / 'data'
+# OUTPUTS_DIR_CONFIG = BASE_DIR_CONFIG / 'outputs'
+
+# LIDAR_DATA_DIR_CONFIG = DATA_DIR_CONFIG / 'lidar'
+# SATELLITE_DATA_DIR_CONFIG = DATA_DIR_CONFIG / 'satellite'
+
+# Required files - these should ideally be part of a data validation step, not top-level config
+# REQUIRED_FILES = {
+#     LIDAR_DATA_DIR_CONFIG: ["file1.las", "file2.laz"],
+#     SATELLITE_DATA_DIR_CONFIG: ["image1.tif", "image2.jp2"]
+# }
+
+# def get_data_source_status(): # This logic should move to a data management/validation module
+#     pass
+# def verify_all_data_sources(): # This logic should move to a data management/validation module
+#     pass
+
 class Environment(enum.Enum):
     """Environment types for the NIS Protocol."""
+    LOCAL = "local"
     DEVELOPMENT = "development"
     STAGING = "staging"
     PRODUCTION = "production"
 
-class Settings(BaseSettings):
-    """Settings for the NIS Protocol."""
-    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
-    ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
-    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
-    USE_REAL_DATA: bool = os.getenv("USE_REAL_DATA", "true").lower() == "true"
-    DISABLE_MOCK_RESPONSES: bool = os.getenv("DISABLE_MOCK_RESPONSES", "true").lower() == "true"
-    ENABLE_MOCK_MODE: bool = os.getenv("ENABLE_MOCK_MODE", "true").lower() == "true"
-    SECRET_KEY: str = os.getenv("SECRET_KEY", "your-super-secret-key-for-development")
-    PROCESSING_MODE: str = os.getenv("PROCESSING_MODE", "local")
-    
-    SENTINEL_USERNAME: Optional[str] = None
-    SENTINEL_PASSWORD: Optional[str] = None
-    LIDAR_USERNAME: Optional[str] = None
-    LIDAR_PASSWORD: Optional[str] = None
-    EARTHDATA_TOKEN: Optional[str] = None
-    CDSE_CLIENT_ID: Optional[str] = None
-    CDSE_AUTH_URL: Optional[str] = None
-    CDSE_STAC_URL: Optional[str] = None
+    @classmethod
+    def _missing_(cls, value):
+        for member in cls:
+            if member.value.lower() == str(value).lower():
+                return member
+        return None
 
-    API_HOST: str = os.getenv("API_HOST", "localhost")
-    API_PORT: int = int(os.getenv("API_PORT", "8000"))
-    EARTHDATA_API_URL: Optional[str] = None
-    EARTHDATA_COLLECTION_ID: Optional[str] = None
-    BACKEND_PORT: int = int(os.getenv("BACKEND_PORT", "8000"))
-    FRONTEND_PORT: int = int(os.getenv("FRONTEND_PORT", "3000"))
-    HOST: str = os.getenv("HOST", "0.0.0.0")
+class SecurityConfig(BaseModel):
+    """Security configuration settings."""
+    secret_key: str = Field(default_factory=lambda: os.getenv('SECRET_KEY', os.urandom(32).hex()))
+    jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
+    cors_allowed_origins: List[str] = Field(default_factory=lambda: [origin.strip() for origin in os.getenv("CORS_ALLOWED_ORIGINS", "*").split(",")])
+    rate_limit_requests: int = 100
+    rate_limit_window: int = 60
 
-    REDIS_HOST: str = os.getenv("REDIS_HOST", "nis-redis")
-    REDIS_PORT: int = int(os.getenv("REDIS_PORT", "6379"))
-    REDIS_DB: int = int(os.getenv("REDIS_DB", "0"))
+class ProcessingConfig(BaseModel):
+    """Distributed processing configuration."""
+    mode: str = Field(default_factory=lambda: os.getenv("PROCESSING_MODE", "local"))
+    max_workers: int = Field(default_factory=lambda: int(os.getenv("MAX_WORKERS", "4")))
+    enable_satellite_processing: bool = Field(default_factory=lambda: os.getenv("ENABLE_SATELLITE_PROCESSING", "true").lower() == "true")
+    enable_lidar_processing: bool = Field(default_factory=lambda: os.getenv("ENABLE_LIDAR_PROCESSING", "true").lower() == "true")
+    enable_historical_texts: bool = Field(default_factory=lambda: os.getenv("ENABLE_HISTORICAL_TEXTS", "true").lower() == "true")
+    enable_indigenous_maps: bool = Field(default_factory=lambda: os.getenv("ENABLE_INDIGENOUS_MAPS", "true").lower() == "true")
+    data_collection_days_range: int = Field(default_factory=lambda: int(os.getenv("DATA_COLLECTION_DAYS_RANGE", "1825"))) # Default 5 years (5*365)
 
-    KAFKA_BOOTSTRAP_SERVERS: str = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "nis-kafka:9092")
-    KAFKA_TOPIC_PREFIX: str = os.getenv("KAFKA_TOPIC_PREFIX", "nis_protocol")
-    LOG_DIR: str = os.getenv("LOG_DIR", "logs")
-    ENABLE_GPT_VISION: bool = os.getenv("ENABLE_GPT_VISION", "true").lower() == "true"
-    ENABLE_WEB_SEARCH: bool = os.getenv("ENABLE_WEB_SEARCH", "true").lower() == "true"
-    
-    JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
-    RATE_LIMIT_REQUESTS: int = int(os.getenv("RATE_LIMIT_REQUESTS", "100"))
-    RATE_LIMIT_WINDOW: int = int(os.getenv("RATE_LIMIT_WINDOW", "60"))
-    CORS_ALLOWED_ORIGINS: List[str] = [origin.strip() for origin in os.getenv("CORS_ALLOWED_ORIGINS", "*").split(",")]
-    
-    MAX_WORKERS: int = int(os.getenv("MAX_WORKERS", "4"))
-    MAX_CONCURRENT_AGENTS: int = int(os.getenv("MAX_CONCURRENT_AGENTS", "5"))
-    BATCH_SIZE: int = int(os.getenv("BATCH_SIZE", "10"))
-    TIMEOUT_SECONDS: int = int(os.getenv("TIMEOUT_SECONDS", "300"))
+class DatabaseConfig(BaseModel):
+    """Database connection configurations."""
+    db_user: Optional[str] = Field(default_factory=lambda: os.getenv("POSTGRES_USER"))
+    db_password: Optional[str] = Field(default_factory=lambda: os.getenv("POSTGRES_PASSWORD"))
+    db_host: Optional[str] = Field(default_factory=lambda: os.getenv("POSTGRES_HOST"))
+    db_port: Optional[int] = Field(default_factory=lambda: int(os.getenv("POSTGRES_PORT", 5432)))
+    db_name: Optional[str] = Field(default_factory=lambda: os.getenv("POSTGRES_DB"))
 
-    LIDAR_DATA_DIR_ENV: str = os.getenv("LIDAR_DATA_DIR", "./data/lidar")
-    OUTPUT_DIR_ENV: str = os.getenv("OUTPUT_DIR", "./outputs")
+    redis_host: str = Field(default_factory=lambda: os.getenv("REDIS_HOST", "localhost"))
+    redis_port: int = Field(default_factory=lambda: int(os.getenv("REDIS_PORT", 6379)))
+    redis_db: int = Field(default_factory=lambda: int(os.getenv("REDIS_DB", 0)))
     
-    # Enable flags for pipeline components - to be controlled by env vars
-    HISTORICAL_TEXTS_ENABLED: bool = os.getenv("HISTORICAL_TEXTS_ENABLED", "true").lower() == "true"
-    INDIGENOUS_MAPS_ENABLED: bool = os.getenv("INDIGENOUS_MAPS_ENABLED", "true").lower() == "true"
-    SATELLITE_ENABLED: bool = os.getenv("SATELLITE_ENABLED", "true").lower() == "true"
-    LIDAR_ENABLED: bool = os.getenv("LIDAR_ENABLED", "true").lower() == "true"
+    kafka_bootstrap_servers: List[str] = Field(default_factory=lambda: os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092").split(","))
+    kafka_topic_prefix: str = Field(default_factory=lambda: os.getenv("KAFKA_TOPIC_PREFIX", "nis_protocol"))
+
+class LoggingConfig(BaseModel):
+    """Logging configuration."""
+    level: str = Field(default_factory=lambda: os.getenv("LOG_LEVEL", "INFO").upper())
+    format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+class AppSettings(BaseSettings):
+    """Main application settings, loaded from environment or .env file."""
+    APP_NAME: str = "NIS Protocol Backend"
+    ENVIRONMENT: Environment = Field(default_factory=lambda: Environment._missing_(os.getenv("NIS_ENV", "local")))
+    LOG_LEVEL: str = Field(default_factory=lambda: os.getenv("LOG_LEVEL", "INFO").upper())
+
+    security: SecurityConfig = SecurityConfig()
+    processing: ProcessingConfig = ProcessingConfig()
+    database: DatabaseConfig = DatabaseConfig()
+    logging_config: LoggingConfig = LoggingConfig()
+
+    OPENAI_API_KEY: Optional[str] = Field(default_factory=lambda: os.getenv("OPENAI_API_KEY"))
+    USE_REAL_DATA: bool = Field(default_factory=lambda: os.getenv("USE_REAL_DATA", "true").lower() == "true")
+    DISABLE_MOCK_RESPONSES: bool = Field(default_factory=lambda: os.getenv("DISABLE_MOCK_RESPONSES", "true").lower() == "true")
+    
+    API_HOST: str = Field(default_factory=lambda: os.getenv("API_HOST", "0.0.0.0"))
+    API_PORT: int = Field(default_factory=lambda: int(os.getenv("API_PORT", "8000")))
+
+    BASE_DIR: Path = Path(__file__).resolve().parent.parent
+    DATA_DIR: Path = BASE_DIR / "data"
+    OUTPUTS_DIR: Path = BASE_DIR / "outputs"
+    LOG_DIR: Path = OUTPUTS_DIR / "logs"
+
+    SATELLITE_DATA_DIR: Path = DATA_DIR / "satellite"
+    LIDAR_DATA_DIR: Path = DATA_DIR / "lidar"
 
     class Config:
         env_file = ".env"
-        extra = "allow"
+        extra = "ignore"
         env_file_encoding = 'utf-8'
 
-def get_settings() -> Settings:
-    """Get application settings."""
-    return Settings()
+app_settings = AppSettings()
 
-# Centralized settings instance - DEFINED FIRST
-settings = get_settings()
+logging.basicConfig(
+    level=app_settings.LOG_LEVEL,
+    format=app_settings.logging_config.format,
+)
+Path(app_settings.LOG_DIR).mkdir(parents=True, exist_ok=True)
 
-# The ConfigManager class can be refactored or removed if all settings are managed by the Settings class.
 class ConfigManager:
-    """Configuration manager for the NIS Protocol."""
+    """Configuration manager for the NIS Protocol. 
+    Provides a single point of access to various configuration sections.
+    """
     
-    def __init__(self):
-        # These now come from the settings object, which is defined above
-        self.kafka_bootstrap_servers = settings.KAFKA_BOOTSTRAP_SERVERS
-        self.kafka_topic_prefix = settings.KAFKA_TOPIC_PREFIX
-        self.redis_url = f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}/{settings.REDIS_DB}"
-        self.log_level = settings.LOG_LEVEL
-        self.log_dir = settings.LOG_DIR
-        self.use_real_data = settings.USE_REAL_DATA
-        self.disable_mock_responses = settings.DISABLE_MOCK_RESPONSES
-        self.enable_gpt_vision = settings.ENABLE_GPT_VISION
-        self.enable_web_search = settings.ENABLE_WEB_SEARCH
-        
-        self.data_dir = Path(settings.LIDAR_DATA_DIR_ENV).parent
-        self.outputs_dir = Path(settings.OUTPUT_DIR_ENV)
-        self.satellite_data_dir = SATELLITE_DATA_DIR
-        self.lidar_data_dir = LIDAR_DATA_DIR
+    def __init__(self, settings_instance: AppSettings = app_settings):
+        self._settings = settings_instance
 
-        self.secret_key = settings.SECRET_KEY
-        self.jwt_algorithm = settings.JWT_ALGORITHM
-        self.access_token_expire_minutes = settings.ACCESS_TOKEN_EXPIRE_MINUTES
-        self.rate_limit_requests = settings.RATE_LIMIT_REQUESTS
-        self.rate_limit_window = settings.RATE_LIMIT_WINDOW
-        self.cors_allowed_origins = settings.CORS_ALLOWED_ORIGINS
-        
-        self.max_workers = settings.MAX_WORKERS
-        self.batch_size = settings.BATCH_SIZE
-        self.timeout_seconds = settings.TIMEOUT_SECONDS
+    def get_config(self, config_type: str) -> Optional[BaseModel]:
+        if config_type == "security":
+            return self._settings.security
+        elif config_type == "processing":
+            return self._settings.processing
+        elif config_type == "database":
+            return self._settings.database
+        elif config_type == "logging":
+            return self._settings.logging_config
+        logging.warning(f"ConfigManager: Unknown config_type requested: {config_type}")
+        return None
+
+    @property
+    def current_environment(self) -> Environment:
+        return self._settings.ENVIRONMENT
+
+    @property
+    def data_dir(self) -> Path:
+        return self._settings.DATA_DIR
+
+    @property
+    def outputs_dir(self) -> Path:
+        return self._settings.OUTPUTS_DIR
     
-    def validate_config(self) -> bool:
-        """Validate the current configuration."""
+    def validate_all_configs(self) -> bool:
         try:
-            if not self.data_dir.exists():
-                raise ValueError(f"Data directory {self.data_dir} does not exist")
-            if not self.outputs_dir.exists():
-                raise ValueError(f"Outputs directory {self.outputs_dir} does not exist")
-            
-            if self.use_real_data and not verify_all_data_sources():
-                raise ValueError("Real data mode enabled but not all data sources are available")
-            
+            if not self._settings.DATA_DIR.exists():
+                 logging.warning(f"Data directory {self._settings.DATA_DIR} does not exist. Creating.")
+                 self._settings.DATA_DIR.mkdir(parents=True, exist_ok=True)
+            if not self._settings.OUTPUTS_DIR.exists():
+                logging.warning(f"Outputs directory {self._settings.OUTPUTS_DIR} does not exist. Creating.")
+                self._settings.OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
+            logging.info("AppSettings successfully validated.")
             return True
-        except Exception as e:
-            print(f"Configuration validation failed: {str(e)}")
+        except ValidationError as e:
+            logging.error(f"AppSettings validation failed: {e}")
             return False
 
-_config_instance: Optional[ConfigManager] = None
+_config_manager_singleton: Optional[ConfigManager] = None
 
-def get_config() -> ConfigManager:
-    """Get the global configuration instance."""
-    global _config_instance
-    if _config_instance is None:
-        _config_instance = ConfigManager() # Now settings will be defined when this is called
-    return _config_instance
+def get_config_manager() -> ConfigManager:
+    """Get the global ConfigManager singleton instance."""
+    global _config_manager_singleton
+    if _config_manager_singleton is None:
+        _config_manager_singleton = ConfigManager(settings_instance=app_settings)
+        _config_manager_singleton.validate_all_configs()
+    return _config_manager_singleton
+
+config_manager: ConfigManager = get_config_manager()
 
 def get_environment() -> Environment:
-    """Get the current environment."""
-    env = settings.ENVIRONMENT.lower()
-    try:
-        return Environment(env)
-    except ValueError:
-        print(f"Warning: Invalid environment '{env}', defaulting to development")
-        return Environment.DEVELOPMENT
+    return config_manager.current_environment
 
-config_manager = get_config() # settings is defined before this now
+def get_settings() -> AppSettings:
+    return app_settings
+
+settings = app_settings
 
 __all__ = [
-    'DATA_DIR',
-    'OUTPUTS_DIR',
-    'SATELLITE_DATA_DIR',
-    'LIDAR_DATA_DIR',
-    'REQUIRED_FILES',
-    'get_data_source_status',
-    'verify_all_data_sources',
     'config_manager',
-    'get_config',
-    'get_environment',
-    'Environment',
-    'get_settings',
+    'get_config_manager',
+    'AppSettings',
+    'app_settings',
     'settings',
+    'Environment',
+    'get_environment',
+    'get_settings',
+    'SecurityConfig', 'ProcessingConfig', 'DatabaseConfig', 'LoggingConfig'
 ] 

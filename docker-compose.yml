@@ -48,8 +48,8 @@ services:
     container_name: nis-backend
     ports:
       - "8000:8000"
-    volumes:
-      - .:/app
+    # volumes: # Temporarily commented out
+    #   - .:/app # Temporarily commented out
     env_file:
       - .env
     environment:

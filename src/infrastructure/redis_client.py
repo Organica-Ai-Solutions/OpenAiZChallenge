@@ -10,7 +10,7 @@ from typing import Dict, List, Optional, Union, Any
 import redis
 
 # Import the global settings instance
-from ..config import settings
+from ..config import app_settings
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -155,9 +155,9 @@ def get_redis_client() -> RedisClient:
     global _redis_client
     if _redis_client is None:
         # Use the settings object for host, port, and db
-        host = settings.REDIS_HOST
-        port = settings.REDIS_PORT
-        db = settings.REDIS_DB
+        host = app_settings.database.redis_host
+        port = app_settings.database.redis_port
+        db = app_settings.database.redis_db
         
         try:
             _redis_client = RedisClient(host=host, port=port, db=db)

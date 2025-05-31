@@ -213,9 +213,12 @@ class NISProtocol:
                 for agent_id, agent in self.agent_registry.items():
                     self.coordinator.register_agent(agent_id, agent)
                 
-                logger.info("NIS Protocol agents and coordinator initialized successfully")
+                # Build the LangGraph workflow
+                self._build_graph() # Call to build and compile the graph
+
+                logger.info("NIS Protocol agents, coordinator, and graph initialized successfully")
             except Exception as e:
-                logger.error(f"Error initializing agents: {e}")
+                logger.error(f"Error initializing agents or graph: {e}", exc_info=True)
                 self.agents_available = False
     
     async def analyze_coordinates(self, 

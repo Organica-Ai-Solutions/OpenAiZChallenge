@@ -1,0 +1,16 @@
+{
+  "map_evidence": [],
+  "oral_evidence": [],
+  "total_sources": 0,
+  "analysis": {
+    "target_location": [
+      10.0,
+      -75.0
+    ],
+    "confidence_scores": {
+      "maps": 0.0,
+      "oral": 0.0
+    },
+    "overall_confidence": 0.0
+  }
+}
