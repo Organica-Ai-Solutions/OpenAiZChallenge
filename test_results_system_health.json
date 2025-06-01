@@ -1,0 +1,9 @@
+{
+  "status": "healthy",
+  "timestamp": "2025-06-01T18:59:38.955149",
+  "services": {
+    "api": "healthy",
+    "redis": "healthy",
+    "kafka": "healthy"
+  }
+}

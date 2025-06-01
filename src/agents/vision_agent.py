@@ -133,7 +133,7 @@ class VisionAgent:
             return self._generate_mock_satellite_result(lat, lon)
         except Exception as e:
             logger.error(f"Unexpected error during satellite data loading for {lat}, {lon}: {e}", exc_info=True)
-            return self._generate_mock_satellite_result(lat, lon) # Fallback to mock for other loading errors
+            return self._generate_mock_satellite_result(lat, lon)
 
         row, col = get_pixel_coords(lat, lon, metadata["transform"])
         patch_data = extract_patch(data, row, col, size=256)
@@ -178,7 +178,7 @@ class VisionAgent:
             return self._generate_mock_lidar_result(lat, lon)
         except Exception as e:
             logger.error(f"Unexpected error during LIDAR data loading for {lat}, {lon}: {e}", exc_info=True)
-            return self._generate_mock_lidar_result(lat, lon) # Fallback to mock for other loading errors
+            return self._generate_mock_lidar_result(lat, lon)
 
         row, col = get_pixel_coords(lat, lon, metadata["transform"])
         patch_data = extract_patch(data, row, col, size=256)

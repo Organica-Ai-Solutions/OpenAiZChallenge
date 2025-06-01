@@ -11,16 +11,16 @@ geopandas>=0.14.3
 shapely>=2.0.1
 rasterio
 pyproj
-gdal
+# gdal  # Commented out - causing build issues
 
 # Optional dependencies for AI models
 openai==1.35.0
 # torch==2.2.0
 transformers==4.38.2
-tf-keras
+# tf-keras
 # ultralytics==8.1.2  # For YOLOv8
-spacy
-langgraph
+# spacy  # Commented out - causing build issues
+# langgraph  # Commented out - causing build issues
 
 # Data infrastructure
 redis==5.0.1
@@ -39,7 +39,7 @@ sentinelsat>=1.1.1
 rasterio>=1.3.8
 numpy>=1.24.3
 scipy>=1.10.1
-laspy>=2.3.0
+# laspy>=2.3.0  # Commented out for now
 pyproj>=3.6.0
 
 # Added from the code block
@@ -55,41 +55,42 @@ pystac-client>=0.7.0
 scikit-learn>=1.0.2
 
 # Image processing
-scikit-image>=0.18.0
+# scikit-image>=0.18.0  # Commented out - causing build issues
 rasterio>=1.2.0
-opencv-python>=4.5.0
+# opencv-python>=4.5.0  # Commented out - causing build issues
 
 # LIDAR processing
-laspy>=2.0.0
-dask==2023.5.0
-distributed==2023.5.0
+# laspy>=2.0.0  # Commented out for now
+h5py>=3.0.0
+# dask==2023.5.0  # Commented out - causing build issues
+# distributed==2023.5.0  # Commented out - causing build issues
 
 # Machine learning
 scikit-learn>=0.24.0
-tensorflow>=2.6.0
-torch>=1.9.0
+# tensorflow>=2.6.0
+# torch>=1.9.0  # Commented out - causing build issues
 
 # Visualization
 matplotlib>=3.4.0
-seaborn>=0.11.0
+# seaborn>=0.11.0  # Commented out for now
 
 # API and web
 fastapi>=0.68.0
 uvicorn>=0.15.0
 aiohttp>=3.8.0
-websockets>=10.0
+# websockets>=10.0  # Commented out for now
 
 # Database
 redis>=4.0.0
-kafka-python>=2.0.0
+# kafka-python>=2.0.0  # Commented out - using confluent-kafka
 
 # Testing
 pytest>=6.2.0
 pytest-asyncio>=0.15.0
 
 # Authentication and security
-kubernetes==25.3.0
-jwt==1.3.1
+# kubernetes==25.3.0  # Commented out - causing build issues
+# jwt==1.3.1  # Commented out for now
 passlib==1.7.4
 python-jose==3.3.0
 bcrypt==4.0.1
@@ -97,7 +98,7 @@ bcrypt==4.0.1
 # Monitoring and System Diagnostics
 psutil==5.9.5
 redis==5.0.1
-kafka-python==2.0.2
+# kafka-python==2.0.2  # Commented out - using confluent-kafka
 
 # Database Dependencies
 sqlalchemy==2.0.15

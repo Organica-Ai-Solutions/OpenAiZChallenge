@@ -121,9 +121,13 @@ class AnalysisPipeline:
         if DataSourceType.SATELLITE in data_sources and self.satellite_collector and self.satellite_enabled:
             logger.info(f"Collecting Satellite data for {site_id}")
             try:
+                logger.info(f"SITE_ID: {site_id} - STEP: Before satellite_collector.search_images")
                 products = await loop.run_in_executor(None, self.satellite_collector.search_images, bounds, start_date, end_date)
+                logger.info(f"SITE_ID: {site_id} - STEP: After satellite_collector.search_images, Products found: {'Yes' if products else 'No'}")
                 if products:
+                    logger.info(f"SITE_ID: {site_id} - STEP: Before satellite_collector.download_images")
                     satellite_images = await loop.run_in_executor(None, self.satellite_collector.download_images, products)
+                    logger.info(f"SITE_ID: {site_id} - STEP: After satellite_collector.download_images, Images downloaded: {'Yes' if satellite_images else 'No'}")
                     if satellite_images:
                         data_point.satellite_image_paths = satellite_images
                         data_point.data_sources[DataSourceType.SATELLITE] = {'raw_image_paths': satellite_images}
@@ -133,7 +137,9 @@ class AnalysisPipeline:
         if DataSourceType.LIDAR in data_sources and self.lidar_collector and self.lidar_enabled:
             logger.info(f"Collecting LIDAR data for {site_id}")
             try:
+                logger.info(f"SITE_ID: {site_id} - STEP: Before lidar_collector.download_lidar_data")
                 lidar_files = await loop.run_in_executor(None, self.lidar_collector.download_lidar_data, bounds, start_date, end_date)
+                logger.info(f"SITE_ID: {site_id} - STEP: After lidar_collector.download_lidar_data, Files downloaded: {'Yes' if lidar_files else 'No'}")
                 if lidar_files:
                     data_point.lidar_data_paths = lidar_files
                     data_point.data_sources[DataSourceType.LIDAR] = {'raw_lidar_paths': lidar_files}
@@ -143,7 +149,9 @@ class AnalysisPipeline:
         if DataSourceType.HISTORICAL_TEXTS in data_sources and self.historical_text_processor and self.historical_texts_enabled:
             logger.info(f"Processing historical texts for {site_id}")
             try:
+                logger.info(f"SITE_ID: {site_id} - STEP: Before historical_text_processor.process_area")
                 texts_data = self.historical_text_processor.process_area(bounds)
+                logger.info(f"SITE_ID: {site_id} - STEP: After historical_text_processor.process_area, Data found: {'Yes' if texts_data else 'No'}")
                 data_point.data_sources[DataSourceType.HISTORICAL_TEXTS] = texts_data
             except Exception as e:
                 logger.error(f"Error processing historical texts for {site_id}: {e}", exc_info=True)
@@ -151,7 +159,9 @@ class AnalysisPipeline:
         if DataSourceType.INDIGENOUS_MAPS in data_sources and self.indigenous_map_processor and self.indigenous_maps_enabled:
             logger.info(f"Processing indigenous maps for {site_id}")
             try:
+                logger.info(f"SITE_ID: {site_id} - STEP: Before indigenous_map_processor.process_area")
                 maps_data = self.indigenous_map_processor.process_area(bounds)
+                logger.info(f"SITE_ID: {site_id} - STEP: After indigenous_map_processor.process_area, Data found: {'Yes' if maps_data else 'No'}")
                 data_point.data_sources[DataSourceType.INDIGENOUS_MAPS] = maps_data
             except Exception as e:
                 logger.error(f"Error processing indigenous maps for {site_id}: {e}", exc_info=True)
@@ -165,8 +175,8 @@ class AnalysisPipeline:
             data_point.validation_status = ValidationStatus.LOW_CONFIDENCE
             if data_point.confidence_score > 0.7: data_point.validation_status = ValidationStatus.HIGH_CONFIDENCE
             elif data_point.confidence_score > 0.4: data_point.validation_status = ValidationStatus.MEDIUM_CONFIDENCE
-        else:
-            data_point.confidence_score = 0.0
+            else:
+                data_point.confidence_score = 0.0
             data_point.validation_status = ValidationStatus.NO_DATA
         data_point.metadata['analysis_status'] = "Temporarily simplified analysis performed"
         logger.info(f"Completed TEMPORARILY SIMPLIFIED analysis for {data_point.site_id}. Confidence: {data_point.confidence_score}")
@@ -190,7 +200,7 @@ class AnalysisPipeline:
                 tile_west = min_lon + i * tile_width_deg
                 tile_east = min(min_lon + (i + 1) * tile_width_deg, max_lon)
                 if tile_west >= tile_east: continue
-                
+
                 tile_bounds_j_i = {'north': tile_north, 'south': tile_south, 'east': tile_east, 'west': tile_west}
                 tile_site_id = f"{original_site_id}_tile_{j}_{i}"
                 logger.info(f"Processing tile {tile_site_id}, Bounds: {tile_bounds_j_i}")
@@ -219,7 +229,7 @@ async def process_research_location(
 
     area_height_deg = area_definition['north'] - area_definition['south']
     area_width_deg = area_definition['east'] - area_definition['west']
-    
+
     center_lat = (area_definition['north'] + area_definition['south']) / 2
     center_lon = (area_definition['east'] + area_definition['west']) / 2
     
@@ -232,7 +242,7 @@ async def process_research_location(
 
     if area_height_deg <= tile_size_deg_lat and area_width_deg <= tile_size_deg_lon:
         data_point = await pipeline.collect_data(site_id, area_definition, data_sources)
-        return pipeline.analyze_data(data_point)
+        return pipeline.analyze_data(data_point) 
     else:
         return await pipeline._execute_tiled_processing(
             original_site_id=site_id, large_area_bounds=area_definition,

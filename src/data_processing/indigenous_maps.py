@@ -14,6 +14,7 @@ import torch
 from transformers import pipeline
 from concurrent.futures import ThreadPoolExecutor
 import re
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -29,12 +30,35 @@ class IndigenousMapProcessor:
         
         # Load models
         self.feature_extractor = self._load_feature_extractor()
-        self.text_analyzer = pipeline(
-            "text-classification",
-            model="bert-base-multilingual-uncased",
-            return_all_scores=True
-        )
         
+        # Load text_analyzer with retry
+        text_analyzer_model_name = "bert-base-multilingual-uncased"
+        max_text_analyzer_retries = 3
+        retry_text_analyzer_delay = 10
+        self.text_analyzer = None # Initialize as None
+
+        for attempt in range(max_text_analyzer_retries):
+            try:
+                logger.info(f"Attempting to load text analyzer model '{text_analyzer_model_name}' (Attempt {attempt + 1}/{max_text_analyzer_retries})...")
+                self.text_analyzer = pipeline(
+                    "text-classification",
+                    model=text_analyzer_model_name,
+                    return_all_scores=True
+                )
+                logger.info(f"Successfully loaded text analyzer model '{text_analyzer_model_name}'.")
+                break # Exit loop on success
+            except Exception as e:
+                logger.error(f"Error loading text analyzer model '{text_analyzer_model_name}' on attempt {attempt + 1}/{max_text_analyzer_retries}: {str(e)}")
+                if attempt < max_text_analyzer_retries - 1:
+                    logger.info(f"Retrying in {retry_text_analyzer_delay} seconds...")
+                    time.sleep(retry_text_analyzer_delay)
+                else:
+                    logger.error(f"Failed to load text analyzer model '{text_analyzer_model_name}' after {max_text_analyzer_retries} attempts.")
+                    # self.text_analyzer remains None, or you could raise an error here
+                    # to make the application startup fail explicitly.
+                    # For now, allow graceful degradation.
+                    break # Exit loop on final failure
+
         # Load reference data
         self.reference_features = self._load_reference_features()
         self.known_locations = self._load_known_locations()
@@ -99,13 +123,34 @@ class IndigenousMapProcessor:
             logger.error(f"Error processing indigenous knowledge for {lat}, {lon}: {str(e)}")
             raise
     
-    def _load_feature_extractor(self) -> torch.nn.Module:
+    def _load_feature_extractor(self) -> Optional[torch.nn.Module]:
         """Load the feature extraction model."""
-        # Use a pre-trained vision model
-        return pipeline(
-            "feature-extraction",
-            model="microsoft/resnet-50"
-        )
+        model_name = "microsoft/resnet-50"
+        max_retries = 3
+        retry_delay_seconds = 10
+
+        for attempt in range(max_retries):
+            try:
+                logger.info(f"Attempting to load feature extractor model '{model_name}' (Attempt {attempt + 1}/{max_retries})...")
+                # Use a pre-trained vision model
+                model = pipeline(
+                    "feature-extraction",
+                    model=model_name
+                )
+                logger.info(f"Successfully loaded feature extractor model '{model_name}'.")
+                return model
+            except Exception as e:
+                logger.error(f"Error loading feature extractor model '{model_name}' on attempt {attempt + 1}/{max_retries}: {str(e)}")
+                if attempt < max_retries - 1:
+                    logger.info(f"Retrying in {retry_delay_seconds} seconds...")
+                    time.sleep(retry_delay_seconds)
+                else:
+                    logger.error(f"Failed to load feature extractor model '{model_name}' after {max_retries} attempts.")
+                    # Option 1: Raise the exception to make the app fail startup
+                    # raise  
+                    # Option 2: Return None for graceful degradation (requires handling in other methods)
+                    return None
+        return None # Should be unreachable if retries fail and an exception isn't raised
     
     def _load_reference_features(self) -> Dict:
         """Load reference features for pattern matching."""
@@ -207,8 +252,32 @@ class IndigenousMapProcessor:
             # Read the map data
             data = src.read()
             
-            # Extract features
+            # Check if feature_extractor is available first
+            if not self.feature_extractor:
+                logger.warning(f"Feature extractor not available. Skipping map analysis for {map_path}.")
+                return {
+                    'type': 'map',
+                    'source': str(map_path),
+                    'features': [],
+                    'confidence': 0.0,
+                    'bounds': src.bounds,
+                    'metadata': self._extract_map_metadata(map_path),
+                    'status': 'skipped_model_unavailable'
+                }
+
             features = self._extract_map_features(data)
+            
+            if features is None:
+                logger.warning(f"Could not extract features for map {map_path}. Skipping further analysis of this map.")
+                return {
+                    'type': 'map',
+                    'source': str(map_path),
+                    'features': [],
+                    'confidence': 0.0,
+                    'bounds': src.bounds,
+                    'metadata': self._extract_map_metadata(map_path),
+                    'status': 'skipped_feature_extraction_failed'
+                }
             
             # Match against reference features
             matches = self._match_features(features)
@@ -222,12 +291,13 @@ class IndigenousMapProcessor:
                 'features': matches,
                 'confidence': confidence,
                 'bounds': src.bounds,
-                'metadata': self._extract_map_metadata(map_path)
+                'metadata': self._extract_map_metadata(map_path),
+                'status': 'processed'
             }
             
         except Exception as e:
             logger.error(f"Error analyzing map {map_path}: {str(e)}")
-            return None
+            return None # Or a dict with an error status
     
     def _analyze_oral_history(
         self,
@@ -243,16 +313,20 @@ class IndigenousMapProcessor:
             relevant_sections = []
             for section in sections:
                 # Analyze sentiment and relevance
-                analysis = self.text_analyzer(section)
+                if not self.text_analyzer:
+                    logger.warning("Text analyzer not available. Skipping sentiment analysis for oral history.")
+                    analysis_result = [] # Provide a default empty result
+                else:
+                    analysis_result = self.text_analyzer(section)
                 
                 # Check if section mentions locations
                 locations = self._extract_locations(section)
                 
-                if locations:
+                if locations: # Only add section if locations are found
                     relevant_sections.append({
                         'text': section,
                         'locations': locations,
-                        'analysis': analysis
+                        'analysis': analysis_result
                     })
             
             if not relevant_sections:
@@ -270,19 +344,27 @@ class IndigenousMapProcessor:
             logger.error(f"Error analyzing oral history {history_path}: {str(e)}")
             return None
     
-    def _extract_map_features(self, data: np.ndarray) -> np.ndarray:
+    def _extract_map_features(self, data: np.ndarray) -> Optional[np.ndarray]:
         """Extract features from map data."""
-        # Convert to RGB if necessary
-        if data.shape[0] == 1:
-            data = np.repeat(data, 3, axis=0)
-        
-        # Normalize
-        data = data / np.max(data)
-        
-        # Extract features using the model
-        features = self.feature_extractor(data.transpose(1, 2, 0))
-        
-        return features
+        if not self.feature_extractor:
+            logger.warning("Feature extractor not available. Cannot extract map features.")
+            return None
+
+        try:
+            # Convert to RGB if necessary
+            if data.shape[0] == 1:
+                data = np.repeat(data, 3, axis=0)
+            
+            # Normalize
+            data = data / np.max(data)
+            
+            # Extract features using the model
+            features = self.feature_extractor(data.transpose(1, 2, 0))
+            
+            return features
+        except Exception as e:
+            logger.error(f"Error extracting features from map: {str(e)}")
+            return None
     
     def _match_features(self, features: np.ndarray) -> List[Dict]:
         """Match extracted features against reference database."""

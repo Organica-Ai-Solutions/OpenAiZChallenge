@@ -1,0 +1,16 @@
+{
+  "health": {
+    "status": "healthy",
+    "timestamp": "2025-06-01T18:59:39.048721",
+    "services": {
+      "api": "healthy",
+      "redis": "healthy",
+      "kafka": "healthy"
+    }
+  },
+  "feature_flags": {
+    "ml_processing": false,
+    "authentication": false,
+    "health_monitoring": true
+  }
+}

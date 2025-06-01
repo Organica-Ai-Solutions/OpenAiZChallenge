@@ -162,11 +162,11 @@ class DistributedProcessingManager:
                 except Exception as ce_cluster:
                     logger.error(f"Error closing Dask cluster during startup failure: {ce_cluster}")
                 self.cluster = None # Reset cluster
-
+                
             if attempt == max_retries - 1:
                 logger.error("All Dask client startup attempts failed. Dask will be unavailable.")
-                break 
-                
+                break
+            
             await asyncio.sleep(2 ** attempt) # Exponential backoff
 
     async def shutdown(self):
@@ -203,7 +203,7 @@ class DistributedProcessingManager:
         # For safety, make it do nothing or raise an error if called.
         # raise NotImplementedError("_initialize_client is deprecated. Call startup() instead.")
         return None # Or simply remove this method
-
+    
     def _setup_local_cluster(self) -> dask.distributed.LocalCluster:
         """Set up a local Dask cluster for multi-core processing."""
         logger.info("Setting up local Dask cluster...")
@@ -224,7 +224,7 @@ class DistributedProcessingManager:
         try:
             logger.info("Setting up Dask Kubernetes cluster...")
             try:
-                config.load_kube_config()
+                    config.load_kube_config()
             except config.ConfigException:
                 logger.info("Kube config not found locally, trying in-cluster config.")
                 try:
@@ -236,7 +236,7 @@ class DistributedProcessingManager:
             cluster = KubeCluster(
                 name='nis-dask-cluster',
                 n_workers=self.kubernetes_config.get('worker_count', 2),
-                 resources={
+                resources={
                     'requests': {
                         'cpu': self.kubernetes_config.get('worker_cpu_request', '0.5'),
                         'memory': self.kubernetes_config.get('worker_memory_request', '2Gi')
@@ -262,7 +262,7 @@ class DistributedProcessingManager:
         if KubeCluster is None:
             logger.warning("dask_kubernetes is not installed. Hybrid mode will default to local cluster.")
             return self._setup_local_cluster()
-        
+    
         logger.info("Attempting to set up Kubernetes part of the hybrid cluster...")
         # Try to set up Kube part using the existing method which returns a KubeCluster object or None
         kube_cluster_part = self._setup_kubernetes_cluster() 

@@ -8,7 +8,7 @@ import logging
 from typing import Dict, List, Optional, Callable, Any, TYPE_CHECKING
 from datetime import datetime, timedelta
 
-import jwt
+from jose import jwt
 from fastapi import Request, HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
@@ -26,7 +26,8 @@ else:
             self.role = role
             self.email = email
 
-from ..infrastructure.distributed_processing import DistributedProcessingManager
+from ..infrastructure.redis_client import get_redis_client
+# from ..infrastructure.distributed_processing import DistributedProcessingManager
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +39,7 @@ class AuthenticationManager:
         secret_key: str,
         algorithm: str = 'HS256',
         access_token_expire_minutes: int = 30,
-        distributed_manager: Optional[DistributedProcessingManager] = None
+        distributed_manager: Optional[Any] = None
     ):
         """Initialize authentication manager.
         

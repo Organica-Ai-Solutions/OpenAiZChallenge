@@ -18,7 +18,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
-from ..infrastructure.distributed_processing import DistributedProcessingManager
+# from ..infrastructure.distributed_processing import DistributedProcessingManager
 
 logger = logging.getLogger(__name__)
 
@@ -145,10 +145,11 @@ class APIGateway:
             security_config: Security and access control configuration
         """
         # Initialize distributed processing
-        self.distributed_manager = DistributedProcessingManager(
-            processing_mode=processing_mode,
-            kubernetes_config=kubernetes_config
-        )
+        # self.distributed_manager = DistributedProcessingManager(
+        #     processing_mode=processing_mode,
+        #     kubernetes_config=kubernetes_config
+        # )
+        self.distributed_manager = None  # Temporarily disabled
         
         # Create FastAPI app
         self.app = FastAPI(

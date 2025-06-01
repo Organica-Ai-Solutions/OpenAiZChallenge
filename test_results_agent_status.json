@@ -1,0 +1,34 @@
+[
+  {
+    "type": "vision",
+    "description": "Visual data analysis and feature detection",
+    "capabilities": [
+      "Satellite imagery processing",
+      "Terrain anomaly detection"
+    ]
+  },
+  {
+    "type": "memory",
+    "description": "Contextual information retrieval",
+    "capabilities": [
+      "Historical reference lookup",
+      "Site correlation"
+    ]
+  },
+  {
+    "type": "reasoning",
+    "description": "Complex data interpretation",
+    "capabilities": [
+      "Hypothesis generation",
+      "Evidence synthesis"
+    ]
+  },
+  {
+    "type": "action",
+    "description": "Recommendation and output generation",
+    "capabilities": [
+      "Research action planning",
+      "Priority assessment"
+    ]
+  }
+]

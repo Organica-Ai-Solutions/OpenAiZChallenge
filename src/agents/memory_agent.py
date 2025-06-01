@@ -910,7 +910,7 @@ class MemoryAgent:
                 if similar:
                     recalled_info["similar_sites_in_region"] = similar
                     logger.info(f"MemoryAgent.recall_context: Found {len(similar)} similar sites in region '{region}' for pattern '{pattern_to_search}'.")
-                else:
+            else:
                     logger.info(f"MemoryAgent.recall_context: No similar sites found in region '{region}' for pattern '{pattern_to_search}'.")
         elif region: # No patterns from visual, but region is known
             # Fallback to a generic search if no specific patterns from vision agent

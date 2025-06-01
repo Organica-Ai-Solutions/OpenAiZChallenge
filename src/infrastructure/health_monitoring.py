@@ -74,7 +74,7 @@ class HealthMonitor:
             except Exception as e:
                 logger.error(f"HealthMonitor: Error shutting down DistributedProcessingManager: {e}")
         self.distributed_manager = None
-
+    
     def check_redis_health(self) -> bool:
         """Check Redis connection health."""
         try:
@@ -169,7 +169,7 @@ class HealthMonitor:
         redis_ok = self.check_redis_health()
         kafka_ok = self.check_kafka_health()
         processing_ok = self.check_processing_health()
-
+        
         return SystemHealth(
             status="healthy" if all([
                 redis_ok,
@@ -203,7 +203,7 @@ def create_health_router() -> APIRouter:
             logger.error("HealthMonitor not found in app.state. Check lifespan initialization.")
             raise HTTPException(status_code=500, detail="HealthMonitor not initialized")
         return request.app.state.health_monitor
-
+    
     @router.get("/health", response_model=SystemHealth)
     async def health_check(health_monitor: HealthMonitor = Depends(get_health_monitor)):
         """Comprehensive system health check endpoint."""

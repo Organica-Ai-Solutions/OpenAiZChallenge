@@ -44,7 +44,7 @@ FROM dependencies AS application
 COPY . .
 
 # --- BEGIN DEBUG ---
-RUN cat /app/api/batch.py
+# RUN cat /app/api/batch.py  # This line was already commented or removed, keeping it as is.
 # --- END DEBUG ---
 
 # Create necessary directories
@@ -133,14 +133,15 @@ RUN pip install --no-cache-dir \
     && pip install --no-cache-dir \
     -r requirements.txt
 
-# Download SpaCy model with retries and timeout
-RUN pip install --no-cache-dir --timeout=600 --retries=5 "https://github.com/explosion/spacy-models/releases/download/pt_core_news_lg-3.8.0/pt_core_news_lg-3.8.0-py3-none-any.whl"
+# Copy and run model caching script
+# COPY scripts/cache_models.py /app/scripts/cache_models.py
+# RUN python /app/scripts/cache_models.py
 
 # Copy the entire project
 COPY . .
 
 # --- BEGIN DEBUG ---
-RUN cat /app/api/batch.py
+# RUN cat /app/api/batch.py  # This line was already commented or removed, keeping it as is.
 # --- END DEBUG ---
 
 # Set environment variables

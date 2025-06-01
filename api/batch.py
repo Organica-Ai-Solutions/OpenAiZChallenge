@@ -132,6 +132,7 @@ async def process_batch(
     kafka_client: Any
 ) -> None:
     """Process a batch of coordinates asynchronously."""
+    logger.info(f"PROCESS_BATCH_STARTED: batch_id={batch_id}, num_coords={len(coordinates_list)}")
     try:
         status = redis_client.cache_get(f"batch_status:{batch_id}")
         if not status:

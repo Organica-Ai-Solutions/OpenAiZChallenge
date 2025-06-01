@@ -166,7 +166,7 @@ class ConfigManager:
         # Try explicitly binding a method to see if it helps (highly unusual to need this)
         # self.get_config = self._actual_get_config.__get__(self, ConfigManager)
 
-
+    
     def get_config(self, config_type: str) -> str:
         print(f"DEBUG CONFIG: SIMPLIFIED ConfigManager.get_config called with type: {config_type}")
         return f"Simplified config for {config_type}: {self.message}"

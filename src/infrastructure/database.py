@@ -33,7 +33,7 @@ class DatabaseManager:
     
     _instance: Optional['DatabaseManager'] = None
     _config_used_for_init: Optional[AppConfigManager] = None # To track which config was used
-
+    
     def __new__(cls, config_manager_instance: Optional[AppConfigManager] = None):
         """Singleton that can be initialized with a specific ConfigManager instance."""
         if cls._instance is None:

@@ -101,6 +101,15 @@ class LoggingConfig(BaseModel):
     level: str = Field(default_factory=lambda: os.getenv("LOG_LEVEL", "INFO").upper())
     format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
+class FeatureFlags(BaseModel):
+    """Feature flags for conditional functionality."""
+    enable_ml_processing: bool = Field(default_factory=lambda: os.getenv("ENABLE_ML_PROCESSING", "false").lower() == "true")
+    enable_distributed_computing: bool = Field(default_factory=lambda: os.getenv("ENABLE_DISTRIBUTED_COMPUTING", "false").lower() == "true")
+    enable_authentication: bool = Field(default_factory=lambda: os.getenv("ENABLE_AUTHENTICATION", "false").lower() == "true")
+    enable_real_data_sources: bool = Field(default_factory=lambda: os.getenv("ENABLE_REAL_DATA_SOURCES", "false").lower() == "true")
+    enable_agent_processing: bool = Field(default_factory=lambda: os.getenv("ENABLE_AGENT_PROCESSING", "false").lower() == "true")
+    enable_health_monitoring: bool = Field(default_factory=lambda: os.getenv("ENABLE_HEALTH_MONITORING", "true").lower() == "true")
+
 class AppSettings(BaseSettings):
     """Main application settings, loaded from environment or .env file."""
     APP_NAME: str = "NIS Protocol Backend"
@@ -126,6 +135,8 @@ class AppSettings(BaseSettings):
 
     SATELLITE_DATA_DIR: Path = DATA_DIR / "satellite"
     LIDAR_DATA_DIR: Path = DATA_DIR / "lidar"
+
+    feature_flags: FeatureFlags = FeatureFlags()
 
     class Config:
         env_file = ".env"
@@ -215,5 +226,5 @@ __all__ = [
     'Environment',
     'get_environment',
     'get_settings',
-    'SecurityConfig', 'ProcessingConfig', 'DatabaseConfig', 'LoggingConfig'
+    'SecurityConfig', 'ProcessingConfig', 'DatabaseConfig', 'LoggingConfig', 'FeatureFlags'
 ] 
