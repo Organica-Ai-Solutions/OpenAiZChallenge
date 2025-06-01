@@ -17,7 +17,7 @@ pyproj
 # gdal  # Commented out - causing build issues
 
 # Optional dependencies for AI models
-openai==1.35.0
+openai==1.82.1
 # torch==2.2.0
 transformers==4.38.2
 # tf-keras

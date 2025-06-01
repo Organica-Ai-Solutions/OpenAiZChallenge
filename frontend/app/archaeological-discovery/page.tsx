@@ -1,343 +1,586 @@
 "use client"
-"use client"
 
-import React, { useState } from "react"
-import Link from "next/link"
+import React, { useState, useEffect, useRef } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
-  Compass, 
-  Satellite, 
-  Layers, 
-  BookOpen, 
+  Search, 
   MapPin, 
-  AlertCircle, 
-  Loader2, 
-  Info,
-  MapIcon,
-  Download
+  Satellite, 
+  Eye, 
+  Brain, 
+  Database,
+  Layers,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  Zap,
+  Globe,
+  Activity,
+  Download,
+  Share2,
+  ChevronRight,
+  Loader2
 } from 'lucide-react'
+import { discoveryService, DiscoveryRequest, DiscoveredSite } from '@/lib/discovery-service'
+import { webSocketService } from '@/lib/websocket'
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Slider } from "@/components/ui/slider"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { 
-  Tooltip, 
-  TooltipContent, 
-  TooltipProvider, 
-  TooltipTrigger 
-} from "@/components/ui/tooltip"
-
-import { ResearchAPI, ArchaeologicalSite } from "@/lib/api/research-api"
-
-// Mock data sources
-const DATA_SOURCES = [
-  { 
-    id: "satellite",
-    icon: <Satellite className="h-5 w-5 text-emerald-600" />, 
-    label: "Satellite Imagery", 
-    description: "High-resolution surface analysis" 
-  },
-  { 
-    id: "lidar",
-    icon: <Layers className="h-5 w-5 text-emerald-600" />, 
-    label: "LIDAR Data", 
-    description: "Terrain and vegetation penetration" 
-  },
-  { 
-    id: "historical",
-    icon: <BookOpen className="h-5 w-5 text-emerald-600" />, 
-    label: "Historical Texts", 
-    description: "Archival and colonial records" 
-  },
-  { 
-    id: "indigenous",
-    icon: <MapIcon className="h-5 w-5 text-emerald-600" />, 
-    label: "Indigenous Maps", 
-    description: "Traditional knowledge sources" 
-  }
-]
+interface DiscoveryState {
+  isSearching: boolean
+  isAnalyzing: boolean
+  currentStep: string
+  progress: number
+  discoveries: DiscoveredSite[]
+  error: string | null
+  analysisResults: any
+}
 
 export default function ArchaeologicalDiscoveryPage() {
-  // State for form inputs
-  const [coordinates, setCoordinates] = useState("")
-  const [selectedSources, setSelectedSources] = useState<string[]>([])
-  const [confidenceThreshold, setConfidenceThreshold] = useState(70)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [results, setResults] = useState<ArchaeologicalSite[] | null>(null)
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  
+  // Form state
+  const [latitude, setLatitude] = useState(searchParams.get('lat') || '')
+  const [longitude, setLongitude] = useState(searchParams.get('lng') || '')
+  const [description, setDescription] = useState('')
+  const [selectedDataSources, setSelectedDataSources] = useState(['satellite', 'lidar', 'historical_text'])
+  
+  // Discovery state
+  const [state, setState] = useState<DiscoveryState>({
+    isSearching: false,
+    isAnalyzing: false,
+    currentStep: '',
+    progress: 0,
+    discoveries: [],
+    error: null,
+    analysisResults: null
+  })
+  
+  const [selectedDiscovery, setSelectedDiscovery] = useState<DiscoveredSite | null>(null)
+  const mapRef = useRef<HTMLDivElement>(null)
 
-  // Coordinate validation regex
-  const coordinateRegex = /^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/
+  useEffect(() => {
+    // Auto-discover if URL parameters are present and auto=true
+    if (searchParams.get('auto') === 'true' && latitude && longitude) {
+      handleDiscovery()
+    }
+  }, [])
 
-  // Handle form submission
-  const handleDiscoverySubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
-    setResults(null)
+  useEffect(() => {
+    // Subscribe to WebSocket updates
+    const unsubscribeAnalysis = webSocketService.subscribe('analysis_update', (data: any) => {
+      setState(prev => ({
+        ...prev,
+        currentStep: data.currentStep,
+        progress: data.progress,
+        isAnalyzing: data.status === 'processing'
+      }))
+    })
 
-    // Validate coordinates
-    if (!coordinateRegex.test(coordinates)) {
-      setError("Please enter valid coordinates in the format: latitude,longitude")
+    const unsubscribeDiscovery = webSocketService.subscribe('discovery', (data: any) => {
+      setState(prev => ({
+        ...prev,
+        discoveries: [...prev.discoveries, {
+          site_id: data.id,
+          latitude: data.coordinates.lat,
+          longitude: data.coordinates.lng,
+          confidence_score: data.confidence,
+          validation_status: data.confidence > 0.7 ? 'HIGH_CONFIDENCE' : 'MEDIUM_CONFIDENCE',
+          description: data.description,
+          cultural_significance: null,
+          data_sources: ['satellite', 'lidar'],
+          metadata: {
+            analysis_timestamp: new Date().toISOString(),
+            sources_analyzed: ['satellite', 'lidar'],
+            confidence_breakdown: { satellite: data.confidence * 0.6, lidar: data.confidence * 0.4 }
+          }
+        }]
+      }))
+    })
+
+    return () => {
+      unsubscribeAnalysis()
+      unsubscribeDiscovery()
+    }
+  }, [])
+
+  const handleDiscovery = async () => {
+    if (!latitude || !longitude) {
+      setState(prev => ({ ...prev, error: 'Please enter valid coordinates' }))
       return
     }
 
-    // Validate data sources
-    if (selectedSources.length === 0) {
-      setError("Please select at least one data source")
-      return
-    }
+    setState(prev => ({
+      ...prev,
+      isSearching: true,
+      isAnalyzing: false,
+      error: null,
+      discoveries: [],
+      progress: 0,
+      currentStep: 'Preparing discovery request...'
+    }))
 
-    // Discover sites
-    setIsLoading(true)
     try {
-      const discoveredSites = await ResearchAPI.discoverSites({
-        coordinates,
-        dataSources: selectedSources,
-        confidenceThreshold
-      })
-
-      setResults(discoveredSites)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  // Handle geolocation
-  const handleUseMyLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords
-          setCoordinates(`${latitude.toFixed(6)},${longitude.toFixed(6)}`)
-        },
-        (error) => {
-          setError("Unable to retrieve location. Please enter coordinates manually.")
-        }
+      const request: DiscoveryRequest = discoveryService.generateDiscoveryRequest(
+        parseFloat(latitude),
+        parseFloat(longitude),
+        description || `Archaeological discovery at ${latitude}, ${longitude}`,
+        selectedDataSources as any[]
       )
-    } else {
-      setError("Geolocation is not supported by your browser.")
+
+      setState(prev => ({ ...prev, currentStep: 'Submitting request to discovery service...', progress: 20 }))
+
+      const response = await discoveryService.discoverSites(request)
+      
+      setState(prev => ({ 
+        ...prev, 
+        currentStep: 'Processing discovered sites...', 
+        progress: 60,
+        discoveries: response.validated_sites || []
+      }))
+
+      // If we have discoveries, auto-select the first one
+      if (response.validated_sites && response.validated_sites.length > 0) {
+        setSelectedDiscovery(response.validated_sites[0])
+        setState(prev => ({ ...prev, currentStep: 'Discovery completed!', progress: 100 }))
+      }
+
+    } catch (error) {
+      console.error('Discovery failed:', error)
+      setState(prev => ({ 
+        ...prev, 
+        error: error instanceof Error ? error.message : 'Discovery failed',
+        currentStep: 'Discovery failed'
+      }))
+    } finally {
+      setState(prev => ({ ...prev, isSearching: false }))
     }
   }
 
-  // Toggle data source selection
-  const toggleDataSource = (sourceId: string) => {
-    setSelectedSources(prev => 
-      prev.includes(sourceId)
-        ? prev.filter(id => id !== sourceId)
-        : [...prev, sourceId]
-    )
+  const analyzeWithAgents = async (site: DiscoveredSite) => {
+    setState(prev => ({ ...prev, isAnalyzing: true, currentStep: 'Starting AI agent analysis...', progress: 0 }))
+
+    try {
+      setState(prev => ({ ...prev, currentStep: 'Analyzing with Vision, Reasoning, Memory, and Action agents...', progress: 25 }))
+      
+      const results = await discoveryService.analyzeDiscoveredSite(site)
+      
+      setState(prev => ({ 
+        ...prev, 
+        analysisResults: results,
+        currentStep: 'Agent analysis completed!',
+        progress: 100,
+        isAnalyzing: false
+      }))
+    } catch (error) {
+      console.error('Agent analysis failed:', error)
+      setState(prev => ({ 
+        ...prev, 
+        error: error instanceof Error ? error.message : 'Agent analysis failed',
+        isAnalyzing: false
+      }))
+    }
   }
 
-  // Export results to JSON
-  const handleExportResults = () => {
-    if (!results) return
-
-    const dataStr = JSON.stringify(results, null, 2)
-    const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`
-    const exportFileDefaultName = `archaeological-sites-${new Date().toISOString().slice(0, 10)}.json`
-    
-    const linkElement = document.createElement("a")
-    linkElement.setAttribute("href", dataUri)
-    linkElement.setAttribute("download", exportFileDefaultName)
-    linkElement.click()
+  const getConfidenceColor = (confidence: number) => {
+    if (confidence > 0.8) return 'text-green-600'
+    if (confidence > 0.6) return 'text-yellow-600'
+    return 'text-red-600'
   }
+
+  const getValidationBadge = (status: string) => {
+    const colors = {
+      'HIGH_CONFIDENCE': 'bg-green-100 text-green-800',
+      'MEDIUM_CONFIDENCE': 'bg-yellow-100 text-yellow-800',
+      'LOW_CONFIDENCE': 'bg-red-100 text-red-800'
+    }
+    return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800'
+  }
+
+  const dataSources = [
+    { id: 'satellite', label: 'Satellite Imagery', icon: Satellite },
+    { id: 'lidar', label: 'LiDAR Data', icon: Layers },
+    { id: 'historical_text', label: 'Historical Texts', icon: Database },
+    { id: 'indigenous_map', label: 'Indigenous Maps', icon: Globe }
+  ]
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="space-y-8">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-emerald-900 mb-4">
-            Archaeological Site Discovery
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-white mb-4 flex items-center justify-center">
+            <Search className="h-10 w-10 mr-3 text-green-400" />
+            Archaeological Discovery
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Explore potential archaeological sites using multi-source data analysis and advanced AI processing
+          <p className="text-xl text-slate-300">
+            Multi-source archaeological site discovery and AI-powered analysis
           </p>
         </div>
 
-        <form onSubmit={handleDiscoverySubmit} className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Site Discovery Parameters</CardTitle>
-              <CardDescription>
-                Enter research coordinates and select data sources to discover potential archaeological sites
-              </CardDescription>
-            </CardHeader>
-            
-            <CardContent className="space-y-6">
-              {/* Coordinate Input */}
-              <div className="space-y-2">
-                <Label htmlFor="coordinates">Research Coordinates</Label>
-                <div className="flex gap-2">
-                  <Input 
-                    id="coordinates" 
-                    placeholder="Enter latitude,longitude (e.g., -3.4567, -62.7890)" 
-                    className="font-mono"
-                    value={coordinates}
-                    onChange={(e) => setCoordinates(e.target.value)}
-                  />
-                  <Button 
-                    type="button"
-                    variant="outline" 
-                    size="icon" 
-                    title="Use my location"
-                    onClick={handleUseMyLocation}
-                  >
-                    <MapPin className="h-4 w-4" />
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Enter decimal coordinates separated by a comma
-                </p>
-              </div>
-
-              {/* Data Source Selection */}
-              <div className="space-y-3">
-                <Label>Data Sources</Label>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Discovery Form */}
+          <div className="lg:col-span-1">
+            <Card className="bg-slate-800/50 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center">
+                  <MapPin className="h-5 w-5 mr-2" />
+                  Site Discovery
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Enter coordinates to discover archaeological sites
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  {DATA_SOURCES.map((source) => (
-                    <div key={source.id} className="flex items-center space-x-2">
-                      <Checkbox 
-                        id={source.id} 
-                        checked={selectedSources.includes(source.id)}
-                        onCheckedChange={() => toggleDataSource(source.id)}
-                      />
-                      <div>
-                        <Label 
-                          htmlFor={source.id} 
-                          className="flex items-center gap-2"
-                        >
-                          {source.icon}
-                          {source.label}
-                        </Label>
-                        <p className="text-xs text-muted-foreground">{source.description}</p>
-                      </div>
+                  <div>
+                    <Label htmlFor="latitude" className="text-slate-300">Latitude</Label>
+                    <Input
+                      id="latitude"
+                      type="number"
+                      step="any"
+                      placeholder="-3.4653"
+                      value={latitude}
+                      onChange={(e) => setLatitude(e.target.value)}
+                      className="bg-slate-700 border-slate-600 text-white"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="longitude" className="text-slate-300">Longitude</Label>
+                    <Input
+                      id="longitude"
+                      type="number"
+                      step="any"
+                      placeholder="-62.2159"
+                      value={longitude}
+                      onChange={(e) => setLongitude(e.target.value)}
+                      className="bg-slate-700 border-slate-600 text-white"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="description" className="text-slate-300">Description (Optional)</Label>
+                  <Textarea
+                    id="description"
+                    placeholder="Archaeological site search in Amazon Basin"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="bg-slate-700 border-slate-600 text-white"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-slate-300 mb-3 block">Data Sources</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {dataSources.map((source) => (
+                      <Button
+                        key={source.id}
+                        variant={selectedDataSources.includes(source.id) ? "default" : "outline"}
+                        size="sm"
+                        className={`justify-start ${
+                          selectedDataSources.includes(source.id) 
+                            ? "bg-blue-600 text-white" 
+                            : "border-slate-600 text-slate-300 hover:bg-slate-700"
+                        }`}
+                        onClick={() => {
+                          setSelectedDataSources(prev => 
+                            prev.includes(source.id)
+                              ? prev.filter(id => id !== source.id)
+                              : [...prev, source.id]
+                          )
+                        }}
+                      >
+                        <source.icon className="h-4 w-4 mr-2" />
+                        {source.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {state.error && (
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="text-red-600">
+                      {state.error}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                <Button 
+                  onClick={handleDiscovery}
+                  disabled={state.isSearching || !latitude || !longitude}
+                  className="w-full bg-green-600 hover:bg-green-700"
+                >
+                  {state.isSearching ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Searching...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="h-4 w-4 mr-2" />
+                      Discover Sites
+                    </>
+                  )}
+                </Button>
+
+                {/* Progress indicator */}
+                {(state.isSearching || state.isAnalyzing) && (
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-400">{state.currentStep}</span>
+                      <span className="text-slate-400">{state.progress}%</span>
                     </div>
+                    <Progress value={state.progress} className="h-2" />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Quick Locations */}
+            <Card className="bg-slate-800/50 border-slate-700 mt-6">
+              <CardHeader>
+                <CardTitle className="text-white">Quick Locations</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {[
+                    { name: 'Amazon Basin', lat: -3.4653, lng: -62.2159 },
+                    { name: 'Andes Mountains', lat: -13.1631, lng: -72.5450 },
+                    { name: 'Cerrado Savanna', lat: -15.7975, lng: -47.8919 }
+                  ].map((location, index) => (
+                    <Button
+                      key={index}
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start text-slate-300 hover:bg-slate-700"
+                      onClick={() => {
+                        setLatitude(location.lat.toString())
+                        setLongitude(location.lng.toString())
+                        setDescription(`Archaeological discovery in ${location.name}`)
+                      }}
+                    >
+                      <MapPin className="h-4 w-4 mr-2" />
+                      {location.name}
+                    </Button>
                   ))}
                 </div>
-              </div>
+              </CardContent>
+            </Card>
+          </div>
 
-              {/* Confidence Threshold */}
-              <div className="space-y-3">
-                <Label>Confidence Threshold: {confidenceThreshold}%</Label>
-                <Slider 
-                  value={[confidenceThreshold]} 
-                  onValueChange={(value) => setConfidenceThreshold(value[0])}
-                  max={100} 
-                  step={5} 
-                  className="py-4" 
-                />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Low Confidence</span>
-                  <span>High Confidence</span>
-                </div>
-              </div>
+          {/* Results Panel */}
+          <div className="lg:col-span-2">
+            {state.discoveries.length > 0 ? (
+              <Tabs defaultValue="discoveries" className="space-y-6">
+                <TabsList className="bg-slate-800 border-slate-700">
+                  <TabsTrigger value="discoveries" className="text-slate-300">
+                    Discoveries ({state.discoveries.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="analysis" className="text-slate-300">
+                    AI Analysis
+                  </TabsTrigger>
+                  <TabsTrigger value="map" className="text-slate-300">
+                    Map View
+                  </TabsTrigger>
+                </TabsList>
 
-              {/* Error Handling */}
-              {error && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-            </CardContent>
-            
-            <CardFooter>
-              <Button 
-                type="submit" 
-                className="w-full bg-emerald-600 text-white hover:bg-emerald-700" 
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Discovering Sites...
-                  </>
-                ) : (
-                  <>
-                    <Compass className="mr-2 h-4 w-4" />
-                    Discover Archaeological Sites
-                  </>
-                )}
-              </Button>
-            </CardFooter>
-          </Card>
-        </form>
-
-        {/* Results Display */}
-        {results && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Discovery Results</CardTitle>
-                <CardDescription>
-                  {results.length} potential archaeological sites found
-                </CardDescription>
-              </div>
-              {results.length > 0 && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleExportResults}
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  Export Results
-                </Button>
-              )}
-            </CardHeader>
-            <CardContent>
-              {results.length > 0 ? (
-                <div className="space-y-4">
-                  {results.map((site) => (
-                    <div 
-                      key={site.id} 
-                      className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
+                <TabsContent value="discoveries" className="space-y-4">
+                  {state.discoveries.map((discovery, index) => (
+                    <Card 
+                      key={discovery.site_id}
+                      className={`bg-slate-800/50 border-slate-700 cursor-pointer transition-all ${
+                        selectedDiscovery?.site_id === discovery.site_id ? 'border-blue-500' : 'hover:border-slate-600'
+                      }`}
+                      onClick={() => setSelectedDiscovery(discovery)}
                     >
-                      <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-semibold">{site.name}</h3>
-                        <span className={`
-                          px-2 py-1 rounded-full text-xs font-bold
-                          ${site.confidence >= 80 ? 'bg-green-100 text-green-800' : 
-                            site.confidence >= 50 ? 'bg-amber-100 text-amber-800' : 
-                            'bg-red-100 text-red-800'}
-                        `}>
-                          {site.confidence}% Confidence
-                        </span>
-                      </div>
-                      <p className="text-muted-foreground mt-2">{site.description}</p>
-                      <div className="mt-2 text-sm flex justify-between">
-                        <div>
-                          <strong>Coordinates:</strong> {site.coordinates}
-                          <span className="ml-4 text-muted-foreground">{site.type}</span>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-white">
+                            Site {index + 1}
+                          </CardTitle>
+                          <Badge className={getValidationBadge(discovery.validation_status)}>
+                            {discovery.validation_status.replace('_', ' ')}
+                          </Badge>
                         </div>
-                        <div className="flex gap-2">
-                          {site.dataSources.map((source) => (
-                            <span 
-                              key={source} 
-                              className="text-xs bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full"
-                            >
+                        <CardDescription className="text-slate-400">
+                          {discovery.description || 'Archaeological site discovered'}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                          <div>
+                            <p className="text-sm text-slate-400">Coordinates</p>
+                            <p className="text-white">{discovery.latitude.toFixed(4)}, {discovery.longitude.toFixed(4)}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-slate-400">Confidence</p>
+                            <p className={`font-semibold ${getConfidenceColor(discovery.confidence_score)}`}>
+                              {(discovery.confidence_score * 100).toFixed(1)}%
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-2 mb-4">
+                          {discovery.data_sources.map((source) => (
+                            <Badge key={source} variant="outline" className="border-slate-600 text-slate-300">
                               {source}
-                            </span>
+                            </Badge>
                           ))}
                         </div>
-                      </div>
-                    </div>
+
+                        <div className="flex gap-2">
+                          <Button 
+                            size="sm" 
+                            onClick={(e: React.MouseEvent) => {
+                              e.stopPropagation()
+                              analyzeWithAgents(discovery)
+                            }}
+                            disabled={state.isAnalyzing}
+                            className="bg-purple-600 hover:bg-purple-700"
+                          >
+                            <Brain className="h-4 w-4 mr-2" />
+                            AI Analysis
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="border-slate-600 text-slate-300"
+                            onClick={(e: React.MouseEvent) => {
+                              e.stopPropagation()
+                              router.push(`/map?lat=${discovery.latitude}&lng=${discovery.longitude}`)
+                            }}
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            View on Map
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
                   ))}
-                </div>
-              ) : (
-                <div className="text-center text-muted-foreground py-8">
-                  <Info className="h-12 w-12 mx-auto mb-4 text-emerald-600" />
-                  <p>No sites found matching the current confidence threshold</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
+                </TabsContent>
+
+                <TabsContent value="analysis">
+                  {state.analysisResults ? (
+                    <div className="space-y-4">
+                      {Object.entries(state.analysisResults).map(([agentType, result]: [string, any]) => (
+                        <Card key={agentType} className="bg-slate-800/50 border-slate-700">
+                          <CardHeader>
+                            <CardTitle className="text-white capitalize">
+                              {agentType} Agent Analysis
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-3">
+                              <div className="flex justify-between">
+                                <span className="text-slate-400">Confidence:</span>
+                                <span className={`font-semibold ${getConfidenceColor(result.confidence_score)}`}>
+                                  {(result.confidence_score * 100).toFixed(1)}%
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-400">Processing Time:</span>
+                                <span className="text-white">{result.processing_time.toFixed(2)}s</span>
+                              </div>
+                              <div>
+                                <p className="text-slate-400 mb-2">Results:</p>
+                                <pre className="text-slate-300 text-sm bg-slate-900 p-3 rounded overflow-x-auto">
+                                  {JSON.stringify(result.results, null, 2)}
+                                </pre>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <Card className="bg-slate-800/50 border-slate-700">
+                      <CardContent className="py-8 text-center">
+                        <Brain className="h-12 w-12 mx-auto text-slate-500 mb-4" />
+                        <p className="text-slate-400 mb-4">
+                          Select a discovery and run AI analysis to see detailed results
+                        </p>
+                        {selectedDiscovery && (
+                          <Button 
+                            onClick={() => analyzeWithAgents(selectedDiscovery)}
+                            className="bg-purple-600 hover:bg-purple-700"
+                          >
+                            <Brain className="h-4 w-4 mr-2" />
+                            Start AI Analysis
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="map">
+                  <Card className="bg-slate-800/50 border-slate-700">
+                    <CardContent className="py-8">
+                      <div 
+                        ref={mapRef}
+                        className="h-96 bg-slate-900 rounded-lg flex items-center justify-center"
+                      >
+                        <div className="text-center text-slate-400">
+                          <Globe className="h-12 w-12 mx-auto mb-4" />
+                          <p className="mb-4">Interactive map will be displayed here</p>
+                          <Button 
+                            onClick={() => router.push('/map')}
+                            variant="outline"
+                            className="border-slate-600 text-slate-300"
+                          >
+                            Open Full Map View
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            ) : (
+              <Card className="bg-slate-800/50 border-slate-700">
+                <CardContent className="py-12 text-center">
+                  <Search className="h-16 w-16 mx-auto text-slate-500 mb-6" />
+                  <h3 className="text-xl font-semibold text-white mb-4">
+                    Ready to Discover Archaeological Sites
+                  </h3>
+                  <p className="text-slate-400 mb-6">
+                    Enter coordinates and select data sources to begin your archaeological discovery journey
+                  </p>
+                  <div className="flex justify-center gap-4">
+                    <Button 
+                      onClick={() => {
+                        setLatitude('-3.4653')
+                        setLongitude('-62.2159')
+                        setDescription('Amazon Basin archaeological discovery')
+                      }}
+                      variant="outline"
+                      className="border-slate-600 text-slate-300"
+                    >
+                      Try Amazon Basin
+                    </Button>
+                    <Button 
+                      onClick={() => router.push('/satellite')}
+                      variant="outline"
+                      className="border-slate-600 text-slate-300"
+                    >
+                      Monitor Satellites
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   )
