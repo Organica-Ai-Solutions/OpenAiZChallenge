@@ -65,8 +65,11 @@ This is **not a demo or prototype** - this is a fully functional Indigenous Know
 - Docker & Docker Compose
 - OpenAI API key
 - 8GB+ RAM (for AI models)
+- Git (for cloning the repository)
 
-### **1. Setup Environment**
+### **🌟 Complete System Launch (Frontend + Backend)**
+
+**One-Command Startup:**
 ```bash
 # Clone repository
 git clone [repository-url]
@@ -75,26 +78,52 @@ cd openai-to-z-nis
 # Setup environment variables
 cp .env.backup .env
 # Edit .env with your OpenAI API key
+
+# Launch complete system (Frontend + Backend + Services)
+./start.sh
 ```
 
-### **2. Launch System**
-```bash
-# Full system startup (takes ~10 minutes for AI model downloads)
-./reset_nis_system.sh
+**What `start.sh` Does:**
+- ✅ **System Compatibility Check**: Validates Docker, memory, and disk space
+- ✅ **Dependency Validation**: Ensures all required files and environment variables
+- ✅ **Service Orchestration**: Starts all services using Docker Compose
+- ✅ **Frontend + Backend**: Launches both web interface and API simultaneously
+- ✅ **Infrastructure Services**: Redis, Kafka, Zookeeper, PostgreSQL
+- ✅ **Real-time Monitoring**: Provides service status and access URLs
 
-# Check system health
-curl http://localhost:8000/system/health
-```
+**Access Points:**
+- **Frontend (Web Interface)**: http://localhost:3000
+- **Backend (API)**: http://localhost:8000
+- **System Health**: http://localhost:8000/system/health
 
-### **3. Test Real Analysis**
+### **🧪 Test Real Analysis**
 ```bash
-# Run comprehensive test suite
+# Test with our comprehensive test suite
 ./test_real_nis_system.sh
 
-# Or test individual coordinate
+# Or test frontend directly
+# Navigate to http://localhost:3000 and use the coordinate input
+
+# Or test backend API directly
 curl -X POST "http://localhost:8000/analyze" \
   -H "Content-Type: application/json" \
   -d '{"lat": -3.4653, "lon": -62.2159}'
+```
+
+### **📊 Service Management**
+```bash
+# View live logs
+docker-compose logs -f
+
+# Stop all services
+docker-compose down
+
+# Restart specific service
+docker-compose restart backend
+docker-compose restart frontend
+
+# Check service status
+docker-compose ps
 ```
 
 ## 📊 **Real Performance Metrics**
