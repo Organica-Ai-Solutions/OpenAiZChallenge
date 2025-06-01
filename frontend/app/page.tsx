@@ -152,6 +152,30 @@ export default function HomePage() {
             </Card>
           </Link>
 
+          {/* Satellite Monitoring */}
+          <Link href="/satellite">
+            <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer group">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <Satellite className="h-8 w-8 text-blue-600 group-hover:text-blue-700" />
+                  <Badge className="bg-blue-100 text-blue-800">New</Badge>
+                </div>
+                <CardTitle>Satellite Monitoring</CardTitle>
+                <CardDescription>
+                  Real-time satellite feeds, change detection, and environmental analysis
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm text-gray-600">
+                  <li>• Live satellite imagery feeds</li>
+                  <li>• Automated change detection</li>
+                  <li>• Weather pattern correlation</li>
+                  <li>• Soil composition analysis</li>
+                </ul>
+              </CardContent>
+            </Card>
+          </Link>
+
           {/* Interactive Map */}
           <Link href="/map">
             <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer group">

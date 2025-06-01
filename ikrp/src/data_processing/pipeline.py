@@ -178,7 +178,7 @@ class ResearchPipeline:
     def __init__(self):
         """Initialize research pipeline with configuration."""
         self.settings = settings
-        self.max_concurrent_agents = self.settings.MAX_CONCURRENT_AGENTS
+        self.max_concurrent_agents = self.settings.processing.max_workers
     
     async def collect_data(
         self, 

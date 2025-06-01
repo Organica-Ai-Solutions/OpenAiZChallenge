@@ -128,6 +128,9 @@ class AppSettings(BaseSettings):
     API_HOST: str = Field(default_factory=lambda: os.getenv("API_HOST", "0.0.0.0"))
     API_PORT: int = Field(default_factory=lambda: int(os.getenv("API_PORT", "8000")))
 
+    # Add missing setting for concurrent agents
+    MAX_CONCURRENT_AGENTS: int = Field(default_factory=lambda: int(os.getenv("MAX_CONCURRENT_AGENTS", "4")))
+
     BASE_DIR: Path = Path(__file__).resolve().parent.parent
     DATA_DIR: Path = BASE_DIR / "data"
     OUTPUTS_DIR: Path = BASE_DIR / "outputs"
