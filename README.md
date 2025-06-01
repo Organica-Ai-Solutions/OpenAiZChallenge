@@ -35,6 +35,30 @@ This is **not a demo or prototype** - this is a fully functional Indigenous Know
    - Iterative refinement with confidence thresholds
    - Cross-validation between data sources
 
+## 🎬 **See the Real System in Action**
+
+<div align="center">
+  
+### **🌟 NIS Protocol Demonstration Video**
+
+[![NIS Protocol Demo](https://img.shields.io/badge/▶️-Watch%20Demo%20Video-red.svg?style=for-the-badge)](src/images/videos/NIS_Protocol_Promo_Video.mp4)
+
+**🎥 [Watch Full Demo Video](src/images/videos/NIS_Protocol_Promo_Video.mp4)**
+
+*Experience our real Indigenous Knowledge Research Platform analyzing archaeological sites using GPT-4 Vision, multi-agent coordination, and actual satellite/LIDAR data processing.*
+
+**Video demonstrates:**
+- ✅ **Live Coordinate Analysis** with real AI models (GPT-4, ResNet-50, BERT)
+- ✅ **Multi-Agent Workflow** execution with LangGraph orchestration  
+- ✅ **Real-Time Data Processing** of satellite imagery and LIDAR terrain data
+- ✅ **Archaeological Finding Generation** with confidence scoring and unique IDs
+- ✅ **Indigenous Consultation Protocols** and ethical recommendation frameworks
+- ✅ **Production System Operation** with Docker deployment and API endpoints
+
+**Note**: *This video shows the actual working system, not a simulation or mockup.*
+
+</div>
+
 ## 🚀 **Quick Start**
 
 ### **Prerequisites**
