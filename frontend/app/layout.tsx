@@ -6,6 +6,7 @@ import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { cn } from "@/lib/utils"
+import { NotificationSystem } from "../src/components/ui/notification-system"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -26,6 +27,7 @@ export default function RootLayout({
         >
           {children}
           <Toaster />
+          <NotificationSystem />
         </ThemeProvider>
       </body>
     </html>

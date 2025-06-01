@@ -1,8 +1,8 @@
 "use client"
 
-import { EnhancedMap } from "../../src/components/ui/enhanced-map"
+import { AnalyticsDashboard } from "../../src/components/ui/analytics-dashboard"
 
-export default function MapPage() {
+export default function AnalyticsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-emerald-900 py-4 text-white">
@@ -14,8 +14,9 @@ export default function MapPage() {
           <nav className="hidden space-x-6 md:flex">
             <a href="/" className="hover:text-emerald-200">Home</a>
             <a href="/agent" className="hover:text-emerald-200">Agent</a>
-            <a href="/map" className="border-b-2 border-emerald-200 pb-1 text-emerald-200">Map</a>
+            <a href="/map" className="hover:text-emerald-200">Map</a>
             <a href="/chat" className="hover:text-emerald-200">Chat</a>
+            <a href="/analytics" className="border-b-2 border-emerald-200 pb-1 text-emerald-200">Analytics</a>
             <a href="/documentation" className="hover:text-emerald-200">Documentation</a>
           </nav>
         </div>
@@ -23,13 +24,13 @@ export default function MapPage() {
 
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Interactive Discovery Map</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Advanced Analytics Dashboard</h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Explore archaeological discoveries in real-time with satellite imagery and AI-powered analysis
+            Comprehensive statistical analysis and insights from archaeological discoveries
           </p>
         </div>
 
-        <EnhancedMap />
+        <AnalyticsDashboard />
       </div>
     </div>
   )

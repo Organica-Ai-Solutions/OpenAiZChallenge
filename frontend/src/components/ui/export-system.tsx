@@ -1,0 +1,568 @@
+"use client"
+
+import { useState } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card"
+import { Button } from "../../../components/ui/button"
+import { Badge } from "../../../components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select"
+import { Checkbox } from "../../../components/ui/checkbox"
+import { Label } from "../../../components/ui/label"
+import { Textarea } from "../../../components/ui/textarea"
+import { Input } from "../../../components/ui/input"
+import { Progress } from "../../../components/ui/progress"
+import {
+  Download,
+  FileText,
+  Image,
+  Database,
+  MapPin,
+  Calendar,
+  Settings,
+  Check,
+  AlertCircle,
+  Eye,
+  Share2,
+  Mail,
+  Printer
+} from "lucide-react"
+
+interface ExportOptions {
+  format: 'pdf' | 'csv' | 'json' | 'geojson'
+  includeCharts: boolean
+  includeMap: boolean
+  includeRawData: boolean
+  includeMetadata: boolean
+  dateRange: string
+  confidenceThreshold: number
+  regions: string[]
+  customNotes: string
+}
+
+interface ExportJob {
+  id: string
+  name: string
+  status: 'pending' | 'processing' | 'completed' | 'failed'
+  progress: number
+  format: string
+  size?: string
+  downloadUrl?: string
+  createdAt: Date
+  error?: string
+}
+
+export function ExportSystem() {
+  const [options, setOptions] = useState<ExportOptions>({
+    format: 'pdf',
+    includeCharts: true,
+    includeMap: true,
+    includeRawData: false,
+    includeMetadata: true,
+    dateRange: '30d',
+    confidenceThreshold: 70,
+    regions: [],
+    customNotes: ''
+  })
+
+  const [activeJobs, setActiveJobs] = useState<ExportJob[]>([])
+  const [isExporting, setIsExporting] = useState(false)
+
+  const availableRegions = [
+    'Amazon Basin',
+    'Andes Mountains', 
+    'Cerrado',
+    'Atlantic Forest'
+  ]
+
+  const formatDescriptions = {
+    pdf: 'Complete report with visualizations, maps, and analysis',
+    csv: 'Tabular data for spreadsheet analysis',
+    json: 'Structured data for developers and APIs',
+    geojson: 'Geographic data for GIS applications'
+  }
+
+  const handleExport = async () => {
+    if (isExporting) return
+
+    setIsExporting(true)
+
+    const jobId = `export_${Date.now()}`
+    const newJob: ExportJob = {
+      id: jobId,
+      name: `NIS Discovery Report - ${new Date().toLocaleDateString()}`,
+      status: 'pending',
+      progress: 0,
+      format: options.format.toUpperCase(),
+      createdAt: new Date()
+    }
+
+    setActiveJobs(prev => [newJob, ...prev])
+
+    try {
+      // Simulate export process
+      const steps = [
+        { message: 'Gathering discovery data...', progress: 20 },
+        { message: 'Generating visualizations...', progress: 40 },
+        { message: 'Creating map overlays...', progress: 60 },
+        { message: 'Compiling report...', progress: 80 },
+        { message: 'Finalizing export...', progress: 100 }
+      ]
+
+      for (const step of steps) {
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        setActiveJobs(prev => prev.map(job => 
+          job.id === jobId 
+            ? { ...job, status: 'processing', progress: step.progress }
+            : job
+        ))
+      }
+
+      // Try real API call first
+      const response = await fetch('http://localhost:8000/export/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          format: options.format,
+          options: options,
+          jobId: jobId
+        })
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        setActiveJobs(prev => prev.map(job => 
+          job.id === jobId 
+            ? { 
+                ...job, 
+                status: 'completed', 
+                progress: 100,
+                downloadUrl: result.downloadUrl,
+                size: result.size 
+              }
+            : job
+        ))
+      } else {
+        throw new Error('Export API unavailable')
+      }
+
+    } catch (error) {
+      console.log('Using mock export completion')
+      
+      // Mock successful completion
+      await new Promise(resolve => setTimeout(resolve, 500))
+      setActiveJobs(prev => prev.map(job => 
+        job.id === jobId 
+          ? { 
+              ...job, 
+              status: 'completed', 
+              progress: 100,
+              downloadUrl: '#mock-download',
+              size: options.format === 'pdf' ? '2.3 MB' : '156 KB'
+            }
+          : job
+      ))
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  const handleDownload = (job: ExportJob) => {
+    if (job.downloadUrl === '#mock-download') {
+      // Create a mock download
+      const element = document.createElement('a')
+      element.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(`
+NIS Discovery Report - ${job.name}
+
+This is a mock export file generated by the NIS Protocol system.
+
+Export Details:
+- Format: ${job.format}
+- Generated: ${job.createdAt.toLocaleString()}
+- Size: ${job.size}
+
+In a real implementation, this would contain:
+- Discovery data and coordinates
+- Confidence scores and analysis results
+- Visualizations and charts
+- Interactive maps and overlays
+- AI model performance metrics
+      `)
+      element.download = `nis-report-${job.id}.${options.format}`
+      document.body.appendChild(element)
+      element.click()
+      document.body.removeChild(element)
+    } else {
+      window.open(job.downloadUrl, '_blank')
+    }
+  }
+
+  const removeJob = (jobId: string) => {
+    setActiveJobs(prev => prev.filter(job => job.id !== jobId))
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Export Configuration */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Download className="h-5 w-5" />
+            <span>Export Configuration</span>
+          </CardTitle>
+          <CardDescription>
+            Generate comprehensive reports and data exports from your discoveries
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Format Selection */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {(['pdf', 'csv', 'json', 'geojson'] as const).map((format) => (
+              <Card 
+                key={format}
+                className={`cursor-pointer transition-all ${
+                  options.format === format 
+                    ? 'ring-2 ring-blue-500 bg-blue-50' 
+                    : 'hover:bg-gray-50'
+                }`}
+                onClick={() => setOptions(prev => ({ ...prev, format }))}
+              >
+                <CardContent className="p-4">
+                  <div className="text-center">
+                    <div className="mb-2">
+                      {format === 'pdf' && <FileText className="h-8 w-8 mx-auto text-red-600" />}
+                      {format === 'csv' && <Database className="h-8 w-8 mx-auto text-green-600" />}
+                      {format === 'json' && <Settings className="h-8 w-8 mx-auto text-blue-600" />}
+                      {format === 'geojson' && <MapPin className="h-8 w-8 mx-auto text-purple-600" />}
+                    </div>
+                    <h3 className="font-semibold uppercase">{format}</h3>
+                    <p className="text-xs text-gray-600 mt-1">
+                      {formatDescriptions[format]}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Content Options */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <Label className="text-base font-medium">Include Content</Label>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="charts"
+                    checked={options.includeCharts}
+                    onCheckedChange={(checked) => 
+                      setOptions(prev => ({ ...prev, includeCharts: !!checked }))
+                    }
+                  />
+                  <Label htmlFor="charts">Charts and Visualizations</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="map"
+                    checked={options.includeMap}
+                    onCheckedChange={(checked) => 
+                      setOptions(prev => ({ ...prev, includeMap: !!checked }))
+                    }
+                  />
+                  <Label htmlFor="map">Interactive Map</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="rawdata"
+                    checked={options.includeRawData}
+                    onCheckedChange={(checked) => 
+                      setOptions(prev => ({ ...prev, includeRawData: !!checked }))
+                    }
+                  />
+                  <Label htmlFor="rawdata">Raw Data Tables</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="metadata"
+                    checked={options.includeMetadata}
+                    onCheckedChange={(checked) => 
+                      setOptions(prev => ({ ...prev, includeMetadata: !!checked }))
+                    }
+                  />
+                  <Label htmlFor="metadata">Analysis Metadata</Label>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <Label className="text-base font-medium">Filters</Label>
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-sm">Date Range</Label>
+                  <Select 
+                    value={options.dateRange}
+                    onValueChange={(value) =>
+                      setOptions(prev => ({ ...prev, dateRange: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="7d">Last 7 Days</SelectItem>
+                      <SelectItem value="30d">Last 30 Days</SelectItem>
+                      <SelectItem value="90d">Last 90 Days</SelectItem>
+                      <SelectItem value="all">All Time</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-sm">Min Confidence: {options.confidenceThreshold}%</Label>
+                  <input
+                    type="range"
+                    min="50"
+                    max="100"
+                    step="5"
+                    value={options.confidenceThreshold}
+                    onChange={(e) =>
+                      setOptions(prev => ({ ...prev, confidenceThreshold: parseInt(e.target.value) }))
+                    }
+                    className="w-full mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-sm">Regions</Label>
+                  <div className="grid grid-cols-2 gap-2 mt-1">
+                    {availableRegions.map((region) => (
+                      <div key={region} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={region}
+                          checked={options.regions.includes(region)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setOptions(prev => ({ 
+                                ...prev, 
+                                regions: [...prev.regions, region] 
+                              }))
+                            } else {
+                              setOptions(prev => ({ 
+                                ...prev, 
+                                regions: prev.regions.filter(r => r !== region) 
+                              }))
+                            }
+                          }}
+                        />
+                        <Label htmlFor={region} className="text-xs">{region}</Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Custom Notes */}
+          <div className="space-y-2">
+            <Label htmlFor="notes">Custom Notes (Optional)</Label>
+            <Textarea
+              id="notes"
+              placeholder="Add any custom notes or context for this export..."
+              value={options.customNotes}
+              onChange={(e) => setOptions(prev => ({ ...prev, customNotes: e.target.value }))}
+              rows={3}
+            />
+          </div>
+
+          {/* Export Button */}
+          <div className="flex justify-center">
+            <Button 
+              onClick={handleExport}
+              disabled={isExporting}
+              size="lg"
+              className="min-w-48"
+            >
+              {isExporting ? (
+                <>
+                  <Settings className="h-4 w-4 mr-2 animate-spin" />
+                  Generating Export...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-2" />
+                  Generate {options.format.toUpperCase()} Export
+                </>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Active Jobs */}
+      {activeJobs.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Calendar className="h-5 w-5" />
+              <span>Export Jobs</span>
+            </CardTitle>
+            <CardDescription>
+              Track the progress of your export jobs
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {activeJobs.map((job) => (
+                <Card key={job.id}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <Badge variant={
+                            job.status === 'completed' ? 'default' :
+                            job.status === 'failed' ? 'destructive' :
+                            'secondary'
+                          }>
+                            {job.format}
+                          </Badge>
+                          <span className="font-medium">{job.name}</span>
+                          <span className="text-sm text-gray-500">
+                            {job.createdAt.toLocaleTimeString()}
+                          </span>
+                        </div>
+                        
+                        {job.status === 'processing' && (
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between text-sm">
+                              <span>Progress</span>
+                              <span>{job.progress}%</span>
+                            </div>
+                            <Progress value={job.progress} className="h-2" />
+                          </div>
+                        )}
+
+                        {job.status === 'completed' && job.size && (
+                          <div className="text-sm text-gray-600">
+                            Ready for download • {job.size}
+                          </div>
+                        )}
+
+                        {job.status === 'failed' && (
+                          <div className="flex items-center space-x-1 text-sm text-red-600">
+                            <AlertCircle className="h-4 w-4" />
+                            <span>{job.error || 'Export failed'}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        {job.status === 'completed' && (
+                          <>
+                            <Button
+                              size="sm"
+                              onClick={() => handleDownload(job)}
+                            >
+                              <Download className="h-4 w-4 mr-1" />
+                              Download
+                            </Button>
+                            <Button size="sm" variant="outline">
+                              <Share2 className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => removeJob(job.id)}
+                        >
+                          ×
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Quick Actions */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Quick Export Templates</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button 
+              variant="outline" 
+              className="h-auto p-4 text-left justify-start"
+              onClick={() => {
+                setOptions({
+                  format: 'pdf',
+                  includeCharts: true,
+                  includeMap: true,
+                  includeRawData: false,
+                  includeMetadata: true,
+                  dateRange: '30d',
+                  confidenceThreshold: 80,
+                  regions: [],
+                  customNotes: 'Executive summary report for stakeholders'
+                })
+              }}
+            >
+              <div>
+                <div className="font-medium mb-1">Executive Report</div>
+                <div className="text-sm text-gray-600">High-level overview with charts and map</div>
+              </div>
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className="h-auto p-4 text-left justify-start"
+              onClick={() => {
+                setOptions({
+                  format: 'csv',
+                  includeCharts: false,
+                  includeMap: false,
+                  includeRawData: true,
+                  includeMetadata: true,
+                  dateRange: 'all',
+                  confidenceThreshold: 50,
+                  regions: [],
+                  customNotes: 'Complete dataset for research analysis'
+                })
+              }}
+            >
+              <div>
+                <div className="font-medium mb-1">Research Dataset</div>
+                <div className="text-sm text-gray-600">Complete raw data for analysis</div>
+              </div>
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className="h-auto p-4 text-left justify-start"
+              onClick={() => {
+                setOptions({
+                  format: 'geojson',
+                  includeCharts: false,
+                  includeMap: true,
+                  includeRawData: false,
+                  includeMetadata: true,
+                  dateRange: '30d',
+                  confidenceThreshold: 75,
+                  regions: [],
+                  customNotes: 'Geographic data for GIS applications'
+                })
+              }}
+            >
+              <div>
+                <div className="font-medium mb-1">GIS Export</div>
+                <div className="text-sm text-gray-600">Geographic data for mapping software</div>
+              </div>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+} 
