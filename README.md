@@ -20,21 +20,23 @@
 
 <div align="center">
 
-<!-- Primary: Clickable thumbnail -->
-[![NIS Protocol Demo Video](src/images/video_thumbnail.png)](src/images/videos/NIS_Protocol_Promo_Video.mp4)
+<!-- Primary: Animated GIF (displays inline on GitHub) -->
+![NIS Protocol Demo](src/images/nis_demo_small.gif)
 
-**👆 Click the image above to watch our 8-second demo video**
+<!-- Fallback GIF path for GitHub Pages/web deployment -->
+<img src="frontend/public/nis_demo.gif" alt="NIS Protocol Demo" width="400" style="display: block; margin: 0 auto;">
+
+*8-second demonstration of the NIS Protocol Archaeological Discovery Platform*
 
 *Demonstrates: Real-time archaeological analysis, AI-powered multi-agent coordination, and cultural intelligence integration*
 
-<!-- Alternative: HTML5 video (may work in some viewers) -->
+<!-- Fallback: Clickable thumbnail for full quality video -->
 <details>
-<summary>🎥 Alternative: Embedded Video Player</summary>
+<summary>🎥 View Full Quality Video</summary>
 
-<video controls width="600" height="337">
-  <source src="src/images/videos/NIS_Protocol_Promo_Video.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+[![High Quality Video](src/images/video_thumbnail.png)](src/images/videos/NIS_Protocol_Promo_Video.mp4)
+
+**👆 Click for full quality MP4 video**
 
 </details>
 
