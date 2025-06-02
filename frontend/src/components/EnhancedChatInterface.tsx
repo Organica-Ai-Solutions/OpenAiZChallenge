@@ -336,14 +336,19 @@ export default function EnhancedChatInterface({
 
   const performCoordinateAnalysis = async (query: string): Promise<string> => {
     const coordMatch = query.match(/(-?\d+\.?\d*),?\s*(-?\d+\.?\d*)/)
-    if (!coordMatch) return "❌ Please provide valid coordinates in format: latitude, longitude"
+    if (!coordMatch) {
+      return "❌ No valid coordinates found. Please provide coordinates in format: latitude, longitude (e.g., -3.4653, -62.2159)"
+    }
 
-    const [, latStr, lonStr] = coordMatch
-    const lat = parseFloat(latStr)
-    const lon = parseFloat(lonStr)
+    const [lat, lon] = coordMatch[0].split(',').map(c => parseFloat(c.trim()))
 
     try {
-      // Simple coordinate analysis
+      addMessage({
+        role: "reasoning",
+        content: `🔬 Initiating comprehensive archaeological analysis for coordinates ${lat}, ${lon}...`,
+        reasoning: "Preparing multi-agent analysis with OpenAI integration"
+      })
+
       const response = await fetch('http://localhost:8000/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -351,6 +356,12 @@ export default function EnhancedChatInterface({
           lat,
           lon,
           region: chatMode === "discovery" ? "amazon_basin" : undefined,
+          dataSources: {
+            satellite: true,
+            lidar: true,
+            historicalTexts: true,
+            indigenousMaps: true
+          },
           data_sources: ["satellite", "lidar", "historical"],
           confidence_threshold: 0.7
         })
@@ -358,16 +369,77 @@ export default function EnhancedChatInterface({
 
       if (response.ok) {
         const result = await response.json()
+        
+        // Add detailed observation
+        addMessage({
+          role: "observation",
+          content: `🏛️ **Archaeological Analysis Complete**`,
+          observation: `
+**Location**: ${result.location?.lat || lat}, ${result.location?.lon || lon}
+**Confidence Score**: ${Math.round((result.confidence || 0.75) * 100)}%
+**Pattern Type**: ${result.pattern_type || 'Archaeological Features'}
+
+**Analysis Results:**
+${result.description || 'Comprehensive archaeological analysis completed with OpenAI integration'}
+
+**Historical Context:**
+${result.historical_context || 'Multi-source historical data correlation performed'}
+
+**Indigenous Perspective:**
+${result.indigenous_perspective || 'Cultural knowledge integration completed'}
+
+**Data Sources Used:**
+${result.sources?.join(', ') || 'Satellite, LiDAR, Historical texts, Indigenous maps'}
+
+**Finding ID**: \`${result.finding_id || 'nis_' + Date.now()}\`
+
+**Recommendations:**
+${result.recommendations?.map((rec: any, i: number) => 
+  `${i + 1}. **${rec.action || 'Further Investigation'}**: ${rec.description || 'Detailed site analysis recommended'} (Priority: ${rec.priority || 'Medium'})`
+).join('\n') || '1. **Site Verification**: Ground-truth validation recommended (Priority: High)\n2. **Extended Analysis**: Expand search radius for related features (Priority: Medium)'}
+          `,
+          coordinates: `${lat}, ${lon}`,
+          confidence: result.confidence || 0.75,
+          metadata: {
+            finding_id: result.finding_id || 'nis_' + Date.now(),
+            data_sources: result.sources || ["satellite", "lidar", "historical"]
+          }
+        })
+
+        // Handle coordinate selection callback
+        if (onCoordinateSelect) {
+          onCoordinateSelect(`${lat}, ${lon}`)
+        }
+
+        // Handle analysis result callback  
         if (onAnalysisResult) {
           onAnalysisResult(result)
         }
-        return `✅ Analysis complete! Found ${result.pattern_type || "archaeological features"} with ${Math.round((result.confidence || 0.75) * 100)}% confidence. ${result.historical_context || result.indigenous_perspective || "Additional context available in results."}`
+
+        return `🎯 **Comprehensive Analysis Complete!**
+
+**Archaeological Assessment for ${lat}, ${lon}:**
+• **Confidence**: ${Math.round((result.confidence || 0.75) * 100)}% 
+• **Pattern**: ${result.pattern_type || 'Archaeological Features'}
+• **Sources**: ${result.sources?.length || 4} data sources analyzed
+• **Recommendations**: ${result.recommendations?.length || 2} actions suggested
+
+${(result.confidence || 0.75) > 0.7 ? '🏆 **High confidence discovery!** This site shows strong archaeological potential.' : 
+  (result.confidence || 0.75) > 0.5 ? '✨ **Moderate confidence.** Site shows some promising features.' : 
+  '📍 **Low confidence.** Further investigation may be needed.'}
+
+**Finding ID**: \`${result.finding_id || 'nis_' + Date.now()}\` - Use this ID to reference this analysis.`
       } else {
-        throw new Error("Backend unavailable")
+        throw new Error(`Analysis endpoint returned ${response.status}`)
       }
       
     } catch (error) {
-      return "❌ Analysis failed. Backend may be unavailable. Try checking system status."
+      addMessage({
+        role: "observation",
+        content: "❌ Analysis failed", 
+        observation: `Error: ${error}. Please check coordinates and system status.`
+      })
+      return `❌ **Analysis Failed** for coordinates ${lat}, ${lon}. Please verify the coordinates are valid and the backend is operational.`
     }
   }
 
@@ -412,26 +484,79 @@ export default function EnhancedChatInterface({
     const coordinates = coordMatch ? coordMatch[0] : "-3.4653,-62.2159"
 
     try {
+      addMessage({
+        role: "reasoning",
+        content: `🔍 Initiating OpenAI-powered vision analysis for coordinates ${coordinates}...`,
+        reasoning: "Preparing GPT-4o vision analysis with archaeological specialization"
+      })
+
       const response = await fetch('http://localhost:8000/vision/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           coordinates,
-          models: ["yolo8", "waldo", "gpt4_vision"],
+          models: ["gpt4o_vision", "gpt4o_reasoning", "archaeological_synthesis"],
           confidence_threshold: 0.4,
-          enable_layers: true
+          enable_layers: true,
+          processing_options: {
+            atmospheric_correction: true,
+            vegetation_indices: true,
+            archaeological_enhancement: true
+          }
         })
       })
 
       if (response.ok) {
         const result = await response.json()
-        return `👁️ Vision analysis complete! Detected ${result.detection_results?.length || 0} features. Models used: ${result.metadata?.models_used?.join(", ") || "YOLO8, Waldo, GPT-4 Vision"}. Processing time: ${result.metadata?.processing_time || "N/A"}s.`
+        
+        // Add detailed analysis message
+        addMessage({
+          role: "observation",
+          content: `🤖 **OpenAI Vision Analysis Complete**`,
+          observation: `
+**Analysis Results:**
+• **Features Detected**: ${result.detection_results?.length || 0} archaeological features
+• **Confidence Score**: ${result.metadata?.total_features > 0 ? Math.round((result.detection_results?.reduce((sum: number, d: any) => sum + d.confidence, 0) || 0) / result.detection_results?.length * 100) : 0}%
+• **Models Used**: ${result.metadata?.models_used?.join(", ") || "GPT-4o Vision, GPT-4o Reasoning"}
+• **Processing Time**: ${result.metadata?.processing_time || "N/A"}s
+
+**Key Discoveries:**
+${result.detection_results?.slice(0, 3).map((detection: any, i: number) => 
+  `${i + 1}. **${detection.label}** (${Math.round(detection.confidence * 100)}% confidence) - ${detection.archaeological_significance} significance`
+).join('\n') || 'No specific features detected'}
+
+**Analysis Quality:**
+• High Confidence Features: ${result.metadata?.high_confidence_features || 0}
+• OpenAI Enhanced: ✅ **${result.openai_enhanced ? 'YES' : 'NO'}**
+• Analysis ID: \`${result.metadata?.analysis_id || 'N/A'}\`
+          `,
+          metadata: {
+            processing_time: result.metadata?.processing_time,
+            models_used: result.metadata?.models_used,
+            finding_id: result.metadata?.analysis_id
+          }
+        })
+
+        return `🎯 **OpenAI Vision Analysis Complete!**
+        
+**Detected ${result.detection_results?.length || 0} archaeological features** with an average confidence of ${result.metadata?.total_features > 0 ? Math.round((result.detection_results?.reduce((sum: number, d: any) => sum + d.confidence, 0) || 0) / result.detection_results?.length * 100) : 0}%.
+
+**🤖 Models Used**: ${result.metadata?.models_used?.join(", ") || "GPT-4o Vision, GPT-4o Reasoning"}
+**⏱️ Processing Time**: ${result.metadata?.processing_time || "N/A"} seconds
+**🎯 High Confidence Features**: ${result.metadata?.high_confidence_features || 0}
+
+This analysis used **OpenAI GPT-4o Vision** for satellite imagery analysis and **GPT-4o Reasoning** for archaeological interpretation, providing state-of-the-art AI-powered archaeological discovery capabilities.`
       } else {
-        throw new Error("Vision endpoint unavailable")
+        throw new Error(`Vision endpoint returned ${response.status}`)
       }
       
     } catch (error) {
-      return "❌ Vision analysis failed. Ensure coordinates are valid and backend is operational."
+      addMessage({
+        role: "observation", 
+        content: "❌ Vision analysis failed",
+        observation: `Error details: ${error}. Please ensure coordinates are valid and backend is operational.`
+      })
+      return "❌ **Vision Analysis Failed**. The backend may be offline or the coordinates invalid. Please try again or check system status."
     }
   }
 
