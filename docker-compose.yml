@@ -1,18 +1,13 @@
-version: '3.8'
-
 services:
   # Redis for caching and session management
   redis:
     image: redis:7-alpine
-    container_name: nis-redis
+    container_name: nis-redis-simple
     restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
-      - redis-data:/data
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-nis_redis_dev}
-    networks:
-      - nis_network
+      - redis_data:/data
 
   # Simplified Backend API (without complex GDAL dependencies)
   backend:
@@ -24,23 +19,13 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-nis_redis_dev}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
       - ENVIRONMENT=development
+      - LOG_LEVEL=info
+      - REDIS_URL=redis://redis:6379
     volumes:
-      - ./outputs:/app/outputs
-      - ./data:/app/data
+      - ./logs:/app/logs
     depends_on:
       - redis
-    networks:
-      - nis_network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   # Frontend (Next.js)
   frontend:
@@ -50,21 +35,15 @@ services:
     container_name: nis-frontend
     restart: unless-stopped
     ports:
-      - "3001:3000"
+      - "3000:3000"
     environment:
+      - NODE_ENV=development
       - NEXT_PUBLIC_API_URL=http://localhost:8000
     volumes:
       - ./frontend:/app
       - /app/node_modules
-      - /app/.next
     depends_on:
       - backend
-    networks:
-      - nis_network
 
 volumes:
-  redis-data:
-
-networks:
-  nis_network:
-    driver: bridge
+  redis_data:

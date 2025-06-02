@@ -3,22 +3,27 @@ FROM python:3.10-slim
 # Set working directory
 WORKDIR /app
 
-# Install basic system dependencies
+# Install system dependencies including build tools
 RUN apt-get update && apt-get install -y \
     curl \
+    gcc \
+    g++ \
+    python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
 COPY requirements.simple.txt .
 
-# Install Python dependencies without GDAL and other complex packages
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.simple.txt
 
-# Copy the application code
-COPY . .
+# Copy application code
+COPY backend_main.py .
+COPY src/ ./src/
+COPY api/ ./api/
 
-# Create necessary directories
-RUN mkdir -p outputs/logs outputs/findings outputs/memory data
+# Create logs directory
+RUN mkdir -p logs
 
 # Expose port
 EXPOSE 8000
@@ -28,4 +33,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:8000/health || exit 1
 
 # Run the application
-CMD ["python", "run_api.py"] 
+CMD ["python", "backend_main.py"] 

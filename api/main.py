@@ -170,10 +170,10 @@ async def root():
 async def system_health():
     """System health check"""
     return {
-        "status": "operational",
+            "status": "operational",
         "timestamp": datetime.now().isoformat(),
-        "services": {
-            "api": "online",
+            "services": {
+                "api": "online",
             "archaeological_analysis": "online",
             "vision_processing": "online"
         },
@@ -182,10 +182,10 @@ async def system_health():
             "lidar": "online", 
             "historical": "online",
             "ethnographic": "online"
-        },
-        "model_services": {
-            "gpt4o": "online",
-            "archaeological_analysis": "online"
+            },
+            "model_services": {
+                "gpt4o": "online",
+                "archaeological_analysis": "online"
         }
     }
 
