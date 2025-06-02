@@ -1,42 +1,62 @@
 "use client"
 
+import Link from "next/link"
+import { Globe } from "lucide-react"
 import EnhancedChatInterface from "../../src/components/EnhancedChatInterface"
 import { NISDataProvider } from "../../src/lib/context/nis-data-context"
 
 export default function ChatPage() {
   return (
     <NISDataProvider>
-      <div className="min-h-screen bg-gray-50">
-        <header className="bg-emerald-900 py-4 text-white">
+      <div className="min-h-screen bg-slate-900">
+        {/* Navigation Header */}
+        <header className="bg-slate-900/80 backdrop-blur-sm border-b border-slate-700 py-4 text-white sticky top-0 z-50">
           <div className="container mx-auto flex items-center justify-between px-4">
-            <a href="/" className="flex items-center gap-2 text-xl font-bold">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-emerald-900">NIS</span>
-              Protocol
-            </a>
+            <Link href="/" className="flex items-center gap-2 text-xl font-bold">
+              <Globe className="h-8 w-8 text-blue-400" />
+              <span className="text-white">NIS Protocol</span>
+            </Link>
             <nav className="hidden space-x-6 md:flex">
-              <a href="/" className="hover:text-emerald-200">
+              <Link href="/" className="hover:text-blue-400 transition-colors">
                 Home
-              </a>
-              <a href="/agent" className="hover:text-emerald-200">
-                Agent
-              </a>
-              <a href="/map" className="hover:text-emerald-200">
-                Map
-              </a>
-              <a href="/chat" className="text-emerald-200">
+              </Link>
+              <Link href="/archaeological-discovery" className="hover:text-blue-400 transition-colors">
+                Discovery
+              </Link>
+              <Link href="/agent" className="hover:text-blue-400 transition-colors">
+                Agents
+              </Link>
+              <Link href="/satellite" className="hover:text-blue-400 transition-colors">
+                Satellite
+              </Link>
+              <Link href="/map" className="hover:text-blue-400 transition-colors">
+                Maps
+              </Link>
+              <Link href="/analytics" className="hover:text-blue-400 transition-colors">
+                Analytics
+              </Link>
+              <Link href="/chat" className="text-blue-400 font-medium">
                 Chat
-              </a>
-              <a href="/documentation" className="hover:text-emerald-200">
-                Documentation
-              </a>
+              </Link>
+              <Link href="/documentation" className="hover:text-blue-400 transition-colors">
+                Docs
+              </Link>
             </nav>
+            
+            {/* Mobile menu button */}
+            <button className="md:hidden text-slate-300 hover:text-white">
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
           </div>
         </header>
 
+        {/* Main Content */}
         <main className="container mx-auto py-8">
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-gray-900">NIS Protocol Chat Agent</h1>
-            <p className="mt-2 text-gray-600">
+            <h1 className="text-3xl font-bold text-white">NIS Protocol Chat Agent</h1>
+            <p className="mt-2 text-slate-300">
               Engage with our AI archaeological discovery agent using natural language
             </p>
           </div>
@@ -49,9 +69,15 @@ export default function ChatPage() {
           />
         </main>
 
-        <footer className="bg-gray-100 py-6 text-center text-sm text-gray-600">
+        {/* Footer */}
+        <footer className="bg-slate-900/80 border-t border-slate-700 py-8 text-slate-300">
           <div className="container mx-auto px-4">
-            © 2024 NIS Protocol. All rights reserved. | Archaeological discovery through neural-inspired systems.
+            <div className="text-center text-sm">
+              <p>© {new Date().getFullYear()} Organica-Ai-Solutions. All rights reserved.</p>
+              <p className="mt-2 text-slate-500">
+                Built with Next.js, FastAPI, and advanced AI for archaeological research.
+              </p>
+            </div>
           </div>
         </footer>
       </div>

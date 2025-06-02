@@ -1,81 +1,62 @@
 version: '3.8'
 
 services:
-  # Redis Service
+  # Redis for caching and session management
   redis:
-    image: redis/redis-stack-server:latest
+    image: redis:7-alpine
     container_name: nis-redis
+    restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
       - redis-data:/data
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-nis_redis_dev}
     networks:
       - nis_network
 
-  # Kafka Service
-  kafka:
-    image: confluentinc/cp-kafka:latest
-    container_name: nis-kafka
-    ports:
-      - "29092:9092"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://nis-kafka:9092,PLAINTEXT_HOST://localhost:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    depends_on:
-      - zookeeper
-    networks:
-      - nis_network
-
-  # Zookeeper Service (required for Kafka)
-  zookeeper:
-    image: confluentinc/cp-zookeeper:latest
-    container_name: nis-zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    networks:
-      - nis_network
-
-  # Backend Service
+  # Simplified Backend API (without complex GDAL dependencies)
   backend:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.simple
     container_name: nis-backend
+    restart: unless-stopped
     ports:
       - "8000:8000"
-    # volumes: # Temporarily commented out
-    #   - .:/app # Temporarily commented out
-    env_file:
-      - .env
     environment:
-      - KAFKA_BOOTSTRAP_SERVERS=nis-kafka:9092
-      - REDIS_URL=redis://nis-redis:6379
-      - LOG_LEVEL=INFO
-      - USE_REAL_DATA=true
-      - DISABLE_MOCK_RESPONSES=true
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-nis_redis_dev}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ENVIRONMENT=development
+    volumes:
+      - ./outputs:/app/outputs
+      - ./data:/app/data
     depends_on:
-      - kafka
       - redis
     networks:
       - nis_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  # Frontend Service
+  # Frontend (Next.js)
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: nis-frontend
+    restart: unless-stopped
     ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app
+      - "3001:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
     depends_on:
       - backend
     networks:
@@ -83,8 +64,6 @@ services:
 
 volumes:
   redis-data:
-  kafka-data:
-  zookeeper-data:
 
 networks:
   nis_network:

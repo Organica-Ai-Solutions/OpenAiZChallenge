@@ -561,15 +561,73 @@ This analysis used **OpenAI GPT-4o Vision** for satellite imagery analysis and *
   }
 
   const performGeneralAssistance = async (query: string): Promise<string> => {
-    if (query.toLowerCase().includes("help")) {
-      return "🤝 I'm your NIS Protocol assistant! I can:\n• Analyze coordinates for archaeological features\n• Discover new sites in the database\n• Run computer vision analysis\n• Check system status\n• Provide research assistance\n\nTry asking me to analyze coordinates, discover sites, or check system status!"
+    // Check if query contains coordinates for analysis
+    const coordMatch = query.match(/(-?\d+\.?\d*),?\s*(-?\d+\.?\d*)/)
+    if (coordMatch) {
+      return await performCoordinateAnalysis(query)
     }
 
-    if (query.toLowerCase().includes("amazon") || query.toLowerCase().includes("rainforest")) {
-      return "🌳 The Amazon rainforest contains countless undiscovered archaeological sites. Our NIS Protocol specializes in finding pre-Columbian settlements, geometric earthworks, and ceremonial complexes. Try coordinates like -3.4653, -62.2159 or ask me to discover sites!"
+    // Check for site discovery requests
+    if (query.toLowerCase().includes('site') || query.toLowerCase().includes('discover')) {
+      return await performSiteDiscovery(query)
     }
 
-    return "💭 I understand you're asking about archaeological discovery. Would you like me to:\n• Analyze specific coordinates\n• Search for new sites\n• Check system capabilities\n• Run vision analysis\n\nPlease let me know how I can help!"
+    // Check for system status requests
+    if (query.toLowerCase().includes('status') || query.toLowerCase().includes('health')) {
+      return await performSystemCheck()
+    }
+
+    // Check for vision analysis requests
+    if (query.toLowerCase().includes('vision') || query.toLowerCase().includes('image')) {
+      return await performVisionAnalysis(query)
+    }
+
+    // For general queries, provide real system information
+    try {
+      const healthResponse = await fetch('http://localhost:8000/system/health')
+      const sitesResponse = await fetch('http://localhost:8000/research/sites?max_sites=3')
+      
+      let systemInfo = ""
+      if (healthResponse.ok) {
+        const health = await healthResponse.json()
+        systemInfo += `🤖 **NIS Protocol Status**: ${health.status}\n`
+      }
+      
+      if (sitesResponse.ok) {
+        const sites = await sitesResponse.json()
+        systemInfo += `📍 **Database**: ${sites.length} archaeological sites available\n`
+      }
+
+      return `🏛️ **NIS Protocol Archaeological Assistant**
+
+${systemInfo}
+
+I can help you with:
+• **Coordinate Analysis**: Provide coordinates like "-3.4653, -62.2159" for archaeological analysis
+• **Site Discovery**: Ask about "sites" or "discoveries" to explore our database
+• **Vision Analysis**: Request "vision analysis" for satellite imagery processing
+• **System Status**: Ask about "status" or "health" for system information
+
+**Example queries:**
+- "Analyze coordinates -13.1631, -72.5450"
+- "Show me discovered sites"
+- "What's the system status?"
+- "Run vision analysis on -14.7390, -75.1300"
+
+What would you like to explore?`
+    } catch (error) {
+      return `🏛️ **NIS Protocol Archaeological Assistant**
+
+I'm here to help with archaeological site discovery and analysis. However, I'm currently unable to connect to the backend services.
+
+**Available when online:**
+• Coordinate analysis with OpenAI integration
+• Archaeological site database queries
+• Vision analysis with GPT-4o
+• Real-time system monitoring
+
+Please check the backend connection and try again.`
+    }
   }
 
   // ====================================================================

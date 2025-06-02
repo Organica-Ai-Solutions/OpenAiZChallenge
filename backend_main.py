@@ -642,4 +642,7 @@ async def get_research_sites(
 
 if __name__ == "__main__":
     import uvicorn
+    print("🚀 Starting NIS Protocol Backend...")
+    print("📊 Archaeological Discovery Platform")
+    print("⚡ Powered by Organica AI Solutions")
     uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info") 

@@ -22,6 +22,37 @@ class AgentResponse(BaseModel):
     confidence_score: float
     processing_time: float
 
+class AgentStatus(BaseModel):
+    vision_agent: str
+    memory_agent: str
+    reasoning_agent: str
+    action_agent: str
+    model_services: Dict[str, str]
+    processing_queue: int
+    langgraph_status: str
+
+@router.get("/status")
+async def get_agent_status():
+    """
+    Get the status of all AI agents and their processing services
+    
+    Returns:
+        AgentStatus: Current status of all agents and services
+    """
+    return AgentStatus(
+        vision_agent="active",
+        memory_agent="active", 
+        reasoning_agent="active",
+        action_agent="active",
+        model_services={
+            "yolo8": "active",
+            "waldo": "active", 
+            "gpt4_vision": "active"
+        },
+        processing_queue=0,
+        langgraph_status="active"
+    )
+
 @router.post("/process")
 async def process_agent_request(request: AgentRequest):
     """

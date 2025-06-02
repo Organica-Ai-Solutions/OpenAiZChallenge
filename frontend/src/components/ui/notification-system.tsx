@@ -41,8 +41,11 @@ export function NotificationSystem({ className, maxNotifications = 50 }: Notific
     // WebSocket connection status
     const unsubscribeConnected = webSocket.subscribe('connected', () => {
       setIsConnected(true)
+      // Remove any previous connection lost notifications
+      setNotifications(prev => prev.filter(n => !n.id.startsWith('connection_')))
+      
       addNotification({
-        id: 'connection_restored',
+        id: `connection_restored_${Date.now()}`,
         type: 'system',
         title: 'Connection Restored',
         message: 'Real-time updates are now active',
@@ -53,14 +56,22 @@ export function NotificationSystem({ className, maxNotifications = 50 }: Notific
 
     const unsubscribeDisconnected = webSocket.subscribe('disconnected', () => {
       setIsConnected(false)
-      addNotification({
-        id: 'connection_lost',
-        type: 'system',
-        title: 'Connection Lost',
-        message: 'Attempting to reconnect...',
-        severity: 'warning',
-        timestamp: new Date()
-      })
+      // Only add notification if we don't already have a recent connection lost notification
+      const hasRecentConnectionLost = notifications.some(n => 
+        n.id.startsWith('connection_lost') && 
+        (Date.now() - n.timestamp.getTime()) < 10000 // Within last 10 seconds
+      )
+      
+      if (!hasRecentConnectionLost) {
+        addNotification({
+          id: `connection_lost_${Date.now()}`,
+          type: 'system',
+          title: 'Connection Lost',
+          message: 'Attempting to reconnect...',
+          severity: 'warning',
+          timestamp: new Date()
+        })
+      }
     })
 
     // Notification handling
@@ -137,9 +148,18 @@ export function NotificationSystem({ className, maxNotifications = 50 }: Notific
     }
   }, [webSocket])
 
+  const removeNotification = useCallback((id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id))
+  }, [])
+
   const addNotification = useCallback((notification: NotificationData) => {
     setNotifications(prev => {
-      const newNotifications = [notification, ...prev]
+      // Remove existing connection notifications before adding new ones
+      const filteredNotifications = notification.id.startsWith('connection_') 
+        ? prev.filter(n => !n.id.startsWith('connection_'))
+        : prev
+        
+      const newNotifications = [notification, ...filteredNotifications]
       
       // Limit notifications
       if (newNotifications.length > maxNotifications) {
@@ -152,11 +172,14 @@ export function NotificationSystem({ className, maxNotifications = 50 }: Notific
     if (!isOpen) {
       setUnreadCount(prev => prev + 1)
     }
+    
+    // Auto-remove connection notifications after a delay
+    if (notification.id.startsWith('connection_')) {
+      setTimeout(() => {
+        setNotifications(prev => prev.filter(n => n.id !== notification.id))
+      }, 5000) // Remove after 5 seconds
+    }
   }, [isOpen, maxNotifications])
-
-  const removeNotification = useCallback((id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id))
-  }, [])
 
   const clearAllNotifications = useCallback(() => {
     setNotifications([])

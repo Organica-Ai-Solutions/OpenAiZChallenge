@@ -1,14 +1,14 @@
-"use client"
-
-import type React from "react"
-import "@/app/globals.css"
+import type { Metadata } from "next"
 import { Inter } from "next/font/google"
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
-import { cn } from "@/lib/utils"
-import { NotificationSystem } from "../src/components/ui/notification-system"
+import "@/app/globals.css"
+import { ClientProviders } from "../components/client-providers"
 
 const inter = Inter({ subsets: ["latin"] })
+
+export const metadata: Metadata = {
+  title: "NIS Protocol - Indigenous Knowledge Research Platform",
+  description: "Advanced AI-powered archaeological site discovery and satellite monitoring system",
+}
 
 export default function RootLayout({
   children,
@@ -17,18 +17,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head />
-      <body className={inter.className} suppressHydrationWarning={true}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+      <body className={inter.className}>
+        <ClientProviders>
           {children}
-          <Toaster />
-          <NotificationSystem />
-        </ThemeProvider>
+        </ClientProviders>
       </body>
     </html>
   )

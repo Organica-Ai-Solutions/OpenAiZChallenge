@@ -199,32 +199,34 @@ function pre_flight_checks() {
 # Archaeological Discovery Animation
 function archaeological_animation() {
     clear
-    echo -e "${GREEN}🌿 NIS Protocol: Neural-Inspired Archaeological Discovery System 🌿${RESET}"
+    echo -e "${GREEN}🏛️ Archaeological Discovery Platform - Powered by NIS Protocol 🏛️${RESET}"
+    echo -e "${BLUE}    Developed by Organica AI Solutions (https://organicaai.com)${RESET}"
     echo ""
     
     for i in {1..10}; do
-        printf "${YELLOW}🏺 Excavating: [%-10s] %d%%${RESET}\r" $(printf "#%.0s" $(seq 1 $i)) $((i * 10))
+        printf "${YELLOW}🔍 Initializing Discovery Systems: [%-10s] %d%%${RESET}\r" $(printf "#%.0s" $(seq 1 $i)) $((i * 10))
         sleep 0.2
     done
-    echo -e "\n${BLUE}📡 Advanced Geospatial Analysis Initialized${RESET}"
+    echo -e "\n${BLUE}🛰️ AI-Powered Archaeological Analysis Ready${RESET}"
     sleep 1
     
-    echo -e "\n${GREEN}🌍 Discovering Hidden Histories ${RESET}"
+    echo -e "\n${GREEN}🌍 Discovering Indigenous Heritage with Respect ${RESET}"
     sleep 1
 }
 
-# NIS Protocol Startup Banner
+# Archaeological Discovery Platform Banner
 function nis_banner() {
     echo -e "${MAGENTA}"
     cat << "EOF"
 ╔═══════════════════════════════════════════════════════════════════╗
-║  禪  NEURAL-INSPIRED SYSTEM PROTOCOL  智                          ║
+║  🏛️  ARCHAEOLOGICAL DISCOVERY PLATFORM  🏛️                         ║
 ║                                                                   ║
-║   🧠 Multi-Agent Intelligence | 🛰️ Geospatial Reasoning          ║
-║   📜 Interpreting Ancient History with Modern AI                 ║
-║   🐉 Inspired by the wisdom of the past — built for the future   ║
+║   🧠 NIS Protocol by Organica AI Solutions                       ║
+║   🔍 AI-Powered Indigenous Archaeological Research               ║
+║   🌍 Respecting Cultural Heritage & Traditional Knowledge        ║
 ║                                                                   ║
-║   📍 Amazon Rainforest | 🌏 Global Archaeology | 🤖 GPT-4.1       ║
+║   🛰️ Satellite Analysis | 🤖 OpenAI GPT-4o | 📜 Cultural Context ║
+║   Visit: https://organicaai.com                                  ║
 ╚═══════════════════════════════════════════════════════════════════╝
 EOF
     echo -e "${RESET}"
@@ -282,14 +284,16 @@ function startup_nis_protocol() {
         FRONTEND_HOST_PORT="3000" # Fallback
     fi
 
-    echo -e "\n${YELLOW}🚀 NIS Protocol is now LIVE! (Managed by Docker Compose)${RESET}"
-    echo -e "Backend: ${BLUE}http://localhost:$BACKEND_HOST_PORT${RESET}"
-    echo -e "Frontend: ${GREEN}http://localhost:$FRONTEND_HOST_PORT${RESET}"
+    echo -e "\n${YELLOW}🚀 Archaeological Discovery Platform is now LIVE! (Powered by NIS Protocol)${RESET}"
+    echo -e "Backend API: ${BLUE}http://localhost:$BACKEND_HOST_PORT${RESET}"
+    echo -e "Frontend Interface: ${GREEN}http://localhost:$FRONTEND_HOST_PORT${RESET}"
+    echo -e "Documentation: ${GREEN}http://localhost:$FRONTEND_HOST_PORT/documentation${RESET}"
+    echo -e "Organica AI Solutions: ${CYAN}https://organicaai.com${RESET}"
     echo -e "To view logs: ${CYAN}$DOCKER_COMPOSE_CMD logs -f${RESET}"
     echo -e "To stop services: ${CYAN}$DOCKER_COMPOSE_CMD down${RESET}"
     echo -e "Detailed startup logs: ${MAGENTA}$LOG_FILE${RESET}"
     
-    log "NIS Protocol startup initiated via Docker Compose. Monitor service logs for status."
+    log "Archaeological Discovery Platform startup initiated via Docker Compose. Monitor service logs for status."
 
     # The script can now exit, or tail logs if preferred.
     # To keep the script running and tailing logs:
