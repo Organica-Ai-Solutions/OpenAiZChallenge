@@ -19,15 +19,30 @@
 ### 🎬 Watch Our Platform in Action
 
 <div align="center">
-  <video controls width="600" height="337" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-    <source src="src/images/videos/NIS_Protocol_Promo_Video.mp4" type="video/mp4">
-    <source src="frontend/public/NIS_Protocol_Promo_Video.mp4" type="video/mp4">
-    Your browser does not support the video tag. 
-    <a href="src/images/videos/NIS_Protocol_Promo_Video.mp4">Download the video</a>
-  </video>
+
+<!-- Primary: Clickable thumbnail -->
+[![NIS Protocol Demo Video](src/images/video_thumbnail.png)](src/images/videos/NIS_Protocol_Promo_Video.mp4)
+
+**👆 Click the image above to watch our 8-second demo video**
+
+*Demonstrates: Real-time archaeological analysis, AI-powered multi-agent coordination, and cultural intelligence integration*
+
+<!-- Alternative: HTML5 video (may work in some viewers) -->
+<details>
+<summary>🎥 Alternative: Embedded Video Player</summary>
+
+<video controls width="600" height="337">
+  <source src="src/images/videos/NIS_Protocol_Promo_Video.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+</details>
+
 </div>
 
-*8-second demonstration of the NIS Protocol Archaeological Discovery Platform*
+*Direct links:*
+- **[📺 View Demo Video](src/images/videos/NIS_Protocol_Promo_Video.mp4)**
+- **[📁 Download Video](frontend/public/NIS_Protocol_Promo_Video.mp4)**
 
 **Key Features Demonstrated:**
 - 🔍 Real-time archaeological site analysis
