@@ -20,8 +20,6 @@
 
 <div align="center">
 
-<!-- Primary: Animated GIF (displays inline on GitHub) -->
-![NIS Protocol Demo](src/images/nis_demo_small.gif)
 
 <!-- Fallback GIF path for GitHub Pages/web deployment -->
 <img src="frontend/public/nis_demo.gif" alt="NIS Protocol Demo" width="400" style="display: block; margin: 0 auto;">
