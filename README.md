@@ -6,7 +6,7 @@
 
 **AI-Powered Indigenous Archaeological Research & Site Discovery**
 
-*Powered by the [NIS Protocol](https://github.com/organica-ai/nis-protocol), developed by [Organica AI Solutions](https://organicaai.com)*
+*Powered by the [NIS Protocol](https://github.com/Organica-Ai-Solutions/NIS_Protocol), developed by [Organica AI Solutions](https://www.organicaai.com)*
 
 ---
 
