@@ -1,0 +1,74 @@
+{
+  "total_sites_discovered": 141,
+  "sites_by_type": {
+    "settlement": 54,
+    "ceremonial": 37,
+    "agricultural": 32,
+    "geoglyph": 26,
+    "defensive": 24,
+    "burial": 20
+  },
+  "analysis_metrics": {
+    "total_analyses": 1255,
+    "successful_analyses": 1386,
+    "success_rate": 92.1,
+    "avg_confidence": 0.88,
+    "high_confidence_discoveries": 53
+  },
+  "recent_activity": {
+    "last_24h_analyses": 26,
+    "last_7d_discoveries": 6,
+    "active_researchers": 16,
+    "ongoing_projects": 5
+  },
+  "model_performance": {
+    "gpt4o_vision": {
+      "accuracy": 96.7,
+      "total_analyses": 1191,
+      "processing_time_avg": 4.6,
+      "specialization": "Cultural context analysis"
+    },
+    "archaeological_analysis": {
+      "accuracy": 89.2,
+      "total_detections": 2371,
+      "processing_time_avg": 3.8,
+      "specialization": "Feature detection and classification"
+    },
+    "ensemble_models": {
+      "accuracy": 95.5,
+      "total_analyses": 882,
+      "processing_time_avg": 6.3,
+      "specialization": "Comprehensive multi-model analysis"
+    }
+  },
+  "geographic_coverage": {
+    "regions_analyzed": 16,
+    "total_area_km2": 45630,
+    "density_sites_per_km2": 0.0025,
+    "countries": [
+      "Peru",
+      "Brazil",
+      "Colombia",
+      "Ecuador",
+      "Bolivia"
+    ],
+    "indigenous_territories": 17
+  },
+  "data_sources": {
+    "satellite_images": 8680,
+    "lidar_scans": 1519,
+    "historical_records": 377,
+    "indigenous_knowledge": 83,
+    "ground_truth_surveys": 52,
+    "academic_papers": 200
+  },
+  "cultural_impact": {
+    "communities_engaged": 38,
+    "indigenous_partnerships": 15,
+    "knowledge_sharing_sessions": 12,
+    "cultural_protocols_followed": "100%"
+  },
+  "timestamp": "2025-06-02T17:35:54.556443",
+  "data_freshness": "real-time",
+  "system_uptime": "17 days"
+}

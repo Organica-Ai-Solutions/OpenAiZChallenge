@@ -1,0 +1,106 @@
+[
+  {
+    "site_id": "site_nazca_6d01ec",
+    "name": "Nazca Lines Complex",
+    "coordinates": "-14.739, -75.13",
+    "confidence": 0.92,
+    "discovery_date": "2024-11-09",
+    "cultural_significance": "indigenous river communities and ancient trade routes",
+    "data_sources": [
+      "satellite",
+      "lidar",
+      "historical"
+    ]
+  },
+  {
+    "site_id": "site_amazon_c9bb1d",
+    "name": "Amazon Settlement Platform",
+    "coordinates": "-3.4653, -62.2159",
+    "confidence": 0.87,
+    "discovery_date": "2025-01-30",
+    "cultural_significance": "settlement areas with rich archaeological deposits",
+    "data_sources": [
+      "satellite",
+      "lidar",
+      "historical"
+    ]
+  },
+  {
+    "site_id": "site_andes_52c580",
+    "name": "Andean Terracing System",
+    "coordinates": "-13.1631, -72.545",
+    "confidence": 0.84,
+    "discovery_date": "2025-04-11",
+    "cultural_significance": "indigenous river communities and ancient trade routes",
+    "data_sources": [
+      "satellite",
+      "lidar",
+      "historical"
+    ]
+  },
+  {
+    "site_id": "site_coastal_2f362d",
+    "name": "Coastal Ceremonial Center",
+    "coordinates": "-8.1116, -79.0291",
+    "confidence": 0.79,
+    "discovery_date": "2024-06-19",
+    "cultural_significance": "pre-Columbian fishing communities and ceremonial complexes",
+    "data_sources": [
+      "satellite",
+      "lidar",
+      "historical"
+    ]
+  },
+  {
+    "site_id": "site_river_d8ce71",
+    "name": "River Valley Complex",
+    "coordinates": "-12.0464, -77.0428",
+    "confidence": 0.76,
+    "discovery_date": "2024-12-13",
+    "cultural_significance": "indigenous river communities and ancient trade routes",
+    "data_sources": [
+      "satellite",
+      "lidar",
+      "historical"
+    ]
+  },
+  {
+    "site_id": "site_highland_369644",
+    "name": "Highland Observatory",
+    "coordinates": "-16.409, -71.5375",
+    "confidence": 0.82,
+    "discovery_date": "2024-06-27",
+    "cultural_significance": "indigenous river communities and ancient trade routes",
+    "data_sources": [
+      "satellite",
+      "lidar",
+      "historical"
+    ]
+  },
+  {
+    "site_id": "site_lowland_85e0ef",
+    "name": "Lowland Settlement",
+    "coordinates": "-5.1945, -60.7356",
+    "confidence": 0.73,
+    "discovery_date": "2024-10-20",
+    "cultural_significance": "settlement areas with rich archaeological deposits",
+    "data_sources": [
+      "satellite",
+      "lidar",
+      "historical"
+    ]
+  },
+  {
+    "site_id": "site_trade_9efd3f",
+    "name": "Trade Route Marker",
+    "coordinates": "-11.2558, -74.2973",
+    "confidence": 0.68,
+    "discovery_date": "2024-12-31",
+    "cultural_significance": "indigenous river communities and ancient trade routes",
+    "data_sources": [
+      "satellite",
+      "lidar",
+      "historical"
+    ]
+  }
+]

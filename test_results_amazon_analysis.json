@@ -1,0 +1,29 @@
+{
+  "location": {
+    "lat": -3.4653,
+    "lon": -62.2159
+  },
+  "confidence": 0.9290913162247176,
+  "description": "Archaeological analysis completed for coordinates -3.4653, -62.2159. Trade route markers identified with 92.9% confidence in valley cultural region.",
+  "sources": [
+    "satellite",
+    "lidar",
+    "historical"
+  ],
+  "historical_context": "Archaeological analysis of valley region reveals evidence of settlement areas with rich archaeological deposits. \nHistorical records from colonial and pre-colonial periods indicate significant human activity in this area.\nSatellite imagery analysis shows geometric patterns consistent with trade route markers.\nRegional archaeological surveys have documented similar features within 50km radius.\nCarbon dating from nearby sites suggests occupation spanning 800-1500 CE.",
+  "indigenous_perspective": "Traditional ecological knowledge indicates this area was significant for settlement areas with rich archaeological deposits.\nLocal oral histories reference ancestral activities including ceremonial gatherings and seasonal settlements.\nTraditional place names suggest cultural importance for navigation and resource management.\nCommunity elders have shared stories of ancient pathways and gathering places in this region.\nEthnoarchaeological studies support the presence of indigenous land management practices.",
+  "pattern_type": "Trade route markers",
+  "finding_id": "nis_3465_62215_1748900154",
+  "recommendations": [
+    {
+      "action": "Immediate Site Investigation",
+      "description": "High confidence trade route markers requires field verification",
+      "priority": "High"
+    },
+    {
+      "action": "Community Consultation",
+      "description": "Engage with local indigenous communities for traditional knowledge about valley areas",
+      "priority": "High"
+    }
+  ]
+}

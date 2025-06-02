@@ -1,0 +1,29 @@
+{
+  "location": {
+    "lat": -13.1631,
+    "lon": -72.545
+  },
+  "confidence": 0.95,
+  "description": "Archaeological analysis completed for coordinates -13.1631, -72.5450. Agricultural terracing identified with 95.0% confidence in amazon cultural region.",
+  "sources": [
+    "satellite",
+    "lidar",
+    "historical"
+  ],
+  "historical_context": "Archaeological analysis of amazon region reveals evidence of indigenous river communities and ancient trade routes. \nHistorical records from colonial and pre-colonial periods indicate significant human activity in this area.\nSatellite imagery analysis shows geometric patterns consistent with agricultural terracing.\nRegional archaeological surveys have documented similar features within 50km radius.\nCarbon dating from nearby sites suggests occupation spanning 800-1500 CE.",
+  "indigenous_perspective": "Traditional ecological knowledge indicates this area was significant for indigenous river communities and ancient trade routes.\nLocal oral histories reference ancestral activities including ceremonial gatherings and seasonal settlements.\nTraditional place names suggest cultural importance for navigation and resource management.\nCommunity elders have shared stories of ancient pathways and gathering places in this region.\nEthnoarchaeological studies support the presence of indigenous land management practices.",
+  "pattern_type": "Agricultural terracing",
+  "finding_id": "nis_13163_72545_1748900154",
+  "recommendations": [
+    {
+      "action": "Immediate Site Investigation",
+      "description": "High confidence agricultural terracing requires field verification",
+      "priority": "High"
+    },
+    {
+      "action": "Community Consultation",
+      "description": "Engage with local indigenous communities for traditional knowledge about amazon areas",
+      "priority": "High"
+    }
+  ]
+}

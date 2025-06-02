@@ -1,0 +1,19 @@
+{
+  "status": "operational",
+  "timestamp": "2025-06-02T17:35:53.951082",
+  "services": {
+    "api": "online",
+    "archaeological_analysis": "online",
+    "vision_processing": "online"
+  },
+  "data_sources": {
+    "satellite": "online",
+    "lidar": "online",
+    "historical": "online",
+    "ethnographic": "online"
+  },
+  "model_services": {
+    "gpt4o": "online",
+    "archaeological_analysis": "online"
+  }
+}
