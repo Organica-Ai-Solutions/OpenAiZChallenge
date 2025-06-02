@@ -1,0 +1,3 @@
+[INFO] [2025-06-02 17:50:43] Stopping all NIS Protocol services managed by Docker Compose...
+[INFO] [2025-06-02 17:50:43] All Docker Compose services stopped successfully.
+[INFO] [2025-06-02 17:50:43] NIS Protocol shutdown complete.
