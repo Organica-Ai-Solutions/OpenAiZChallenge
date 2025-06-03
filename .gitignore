@@ -52,4 +52,5 @@ outputs/memory/*
 
 # OS specific files
 .DS_Store
-Thumbs.db 
+Thumbs.db logs/*.log
+logs/*.log

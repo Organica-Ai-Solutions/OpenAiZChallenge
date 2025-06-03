@@ -197,6 +197,96 @@ export function SatelliteMonitor() {
     { name: 'Organic', value: state.soilData.composition.organicMatter }
   ] : []
 
+  // Button handler functions
+  const handleAnalyzeImagery = async (image: SatelliteImagery) => {
+    try {
+      setState(prev => ({ ...prev, isLoading: true }))
+      const analysis = await satelliteService.analyzeImagery(image.id, image.coordinates)
+      
+      // Show analysis results (could be in a modal or toast)
+      console.log('🔬 Imagery Analysis Results:', analysis)
+      alert(`Analysis complete! Found ${analysis.features_detected?.length || 0} features with recommendations: ${analysis.recommendations?.join(', ') || 'None'}`)
+      
+    } catch (error) {
+      console.error('Error analyzing imagery:', error)
+      alert('Failed to analyze imagery. Please try again.')
+    } finally {
+      setState(prev => ({ ...prev, isLoading: false }))
+    }
+  }
+
+  const handleViewChangeDetails = async (change: ChangeDetection) => {
+    try {
+      const details = await satelliteService.viewChangeDetails(change.id)
+      console.log('👁️ Change Details:', details)
+      
+      // Show detailed information
+      const detailsText = `
+Change Analysis Details:
+- Change Probability: ${(details.detailed_analysis?.change_probability * 100)?.toFixed(1) || 'N/A'}%
+- Affected Area: ${details.detailed_analysis?.affected_area_km2?.toFixed(3) || 'N/A'} km²
+- Direction: ${details.detailed_analysis?.change_direction || 'Unknown'}
+- Recommendations: ${details.recommendations?.join(', ') || 'None'}
+      `
+      alert(detailsText)
+      
+    } catch (error) {
+      console.error('Error viewing change details:', error)
+      alert('Failed to load change details. Please try again.')
+    }
+  }
+
+  const handleReviewAlert = async (alert: SatelliteAlert) => {
+    try {
+      const review = await satelliteService.reviewAlert(alert.id)
+      console.log('📋 Alert Review:', review)
+      
+      // Show review information
+      const reviewText = `
+Alert Review:
+- Status: ${review.review_status || 'Unknown'}
+- Trigger: ${review.detailed_information?.trigger_conditions || 'N/A'}
+- Confidence Factors: ${review.detailed_information?.confidence_factors?.join(', ') || 'None'}
+- Next Steps: ${review.next_steps?.join(', ') || 'None'}
+      `
+      alert(reviewText)
+      
+    } catch (error) {
+      console.error('Error reviewing alert:', error)
+      alert('Failed to review alert. Please try again.')
+    }
+  }
+
+  const handleExportData = async (dataType: string) => {
+    try {
+      setState(prev => ({ ...prev, isLoading: true }))
+      const exportResult = await satelliteService.exportData(dataType, 'json', selectedCoordinates)
+      console.log('📁 Export Result:', exportResult)
+      
+      // Show export information
+      const exportText = `
+Data Export Ready:
+- Type: ${exportResult.data_type}
+- Format: ${exportResult.format}
+- Size: ${exportResult.file_size}
+- Status: ${exportResult.status}
+- Download: ${exportResult.download_url}
+      `
+      alert(exportText)
+      
+      // Could open download link
+      if (exportResult.download_url) {
+        window.open(exportResult.download_url, '_blank')
+      }
+      
+    } catch (error) {
+      console.error('Error exporting data:', error)
+      alert('Failed to export data. Please try again.')
+    } finally {
+      setState(prev => ({ ...prev, isLoading: false }))
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Control Panel */}
@@ -224,6 +314,10 @@ export function SatelliteMonitor() {
               <Button size="sm" onClick={loadSatelliteData} disabled={state.isLoading}>
                 <RefreshCw className={`h-4 w-4 mr-2 ${state.isLoading ? 'animate-spin' : ''}`} />
                 Refresh
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => handleExportData('all')} disabled={state.isLoading}>
+                <Download className="h-4 w-4 mr-2" />
+                Export Data
               </Button>
             </div>
           </div>
@@ -383,7 +477,7 @@ export function SatelliteMonitor() {
                           <div>Resolution: {image.resolution.toFixed(1)}m</div>
                           <div>Cloud Cover: {image.cloudCover.toFixed(0)}%</div>
                         </div>
-                        <Button size="sm" className="w-full">
+                        <Button size="sm" className="w-full" onClick={() => handleAnalyzeImagery(image)}>
                           <Eye className="h-4 w-4 mr-2" />
                           Analyze
                         </Button>
@@ -428,7 +522,7 @@ export function SatelliteMonitor() {
                           </div>
                         </div>
                       </div>
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" onClick={() => handleViewChangeDetails(change)}>
                         <MapPin className="h-4 w-4 mr-2" />
                         View
                       </Button>
@@ -619,7 +713,7 @@ export function SatelliteMonitor() {
                             </div>
                           </div>
                           {alert.actionRequired && (
-                            <Button size="sm" variant="outline">
+                            <Button size="sm" variant="outline" onClick={() => handleReviewAlert(alert)}>
                               <Eye className="h-4 w-4 mr-2" />
                               Review
                             </Button>

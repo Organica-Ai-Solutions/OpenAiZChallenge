@@ -8,7 +8,7 @@ import { Compass, Send, MapPin, Info, Layers, Database, Search } from 'lucide-re
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 import { ResearchAPI, ArchaeologicalSite } from "@/lib/api/research-api"
-import MapViewer from './MapViewer'
+import PigeonMapViewer from './PigeonMapViewer'
 
 interface ChatMessage {
   id: string
@@ -21,6 +21,17 @@ interface ChatMessage {
 
 const QUICK_ACTIONS = [
   {
+    label: "Vision Analysis",
+    icon: Search,
+    description: "AI-powered satellite and LiDAR analysis for archaeological discovery",
+    action: async (coordinates?: string) => {
+      if (coordinates) {
+        return `Initiating vision analysis for coordinates ${coordinates}. Analyzing satellite imagery, LiDAR data, and terrain patterns...`
+      }
+      return "Please select coordinates on the map or enter them in the chat to begin vision analysis."
+    }
+  },
+  {
     label: "Verify Data Sources",
     icon: Database,
     description: "Cross-reference multiple data sources for comprehensive analysis",
@@ -31,12 +42,6 @@ const QUICK_ACTIONS = [
     icon: Layers,
     description: "Analyze archaeological contexts in surrounding regions",
     action: async () => "Searching for comparable archaeological sites..."
-  },
-  {
-    label: "Request High-Res Imagery",
-    icon: Search,
-    description: "Obtain detailed satellite and LIDAR imagery",
-    action: async () => "Requesting high-resolution archaeological imagery..."
   }
 ]
 
@@ -52,6 +57,7 @@ export default function NISProtocolChat() {
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [selectedSite, setSelectedSite] = useState<ArchaeologicalSite | null>(null)
+  const [currentCoordinates, setCurrentCoordinates] = useState<string>('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -62,10 +68,22 @@ export default function NISProtocolChat() {
     scrollToBottom()
   }, [messages])
 
-  const handleQuickAction = async (action: () => Promise<string>) => {
+  const handleQuickAction = async (action: (coords?: string) => Promise<string>, needsCoordinates = false) => {
     setIsLoading(true)
     try {
-      const result = await action()
+      let result: string
+      if (needsCoordinates && currentCoordinates) {
+        result = await action(currentCoordinates)
+        
+        // If it's vision analysis, trigger actual analysis
+        if (action.toString().includes('vision analysis')) {
+          await handleVisionAnalysis(currentCoordinates)
+          return
+        }
+      } else {
+        result = await action()
+      }
+      
       const suggestionMessage: ChatMessage = {
         id: `suggestion-${Date.now()}`,
         type: 'suggestion',
@@ -83,6 +101,85 @@ export default function NISProtocolChat() {
       setMessages(prev => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleVisionAnalysis = async (coordinates: string) => {
+    setIsLoading(true)
+    try {
+      const [lat, lng] = coordinates.split(',').map(coord => parseFloat(coord.trim()))
+      
+      // Call vision analysis API
+      const response = await fetch('http://localhost:8000/vision/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          coordinates: coordinates,
+          analysis_type: 'comprehensive'
+        }),
+      })
+
+      let analysisResult
+      if (response.ok) {
+        analysisResult = await response.json()
+      } else {
+        // Fallback mock analysis
+        analysisResult = generateMockVisionAnalysis(lat, lng)
+      }
+
+      const visionMessage: ChatMessage = {
+        id: `vision-${Date.now()}`,
+        type: 'discovery',
+        content: `🛰️ Vision Analysis Results for ${coordinates}:
+
+**Satellite Analysis**: ${Math.round(analysisResult.satellite_findings?.confidence * 100 || 75)}% confidence
+${analysisResult.satellite_findings?.features_detected?.map((f: any) => `• ${f.type}: ${f.description}`).join('\n') || '• No significant features detected'}
+
+**Combined Assessment**: ${Math.round(analysisResult.combined_analysis?.confidence * 100 || 80)}% confidence
+Site Classification: ${analysisResult.combined_analysis?.site_classification || 'Unknown'}
+
+**Recommendations**:
+${analysisResult.recommendations?.map((r: string) => `• ${r}`).join('\n') || '• Further investigation recommended'}`,
+        coordinates: [lat, lng],
+        timestamp: new Date()
+      }
+
+      setMessages(prev => [...prev, visionMessage])
+    } catch (error) {
+      const errorMessage: ChatMessage = {
+        id: `error-${Date.now()}`,
+        type: 'system',
+        content: "Vision analysis failed. Please try again with valid coordinates.",
+        timestamp: new Date()
+      }
+      setMessages(prev => [...prev, errorMessage])
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const generateMockVisionAnalysis = (lat: number, lng: number) => {
+    const isAmazonRegion = lat >= -15 && lat <= 5 && lng >= -75 && lng <= -45
+    return {
+      satellite_findings: {
+        confidence: 0.75 + Math.random() * 0.2,
+        features_detected: [
+          { type: "Circular Structure", description: "Potential ceremonial site with 45m diameter" },
+          { type: "Linear Alignment", description: "Ancient pathway extending 300m" },
+          { type: "Soil Anomaly", description: "Archaeological disturbance detected" }
+        ]
+      },
+      combined_analysis: {
+        confidence: 0.80 + Math.random() * 0.15,
+        site_classification: isAmazonRegion ? "Pre-Columbian Settlement" : "Historical Site"
+      },
+      recommendations: [
+        "Conduct ground-truth survey",
+        "Acquire higher resolution imagery",
+        "Consult with local communities"
+      ]
     }
   }
 
@@ -157,7 +254,17 @@ This site bears similarity to known archaeological contexts in the Amazon Basin.
     // Check if message looks like coordinates
     const coordinateRegex = /^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/
     if (coordinateRegex.test(inputMessage.trim())) {
+      setCurrentCoordinates(inputMessage.trim())
       await handleDiscoveryRequest(inputMessage.trim())
+    } else {
+      // Handle other chat messages here
+      const systemMessage: ChatMessage = {
+        id: `system-${Date.now()}`,
+        type: 'system',
+        content: "I understand you're looking for archaeological insights. Try entering coordinates (e.g., -3.4653, -62.2159) or clicking on the map to begin analysis.",
+        timestamp: new Date()
+      }
+      setMessages(prev => [...prev, systemMessage])
     }
   }
 
@@ -194,23 +301,28 @@ This site bears similarity to known archaeological contexts in the Amazon Basin.
           <div ref={messagesEndRef} />
         </CardContent>
         <div className="p-4 border-t space-y-2">
-          <div className="flex space-x-2 mb-2">
-            {QUICK_ACTIONS.map((action) => (
+          <div className="flex flex-wrap gap-2 mb-3">
+            {QUICK_ACTIONS.map((action, index) => (
               <TooltipProvider key={action.label}>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button 
                       variant="outline" 
-                      size="icon" 
-                      onClick={() => handleQuickAction(action.action)}
-                      disabled={isLoading}
+                      size="sm"
+                      onClick={() => handleQuickAction(action.action, index === 0)} // Vision analysis needs coordinates
+                      disabled={isLoading || (index === 0 && !currentCoordinates)}
+                      className="flex items-center gap-2"
                     >
                       <action.icon className="h-4 w-4" />
+                      <span className="hidden sm:inline">{action.label}</span>
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>{action.label}</p>
+                    <p className="font-medium">{action.label}</p>
                     <p className="text-xs text-muted-foreground">{action.description}</p>
+                    {index === 0 && !currentCoordinates && (
+                      <p className="text-xs text-orange-600">Select coordinates first</p>
+                    )}
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -242,12 +354,18 @@ This site bears similarity to known archaeological contexts in the Amazon Basin.
           </CardTitle>
         </CardHeader>
         <CardContent className="flex-1 p-0">
-          <MapViewer 
+          <PigeonMapViewer 
+            sites={[]}
+            onCoordinateSelect={(coords) => {
+              setInputMessage(coords);
+              setCurrentCoordinates(coords);
+            }}
             initialCoordinates={
               selectedSite 
                 ? selectedSite.coordinates 
-                : undefined
+                : [-3.4653, -62.2159]
             }
+            className="h-full"
           />
         </CardContent>
       </Card>

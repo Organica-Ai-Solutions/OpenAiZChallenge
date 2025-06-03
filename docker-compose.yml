@@ -39,6 +39,7 @@ services:
     environment:
       - NODE_ENV=development
       - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_GOOGLE_MAPS_KEY=AIzaSyCCMYQ_eQdaKPV30JGFEv_556O8N-ZzV9E
     volumes:
       - ./frontend:/app
       - /app/node_modules

@@ -31,7 +31,7 @@ export default function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning={true}>
-      <body className={`${inter.className} flex min-h-screen`}>
+      <body className={`${inter.className} flex min-h-screen`} suppressHydrationWarning>
         <nav className="w-64 bg-emerald-50 border-r p-6 space-y-2">
           <div className="mb-8 text-center">
             <h1 className="text-2xl font-bold text-emerald-800">IKRP</h1>

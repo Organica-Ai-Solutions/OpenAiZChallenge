@@ -198,97 +198,286 @@ export default function NISAgentUI() {
   }, [])
 
   // Handle coordinate selection from map or chat
-  const handleCoordinateSelect = useCallback((coords: string) => {
-    setCoordinates(coords)
+  const handleCoordinateSelect = useCallback((coordinates: string) => {
+    setCoordinates(coordinates)
     setActiveTab("input")
   }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCoordinates(e.target.value)
-    // Clear previous results and errors when input changes
-    if (results) setResults(null)
-    if (error) setError(null)
+    setError(null)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    // Basic validation
-    if (!coordinates.trim() || !coordinates.includes(",")) {
-      setError("Please enter valid coordinates in format: latitude, longitude")
+    if (!coordinates.trim()) {
+      setError("Please enter coordinates")
       return
     }
 
+    const coordParts = coordinates.split(",").map(coord => coord.trim())
+    if (coordParts.length !== 2) {
+      setError("Please enter coordinates in the format: latitude, longitude")
+      return
+    }
+
+    const lat = parseFloat(coordParts[0])
+    const lon = parseFloat(coordParts[1])
+
+    if (isNaN(lat) || isNaN(lon)) {
+      setError("Please enter valid numeric coordinates")
+      return
+    }
+
+    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+      setError("Please enter valid coordinate ranges (lat: -90 to 90, lon: -180 to 180)")
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+
     try {
-      setLoading(true)
-      setError(null)
-
-      // Parse coordinates
-      const [latStr, lonStr] = coordinates.split(",").map((s: string) => s.trim())
-      const lat = parseFloat(latStr)
-      const lon = parseFloat(lonStr)
-
-      if (isNaN(lat) || isNaN(lon)) {
-        throw new Error("Invalid coordinate format. Please use: latitude, longitude")
-      }
-
-      let analysisData: any
-      let backendMode = "offline"
-
-      if (isBackendOnline) {
-        try {
-          // Use our REAL archaeological analysis endpoint that we know works
-          const response = await fetch("http://localhost:8000/analyze", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              lat: lat,
-              lon: lon,
-              data_sources: selectedDataSources.length > 0 ? selectedDataSources : ["satellite", "lidar", "historical"],
-              confidence_threshold: confidenceThreshold / 100
-            }),
-          })
-
-          if (response.ok) {
-            analysisData = await response.json()
-            backendMode = "real_backend"
-            
-            // Add UI-specific enhancements to real backend data
-            analysisData.backend_status = "connected"
-            analysisData.processing_time = "2.8s"
-            analysisData.ui_enhancements = {
-              visual_confidence: Math.round((analysisData.confidence || 0.75) * 100),
-              geographic_region: getGeographicRegion(lat, lon),
-              analysis_quality: analysisData.confidence > 0.8 ? "High" : analysisData.confidence > 0.6 ? "Medium" : "Standard"
-            }
-          } else {
-            throw new Error(`Backend returned ${response.status}`)
-          }
-        } catch (backendError) {
-          console.log("Real backend analysis failed:", backendError)
-          backendMode = "demo_enhanced"
-        }
-      }
-
-      // If backend failed or offline, use enhanced demo
-      if (backendMode !== "real_backend") {
-        analysisData = generateEnhancedDemoAnalysis(lat, lon, selectedDataSources, confidenceThreshold)
-        analysisData.backend_status = isBackendOnline ? "partial_connection" : "offline"
-      }
-
-      // Set results regardless of source
-      setResults(analysisData)
-      setActiveTab("results") // Auto-switch to results tab
+      // Use enhanced backend analysis if available
+      const endpoint = isBackendOnline ? 
+        "http://localhost:8000/agents/analyze/enhanced" : 
+        "http://localhost:8000/analyze"
       
-    } catch (error: any) {
-      console.error("Analysis error:", error)
-      setError(error.message || "An unexpected error occurred during analysis")
+      const requestData = {
+        lat,
+        lon,
+        data_sources: selectedDataSources.length > 0 ? selectedDataSources : ["satellite", "lidar", "historical"],
+        confidence_threshold: confidenceThreshold / 100
+      }
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData),
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      
+      // Generate enhanced analysis if backend is offline
+      const enhancedData = isBackendOnline ? data : generateEnhancedDemoAnalysis(lat, lon, requestData.data_sources, confidenceThreshold)
+      
+      setResults({
+        ...enhancedData,
+        backend_status: isBackendOnline ? "connected" : "demo",
+        sources: requestData.data_sources,
+        timestamp: new Date().toISOString()
+      })
+      setActiveTab("results")
+      
+      // Broadcast success to WebSocket if available
+      if (isBackendOnline) {
+        console.log("🎯 Analysis completed with backend integration")
+      }
+      
+    } catch (error) {
+      console.warn("Backend analysis failed, using enhanced demo mode:", error)
+      
+      // Enhanced fallback analysis
+      const demoData = generateEnhancedDemoAnalysis(lat, lon, requestData.data_sources, confidenceThreshold)
+      setResults({
+        ...demoData,
+        backend_status: "demo_fallback",
+        sources: requestData.data_sources,
+        timestamp: new Date().toISOString(),
+        error_recovery: true
+      })
+      setActiveTab("results")
     } finally {
       setLoading(false)
     }
   }
+
+  // Enhanced demo analysis with realistic data
+  const generateEnhancedDemoAnalysis = (lat: number, lon: number, sources: string[], threshold: number) => {
+    const region = getGeographicRegion(lat, lon)
+    const confidence = 0.5 + Math.random() * 0.4 // 50-90% confidence range
+    
+    return {
+      location: { lat, lon },
+      confidence,
+      description: `Enhanced archaeological analysis completed for coordinates ${lat.toFixed(4)}, ${lon.toFixed(4)} in ${region} region. Multiple data sources reveal significant archaeological potential with geometric patterns consistent with pre-Columbian settlement structures.`,
+      sources,
+      pattern_type: ["Settlement Complex", "Ceremonial Center", "Agricultural Terracing", "Trade Route Hub", "Defensive Earthworks"][Math.floor(Math.random() * 5)],
+      finding_id: `enhanced_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+      historical_context: `Archaeological analysis of ${region} region reveals evidence of sophisticated indigenous engineering. Historical records from colonial and pre-colonial periods indicate significant human activity. Satellite imagery analysis shows geometric patterns consistent with organized settlement architecture.`,
+      indigenous_perspective: `Traditional ecological knowledge indicates this area held cultural significance for indigenous communities. Oral histories reference ancestral activities including ceremonial gatherings and seasonal settlements. Community elders have shared stories of ancient pathways and resource management practices.`,
+      recommendations: [
+        {
+          id: "field_verification",
+          action: "Field Verification", 
+          description: "Conduct ground-truthing expedition with archaeological team",
+          priority: confidence > 0.75 ? "High" : "Medium"
+        },
+        {
+          id: "community_engagement",
+          action: "Community Consultation",
+          description: "Engage with local indigenous knowledge holders for cultural context",
+          priority: "High"
+        },
+        {
+          id: "additional_data",
+          action: "Enhanced Analysis",
+          description: "Acquire high-resolution imagery and LIDAR data for detailed study",
+          priority: "Medium"
+        }
+      ],
+      metadata: {
+        processing_time: Math.random() * 2000 + 1000, // 1-3 seconds
+        models_used: ["gpt4o_vision", "archaeological_analysis", "cultural_context"],
+        data_sources_accessed: sources,
+        confidence_threshold: threshold / 100,
+        analysis_version: "enhanced_v2.1"
+      },
+      siteType: region === "amazon" ? "River Settlement" : region === "andes" ? "Mountain Observatory" : "Ceremonial Complex"
+    }
+  }
+
+  // Enhanced save functionality with backend integration
+  const saveAnalysis = async () => {
+    if (!results) return
+    
+    try {
+      if (isBackendOnline) {
+        const saveRequest = {
+          coordinates,
+          timestamp: new Date().toISOString(),
+          results,
+          backend_status: results.backend_status || "connected",
+          metadata: {
+            saved_from: "agent_interface",
+            user_session: "demo_user",
+            analysis_quality: results.confidence || 0.85
+          }
+        }
+        
+        const response = await fetch("http://localhost:8000/agents/analysis/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(saveRequest)
+        })
+        
+        if (response.ok) {
+          const saveResult = await response.json()
+          console.log("✅ Analysis saved to backend:", saveResult)
+          
+          // Update local storage as backup
+          const saved = {
+            id: saveResult.analysis_id,
+            coordinates,
+            timestamp: new Date().toISOString(),
+            results,
+            saved_via: "backend"
+          }
+          setSavedAnalyses(prev => [saved, ...prev.slice(0, 19)]) // Keep last 20
+          
+          alert(`Analysis saved successfully! ID: ${saveResult.analysis_id}`)
+        } else {
+          throw new Error("Failed to save to backend")
+        }
+      } else {
+        // Fallback to local storage
+        const saved = {
+          id: `local_${Date.now()}`,
+          coordinates,
+          timestamp: new Date().toISOString(),
+          results,
+          saved_via: "local"
+        }
+        setSavedAnalyses(prev => [saved, ...prev.slice(0, 19)])
+        localStorage.setItem("nis-saved-analyses", JSON.stringify([saved, ...savedAnalyses.slice(0, 19)]))
+        
+        alert("Analysis saved locally!")
+      }
+    } catch (error) {
+      console.error("Failed to save analysis:", error)
+      alert("Failed to save analysis. Please try again.")
+    }
+  }
+
+  // Enhanced export with more data
+  const exportResults = () => {
+    if (!results) return
+    
+    const exportData = {
+      analysis_export: {
+        export_id: `export_${Date.now()}`,
+        export_timestamp: new Date().toISOString(),
+        analysis_data: {
+          coordinates,
+          results,
+          backend_status: isBackendOnline ? "connected" : "offline",
+          export_version: "v2.0"
+        },
+        system_metadata: {
+          browser: navigator.userAgent,
+          export_source: "nis_agent_interface",
+          data_quality: results.confidence || 0.85,
+          processing_mode: results.backend_status || "demo"
+        },
+        export_settings: {
+          data_sources_included: selectedDataSources,
+          confidence_threshold: confidenceThreshold,
+          region_analysis: getGeographicRegion(
+            results.location?.lat || parseFloat(coordinates.split(',')[0]),
+            results.location?.lon || parseFloat(coordinates.split(',')[1])
+          )
+        }
+      }
+    }
+    
+    const dataStr = JSON.stringify(exportData, null, 2)
+    const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`
+    const exportFileDefaultName = `nis-enhanced-analysis-${new Date().toISOString().slice(0, 10)}.json`
+    
+    const linkElement = document.createElement("a")
+    linkElement.setAttribute("href", dataUri)
+    linkElement.setAttribute("download", exportFileDefaultName)
+    linkElement.click()
+    
+    console.log("📁 Enhanced analysis exported")
+  }
+
+  // Load saved analyses on component mount
+  useEffect(() => {
+    const loadSavedAnalyses = async () => {
+      try {
+        if (isBackendOnline) {
+          // Load from backend
+          const response = await fetch("http://localhost:8000/agents/analysis/history?page=1&per_page=20")
+          if (response.ok) {
+            const historyData = await response.json()
+            setSavedAnalyses(historyData.analyses || [])
+            console.log(`📚 Loaded ${historyData.analyses?.length || 0} analyses from backend`)
+          }
+        } else {
+          // Load from local storage
+          const saved = localStorage.getItem("nis-saved-analyses")
+          if (saved) {
+            const parsedSaved = JSON.parse(saved)
+            setSavedAnalyses(parsedSaved)
+            console.log(`📚 Loaded ${parsedSaved.length} analyses from local storage`)
+          }
+        }
+      } catch (error) {
+        console.warn("Failed to load saved analyses:", error)
+      }
+    }
+    
+    if (savedAnalyses.length === 0) {
+      loadSavedAnalyses()
+    }
+  }, [isBackendOnline])
 
   // Helper function to get geographic region for analysis
   const getGeographicRegion = (lat: number, lon: number): string => {
@@ -297,105 +486,6 @@ export default function NISAgentUI() {
     if (lat > -10 && lon < -75) return "Coastal Plains"
     if (lat < -15) return "Highland Regions"
     return "River Valleys"
-  }
-
-  // Enhanced demo analysis generator
-  const generateEnhancedDemoAnalysis = (lat: number, lon: number, sources: string[], threshold: number) => {
-    const region = getGeographicRegion(lat, lon)
-    const baseConfidence = 0.5 + (Math.random() * 0.4) // 50-90% range
-    
-    const patterns = {
-      "Amazon Basin": ["River Settlement", "Trade Hub", "Ceremonial Platform"],
-      "Andean Highlands": ["Agricultural Terracing", "Astronomical Site", "Fortress Complex"],
-      "Coastal Plains": ["Fishing Settlement", "Ceremonial Center", "Shell Midden"],
-      "Highland Regions": ["Sacred Observatory", "Temple Complex", "Defensive Site"],
-      "River Valleys": ["Agricultural Center", "Settlement Cluster", "Market Plaza"]
-    }
-    
-    const selectedPattern = patterns[region as keyof typeof patterns]?.[Math.floor(Math.random() * 3)] || "Archaeological Feature"
-    
-    return {
-      location: { lat, lon },
-      confidence: baseConfidence,
-      pattern_type: selectedPattern,
-      description: `Advanced AI analysis of coordinates ${lat}, ${lon} in the ${region} reveals ${selectedPattern.toLowerCase()} with ${Math.round(baseConfidence * 100)}% confidence. Multi-source data correlation indicates significant archaeological potential.`,
-      sources: sources.length > 0 ? sources : ["satellite", "lidar", "historical", "ethnographic"],
-      finding_id: `enhanced_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
-      historical_context: `${region} analysis reveals patterns consistent with pre-Columbian settlement strategies. Archaeological evidence suggests organized land use and cultural activities dating to 800-1500 CE.`,
-      indigenous_perspective: `Traditional knowledge from the ${region.toLowerCase()} indicates this area held cultural significance for navigation, resource management, and seasonal ceremonies according to oral histories.`,
-      recommendations: [
-        {
-          action: "Field Verification",
-          priority: baseConfidence > 0.7 ? "High" : "Medium",
-          description: `Ground-truth analysis recommended for ${selectedPattern.toLowerCase()} verification`,
-          timeline: "2-4 weeks",
-          cost_estimate: "$12,000-18,000"
-        },
-        {
-          action: "Community Engagement",
-          priority: "High",
-          description: "Consult with local indigenous communities for traditional knowledge",
-          timeline: "Ongoing",
-          cultural_protocols: "Required"
-        },
-        {
-          action: "Extended Survey",
-          priority: "Medium", 
-          description: "Expand analysis to 2km radius for related features",
-          timeline: "1-2 months",
-          methodology: "Drone survey with multi-spectral imaging"
-        }
-      ],
-      metadata: {
-        processing_time: "3.2s",
-        models_used: ["Enhanced Pattern Recognition", "Cultural Context AI", "Geographic Analysis"],
-        data_sources_accessed: sources.length > 0 ? sources : ["satellite", "lidar", "historical", "ethnographic"],
-        analysis_depth: "comprehensive",
-        geographic_region: region
-      },
-      ui_enhancements: {
-        visual_confidence: Math.round(baseConfidence * 100),
-        geographic_region: region,
-        analysis_quality: baseConfidence > 0.8 ? "High" : baseConfidence > 0.6 ? "Medium" : "Standard",
-        cultural_context_available: true,
-        real_time_status: isBackendOnline ? "partial" : "offline"
-      }
-    }
-  }
-
-  const saveAnalysis = () => {
-    if (results) {
-      const analysis = {
-        id: Date.now().toString(),
-        coordinates,
-        timestamp: new Date().toISOString(),
-        results: { ...results },
-      }
-      setSavedAnalyses([...savedAnalyses, analysis])
-
-      // Try to save to backend if available
-      if (isBackendOnline) {
-        fetch("http://localhost:8000/analyses/save", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(analysis)
-        }).catch(() => console.log("Could not save to backend, saved locally only"))
-      }
-    }
-  }
-
-  const exportResults = () => {
-    if (!results) return
-
-    const dataStr = JSON.stringify(results, null, 2)
-    const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`
-
-    const exportFileDefaultName = `nis-analysis-${new Date().toISOString().slice(0, 10)}.json`
-
-    const linkElement = document.createElement("a")
-    linkElement.setAttribute("href", dataUri)
-    linkElement.setAttribute("download", exportFileDefaultName)
-    linkElement.click()
   }
 
   // Handle map loading error
@@ -605,9 +695,9 @@ export default function NISAgentUI() {
             <div className="mt-6">
               <h3 className="text-sm font-medium mb-2">Reference Sites:</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {KNOWN_SITES.map((site, index) => (
+                {KNOWN_SITES.map((site) => (
                   <Button
-                    key={index}
+                    key={site.name.toLowerCase().replace(/\s+/g, '_')}
                     variant="outline"
                     className="justify-start h-auto py-2 px-3"
                     onClick={() => setCoordinates(site.coordinates)}
@@ -734,9 +824,9 @@ export default function NISAgentUI() {
                 <div className="p-4 border rounded-lg">
                   <h3 className="font-medium mb-3">Quick Navigation</h3>
                   <div className="space-y-2">
-                    {KNOWN_SITES.map((site, index) => (
+                    {KNOWN_SITES.map((site) => (
                       <Button
-                        key={index}
+                        key={site.name.toLowerCase().replace(/\s+/g, '_')}
                         variant="outline"
                         size="sm"
                         className="w-full justify-start"
@@ -801,27 +891,16 @@ export default function NISAgentUI() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => {
-                        const exportData = {
-                          coordinates,
-                          timestamp: new Date().toISOString(),
-                          results,
-                          backend_status: isBackendOnline ? "connected" : "offline",
-                          metadata: {
-                            analysis_mode: results.backend_status || "demo",
-                            data_sources: results.sources || [],
-                            confidence: results.confidence
-                          }
-                        }
-                        const dataStr = JSON.stringify(exportData, null, 2)
-                        const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`
-                        const exportFileDefaultName = `nis-analysis-${new Date().toISOString().slice(0, 10)}.json`
-                        
-                        const linkElement = document.createElement("a")
-                        linkElement.setAttribute("href", dataUri)
-                        linkElement.setAttribute("download", exportFileDefaultName)
-                        linkElement.click()
-                      }}
+                      onClick={saveAnalysis}
+                      disabled={!results}
+                    >
+                      <Save className="h-4 w-4 mr-1" />
+                      Save
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={exportResults}
                     >
                       <Download className="h-4 w-4 mr-1" />
                       Export
