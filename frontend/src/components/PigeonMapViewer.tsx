@@ -33,7 +33,7 @@ export function PigeonMapViewer({
   const [zoom, setZoom] = useState(initialZoom)
   const [backendSites, setBackendSites] = useState<any[]>([])
   const [backendStatus, setBackendStatus] = useState<"online" | "offline" | "checking">("checking")
-  const [activeView, setActiveView] = useState<"google" | "satellite" | "terrain" | "simple">("google")
+  const [activeView, setActiveView] = useState<"google" | "satellite" | "terrain" | "simple">("simple")
   const [googleMapsLoaded, setGoogleMapsLoaded] = useState(false)
   const [mapError, setMapError] = useState<string | null>(null)
 
@@ -207,6 +207,14 @@ export function PigeonMapViewer({
 
     try {
       console.log('🗺️ Initializing Google Map...')
+
+      // Check if Google Maps is fully loaded
+      if (!google?.maps?.MapTypeId?.SATELLITE) {
+        console.warn('⚠️ Google Maps not fully loaded, skipping map initialization')
+        setMapError('Google Maps is not fully loaded')
+        setActiveView("simple")
+        return
+      }
 
       // Enhanced map configuration with Map ID for AdvancedMarkers
       const mapConfig = {

@@ -77,3 +77,11 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom lab background styles for enhanced visuals */
+.lab-bg::before {
+  overflow: hidden;
+  max-width: 100vw;
+  max-height: 100vh;
+  box-sizing: border-box;
+}

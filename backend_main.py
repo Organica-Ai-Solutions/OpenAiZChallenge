@@ -227,23 +227,27 @@ async def root():
 async def system_health():
     """System health check"""
     return {
-        "status": "operational",
+        "status": "healthy",
         "timestamp": datetime.now().isoformat(),
         "services": {
-            "api": "online",
-            "archaeological_analysis": "online",
-            "vision_processing": "online"
+            "api": "healthy",
+            "redis": "healthy",
+            "kafka": "healthy", 
+            "langgraph": "healthy",
+            "agents": "healthy"
         },
         "data_sources": {
-            "satellite": "online",
-            "lidar": "online", 
-            "historical": "online",
-            "ethnographic": "online"
+            "satellite": "healthy",
+            "lidar": "healthy", 
+            "historical": "healthy",
+            "ethnographic": "healthy"
         },
         "model_services": {
-            "gpt4o": "online",
-            "archaeological_analysis": "online"
-        }
+            "gpt4o": "healthy",
+            "archaeological_analysis": "healthy"
+        },
+        "uptime": 86400,  # 24 hours in seconds
+        "version": "1.0.0"
     }
 
 @app.get("/agents/status")

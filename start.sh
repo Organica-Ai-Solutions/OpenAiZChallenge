@@ -40,8 +40,21 @@ log() {
 
 error_log() {
     echo -e "\033[0;31m[ERROR] $1\033[0m" | tee -a "$ERROR_LOG_FILE" >&2
-    # Removed exit 1 to allow script to attempt cleanup or further actions if needed.
-    # Consider adding exit 1 back if immediate script termination on any error is desired.
+}
+
+# Check if Docker daemon is running
+check_docker_daemon() {
+    if ! docker info >/dev/null 2>&1; then
+        error_log "Docker daemon is not running. Please start Docker Desktop."
+        echo -e "\n${YELLOW}To fix this issue:${RESET}"
+        echo -e "1. Open Docker Desktop application"
+        echo -e "2. Wait for Docker to start completely"
+        echo -e "3. Re-run this script"
+        echo -e "\n${CYAN}Alternatively, you can run the reset script which doesn't require Docker Compose:${RESET}"
+        echo -e "   ./reset_nis_system.sh"
+        exit 1
+    fi
+    log "Docker daemon is running and accessible" "SUCCESS"
 }
 
 # Trap any errors
@@ -114,6 +127,9 @@ function check_system_compatibility() {
         exit 1
     fi
     log "Docker Version: $(docker --version)"
+    
+    # Check if Docker daemon is running
+    check_docker_daemon
 
     if ! command -v docker-compose &> /dev/null; then
         # Try docker compose (v2 syntax)
@@ -153,8 +169,8 @@ function validate_dependencies() {
         exit 1
     fi
 
-    if [ ! -f "${BASE_DIR}/frontend/Dockerfile" ]; then
-        error_log "frontend/Dockerfile not found. Needed for building the frontend service."
+    if [ ! -f "${BASE_DIR}/frontend/Dockerfile.dev" ]; then
+        error_log "frontend/Dockerfile.dev not found. Needed for building the frontend service."
         exit 1
     fi
         
@@ -252,6 +268,22 @@ function startup_nis_protocol() {
     else
         log "Existing services stopped."
     fi
+    
+    # Clean up any standalone containers that might conflict
+    log "Cleaning up standalone Docker containers..."
+    docker stop nis-redis-simple 2>/dev/null || true
+    docker rm nis-redis-simple 2>/dev/null || true
+    docker stop nis-kafka 2>/dev/null || true
+    docker rm nis-kafka 2>/dev/null || true
+    docker stop nis-zookeeper 2>/dev/null || true
+    docker rm nis-zookeeper 2>/dev/null || true
+    
+    # Stop any development processes that might conflict with ports
+    log "Stopping development processes..."
+    pkill -f "python run_api.py" 2>/dev/null || true
+    pkill -f "python simple_backend.py" 2>/dev/null || true
+    pkill -f "next dev" 2>/dev/null || true
+    pkill -f "npm run dev" 2>/dev/null || true
     
     log "Building and starting services in detached mode..."
     if ! $DOCKER_COMPOSE_CMD up -d --build --remove-orphans; then

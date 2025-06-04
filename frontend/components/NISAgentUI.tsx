@@ -246,7 +246,7 @@ export function NISAgentUI() {
                   <h3 className="text-sm font-medium">Sources</h3>
                   <ul className="text-sm list-disc pl-5">
                     {result.sources.map((source, index) => (
-                      <li key={index}>{source}</li>
+                      <li key={`source-${index}-${source}`}>{source}</li>
                     ))}
                   </ul>
                 </div>
@@ -255,7 +255,7 @@ export function NISAgentUI() {
                     <h3 className="text-sm font-medium">Recommendations</h3>
                     <ul className="text-sm list-disc pl-5">
                       {result.recommendations.map((rec, index) => (
-                        <li key={index} className="mt-1">
+                        <li key={`rec-${index}-${rec.action}`} className="mt-1">
                           <span className="font-medium">{rec.action}:</span> {rec.description}
                           <span className="text-xs ml-1 px-1.5 py-0.5 rounded-full bg-muted">
                             {rec.priority}
