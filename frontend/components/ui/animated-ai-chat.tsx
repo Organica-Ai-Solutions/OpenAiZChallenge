@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback, useTransition } from "react";
 import { useState } from "react";
 import { cn } from "../../lib/utils";
+import { AnimatedMessage, ArchaeologicalTypingIndicator } from "./animated-message";
 import {
     ImageIcon,
     FileUp,
@@ -378,31 +379,39 @@ export function AnimatedAIChat({ onMessageSend, onCoordinateSelect }: AnimatedAI
                 >
                     {/* Header - only show if no messages */}
                     {messages.length === 0 && (
-                        <div className="text-center space-y-3">
+                        <div className="text-center space-y-4">
                             <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.2, duration: 0.5 }}
                                 className="inline-block"
                             >
-                                <h1 className="text-3xl font-medium tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white/90 to-white/40 pb-1">
-                                    How can I help with archaeological discovery today?
-                                </h1>
+                                <div className="flex items-center justify-center gap-3 mb-4">
+                                    <span className="text-4xl animate-pulse">🏛️</span>
+                                    <h1 className="text-3xl font-medium tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-400 pb-1">
+                                        NIS Protocol
+                                    </h1>
+                                    <span className="text-4xl animate-pulse">⛏️</span>
+                                </div>
+                                <p className="text-lg text-white/80 mb-3">
+                                    **Archaeological Discovery Assistant**
+                                </p>
                                 <motion.div 
-                                    className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                                    className="h-px bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent"
                                     initial={{ width: 0, opacity: 0 }}
                                     animate={{ width: "100%", opacity: 1 }}
                                     transition={{ delay: 0.5, duration: 0.8 }}
                                 />
                             </motion.div>
-                            <motion.p 
-                                className="text-sm text-white/40"
+                            <motion.div 
+                                className="text-sm text-white/60 space-y-2"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 0.3 }}
                             >
-                                Use commands like /discover, /analyze, or ask about archaeological sites
-                            </motion.p>
+                                <p>🔍 *Analyze coordinates* • 👁️ *Satellite imagery* • 🗺️ *Site discovery*</p>
+                                <p className="text-emerald-400">Ready to explore archaeological wonders? Use **/** for commands!</p>
+                            </motion.div>
                         </div>
                     )}
 
@@ -411,20 +420,49 @@ export function AnimatedAIChat({ onMessageSend, onCoordinateSelect }: AnimatedAI
                         <div className="bg-white/[0.02] rounded-2xl border border-white/[0.05] max-h-[60vh] overflow-y-auto p-4 space-y-4">
                             {messages.map((message) => (
                                 <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`max-w-[80%] p-3 rounded-lg ${
+                                    <div className={`max-w-[80%] p-4 rounded-lg ${
                                         message.role === 'user' 
-                                            ? 'bg-emerald-600/20 text-emerald-100 ml-auto' 
+                                            ? 'bg-emerald-600/20 border border-emerald-500/30 text-emerald-100 ml-auto' 
                                             : message.type === 'error'
-                                            ? 'bg-red-600/20 text-red-100'
-                                            : 'bg-white/[0.05] text-white/90'
+                                            ? 'bg-red-600/20 border border-red-500/30 text-red-100'
+                                            : 'bg-slate-800/40 border border-slate-700/30 text-white/90'
                                     }`}>
-                                        <div className="text-sm whitespace-pre-wrap">{message.content}</div>
-                                        <div className="text-xs opacity-60 mt-1">
-                                            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        {message.role === 'user' ? (
+                                            // User messages - simple display
+                                            <div className="text-sm whitespace-pre-wrap font-medium">
+                                                {message.content}
+                                            </div>
+                                        ) : (
+                                            // AI messages - animated with formatting
+                                            <AnimatedMessage 
+                                                content={message.content}
+                                                isStreaming={isTyping && message.id === messages[messages.length - 1]?.id}
+                                                className="text-sm"
+                                            />
+                                        )}
+                                        <div className="text-xs opacity-60 mt-2 flex items-center justify-between">
+                                            <span>
+                                                {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                            {message.role === 'assistant' && (
+                                                <div className="flex items-center gap-1 text-xs">
+                                                    <span className="text-emerald-400">🏛️</span>
+                                                    <span className="text-slate-400">NIS Protocol</span>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
                             ))}
+                            
+                            {/* Typing indicator */}
+                            {isTyping && (
+                                <div className="flex justify-start">
+                                    <div className="bg-slate-800/40 border border-slate-700/30 rounded-lg p-4 max-w-[80%]">
+                                        <ArchaeologicalTypingIndicator />
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -450,22 +488,37 @@ export function AnimatedAIChat({ onMessageSend, onCoordinateSelect }: AnimatedAI
                                             <motion.div
                                                 key={suggestion.prefix}
                                                 className={cn(
-                                                    "flex items-center gap-2 px-3 py-2 text-xs transition-colors cursor-pointer",
+                                                    "flex items-center gap-3 px-4 py-3 text-sm transition-colors cursor-pointer border-l-2",
                                                     activeSuggestion === index 
-                                                        ? "bg-white/10 text-white" 
-                                                        : "text-white/70 hover:bg-white/5"
+                                                        ? "bg-emerald-600/20 text-emerald-100 border-emerald-400" 
+                                                        : "text-white/70 hover:bg-white/5 border-transparent hover:border-white/20"
                                                 )}
                                                 onClick={() => selectCommandSuggestion(index)}
                                                 initial={{ opacity: 0 }}
                                                 animate={{ opacity: 1 }}
                                                 transition={{ delay: index * 0.03 }}
                                             >
-                                                <div className="w-5 h-5 flex items-center justify-center text-white/60">
+                                                <div className="w-6 h-6 flex items-center justify-center text-emerald-400">
                                                     {suggestion.icon}
                                                 </div>
-                                                <div className="font-medium">{suggestion.label}</div>
-                                                <div className="text-white/40 text-xs ml-1">
-                                                    {suggestion.prefix}
+                                                <div className="flex-1">
+                                                    <div className="font-semibold flex items-center gap-2">
+                                                        {suggestion.label}
+                                                        <span className="text-xs bg-slate-700/50 px-2 py-0.5 rounded-full text-slate-300">
+                                                            {suggestion.prefix}
+                                                        </span>
+                                                    </div>
+                                                    <div className="text-xs text-white/50 mt-0.5">
+                                                        {suggestion.description}
+                                                    </div>
+                                                </div>
+                                                <div className="text-xl">
+                                                    {suggestion.prefix === "/discover" && "🏛️"}
+                                                    {suggestion.prefix === "/analyze" && "🎯"}
+                                                    {suggestion.prefix === "/vision" && "👁️"}
+                                                    {suggestion.prefix === "/research" && "📚"}
+                                                    {suggestion.prefix === "/suggest" && "🗺️"}
+                                                    {suggestion.prefix === "/status" && "⚙️"}
                                                 </div>
                                             </motion.div>
                                         ))}
@@ -594,29 +647,41 @@ export function AnimatedAIChat({ onMessageSend, onCoordinateSelect }: AnimatedAI
 
                     {/* Command suggestions - only show if no messages */}
                     {messages.length === 0 && (
-                        <div className="flex flex-wrap items-center justify-center gap-2">
+                        <div className="flex flex-wrap items-center justify-center gap-3">
                             {commandSuggestions.map((suggestion, index) => (
                                 <motion.button
                                     key={suggestion.prefix}
                                     onClick={() => selectCommandSuggestion(index)}
-                                    className="flex items-center gap-2 px-3 py-2 bg-white/[0.02] hover:bg-white/[0.05] rounded-lg text-sm text-white/60 hover:text-white/90 transition-all relative group"
-                                    initial={{ opacity: 0, y: 10 }}
+                                    className="flex items-center gap-3 px-4 py-3 bg-slate-800/30 hover:bg-slate-700/40 border border-slate-600/30 hover:border-emerald-500/50 rounded-xl text-sm text-white/70 hover:text-emerald-100 transition-all relative group"
+                                    initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.1 }}
+                                    whileHover={{ 
+                                        scale: 1.05,
+                                        boxShadow: "0 10px 20px rgba(16, 185, 129, 0.1)"
+                                    }}
+                                    whileTap={{ scale: 0.98 }}
                                 >
-                                    {suggestion.icon}
-                                    <span>{suggestion.label}</span>
+                                    <div className="text-emerald-400 group-hover:text-emerald-300">
+                                        {suggestion.icon}
+                                    </div>
+                                    <div className="flex flex-col items-start">
+                                        <span className="font-medium">{suggestion.label}</span>
+                                        <span className="text-xs text-white/40 group-hover:text-white/60">
+                                            {suggestion.prefix}
+                                        </span>
+                                    </div>
+                                    <div className="text-lg group-hover:animate-pulse">
+                                        {suggestion.prefix === "/discover" && "🏛️"}
+                                        {suggestion.prefix === "/analyze" && "🎯"}
+                                        {suggestion.prefix === "/vision" && "👁️"}
+                                        {suggestion.prefix === "/research" && "📚"}
+                                        {suggestion.prefix === "/suggest" && "🗺️"}
+                                        {suggestion.prefix === "/status" && "⚙️"}
+                                    </div>
                                     <motion.div
-                                        className="absolute inset-0 border border-white/[0.05] rounded-lg"
+                                        className="absolute inset-0 border border-emerald-500/0 group-hover:border-emerald-500/30 rounded-xl transition-all duration-300"
                                         initial={false}
-                                        animate={{
-                                            opacity: [0, 1],
-                                            scale: [0.98, 1],
-                                        }}
-                                        transition={{
-                                            duration: 0.3,
-                                            ease: "easeOut",
-                                        }}
                                     />
                                 </motion.button>
                             ))}
@@ -628,20 +693,12 @@ export function AnimatedAIChat({ onMessageSend, onCoordinateSelect }: AnimatedAI
             <AnimatePresence>
                 {isTyping && (
                     <motion.div 
-                        className="fixed bottom-8 left-1/2 transform -translate-x-1/2 backdrop-blur-2xl bg-white/[0.02] rounded-full px-4 py-2 shadow-lg border border-white/[0.05]"
+                        className="fixed bottom-8 left-1/2 transform -translate-x-1/2 backdrop-blur-2xl bg-black/60 rounded-2xl px-6 py-3 shadow-lg border border-emerald-500/20"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 20 }}
                     >
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-7 rounded-full bg-white/[0.05] flex items-center justify-center text-center">
-                                <span className="text-xs font-medium text-white/90 mb-0.5">NIS</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-white/70">
-                                <span>Analyzing</span>
-                                <TypingDots />
-                            </div>
-                        </div>
+                        <ArchaeologicalTypingIndicator />
                     </motion.div>
                 )}
             </AnimatePresence>
