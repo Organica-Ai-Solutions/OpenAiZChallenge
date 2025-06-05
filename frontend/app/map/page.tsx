@@ -2472,7 +2472,7 @@ Currently showing ${sites.length} archaeological sites.`
                           <div className="text-sm font-medium mb-2">Data Sources Used</div>
                           <div className="flex flex-wrap gap-2">
                             {toolResults[activeTool].data_sources.map((source: string, index: number) => (
-                              <Badge key={index} variant="outline" className="text-xs">
+                              <Badge key={`data-source-${index}`} variant="outline" className="text-xs">
                                 {source.toUpperCase()}
                               </Badge>
                             ))}
@@ -2566,7 +2566,7 @@ Currently showing ${sites.length} archaeological sites.`
                           <div className="text-sm font-medium mb-2">Recommended Next Steps</div>
                           <div className="text-xs space-y-1">
                             {toolResults[activeTool].next_steps.map((step: string, index: number) => (
-                              <div key={index} className="flex items-start gap-2">
+                              <div key={`next-step-${index}`} className="flex items-start gap-2">
                                 <div className="w-1 h-1 bg-emerald-400 rounded-full mt-2 flex-shrink-0"></div>
                                 <span className="text-slate-300">{step}</span>
                               </div>

@@ -4,6 +4,7 @@ import { useEffect, useRef, useCallback, useTransition } from "react";
 import { useState } from "react";
 import { cn } from "../../lib/utils";
 import { AnimatedMessage, ArchaeologicalTypingIndicator } from "./animated-message";
+import { ScrollArea } from "./scroll-area";
 import {
     ImageIcon,
     FileUp,
@@ -194,6 +195,16 @@ export function AnimatedAIChat({ onMessageSend, onCoordinateSelect }: AnimatedAI
     const [inputFocused, setInputFocused] = useState(false);
     const commandPaletteRef = useRef<HTMLDivElement>(null);
     const [isBackendOnline, setIsBackendOnline] = useState(false);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    // Auto-scroll to bottom when new messages arrive
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages, isTyping]);
 
     // Check backend status
     useEffect(() => {
@@ -884,52 +895,59 @@ Type any command or ask questions about archaeological research!`;
 
                     {/* Messages Area */}
                     {messages.length > 0 && (
-                        <div className="bg-white/[0.02] rounded-2xl border border-white/[0.05] max-h-[60vh] overflow-y-auto p-4 space-y-4">
-                            {messages.map((message) => (
-                                <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`max-w-[80%] p-4 rounded-lg ${
-                                        message.role === 'user' 
-                                            ? 'bg-emerald-600/20 border border-emerald-500/30 text-emerald-100 ml-auto' 
-                                            : message.type === 'error'
-                                            ? 'bg-red-600/20 border border-red-500/30 text-red-100'
-                                            : 'bg-slate-800/40 border border-slate-700/30 text-white/90'
-                                    }`}>
-                                        {message.role === 'user' ? (
-                                            // User messages - simple display
-                                            <div className="text-sm whitespace-pre-wrap font-medium">
-                                                {message.content}
-                                            </div>
-                                        ) : (
-                                            // AI messages - animated with formatting
-                                            <AnimatedMessage 
-                                                content={message.content}
-                                                isStreaming={isTyping && message.id === messages[messages.length - 1]?.id}
-                                                className="text-sm"
-                                            />
-                                        )}
-                                        <div className="text-xs opacity-60 mt-2 flex items-center justify-between">
-                                            <span>
-                                                {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            </span>
-                                            {message.role === 'assistant' && (
-                                                <div className="flex items-center gap-1 text-xs">
-                                                    <span className="text-emerald-400">🏛️</span>
-                                                    <span className="text-slate-400">NIS Protocol</span>
+                        <div className="bg-white/[0.02] rounded-2xl border border-white/[0.05] h-[400px]">
+                            <ScrollArea className="h-full p-4">
+                                <div className="space-y-4">
+                                    {messages.map((message) => (
+                                        <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                            <div className={`max-w-[80%] p-4 rounded-lg ${
+                                                message.role === 'user' 
+                                                    ? 'bg-emerald-600/20 border border-emerald-500/30 text-emerald-100 ml-auto' 
+                                                    : message.type === 'error'
+                                                    ? 'bg-red-600/20 border border-red-500/30 text-red-100'
+                                                    : 'bg-slate-800/40 border border-slate-700/30 text-white/90'
+                                            }`}>
+                                                {message.role === 'user' ? (
+                                                    // User messages - simple display
+                                                    <div className="text-sm whitespace-pre-wrap font-medium">
+                                                        {message.content}
+                                                    </div>
+                                                ) : (
+                                                    // AI messages - animated with formatting
+                                                    <AnimatedMessage 
+                                                        content={message.content}
+                                                        isStreaming={isTyping && message.id === messages[messages.length - 1]?.id}
+                                                        className="text-sm"
+                                                    />
+                                                )}
+                                                <div className="text-xs opacity-60 mt-2 flex items-center justify-between">
+                                                    <span>
+                                                        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
+                                                    {message.role === 'assistant' && (
+                                                        <div className="flex items-center gap-1 text-xs">
+                                                            <span className="text-emerald-400">🏛️</span>
+                                                            <span className="text-slate-400">NIS Protocol</span>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            )}
+                                            </div>
                                         </div>
-                                    </div>
+                                    ))}
+                                    
+                                    {/* Typing indicator */}
+                                    {isTyping && (
+                                        <div className="flex justify-start">
+                                            <div className="bg-slate-800/40 border border-slate-700/30 rounded-lg p-4 max-w-[80%]">
+                                                <ArchaeologicalTypingIndicator />
+                                            </div>
+                                        </div>
+                                    )}
+                                    
+                                    {/* Scroll anchor */}
+                                    <div ref={messagesEndRef} />
                                 </div>
-                            ))}
-                            
-                            {/* Typing indicator */}
-                            {isTyping && (
-                                <div className="flex justify-start">
-                                    <div className="bg-slate-800/40 border border-slate-700/30 rounded-lg p-4 max-w-[80%]">
-                                        <ArchaeologicalTypingIndicator />
-                                    </div>
-                                </div>
-                            )}
+                            </ScrollArea>
                         </div>
                     )}
 

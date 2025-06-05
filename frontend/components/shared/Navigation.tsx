@@ -21,6 +21,7 @@ const navigationLinks = [
   { href: "/satellite", label: "Satellite" },
   { href: "/map", label: "Maps" },
   { href: "/analytics", label: "Analytics" },
+  { href: "/codex-reader", label: "Codex Reader" },
   { href: "/chat", label: "Chat" },
   { href: "/documentation", label: "Docs" },
 ]

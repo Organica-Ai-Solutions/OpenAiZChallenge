@@ -198,7 +198,7 @@ export default function NISAgentUI() {
   const [systemHealth, setSystemHealth] = useState<SystemHealth | null>(null)
   const [backendSites, setBackendSites] = useState<BackendSite[]>([])
   const [isBackendOnline, setIsBackendOnline] = useState<boolean>(false)
-  
+
   // Real data replacing static mock data
   const [regions, setRegions] = useState<Region[]>([])
   const [knownSites, setKnownSites] = useState<RealSite[]>([])
@@ -487,7 +487,7 @@ export default function NISAgentUI() {
   }, [sites])
 
   // Backend data fetching function
-  const fetchBackendData = async () => {
+    const fetchBackendData = async () => {
     setLoadingRealData(true)
     
     try {
@@ -512,8 +512,8 @@ export default function NISAgentUI() {
           setSavedAnalyses(historyResponse.data.analyses)
           console.log(`✅ Refreshed ${historyResponse.data.analyses.length} saved analyses`)
         }
-      }
-    } catch (error) {
+        }
+      } catch (error) {
       console.error('❌ Failed to refresh backend data:', error)
     } finally {
       setLoadingRealData(false)
@@ -594,9 +594,9 @@ export default function NISAgentUI() {
     setError(null)
 
     // Prepare comprehensive request data with real data preference
-    const requestData = {
-      lat,
-      lon,
+      const requestData = {
+        lat,
+        lon,
       coordinates: `${lat}, ${lon}`,
       data_sources: selectedDataSources.length > 0 ? selectedDataSources : ["satellite", "lidar", "historical", "indigenous"],
       confidence_threshold: confidenceThreshold / 100,
@@ -633,7 +633,7 @@ export default function NISAgentUI() {
             console.log(`🔍 Attempting discovery via ${endpoint.name}: ${endpoint.url}`)
             
             const response = await makeBackendRequest(endpoint.url, {
-              method: "POST",
+        method: "POST",
               body: JSON.stringify(requestData)
             })
 
@@ -731,8 +731,8 @@ export default function NISAgentUI() {
           ...emergencyDiscovery,
           coordinates: requestData.coordinates,
           location: { lat, lon },
-          sources: requestData.data_sources,
-          timestamp: new Date().toISOString(),
+        sources: requestData.data_sources,
+        timestamp: new Date().toISOString(),
           discovery_id: `emergency_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
           backend_status: "error_recovery",
           error_recovery: true,
@@ -741,7 +741,7 @@ export default function NISAgentUI() {
         }
         
         setResults(fallbackResults)
-        setActiveTab("results")
+      setActiveTab("results")
         
         setError(`Discovery completed with emergency fallback due to: ${(error as Error).message}`)
         console.log('🚨 Emergency discovery fallback activated:', fallbackResults.discovery_id)
@@ -1733,7 +1733,7 @@ export default function NISAgentUI() {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full mix-blend-normal filter blur-[128px] animate-pulse delay-700" />
         <div className="absolute top-1/4 right-1/3 w-64 h-64 bg-teal-500/10 rounded-full mix-blend-normal filter blur-[96px] animate-pulse delay-1000" />
         <div className="absolute top-1/2 left-1/2 w-80 h-80 bg-purple-500/8 rounded-full mix-blend-normal filter blur-[120px] animate-pulse delay-500" />
-      </div>
+          </div>
 
       <div className="relative z-10 container mx-auto px-6 py-8">
         <motion.div
@@ -1778,7 +1778,7 @@ export default function NISAgentUI() {
           </motion.div>
 
           {/* Enhanced Tab Navigation */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1791,28 +1791,28 @@ export default function NISAgentUI() {
                 >
                   <MapPin className="h-4 w-4 shrink-0" />
                   <span className="hidden sm:inline truncate">Discovery</span>
-                </TabsTrigger>
+            </TabsTrigger>
                 <TabsTrigger 
                   value="vision" 
                   className="flex items-center gap-2 data-[state=active]:bg-purple-600/20 data-[state=active]:text-purple-100 data-[state=active]:border-purple-500/30 rounded-xl transition-all duration-300 flex-1 min-w-0 justify-center"
                 >
                   <Eye className="h-4 w-4 shrink-0" />
                   <span className="hidden sm:inline truncate">Vision AI</span>
-                </TabsTrigger>
+            </TabsTrigger>
                 <TabsTrigger 
                   value="map" 
                   className="flex items-center gap-2 data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-100 data-[state=active]:border-blue-500/30 rounded-xl transition-all duration-300 flex-1 min-w-0 justify-center"
                 >
                   <Layers className="h-4 w-4 shrink-0" />
                   <span className="hidden sm:inline truncate">Map</span>
-                </TabsTrigger>
+            </TabsTrigger>
                 <TabsTrigger 
                   value="chat" 
                   className="flex items-center gap-2 data-[state=active]:bg-orange-600/20 data-[state=active]:text-orange-100 data-[state=active]:border-orange-500/30 rounded-xl transition-all duration-300 flex-1 min-w-0 justify-center"
                 >
                   <MessageSquare className="h-4 w-4 shrink-0" />
                   <span className="hidden sm:inline truncate">AI Chat</span>
-                </TabsTrigger>
+            </TabsTrigger>
                 <TabsTrigger 
                   value="results" 
                   className="flex items-center gap-2 data-[state=active]:bg-gray-600/20 data-[state=active]:text-gray-100 data-[state=active]:border-gray-500/30 rounded-xl transition-all duration-300 flex-1 min-w-0 justify-center" 
@@ -1820,7 +1820,7 @@ export default function NISAgentUI() {
                 >
                   <Database className="h-4 w-4 shrink-0" />
                   <span className="hidden sm:inline truncate">Results</span>
-                </TabsTrigger>
+            </TabsTrigger>
                 <TabsTrigger 
                   value="history" 
                   className="flex items-center gap-2 data-[state=active]:bg-slate-600/20 data-[state=active]:text-slate-100 data-[state=active]:border-slate-500/30 rounded-xl transition-all duration-300 flex-1 min-w-0 justify-center" 
@@ -1828,8 +1828,8 @@ export default function NISAgentUI() {
                 >
                   <History className="h-4 w-4 shrink-0" />
                   <span className="hidden sm:inline truncate">History</span>
-                </TabsTrigger>
-              </TabsList>
+            </TabsTrigger>
+          </TabsList>
             </motion.div>
 
             {/* Discovery Tab */}
@@ -1858,42 +1858,42 @@ export default function NISAgentUI() {
                         Coordinates (Latitude, Longitude)
                       </Label>
                       <div className="relative">
-                        <Input
-                          id="coordinates"
-                          placeholder="e.g., -3.4653, -62.2159"
-                          value={coordinates}
-                          onChange={handleInputChange}
-                          disabled={loading}
+                    <Input
+                      id="coordinates"
+                      placeholder="e.g., -3.4653, -62.2159"
+                      value={coordinates}
+                      onChange={handleInputChange}
+                      disabled={loading}
                           className="bg-white/[0.03] border-white/[0.1] text-white placeholder:text-white/40 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-200"
-                        />
+                    />
                         <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/5 to-emerald-500/0 rounded-xl pointer-events-none opacity-0 focus-within:opacity-100 transition-opacity duration-300"></div>
                       </div>
                       <p className="text-xs text-white/50">
-                        Enter latitude and longitude separated by a comma
-                      </p>
-                    </div>
+                      Enter latitude and longitude separated by a comma
+                    </p>
+                  </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="region" className="text-sm font-medium text-white/80">Region</Label>
                       <Select value={selectedRegion} onValueChange={setSelectedRegion} disabled={loading}>
                         <SelectTrigger className="bg-white/[0.03] border-white/[0.1] text-white rounded-xl">
-                          <SelectValue placeholder="Select region" />
-                        </SelectTrigger>
+                        <SelectValue placeholder="Select region" />
+                      </SelectTrigger>
                         <SelectContent className="bg-slate-800 border-slate-700">
-                          <SelectItem value="all">All Amazon</SelectItem>
+                        <SelectItem value="all">All Amazon</SelectItem>
                           {Array.isArray(regions) && regions.map((region: Region) => (
-                            <SelectItem key={region.id} value={region.id}>
+                          <SelectItem key={region.id} value={region.id}>
                               {region.name} {region.site_count && `(${region.site_count} sites)`}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
+                </div>
 
                   {/* Data Sources Selection */}
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between">
                       <Label className="text-sm font-medium text-white/80">Data Sources</Label>
                       <div className="flex gap-2">
                         <motion.button
@@ -1915,7 +1915,7 @@ export default function NISAgentUI() {
                           Clear All
                         </motion.button>
                       </div>
-                    </div>
+                  </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
                       {dataSources.map((source: DataSourceCapability, index: number) => (
@@ -1957,7 +1957,7 @@ export default function NISAgentUI() {
                               >
                                 {source.availability}
                               </Badge>
-                            </div>
+                      </div>
                             <span className="text-xs text-white/60">{source.accuracy_rate}%</span>
                           </div>
                           <h4 className="font-medium text-white mb-2">{source.name}</h4>
@@ -1973,9 +1973,9 @@ export default function NISAgentUI() {
                             />
                           )}
                         </motion.div>
-                      ))}
-                    </div>
+                    ))}
                   </div>
+                </div>
 
                   {/* Advanced Options */}
                   <motion.div
@@ -1986,7 +1986,7 @@ export default function NISAgentUI() {
                     }}
                     className="space-y-4"
                   >
-                    <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between">
                       <Label className="text-sm font-medium text-white/80">Advanced Options</Label>
                       <motion.button
                         type="button"
@@ -1998,10 +1998,10 @@ export default function NISAgentUI() {
                         <Settings className="h-3 w-3" />
                         {showAdvancedOptions ? 'Hide' : 'Show'}
                       </motion.button>
-                    </div>
+                  </div>
 
                     <AnimatePresence>
-                      {showAdvancedOptions && (
+                  {showAdvancedOptions && (
                         <motion.div
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: "auto" }}
@@ -2013,16 +2013,16 @@ export default function NISAgentUI() {
                             <Label className="text-sm font-medium text-white/80 mb-3 block">
                               Confidence Threshold: {confidenceThreshold}%
                             </Label>
-                            <Slider
-                              value={[confidenceThreshold]}
-                              onValueChange={(value) => setConfidenceThreshold(value[0])}
+                        <Slider
+                          value={[confidenceThreshold]}
+                          onValueChange={(value) => setConfidenceThreshold(value[0])}
                               max={100}
                               min={0}
                               step={5}
                               className="py-4"
-                            />
-                          </div>
-                          
+                        />
+                      </div>
+
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="flex items-center space-x-3">
                               <Switch 
@@ -2032,8 +2032,8 @@ export default function NISAgentUI() {
                               />
                               <Label htmlFor="pattern-recognition" className="text-sm text-white/80">
                                 Pattern Recognition
-                              </Label>
-                            </div>
+                        </Label>
+                      </div>
                             <div className="flex items-center space-x-3">
                               <Switch 
                                 id="cultural-analysis" 
@@ -2042,9 +2042,9 @@ export default function NISAgentUI() {
                               />
                               <Label htmlFor="cultural-analysis" className="text-sm text-white/80">
                                 Cultural Analysis
-                              </Label>
-                            </div>
-                          </div>
+                        </Label>
+                      </div>
+                    </div>
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -2061,7 +2061,7 @@ export default function NISAgentUI() {
                       disabled={loading || !coordinates.trim()}
                       size="lg"
                     >
-                      {loading ? (
+                {loading ? (
                         <div className="flex items-center gap-3">
                           <Loader className="h-5 w-5 animate-spin" />
                           <span>Analyzing Archaeological Patterns...</span>
@@ -2077,14 +2077,14 @@ export default function NISAgentUI() {
                           <span>Start Archaeological Discovery</span>
                           <ArrowUpIcon className="h-4 w-4" />
                         </div>
-                      )}
-                    </Button>
+                )}
+              </Button>
                   </motion.div>
-                </form>
+            </form>
 
                 {/* Error Display */}
                 <AnimatePresence>
-                  {error && (
+            {error && (
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -2092,9 +2092,9 @@ export default function NISAgentUI() {
                       transition={{ duration: 0.3 }}
                     >
                       <Alert className="mt-6 bg-red-500/10 border-red-500/30 text-red-100">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertDescription>{error}</AlertDescription>
-                      </Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -2208,13 +2208,13 @@ export default function NISAgentUI() {
                             <span className="font-semibold">+{knownSites.length - 9} more sites available</span>
                           </p>
                           <p className="text-white/40 text-xs mt-1">Access full database via the Map tab</p>
-                        </div>
+              </div>
                       </motion.div>
                     )}
-                  </div>
+            </div>
                 )}
               </motion.div>
-            </TabsContent>
+          </TabsContent>
 
             {/* Vision Tab */}
             <TabsContent value="vision" className="space-y-6 mt-8">
@@ -2245,22 +2245,22 @@ export default function NISAgentUI() {
                   </div>
                 </div>
 
-                <VisionAgentVisualization 
-                  coordinates={coordinates} 
-                  imageSrc={results?.imageSrc || "/placeholder.svg?height=400&width=600"}
-                  onAnalysisComplete={(visionResults) => {
-                    if (results) {
-                      setResults({
-                        ...results,
-                        vision_analysis: visionResults,
-                        enhanced_features: visionResults.detection_results || [],
-                        processing_pipeline: [...(results.processing_pipeline || []), ...(visionResults.processing_pipeline || [])]
-                      })
-                    }
-                  }}
-                  isBackendOnline={isBackendOnline}
-                  autoAnalyze={coordinates !== ""}
-                />
+            <VisionAgentVisualization 
+              coordinates={coordinates} 
+              imageSrc={results?.imageSrc || "/placeholder.svg?height=400&width=600"}
+              onAnalysisComplete={(visionResults) => {
+                if (results) {
+                  setResults({
+                    ...results,
+                    vision_analysis: visionResults,
+                    enhanced_features: visionResults.detection_results || [],
+                    processing_pipeline: [...(results.processing_pipeline || []), ...(visionResults.processing_pipeline || [])]
+                  })
+                }
+              }}
+              isBackendOnline={isBackendOnline}
+              autoAnalyze={coordinates !== ""}
+            />
               </motion.div>
             </TabsContent>
 
@@ -2312,8 +2312,8 @@ export default function NISAgentUI() {
                         Real Data
                       </Badge>
                     )}
+                    </div>
                   </div>
-                </div>
 
                 {/* Google Maps API Script */}
                 <Script
@@ -2448,9 +2448,9 @@ export default function NISAgentUI() {
                             />
                           </div>
                         ))}
-                      </div>
-                    </div>
-
+                </div>
+              </div>
+              
                     {/* Site Statistics */}
                     <div className="border-t border-white/[0.1] pt-4">
                       <label className="text-sm font-medium text-white/80 mb-3 block">Statistics</label>
@@ -2463,8 +2463,8 @@ export default function NISAgentUI() {
                           <span>High Confidence:</span>
                           <span className="text-emerald-400">
                             {filteredSites.filter(s => s.confidence * 100 >= 85).length}
-                          </span>
-                        </div>
+                      </span>
+                    </div>
                         <div className="flex justify-between text-white/60">
                           <span>Settlement Sites:</span>
                           <span className="text-blue-400">
@@ -2477,9 +2477,9 @@ export default function NISAgentUI() {
                             {filteredSites.filter(s => s.type === 'ceremonial').length}
                           </span>
                         </div>
-                      </div>
                     </div>
                   </div>
+                </div>
 
                   {/* Map Container */}
                   <div className="lg:col-span-3">
@@ -2494,8 +2494,8 @@ export default function NISAgentUI() {
                               <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-white/40" />
                               <div className="text-white/60">Loading Google Maps...</div>
                               <div className="text-xs text-white/40 mt-2">Initializing satellite imagery and map controls</div>
-                            </div>
-                          </div>
+                  </div>
+                </div>
                         )}
                         
                         {mapError && (
@@ -2517,10 +2517,10 @@ export default function NISAgentUI() {
                               >
                                 Retry
                               </motion.button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
 
                       {/* Map Overlay Controls */}
                       {googleMapsLoaded && !mapError && (
@@ -2558,7 +2558,7 @@ export default function NISAgentUI() {
                           >
                             <Maximize className="h-4 w-4" />
                           </motion.button>
-                        </div>
+            </div>
                       )}
 
                       {/* Selected Site Info Panel */}
@@ -2579,7 +2579,7 @@ export default function NISAgentUI() {
                                 {selectedSite.size_hectares && (
                                   <span>Size: {selectedSite.size_hectares}ha</span>
                                 )}
-                              </div>
+              </div>
                             </div>
                             <div className="flex gap-2 ml-4">
                               <motion.button
@@ -2606,7 +2606,7 @@ export default function NISAgentUI() {
                   </div>
                 </div>
               </motion.div>
-            </TabsContent>
+          </TabsContent>
 
             {/* Chat Tab */}
             <TabsContent value="chat" className="space-y-6 mt-8">
@@ -2633,7 +2633,7 @@ export default function NISAgentUI() {
                   />
                 </div>
               </motion.div>
-            </TabsContent>
+          </TabsContent>
 
             {/* Results Tab */}
             <TabsContent value="results" className="space-y-6 mt-8">
@@ -2656,9 +2656,9 @@ export default function NISAgentUI() {
                           <p className="text-white/60 text-sm">Archaeological discovery complete</p>
                         </div>
                       </div>
-                      <div className="flex gap-2">
+                  <div className="flex gap-2">
                         <motion.button
-                          onClick={saveAnalysis}
+                      onClick={saveAnalysis}
                           className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg transition-all duration-200"
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
@@ -2667,70 +2667,70 @@ export default function NISAgentUI() {
                           Save
                         </motion.button>
                         <motion.button
-                          onClick={exportResults}
+                      onClick={exportResults}
                           className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg transition-all duration-200"
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
-                        >
+                    >
                           <Download className="h-4 w-4" />
-                          Export
+                      Export
                         </motion.button>
-                      </div>
-                    </div>
+                  </div>
+                </div>
 
                     {/* Key Metrics */}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                       <div className="p-4 bg-white/[0.02] border border-white/[0.1] rounded-xl">
-                        <div className="flex items-center justify-between">
-                          <div>
+                      <div className="flex items-center justify-between">
+                        <div>
                             <p className="text-sm text-white/60">Confidence</p>
                             <p className="text-2xl font-bold text-white">
-                              {results.confidence ? Math.round(results.confidence * 100) : 85}%
-                            </p>
-                          </div>
-                          <TrendingUp className="h-8 w-8 text-emerald-400" />
+                            {results.confidence ? Math.round(results.confidence * 100) : 85}%
+                          </p>
                         </div>
+                          <TrendingUp className="h-8 w-8 text-emerald-400" />
+                      </div>
                       </div>
 
                       <div className="p-4 bg-white/[0.02] border border-white/[0.1] rounded-xl">
-                        <div className="flex items-center justify-between">
-                          <div>
+                      <div className="flex items-center justify-between">
+                        <div>
                             <p className="text-sm text-white/60">Site Type</p>
                             <p className="text-xl font-semibold text-white">
-                              {results.siteType || results.pattern_type || "Settlement"}
-                            </p>
-                          </div>
-                          <MapPin className="h-8 w-8 text-blue-400" />
+                            {results.siteType || results.pattern_type || "Settlement"}
+                          </p>
                         </div>
+                          <MapPin className="h-8 w-8 text-blue-400" />
+                      </div>
                       </div>
 
                       <div className="p-4 bg-white/[0.02] border border-white/[0.1] rounded-xl">
-                        <div className="flex items-center justify-between">
-                          <div>
+                      <div className="flex items-center justify-between">
+                        <div>
                             <p className="text-sm text-white/60">Data Sources</p>
                             <p className="text-2xl font-bold text-white">{results.sources?.length || 4}</p>
-                          </div>
-                          <Database className="h-8 w-8 text-purple-400" />
                         </div>
+                          <Database className="h-8 w-8 text-purple-400" />
+                      </div>
                       </div>
 
                       <div className="p-4 bg-white/[0.02] border border-white/[0.1] rounded-xl">
-                        <div className="flex items-center justify-between">
-                          <div>
+                      <div className="flex items-center justify-between">
+                        <div>
                             <p className="text-sm text-white/60">Status</p>
                             <p className="text-sm font-semibold text-white">
                               {isBackendOnline ? "Live Data" : "Demo"}
-                            </p>
-                          </div>
-                          {isBackendOnline ? (
-                            <CheckCircle className="h-8 w-8 text-emerald-400" />
-                          ) : (
-                            <AlertCircle className="h-8 w-8 text-amber-400" />
-                          )}
+                          </p>
                         </div>
+                        {isBackendOnline ? (
+                            <CheckCircle className="h-8 w-8 text-emerald-400" />
+                        ) : (
+                            <AlertCircle className="h-8 w-8 text-amber-400" />
+                        )}
+                      </div>
                       </div>
                     </div>
-                  </div>
+                </div>
 
                   {/* Visual Analysis Section */}
                   <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -2955,7 +2955,7 @@ export default function NISAgentUI() {
                       
                       <div className="space-y-4">
                         {/* Confidence Breakdown */}
-                        <div>
+                      <div>
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-sm text-white/80">Pattern Recognition</span>
                             <span className="text-sm text-emerald-400 font-medium">94%</span>
@@ -2968,9 +2968,9 @@ export default function NISAgentUI() {
                               transition={{ duration: 1, delay: 0.2 }}
                             />
                           </div>
-                        </div>
-                        
-                        <div>
+                      </div>
+                      
+                      <div>
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-sm text-white/80">Historical Correlation</span>
                             <span className="text-sm text-blue-400 font-medium">87%</span>
@@ -2983,8 +2983,8 @@ export default function NISAgentUI() {
                               transition={{ duration: 1, delay: 0.4 }}
                             />
                           </div>
-                        </div>
-                        
+                      </div>
+
                         <div>
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-sm text-white/80">Geometric Analysis</span>
@@ -3058,40 +3058,40 @@ export default function NISAgentUI() {
                             <p className="text-sm text-white/70 leading-relaxed">
                               {results.description || results.summary || 
                                 "Comprehensive analysis revealing archaeological patterns and settlement indicators."}
-                            </p>
-                          </div>
+                          </p>
+                        </div>
                         </div>
 
-                        {results.historical_context && (
-                          <div>
+                          {results.historical_context && (
+                            <div>
                             <h4 className="font-medium text-white/80 mb-3 flex items-center gap-2">
                               <Scroll className="h-4 w-4 text-blue-400" />
-                              Historical Context
-                            </h4>
+                                Historical Context
+                              </h4>
                             <div className="bg-white/[0.02] rounded-lg p-4 border border-white/[0.05]">
                               <p className="text-sm text-white/70 leading-relaxed">{results.historical_context}</p>
                             </div>
-                          </div>
-                        )}
+                            </div>
+                          )}
                       </div>
-                      
+                          
                       {/* Right Column */}
                       <div className="space-y-6">
-                        {results.indigenous_perspective && (
-                          <div>
+                          {results.indigenous_perspective && (
+                            <div>
                             <h4 className="font-medium text-white/80 mb-3 flex items-center gap-2">
                               <Users className="h-4 w-4 text-purple-400" />
-                              Indigenous Perspective
-                            </h4>
+                                Indigenous Perspective
+                              </h4>
                             <div className="bg-white/[0.02] rounded-lg p-4 border border-white/[0.05]">
                               <p className="text-sm text-white/70 leading-relaxed">{results.indigenous_perspective}</p>
                             </div>
-                          </div>
-                        )}
+                        </div>
+                      )}
                         
                         {/* Recommendations */}
                         {results.recommendations && results.recommendations.length > 0 && (
-                          <div>
+                        <div>
                             <h4 className="font-medium text-white/80 mb-3 flex items-center gap-2">
                               <Lightbulb className="h-4 w-4 text-amber-400" />
                               Recommendations
@@ -3107,7 +3107,7 @@ export default function NISAgentUI() {
                                       "bg-blue-500/20 text-blue-400"
                                     )}>
                                       {index + 1}
-                                    </div>
+                            </div>
                                     <div className="flex-1">
                                       <h5 className="text-sm font-medium text-white mb-1">{rec.action}</h5>
                                       <p className="text-xs text-white/60 leading-relaxed">{rec.description}</p>
@@ -3119,16 +3119,16 @@ export default function NISAgentUI() {
                                           "bg-blue-500/20 text-blue-400"
                                         )}>
                                           {rec.priority}
-                                        </span>
+                              </span>
                                         <span className="text-white/50">⏱️ {rec.timeline}</span>
-                                      </div>
-                                    </div>
-                                  </div>
+                            </div>
+                              </div>
+                            </div>
                                 </div>
                               ))}
-                            </div>
                           </div>
-                        )}
+                        </div>
+                      )}
                       </div>
                     </div>
                   </div>
@@ -3138,13 +3138,13 @@ export default function NISAgentUI() {
                     <div className="flex items-center gap-3 mb-6">
                       <div className="p-2 bg-purple-500/10 rounded-lg">
                         <Brain className="h-5 w-5 text-purple-400" />
-                      </div>
+                          </div>
                       <h3 className="text-lg font-semibold text-white">IKRP Enhanced Analysis</h3>
                       <Badge className="bg-purple-500/20 text-purple-400 text-xs">Advanced Research Platform</Badge>
-                    </div>
+                          </div>
 
                     <Tabs defaultValue="discovery" className="w-full">
-                      <TabsList className="grid w-full grid-cols-4 bg-white/[0.05] mb-6">
+                      <TabsList className="grid w-full grid-cols-5 bg-white/[0.05] mb-6">
                         <TabsTrigger value="discovery" className="text-white/70 data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300">
                           Site Discovery
                         </TabsTrigger>
@@ -3153,6 +3153,9 @@ export default function NISAgentUI() {
                         </TabsTrigger>
                         <TabsTrigger value="research" className="text-white/70 data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-300">
                           Research Sites
+                        </TabsTrigger>
+                        <TabsTrigger value="codex" className="text-white/70 data-[state=active]:bg-orange-500/20 data-[state=active]:text-orange-300">
+                          Codex Discovery
                         </TabsTrigger>
                         <TabsTrigger value="synthesis" className="text-white/70 data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-300">
                           Synthesis
@@ -3216,9 +3219,9 @@ export default function NISAgentUI() {
                                 <p className="text-xs font-mono text-white">{results.ikrp_discovery.submission_id}</p>
                                 <p className="text-xs text-purple-300 mt-2">Validated Sites: {results.ikrp_discovery.validated_sites?.length || 0}</p>
                                 <p className="text-xs text-purple-300">Overall Confidence: {Math.round((results.ikrp_discovery.overall_confidence || 0) * 100)}%</p>
-                              </div>
-                            )}
                           </div>
+                            )}
+                        </div>
 
                           <div className="p-4 bg-white/[0.02] border border-white/[0.1] rounded-xl">
                             <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
@@ -3257,7 +3260,7 @@ export default function NISAgentUI() {
                                   <div key={`ikrp-site-${index}`} className="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded text-xs">
                                     <p className="text-white font-medium">{site.site_id}</p>
                                     <p className="text-emerald-300">{Math.round(site.confidence_score * 100)}% confidence</p>
-                                  </div>
+                      </div>
                                 ))}
                               </div>
                             )}
@@ -3326,7 +3329,7 @@ export default function NISAgentUI() {
                                   <p className="text-xs text-white">
                                     {results[`ikrp_${agent.type}_agent`].processing_time || 0}s
                                   </p>
-                                </div>
+                              </div>
                               )}
                             </div>
                           ))}
@@ -3365,10 +3368,10 @@ export default function NISAgentUI() {
                                     <p className={`font-semibold ${value === 'active' ? 'text-emerald-400' : 'text-amber-400'}`}>
                                       {typeof value === 'string' ? value : JSON.stringify(value)}
                                     </p>
-                                  </div>
+                      </div>
                                 )
                               ))}
-                            </div>
+                </div>
                           )}
                         </div>
                       </TabsContent>
@@ -3453,16 +3456,281 @@ export default function NISAgentUI() {
                                       </div>
                                       <Badge className="bg-emerald-500/20 text-emerald-400 text-xs">
                                         {Math.round((site.confidence_score || site.confidence || 0) * 100)}%
-                                      </Badge>
+                            </Badge>
                                     </div>
                                     <p className="text-xs text-white/70 mb-2">
                                       Sources: {(site.data_sources || ['satellite']).join(', ')}
                                     </p>
                                     <p className="text-xs text-white/50">
                                       Status: {site.validation_status || 'validated'}
-                                    </p>
-                                  </div>
+                            </p>
+                          </div>
                                 ))}
+                    </div>
+                            </div>
+                          )}
+                        </div>
+                      </TabsContent>
+
+                      {/* Codex Discovery */}
+                      <TabsContent value="codex" className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {/* Automated Codex Search */}
+                          <div className="p-4 bg-white/[0.02] border border-white/[0.1] rounded-xl">
+                            <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                              <Scroll className="h-4 w-4 text-orange-400" />
+                              Automated Codex Discovery
+                            </h4>
+                      <div className="space-y-3">
+                              <Button
+                                onClick={async () => {
+                                  if (!coordinates) return
+                                  const [lat, lng] = coordinates.split(',').map(c => parseFloat(c.trim()))
+                                  
+                                  try {
+                                    const response = await fetch('http://localhost:8001/codex/discover', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({
+                                        coordinates: { lat, lng },
+                                        radius_km: 100,
+                                        period: "all",
+                                        sources: ["famsi", "world_digital_library", "inah"],
+                                        max_results: 15
+                                      })
+                                    })
+                                    
+                                    if (response.ok) {
+                                      const codexResult = await response.json()
+                                      setResults((prev: any) => ({
+                                        ...prev,
+                                        ikrp_codex_discovery: codexResult
+                                      }))
+                                      console.log('📜 Codex Discovery completed:', codexResult.total_codices_found, 'codices found')
+                                    }
+                                  } catch (error) {
+                                    console.error('❌ Codex Discovery failed:', error)
+                                  }
+                                }}
+                                className="w-full bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 border-orange-500/30"
+                                disabled={!coordinates}
+                              >
+                                <Search className="h-4 w-4 mr-2" />
+                                Discover Historical Codices
+                              </Button>
+                              
+                              {results.ikrp_codex_discovery && (
+                                <div className="space-y-2">
+                                  <div className="p-3 bg-orange-500/10 border border-orange-500/20 rounded-lg">
+                                    <p className="text-xs text-orange-300 mb-1">Discovery Results:</p>
+                                    <p className="text-xs text-white">{results.ikrp_codex_discovery.total_codices_found} codices found</p>
+                                    <p className="text-xs text-orange-300">{results.ikrp_codex_discovery.auto_analyzed} auto-analyzed</p>
+                                    <p className="text-xs text-white/70">Processing: {results.ikrp_codex_discovery.search_metadata?.processing_time}</p>
+                                  </div>
+                                  
+                                  {/* Display top 3 discovered codices */}
+                                  <div className="space-y-2 max-h-32 overflow-y-auto">
+                                    {results.ikrp_codex_discovery.codices?.slice(0, 3).map((codex: any, index: number) => (
+                                      <div key={`codex-${index}`} className="p-2 bg-white/[0.03] border border-white/[0.1] rounded text-xs">
+                                        <p className="text-white font-medium truncate">{codex.title}</p>
+                                        <div className="flex justify-between items-center mt-1">
+                                          <span className="text-orange-300">{codex.source}</span>
+                                          <Badge className="bg-orange-500/20 text-orange-400 text-xs">
+                                            {Math.round(codex.relevance_score * 100)}%
+                                </Badge>
+                              </div>
+                                        <p className="text-white/50 mt-1">{codex.period} • {codex.content_type}</p>
+                            </div>
+                                    ))}
+                          </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* GPT-4.1 Vision Analysis */}
+                          <div className="p-4 bg-white/[0.02] border border-white/[0.1] rounded-xl">
+                            <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                              <Eye className="h-4 w-4 text-blue-400" />
+                              GPT-4.1 Vision Analysis
+                            </h4>
+                            <div className="space-y-3">
+                              <Button
+                                onClick={async () => {
+                                  if (!results.ikrp_codex_discovery?.codices?.length) {
+                                    console.log('❌ No codices available for analysis')
+                                    return
+                                  }
+                                  
+                                  const topCodex = results.ikrp_codex_discovery.codices[0]
+                                  const [lat, lng] = coordinates.split(',').map(c => parseFloat(c.trim()))
+                                  
+                                  try {
+                                    const response = await fetch('http://localhost:8001/codex/analyze', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({
+                                        codex_id: topCodex.id,
+                                        image_url: topCodex.image_url,
+                                        coordinates: { lat, lng },
+                                        context: `Archaeological analysis for site at ${coordinates}`
+                                      })
+                                    })
+                                    
+                                    if (response.ok) {
+                                      const analysisResult = await response.json()
+                                      setResults((prev: any) => ({
+                                        ...prev,
+                                        ikrp_codex_analysis: analysisResult
+                                      }))
+                                      console.log('🔍 Codex Analysis completed:', analysisResult.confidence)
+                                    }
+                                  } catch (error) {
+                                    console.error('❌ Codex Analysis failed:', error)
+                                  }
+                                }}
+                                className="w-full bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border-blue-500/30"
+                                disabled={!results.ikrp_codex_discovery?.codices?.length}
+                              >
+                                <Brain className="h-4 w-4 mr-2" />
+                                Analyze Top Codex
+                              </Button>
+                              
+                              {results.ikrp_codex_analysis && (
+                                <div className="space-y-2">
+                                  <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                                    <p className="text-xs text-blue-300 mb-1">Analysis Results:</p>
+                                    <p className="text-xs text-white">Confidence: {Math.round(results.ikrp_codex_analysis.confidence * 100)}%</p>
+                                    <p className="text-xs text-blue-300">Processing: {results.ikrp_codex_analysis.processing_time}s</p>
+                                  </div>
+                                  
+                                  {/* Analysis insights */}
+                                  {results.ikrp_codex_analysis.analysis && (
+                                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                                      {results.ikrp_codex_analysis.analysis.archaeological_insights?.site_types && (
+                                        <div className="p-2 bg-white/[0.03] border border-white/[0.1] rounded text-xs">
+                                          <p className="text-blue-300 font-medium mb-1">Site Types Identified:</p>
+                                          <div className="flex flex-wrap gap-1">
+                                            {results.ikrp_codex_analysis.analysis.archaeological_insights.site_types.slice(0, 3).map((type: string, index: number) => (
+                                              <Badge key={index} variant="outline" className="text-xs">
+                                                {type}
+                                              </Badge>
+                        ))}
+                      </div>
+                                        </div>
+                                      )}
+                                      
+                                      {results.ikrp_codex_analysis.analysis.textual_content?.glyph_translations && (
+                                        <div className="p-2 bg-white/[0.03] border border-white/[0.1] rounded text-xs">
+                                          <p className="text-blue-300 font-medium mb-1">Glyph Translations:</p>
+                                          {results.ikrp_codex_analysis.analysis.textual_content.glyph_translations.slice(0, 2).map((translation: any, index: number) => (
+                                            <p key={index} className="text-white/70">{translation.meaning} ({Math.round(translation.confidence * 100)}%)</p>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Digital Archives Status */}
+                        <div className="p-4 bg-white/[0.02] border border-white/[0.1] rounded-xl">
+                          <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                            <Database className="h-4 w-4 text-emerald-400" />
+                            Digital Archives Integration
+                          </h4>
+                          
+                          <div className="grid grid-cols-3 gap-2 mb-4">
+                            <Button
+                              onClick={async () => {
+                                try {
+                                  const response = await fetch('http://localhost:8001/codex/sources')
+                                  if (response.ok) {
+                                    const sources = await response.json()
+                                    setResults((prev: any) => ({ ...prev, ikrp_codex_sources: sources }))
+                                  }
+                                } catch (error) {
+                                  console.error('❌ Archive sources query failed:', error)
+                                }
+                              }}
+                              size="sm"
+                              className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs"
+                            >
+                              FAMSI Archive
+                            </Button>
+                            <Button
+                              onClick={async () => {
+                                // Mock World Digital Library check
+                                setResults((prev: any) => ({ 
+                                  ...prev, 
+                                  ikrp_wdl_status: { 
+                                    status: 'active', 
+                                    codices: 12,
+                                    last_updated: new Date().toISOString() 
+                                  }
+                                }))
+                              }}
+                              size="sm"
+                              className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-xs"
+                            >
+                              World Library
+                            </Button>
+                            <Button
+                              onClick={async () => {
+                                // Mock INAH archive check
+                                setResults((prev: any) => ({ 
+                                  ...prev, 
+                                  ikrp_inah_status: { 
+                                    status: 'active', 
+                                    codices: 8,
+                                    last_updated: new Date().toISOString() 
+                                  }
+                                }))
+                              }}
+                              size="sm"
+                              className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-xs"
+                            >
+                              INAH Mexico
+                            </Button>
+                          </div>
+
+                          {/* Archive status display */}
+                          {(results.ikrp_codex_sources || results.ikrp_wdl_status || results.ikrp_inah_status) && (
+                            <div className="space-y-2">
+                              <h5 className="text-xs text-white/80">Archive Status:</h5>
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                {results.ikrp_codex_sources?.sources?.map((source: any, index: number) => (
+                                  <div key={`archive-${index}`} className="p-2 bg-white/[0.03] border border-white/[0.1] rounded text-xs">
+                                    <p className="text-white font-medium truncate">{source.name}</p>
+                                    <p className="text-emerald-300">{source.total_codices} codices</p>
+                                    <Badge className="bg-emerald-500/20 text-emerald-400 text-xs mt-1">
+                                      {source.status}
+                                    </Badge>
+                          </div>
+                        ))}
+                                
+                                {results.ikrp_wdl_status && (
+                                  <div className="p-2 bg-white/[0.03] border border-white/[0.1] rounded text-xs">
+                                    <p className="text-white font-medium">World Digital Library</p>
+                                    <p className="text-blue-300">{results.ikrp_wdl_status.codices} codices</p>
+                                    <Badge className="bg-blue-500/20 text-blue-400 text-xs mt-1">
+                                      {results.ikrp_wdl_status.status}
+                                    </Badge>
+                      </div>
+                                )}
+                                
+                                {results.ikrp_inah_status && (
+                                  <div className="p-2 bg-white/[0.03] border border-white/[0.1] rounded text-xs">
+                                    <p className="text-white font-medium">INAH Mexico</p>
+                                    <p className="text-purple-300">{results.ikrp_inah_status.codices} codices</p>
+                                    <Badge className="bg-purple-500/20 text-purple-400 text-xs mt-1">
+                                      {results.ikrp_inah_status.status}
+                                    </Badge>
+              </div>
+            )}
                               </div>
                             </div>
                           )}
@@ -3524,7 +3792,7 @@ export default function NISAgentUI() {
                           {/* Overall IKRP Integration Score */}
                           <div className="mt-6 p-4 bg-gradient-to-r from-purple-500/10 to-emerald-500/10 border border-white/[0.1] rounded-xl">
                             <div className="flex items-center justify-between">
-                              <div>
+                <div>
                                 <h5 className="text-sm font-semibold text-white">IKRP Integration Score</h5>
                                 <p className="text-xs text-white/60">Based on agent consensus and database validation</p>
                               </div>
@@ -3541,7 +3809,7 @@ export default function NISAgentUI() {
                                   )}%
                                 </p>
                                 <p className="text-xs text-emerald-300">Comprehensive Score</p>
-                              </div>
+                </div>
                             </div>
                           </div>
                         </div>
@@ -3558,18 +3826,18 @@ export default function NISAgentUI() {
                       Run an analysis from the Discovery tab to see comprehensive results with real-time data visualization.
                     </p>
                     <motion.button
-                      onClick={() => setActiveTab("input")}
+                  onClick={() => setActiveTab("input")}
                       className="flex items-center gap-2 px-6 py-3 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl mx-auto transition-all duration-200"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                    >
+                >
                       <MapPin className="h-4 w-4" />
-                      Start Analysis
+                  Start Analysis
                     </motion.button>
                   </div>
-                </div>
-              )}
-            </TabsContent>
+              </div>
+            )}
+          </TabsContent>
 
             {/* History Tab */}
             <TabsContent value="history" className="space-y-6 mt-8">
@@ -3589,21 +3857,21 @@ export default function NISAgentUI() {
                   </div>
                 </div>
 
-                <EnhancedHistoryTab
-                  savedAnalyses={savedAnalyses}
-                  setSavedAnalyses={setSavedAnalyses}
-                  onAnalysisSelect={(analysis) => {
-                    setResults(analysis.results)
-                    setCoordinates(analysis.coordinates)
-                    setActiveTab("results")
-                  }}
-                  isBackendOnline={isBackendOnline}
-                />
+            <EnhancedHistoryTab
+              savedAnalyses={savedAnalyses}
+              setSavedAnalyses={setSavedAnalyses}
+              onAnalysisSelect={(analysis) => {
+                setResults(analysis.results)
+                setCoordinates(analysis.coordinates)
+                setActiveTab("results")
+              }}
+              isBackendOnline={isBackendOnline}
+            />
               </motion.div>
-            </TabsContent>
-          </Tabs>
+          </TabsContent>
+        </Tabs>
         </motion.div>
-      </div>
+          </div>
     </div>
   )
 }

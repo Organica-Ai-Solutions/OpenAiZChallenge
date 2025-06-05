@@ -15,10 +15,14 @@ import math
 import logging
 import asyncio
 import json
+import requests
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("nis_backend")
+
+# IKRP Service Configuration
+IKRP_SERVICE_URL = "http://localhost:8001"  # Always use localhost for development
 
 app = FastAPI(
     title="NIS Protocol Backend",
@@ -34,6 +38,62 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# IKRP Proxy Routes
+@app.get("/ikrp/sources")
+async def get_ikrp_sources():
+    """Proxy request to IKRP service for codex sources."""
+    try:
+        response = requests.get(f"{IKRP_SERVICE_URL}/codex/sources", timeout=30)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        logger.error(f"IKRP sources request failed: {e}")
+        raise HTTPException(status_code=503, detail="IKRP service unavailable")
+
+@app.post("/ikrp/search_codices")
+async def search_ikrp_codices(request: dict):
+    """Proxy request to IKRP service for codex discovery."""
+    try:
+        response = requests.post(f"{IKRP_SERVICE_URL}/codex/discover", json=request, timeout=30)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        logger.error(f"IKRP search request failed: {e}")
+        raise HTTPException(status_code=503, detail="IKRP service unavailable")
+
+@app.post("/ikrp/analyze_codex")
+async def analyze_ikrp_codex(request: dict):
+    """Proxy request to IKRP service for codex analysis."""
+    try:
+        response = requests.post(f"{IKRP_SERVICE_URL}/codex/analyze", json=request, timeout=30)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        logger.error(f"IKRP analysis request failed: {e}")
+        raise HTTPException(status_code=503, detail="IKRP service unavailable")
+
+@app.post("/ikrp/download_codex")
+async def download_ikrp_codex(request: dict):
+    """Proxy request to IKRP service for full codex download."""
+    try:
+        response = requests.post(f"{IKRP_SERVICE_URL}/codex/download", json=request, timeout=60)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        logger.error(f"IKRP download request failed: {e}")
+        raise HTTPException(status_code=503, detail="IKRP service unavailable")
+
+@app.get("/ikrp/status")
+async def get_ikrp_status():
+    """Get IKRP service status."""
+    try:
+        response = requests.get(f"{IKRP_SERVICE_URL}/", timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        logger.error(f"IKRP status request failed: {e}")
+        return {"status": "unavailable", "error": str(e)}
 
 # WebSocket connection manager
 class ConnectionManager:
@@ -1332,22 +1392,42 @@ async def get_satellite_weather_data(request: WeatherRequest):
         raise HTTPException(status_code=500, detail=f"Failed to fetch weather data: {str(e)}")
 
 @app.post("/satellite/soil")
-async def get_satellite_soil_data(coordinates: SatelliteCoordinates):
+async def get_satellite_soil_data(request: Dict[str, Any]):
     """Get soil analysis data for specified coordinates"""
     try:
-        logger.info(f"🌱 Fetching soil data for {coordinates.lat}, {coordinates.lng}")
-        soil = generate_soil_data(coordinates)
+        # Extract coordinates from different possible formats
+        if 'coordinates' in request and isinstance(request['coordinates'], dict):
+            coordinates = request['coordinates']
+            lat = coordinates.get('lat', 0.0)
+            lng = coordinates.get('lng', 0.0)
+        elif 'lat' in request and 'lng' in request:
+            lat = request['lat']
+            lng = request['lng']
+        elif 'latitude' in request and 'longitude' in request:
+            lat = request['latitude']
+            lng = request['longitude']
+        else:
+            # Default coordinates if none provided
+            lat = -3.4653
+            lng = -62.2159
+        
+        logger.info(f"🌱 Fetching soil data for {lat}, {lng}")
+        
+        # Create coordinates object for the existing function
+        coordinates_obj = type('SatelliteCoordinates', (), {'lat': lat, 'lng': lng})()
+        soil = generate_soil_data(coordinates_obj)
+        
         return {
             "status": "success",
             "data": soil,
             "metadata": {
-                "coordinates": {"lat": coordinates.lat, "lng": coordinates.lng},
+                "coordinates": {"lat": lat, "lng": lng},
                 "timestamp": datetime.now().isoformat(),
                 "analysis_methods": ["satellite_spectral", "ground_truth", "modeling"]
             }
         }
     except Exception as e:
-        logger.error(f"❌ Error fetching soil data: {str(e)}")
+        logger.error(f"❌ Error fetching soil data: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch soil data: {str(e)}")
 
 @app.get("/satellite/status")
@@ -1580,79 +1660,247 @@ async def get_change_details(change_id: str):
 
 @app.post("/satellite/review-alert/{alert_id}")
 async def review_satellite_alert(alert_id: str, request: Dict):
-    """Review and analyze a specific satellite alert"""
+    """Review and update satellite alert status"""
     try:
-        coordinates = request.get("coordinates", {})
-        logger.info(f"📋 Reviewing satellite alert ID: {alert_id}")
+        action = request.get("action")  # 'acknowledge', 'dismiss', 'escalate'
+        notes = request.get("notes", "")
+        
+        logger.info(f"📋 Reviewing satellite alert {alert_id} with action: {action}")
         
         # Simulate alert review process
-        alert_review = {
+        review_data = {
             "alert_id": alert_id,
+            "action": action,
+            "reviewed_by": "nis_operator",
             "review_timestamp": datetime.now().isoformat(),
-            "review_status": random.choice(["validated", "under_investigation", "false_positive", "requires_followup"]),
-            "detailed_information": {
-                "trigger_conditions": random.choice([
-                    "Rapid vegetation change detected",
-                    "Geometric anomaly identified",
-                    "Spectral signature change",
-                    "Multi-temporal pattern recognition"
-                ]),
-                "confidence_factors": [
-                    f"Statistical significance: {random.uniform(0.85, 0.99):.3f}",
-                    "Consistent across multiple sensors",
-                    "Temporal pattern matches known archaeological signatures",
-                    "Geographic context supports archaeological hypothesis"
-                ],
-                "analysis_methodology": {
-                    "primary_algorithm": "Machine learning classification",
-                    "secondary_validation": "Expert visual interpretation",
-                    "temporal_analysis": "Multi-year trend analysis",
-                    "spatial_context": "Regional pattern comparison"
-                }
-            },
-            "risk_assessment": {
-                "archaeological_potential": random.choice(["Very High", "High", "Moderate", "Low"]),
-                "threat_level": random.choice(["Immediate", "Short-term", "Medium-term", "Long-term"]),
-                "preservation_status": random.choice(["Excellent", "Good", "Fair", "At Risk"]),
-                "access_difficulty": random.choice(["Easy", "Moderate", "Difficult", "Extremely Difficult"])
-            },
-            "next_steps": [
-                "Schedule detailed satellite follow-up imaging",
-                "Coordinate with local archaeological institutions",
-                "Plan field verification mission",
-                "Document findings in archaeological database",
-                "Monitor for additional changes"
-            ],
-            "resource_requirements": {
-                "satellite_time": f"{random.randint(2, 8)} hours",
-                "analysis_time": f"{random.randint(4, 16)} hours",
-                "field_team_size": f"{random.randint(2, 6)} researchers",
-                "estimated_cost": f"${random.randint(1500, 8000):,}",
-                "timeline": f"{random.randint(2, 12)} weeks"
-            },
-            "environmental_considerations": {
-                "seasonal_accessibility": random.choice(["Year-round", "Dry season only", "Limited access", "Restricted"]),
-                "weather_factors": random.choice(["Minimal impact", "Seasonal constraints", "Weather dependent", "High risk"]),
-                "ecological_sensitivity": random.choice(["Low", "Moderate", "High", "Protected area"]),
-                "indigenous_territory": random.choice([True, False])
-            },
-            "collaboration_opportunities": {
-                "local_communities": random.choice([True, False]),
-                "academic_institutions": random.choice([True, False]),
-                "government_agencies": random.choice([True, False]),
-                "international_partnerships": random.choice([True, False])
+            "notes": notes,
+            "status": "reviewed",
+            "follow_up_required": action == "escalate",
+            "updated_alert": {
+                "id": alert_id,
+                "severity": "high" if action == "escalate" else "medium",
+                "status": "acknowledged" if action == "acknowledge" else "dismissed",
+                "review_notes": notes,
+                "last_updated": datetime.now().isoformat()
             }
         }
         
         return {
             "success": True,
-            "data": alert_review,
-            "processing_time": f"{random.uniform(1.2, 3.5):.1f}s"
+            "message": f"Alert {alert_id} {action}d successfully",
+            "data": review_data
         }
         
     except Exception as e:
-        logger.error(f"❌ Error reviewing alert: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to review alert: {str(e)}")
+        logger.error(f"❌ Alert review failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Alert review failed: {str(e)}")
+
+# Add missing endpoints for frontend compatibility
+@app.get("/research/regions")
+async def get_research_regions():
+    """Get archaeological research regions"""
+    try:
+        logger.info("🗺️ Loading research regions")
+        
+        regions = [
+            {
+                "id": "amazon_central",
+                "name": "Central Amazon Basin",
+                "bounds": [[-5, -70], [0, -60]],
+                "description": "Primary Amazon rainforest archaeological zone",
+                "cultural_groups": ["Kalapalo", "Kuikuro", "Matipu"],
+                "site_count": 45,
+                "recent_discoveries": 7,
+                "priority_level": "high"
+            },
+            {
+                "id": "amazon_western", 
+                "name": "Western Amazon",
+                "bounds": [[-10, -75], [-5, -65]],
+                "description": "Andean foothills and upper Amazon region",
+                "cultural_groups": ["Shipibo", "Ashuar", "Achuar"],
+                "site_count": 32,
+                "recent_discoveries": 4,
+                "priority_level": "high"
+            },
+            {
+                "id": "amazon_eastern",
+                "name": "Eastern Amazon",
+                "bounds": [[-5, -60], [0, -50]],
+                "description": "Atlantic coast interface archaeological zone",
+                "cultural_groups": ["Kayapó", "Arara", "Juruna"],
+                "site_count": 28,
+                "recent_discoveries": 3,
+                "priority_level": "medium"
+            },
+            {
+                "id": "amazon_southern",
+                "name": "Southern Amazon",
+                "bounds": [[-15, -70], [-10, -60]],
+                "description": "Cerrado-Amazon transition archaeological zone",
+                "cultural_groups": ["Bororo", "Xavante", "Karajá"],
+                "site_count": 24,
+                "recent_discoveries": 5,
+                "priority_level": "medium"
+            },
+            {
+                "id": "andean_highlands",
+                "name": "Andean Highlands",
+                "bounds": [[-18, -75], [-10, -68]],
+                "description": "High altitude archaeological complexes",
+                "cultural_groups": ["Quechua", "Aymara", "Inca"],
+                "site_count": 67,
+                "recent_discoveries": 12,
+                "priority_level": "very_high"
+            },
+            {
+                "id": "coastal_peru",
+                "name": "Peruvian Coast",
+                "bounds": [[-18, -82], [-3, -78]],
+                "description": "Pacific coastal archaeological corridor",
+                "cultural_groups": ["Moche", "Nazca", "Chimú"],
+                "site_count": 89,
+                "recent_discoveries": 15,
+                "priority_level": "very_high"
+            }
+        ]
+        
+        return {
+            "success": True,
+            "data": regions,
+            "count": len(regions),
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to load regions: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to load regions: {str(e)}")
+
+@app.get("/system/data-sources")
+async def get_system_data_sources():
+    """Get available data sources and their capabilities"""
+    try:
+        logger.info("📊 Loading system data sources")
+        
+        data_sources = [
+            {
+                "id": "satellite_imagery",
+                "name": "Satellite Imagery Analysis",
+                "description": "High-resolution satellite imagery processing with AI pattern recognition",
+                "availability": "online",
+                "processing_time": "2-5 seconds",
+                "accuracy_rate": 94.2,
+                "data_types": ["multispectral", "rgb", "infrared"],
+                "resolution": "30cm/pixel",
+                "coverage": "global",
+                "update_frequency": "daily",
+                "status": "active"
+            },
+            {
+                "id": "lidar_data",
+                "name": "LIDAR Elevation Data",
+                "description": "Light Detection and Ranging point clouds for micro-topography analysis",
+                "availability": "online",
+                "processing_time": "3-8 seconds",
+                "accuracy_rate": 91.7,
+                "data_types": ["point_cloud", "dem", "dsm"],
+                "resolution": "25 points/m²",
+                "coverage": "selective_regions",
+                "update_frequency": "quarterly",
+                "status": "active"
+            },
+            {
+                "id": "historical_records",
+                "name": "Historical Documents",
+                "description": "Colonial and indigenous historical documents with NLP processing",
+                "availability": "online",
+                "processing_time": "1-3 seconds",
+                "accuracy_rate": 87.5,
+                "data_types": ["text", "maps", "chronicles"],
+                "resolution": "document_level",
+                "coverage": "south_america",
+                "update_frequency": "monthly",
+                "status": "active"
+            },
+            {
+                "id": "indigenous_knowledge",
+                "name": "Indigenous Knowledge Base",
+                "description": "Traditional ecological knowledge and oral histories integration",
+                "availability": "online",
+                "processing_time": "2-4 seconds",
+                "accuracy_rate": 89.1,
+                "data_types": ["oral_history", "traditional_maps", "cultural_sites"],
+                "resolution": "community_level",
+                "coverage": "indigenous_territories",
+                "update_frequency": "continuous",
+                "status": "active"
+            },
+            {
+                "id": "geophysical_surveys",
+                "name": "Geophysical Survey Data",
+                "description": "Ground-penetrating radar and magnetometer survey results",
+                "availability": "limited",
+                "processing_time": "5-12 seconds",
+                "accuracy_rate": 85.3,
+                "data_types": ["gpr", "magnetometry", "resistivity"],
+                "resolution": "sub_meter",
+                "coverage": "survey_sites_only",
+                "update_frequency": "on_demand",
+                "status": "active"
+            },
+            {
+                "id": "archaeological_database",
+                "name": "Archaeological Site Database",
+                "description": "Comprehensive database of known archaeological sites and artifacts",
+                "availability": "online",
+                "processing_time": "1-2 seconds",
+                "accuracy_rate": 96.8,
+                "data_types": ["site_records", "artifact_catalog", "excavation_reports"],
+                "resolution": "site_level",
+                "coverage": "global",
+                "update_frequency": "daily",
+                "status": "active"
+            },
+            {
+                "id": "environmental_data",
+                "name": "Environmental Context Data",
+                "description": "Climate, vegetation, and environmental change analysis",
+                "availability": "online",
+                "processing_time": "2-6 seconds",
+                "accuracy_rate": 88.9,
+                "data_types": ["climate", "vegetation", "hydrology"],
+                "resolution": "regional",
+                "coverage": "global",
+                "update_frequency": "weekly",
+                "status": "active"
+            },
+            {
+                "id": "modern_infrastructure",
+                "name": "Modern Infrastructure Analysis",
+                "description": "Current development impact and accessibility analysis",
+                "availability": "online",
+                "processing_time": "1-4 seconds",
+                "accuracy_rate": 92.4,
+                "data_types": ["roads", "settlements", "agriculture"],
+                "resolution": "high",
+                "coverage": "regional",
+                "update_frequency": "monthly",
+                "status": "active"
+            }
+        ]
+        
+        return {
+            "success": True,
+            "data": data_sources,
+            "count": len(data_sources),
+            "active_sources": len([ds for ds in data_sources if ds["status"] == "active"]),
+            "total_accuracy": sum(ds["accuracy_rate"] for ds in data_sources) / len(data_sources),
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to load data sources: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to load data sources: {str(e)}")
 
 # Agent Analysis Management Models
 class SaveAnalysisRequest(BaseModel):

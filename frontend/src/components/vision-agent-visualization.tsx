@@ -2542,7 +2542,7 @@ export function VisionAgentVisualization({
                           Real Backend
                         </Badge>
                       </div>
-                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>

@@ -68,6 +68,23 @@ services:
       - redis
       - kafka
 
+  # IKRP Codex Discovery Service
+  ikrp:
+    build:
+      context: .
+      dockerfile: Dockerfile.ikrp
+    container_name: nis-ikrp
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    environment:
+      - ENVIRONMENT=development
+      - LOG_LEVEL=info
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      - redis
+
   # Frontend (Next.js)
   frontend:
     build:
@@ -86,6 +103,7 @@ services:
       - /app/node_modules
     depends_on:
       - backend
+      - ikrp
 
 volumes:
   redis_data:

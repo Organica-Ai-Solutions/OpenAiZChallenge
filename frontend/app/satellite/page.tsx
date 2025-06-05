@@ -8,6 +8,7 @@ import { SatelliteMonitor } from "../../src/components/ui/satellite-monitor"
 import { HealthStatusMonitor } from "../../src/components/ui/health-status"
 import Navigation from "../../components/shared/Navigation"
 import { config, isBackendAvailable } from "../../src/lib/config"
+import { TooltipProvider } from "../../components/ui/tooltip"
 
 export default function SatellitePage() {
   const [isBackendOnline, setIsBackendOnline] = useState(false)
@@ -159,7 +160,9 @@ export default function SatellitePage() {
               className="lg:col-span-3"
             >
               <div className="rounded-2xl bg-white/[0.02] backdrop-blur-sm border border-white/[0.08] p-1">
-                <SatelliteMonitor isBackendOnline={isBackendOnline} />
+                <TooltipProvider>
+                  <SatelliteMonitor isBackendOnline={isBackendOnline} />
+                </TooltipProvider>
               </div>
             </motion.div>
           </motion.div>
