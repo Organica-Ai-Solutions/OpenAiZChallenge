@@ -249,7 +249,7 @@ export function EnhancedHistoryTab({
   useEffect(() => {
     fetchCompleteDatabase()
   }, [isBackendOnline])
-  
+
   // Computed statistics
   const historyStats: HistoryStats = useMemo(() => {
     if (savedAnalyses.length === 0) {
@@ -280,7 +280,7 @@ export function EnhancedHistoryTab({
       return acc
     }, {})
     
-    const mostCommonPattern = Object.keys(patternCounts).length > 0
+    const mostCommonPattern = Object.keys(patternCounts).length > 0 
       ? Object.entries(patternCounts).sort(([,a], [,b]) => b - a)[0][0]
       : "Settlement"
 
@@ -383,7 +383,7 @@ export function EnhancedHistoryTab({
         }
       }
     }
-    
+
     const dataStr = JSON.stringify(exportData, null, 2)
     const dataBlob = new Blob([dataStr], { type: 'application/json' })
     const url = URL.createObjectURL(dataBlob)
@@ -537,7 +537,7 @@ export function EnhancedHistoryTab({
               <div className="flex items-center gap-2 text-xs text-white/50">
                 <Database className="h-3 w-3" />
                 <span>{analysis.saved_via === 'backend' ? 'Backend' : 'Local'}</span>
-              </div>
+          </div>
               
               <div className="flex gap-1">
                 <Button
@@ -571,8 +571,8 @@ export function EnhancedHistoryTab({
             <div className="flex-1">
               <CardTitle className="text-sm text-white group-hover:text-emerald-300 transition-colors mb-2">
                 {site.name}
-              </CardTitle>
-              <div className="flex items-center gap-2">
+            </CardTitle>
+          <div className="flex items-center gap-2">
                 <Badge 
                   className={cn(
                     "text-xs",
@@ -584,24 +584,24 @@ export function EnhancedHistoryTab({
                   )}
                 >
                   {Math.round(site.confidence * 100)}% confidence
-                </Badge>
+              </Badge>
                 <Badge variant="outline" className="text-xs border-white/[0.2] text-white/60 capitalize">
                   {site.type}
                 </Badge>
               </div>
             </div>
           </div>
-        </CardHeader>
-        
+      </CardHeader>
+      
         <CardContent className="pt-0">
-          <div className="space-y-3">
+        <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm">
               <MapPin className="h-4 w-4 text-emerald-400" />
               <code className="text-xs bg-white/[0.05] px-2 py-1 rounded font-mono text-emerald-300">
                 {site.coordinates}
               </code>
-            </div>
-            
+          </div>
+          
             <p className="text-xs text-white/70 line-clamp-2 leading-relaxed">
               {site.cultural_significance}
             </p>
@@ -718,8 +718,8 @@ export function EnhancedHistoryTab({
                   <p className="text-2xl font-bold text-white">{Math.round((databaseStats?.success_rate || 0.9) * 100)}%</p>
                 </div>
                 <CheckCircle className="h-8 w-8 text-emerald-400" />
-              </div>
-            </CardContent>
+        </div>
+      </CardContent>
           </Card>
         </motion.div>
       </div>
@@ -755,7 +755,7 @@ export function EnhancedHistoryTab({
             Database
           </Button>
         </div>
-
+        
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
@@ -778,8 +778,8 @@ export function EnhancedHistoryTab({
             Export
           </Button>
         </div>
-      </div>
-
+          </div>
+          
       {/* Filters - Only show for analyses view */}
       {selectedView === 'analyses' && (
         <motion.div
@@ -788,38 +788,38 @@ export function EnhancedHistoryTab({
           className="flex flex-col lg:flex-row gap-4 p-4 bg-white/[0.02] rounded-xl border border-white/[0.05]"
         >
           <div className="flex-1">
-            <Input
-              placeholder="Search analyses..."
+              <Input
+                placeholder="Search analyses..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="bg-white/[0.03] border-white/[0.1] text-white placeholder:text-white/40"
-            />
-          </div>
-          
+              />
+            </div>
+            
           <Select value={confidenceFilter} onValueChange={setConfidenceFilter}>
             <SelectTrigger className="lg:w-40 bg-white/[0.03] border-white/[0.1] text-white">
-              <SelectValue />
-            </SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
             <SelectContent className="bg-slate-800 border-slate-700">
               <SelectItem value="all">All Confidence</SelectItem>
               <SelectItem value="high">High (85%+)</SelectItem>
               <SelectItem value="medium">Medium (70-84%)</SelectItem>
               <SelectItem value="low">Low (<70%)</SelectItem>
-            </SelectContent>
-          </Select>
-          
+              </SelectContent>
+            </Select>
+            
           <Select value={timeFilter} onValueChange={setTimeFilter}>
             <SelectTrigger className="lg:w-32 bg-white/[0.03] border-white/[0.1] text-white">
-              <SelectValue />
-            </SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
             <SelectContent className="bg-slate-800 border-slate-700">
               <SelectItem value="all">All Time</SelectItem>
               <SelectItem value="today">Today</SelectItem>
               <SelectItem value="week">This Week</SelectItem>
               <SelectItem value="month">This Month</SelectItem>
               <SelectItem value="year">This Year</SelectItem>
-            </SelectContent>
-          </Select>
+              </SelectContent>
+            </Select>
         </motion.div>
       )}
 
@@ -848,11 +848,11 @@ export function EnhancedHistoryTab({
                     : "No analyses match your current filters. Try adjusting your search criteria."
                   }
                 </p>
-              </div>
+          </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {filteredAnalyses.map((analysis, index) => renderAnalysisCard(analysis, index))}
-              </div>
+            </div>
             )}
           </motion.div>
         )}
@@ -946,10 +946,10 @@ export function EnhancedHistoryTab({
                           <span className="text-white/60">Data Sources:</span>
                           <span className="text-white font-medium">{databaseStats.data_sources_active}</span>
                         </div>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-4">
+          </div>
+        </div>
+
+            <div className="space-y-4">
                       <h4 className="font-medium text-white/80">System Status</h4>
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
@@ -964,7 +964,7 @@ export function EnhancedHistoryTab({
                         </div>
                       </div>
                     </div>
-                  </div>
+            </div>
                 ) : (
                   <div className="flex items-center justify-center py-8">
                     <RefreshCw className="h-6 w-6 animate-spin text-white/40 mr-2" />
@@ -1020,12 +1020,12 @@ export function EnhancedHistoryTab({
                     <Activity className="h-6 w-6" />
                     <span className="text-xs">View Analyses</span>
                   </Button>
-                </div>
+          </div>
               </CardContent>
             </Card>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+      </div>
   )
 } 

@@ -13,7 +13,7 @@ import { Progress } from "../../components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
-import { 
+import {
   Activity, 
   Search, 
   Eye, 
@@ -885,18 +885,18 @@ export function VisionAgentVisualization({
 
       let analysisResults: any = null
 
-      const analysisTarget = coordinates || `Custom Image: ${customImageFile?.name}`
-      addLogEntry(`📍 Analyzing: ${analysisTarget}`)
-      
-      updateProcessingStep("Input Validation", "running")
-      setAnalysisProgress(15)
+        const analysisTarget = coordinates || `Custom Image: ${customImageFile?.name}`
+        addLogEntry(`📍 Analyzing: ${analysisTarget}`)
+        
+        updateProcessingStep("Input Validation", "running")
+        setAnalysisProgress(15)
 
       // Real backend analysis only
-      if (coordinates) {
-        try {
-          analysisResults = await runVisionAnalysis(coordinates)
-          addLogEntry("✅ Real backend analysis complete")
-        } catch (error) {
+        if (coordinates) {
+          try {
+            analysisResults = await runVisionAnalysis(coordinates)
+            addLogEntry("✅ Real backend analysis complete")
+          } catch (error) {
           addLogEntry(`❌ Real backend analysis failed: ${(error as Error).message}`, "error")
           throw error // Don't fallback - require real data
         }
@@ -960,7 +960,7 @@ export function VisionAgentVisualization({
               }
             })
             
-          } else {
+        } else {
             const errorData = await response.text()
             throw new Error(`Backend analysis failed: ${response.status} - ${errorData}`)
           }
@@ -1316,9 +1316,9 @@ export function VisionAgentVisualization({
               
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
+              <Button
+                variant="outline"
+                size="sm"
                     onClick={handleSaveAnalysis}
                     disabled={detections.length === 0}
                   >
@@ -1436,33 +1436,33 @@ export function VisionAgentVisualization({
                 <Target className="h-4 w-4" />
                 <span className="hidden sm:inline font-medium">Detection</span>
                 <span className="sm:hidden text-xs">Detect</span>
-              </TabsTrigger>
+            </TabsTrigger>
               <TabsTrigger value="enhancement" className="flex items-center gap-1 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all">
                 <Palette className="h-4 w-4" />
                 <span className="hidden sm:inline font-medium">Enhancement</span>
                 <span className="sm:hidden text-xs">Enhance</span>
-              </TabsTrigger>
+            </TabsTrigger>
               <TabsTrigger value="layers" className="flex items-center gap-1 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all">
                 <Layers className="h-4 w-4" />
                 <span className="hidden sm:inline font-medium">Layers</span>
                 <span className="sm:hidden text-xs">Layers</span>
-              </TabsTrigger>
+            </TabsTrigger>
               <TabsTrigger value="models" className="flex items-center gap-1 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all">
                 <Brain className="h-4 w-4" />
                 <span className="hidden sm:inline font-medium">Models</span>
                 <span className="sm:hidden text-xs">Models</span>
-              </TabsTrigger>
+            </TabsTrigger>
               <TabsTrigger value="settings" className="flex items-center gap-1 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all">
                 <Settings className="h-4 w-4" />
                 <span className="hidden sm:inline font-medium">Settings</span>
                 <span className="sm:hidden text-xs">Settings</span>
-              </TabsTrigger>
+            </TabsTrigger>
               <TabsTrigger value="history" className="flex items-center gap-1 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all">
                 <Database className="h-4 w-4" />
                 <span className="hidden sm:inline font-medium">History</span>
                 <span className="sm:hidden text-xs">History</span>
-              </TabsTrigger>
-            </TabsList>
+            </TabsTrigger>
+          </TabsList>
           </div>
 
           <TabsContent value="detection" className="mx-4 mb-4">
@@ -1527,13 +1527,13 @@ export function VisionAgentVisualization({
                               <div className="flex items-center gap-2 mb-1">
                                 <div className="w-3 h-3 bg-orange-400 rounded"></div>
                                 <span className="font-medium">LIDAR Data</span>
-                              </div>
+                            </div>
                               <div className="text-orange-200">• 1m point cloud resolution</div>
                               <div className="text-orange-200">• Elevation contours active</div>
-                            </div>
-                          </div>
-                        )}
-                        
+                        </div>
+                      </div>
+                    )}
+
                         {/* Thermal analysis overlay */}
                         {analysisSettings.enable_thermal && (
                           <div className="absolute inset-0 pointer-events-none" style={{ mixBlendMode: 'screen' }}>
@@ -1555,10 +1555,10 @@ export function VisionAgentVisualization({
                               </div>
                               <div className="text-red-200">• Subsurface anomalies</div>
                               <div className="text-red-200">• Temperature variations</div>
-                            </div>
-                          </div>
-                        )}
-                        
+                                </div>
+                              </div>
+                            )}
+                            
                         {/* Multispectral bands overlay */}
                         {analysisSettings.enable_multispectral && (
                           <div className="absolute inset-0 pointer-events-none">
@@ -1576,9 +1576,9 @@ export function VisionAgentVisualization({
                                   <div className="w-2 h-2 bg-green-400 rounded" title="Green band"></div>
                                   <div className="w-2 h-2 bg-blue-400 rounded" title="Blue band"></div>
                                   <div className="w-2 h-2 bg-purple-400 rounded" title="NIR band"></div>
-                                </div>
-                                <span className="font-medium">Multispectral</span>
                               </div>
+                                <span className="font-medium">Multispectral</span>
+                          </div>
                               <div className="text-purple-200">• RGB + NIR bands</div>
                               <div className="text-purple-200">• Vegetation analysis</div>
                             </div>
@@ -1590,7 +1590,7 @@ export function VisionAgentVisualization({
                           <div className="flex items-center gap-2 mb-1">
                             <div className={`w-2 h-2 rounded-full ${satelliteMapLoaded ? 'bg-green-400' : 'bg-yellow-400'} animate-pulse`}></div>
                             <span className="font-medium">Live Satellite Data</span>
-                          </div>
+                    </div>
                           <div className="text-green-200">
                             {coordinates ? `📍 ${coordinates}` : '📍 Custom location'}
                           </div>
@@ -1621,8 +1621,8 @@ export function VisionAgentVisualization({
                                 <RefreshCw className={`h-4 w-4 mr-2 ${isAnalyzing ? 'animate-spin' : ''}`} />
                                 {isAnalyzing ? 'Loading...' : 'Load Satellite Data'}
                               </Button>
-                            )}
-                          </div>
+                      )}
+                    </div>
                         </div>
                       </div>
                     )}
@@ -2186,28 +2186,28 @@ export function VisionAgentVisualization({
               {Object.keys(modelPerformance).length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {Object.entries(modelPerformance).map(([model, data]: [string, any]) => (
-                    <Card key={model}>
+                  <Card key={model}>
                       <CardHeader className="pb-2">
                         <div className="flex justify-between items-center">
                           <CardTitle className="text-base capitalize">{model.replace('_', ' ')}</CardTitle>
                           <Badge variant="outline" className="text-blue-600">
                             {data.accuracy}% Accuracy
                           </Badge>
-                        </div>
+                      </div>
                       </CardHeader>
                       <CardContent className="space-y-3">
-                        <div className="w-full bg-muted rounded-full h-2">
-                          <div 
+                      <div className="w-full bg-muted rounded-full h-2">
+                        <div 
                             className="h-2 rounded-full bg-gradient-to-r from-blue-500 to-green-500"
-                            style={{ width: `${data.accuracy}%` }}
+                          style={{ width: `${data.accuracy}%` }}
                           />
-                        </div>
+                      </div>
                         
                         <div className="grid grid-cols-2 gap-2 text-sm">
                           <div>
                             <span className="text-muted-foreground">Processing:</span>
                             <div className="font-medium">{data.processing_time}</div>
-                          </div>
+                      </div>
                           <div>
                             <span className="text-muted-foreground">Features:</span>
                             <div className="font-medium">{data.features_detected}</div>
@@ -2229,8 +2229,8 @@ export function VisionAgentVisualization({
                             )}
                           </div>
                         )}
-                      </CardContent>
-                    </Card>
+                    </CardContent>
+                  </Card>
                   ))}
                 </div>
               ) : (
@@ -2248,7 +2248,7 @@ export function VisionAgentVisualization({
                         <Play className="h-4 w-4 mr-2" />
                         Run Analysis
                       </Button>
-                    </div>
+                </div>
                   </CardContent>
                 </Card>
               )}
@@ -2319,13 +2319,13 @@ export function VisionAgentVisualization({
           <TabsContent value="settings" className="mx-4 mb-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Analysis Settings */}
-              <Card>
-                <CardHeader>
+            <Card>
+              <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Settings className="h-5 w-5" />
                     Analysis Settings
                   </CardTitle>
-                </CardHeader>
+              </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label>Global Confidence Threshold: {analysisSettings.confidence_threshold}%</Label>
@@ -2342,7 +2342,7 @@ export function VisionAgentVisualization({
                       Minimum confidence required for feature detection
                     </p>
                   </div>
-                  
+
                   <div>
                     <Label>Analysis Depth</Label>
                     <Select 
@@ -2361,53 +2361,53 @@ export function VisionAgentVisualization({
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div className="space-y-3">
                     <Label>Advanced Features</Label>
-                    <div className="space-y-2">
+                  <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <Label htmlFor="thermal">Thermal Analysis</Label>
-                        <Switch
+                    <Switch
                           id="thermal"
-                          checked={analysisSettings.enable_thermal}
+                      checked={analysisSettings.enable_thermal}
                           onCheckedChange={(checked) => 
                             setAnalysisSettings(prev => ({ ...prev, enable_thermal: checked }))
                           }
-                        />
-                      </div>
-                      
+                    />
+                  </div>
+
                       <div className="flex items-center justify-between">
                         <Label htmlFor="multispectral">Multispectral Imaging</Label>
-                        <Switch
+                    <Switch
                           id="multispectral"
-                          checked={analysisSettings.enable_multispectral}
+                      checked={analysisSettings.enable_multispectral}
                           onCheckedChange={(checked) => 
                             setAnalysisSettings(prev => ({ ...prev, enable_multispectral: checked }))
                           }
-                        />
-                      </div>
-                      
+                    />
+                  </div>
+
                       <div className="flex items-center justify-between">
                         <Label htmlFor="lidar">LIDAR Fusion</Label>
-                        <Switch
+                    <Switch
                           id="lidar"
-                          checked={analysisSettings.enable_lidar_fusion}
+                      checked={analysisSettings.enable_lidar_fusion}
                           onCheckedChange={(checked) => 
                             setAnalysisSettings(prev => ({ ...prev, enable_lidar_fusion: checked }))
                           }
-                        />
-                      </div>
-                      
+                    />
+                  </div>
+
                       <div className="flex items-center justify-between">
                         <Label htmlFor="measurement">Measurement Mode</Label>
-                        <Switch
+                    <Switch
                           id="measurement"
                           checked={analysisSettings.measurement_mode}
                           onCheckedChange={(checked) => 
                             setAnalysisSettings(prev => ({ ...prev, measurement_mode: checked }))
                           }
-                        />
-                      </div>
+                    />
+                  </div>
                     </div>
                   </div>
                 </CardContent>
@@ -2425,11 +2425,11 @@ export function VisionAgentVisualization({
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <Label>Real-time Mode</Label>
-                      <Switch
+                    <Switch
                         checked={realTimeMode}
                         onCheckedChange={setRealTimeMode}
-                      />
-                    </div>
+                    />
+                  </div>
                     
                     <div className="flex items-center justify-between">
                       <Label>Show Bounding Boxes</Label>
@@ -2543,9 +2543,9 @@ export function VisionAgentVisualization({
                         </Badge>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                </div>
+              </CardContent>
+            </Card>
             </div>
           </TabsContent>
 
@@ -2622,7 +2622,7 @@ export function VisionAgentVisualization({
                   ))}
                 </div>
               ) : (
-                <Card>
+            <Card>
                   <CardContent className="py-8">
                     <div className="text-center text-muted-foreground">
                       <Database className="h-16 w-16 mx-auto mb-4 opacity-50" />
@@ -2651,19 +2651,19 @@ export function VisionAgentVisualization({
                 <Activity className="h-4 w-4" />
                 Execution Log
               </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </CardHeader>
+              <CardContent>
               <ScrollArea className="h-32">
                 <div className="space-y-1 font-mono text-xs">
-                  {executionLog.map((log, index) => (
-                    <div key={index} className="text-muted-foreground">
-                      {log}
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
+                    {executionLog.map((log, index) => (
+                      <div key={index} className="text-muted-foreground">
+                        {log}
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
         )}
       </Card>
     </TooltipProvider>

@@ -1486,12 +1486,173 @@ async def export_satellite_data(request: Dict):
         
         return {
             "status": "success",
-            "export": export_data,
+            "data": export_data,
             "message": f"Data export prepared successfully in {format_type} format"
         }
     except Exception as e:
         logger.error(f"❌ Error exporting data: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to export data: {str(e)}")
+
+@app.get("/satellite/change-details/{change_id}")
+async def get_change_details(change_id: str):
+    """Get detailed information about a specific change detection"""
+    try:
+        logger.info(f"🔍 Fetching change details for ID: {change_id}")
+        
+        # Simulate detailed change analysis
+        change_details = {
+            "id": change_id,
+            "analysis_timestamp": datetime.now().isoformat(),
+            "detailed_analysis": {
+                "change_probability": random.uniform(0.75, 0.98),
+                "affected_area_km2": random.uniform(0.001, 0.05),
+                "change_direction": random.choice(["increase", "decrease", "alteration"]),
+                "confidence_factors": [
+                    "Spectral analysis shows clear vegetation changes",
+                    "Geometric patterns suggest human activity",
+                    "Temporal consistency across multiple dates",
+                    "Correlation with known archaeological indicators"
+                ],
+                "measurement_precision": {
+                    "spatial_accuracy": "±2.5 meters",
+                    "temporal_accuracy": "±3 days",
+                    "spectral_accuracy": "±0.05 NDVI"
+                }
+            },
+            "archaeological_relevance": random.choice([
+                "High - Geometric patterns consistent with ancient structures",
+                "Medium - Vegetation changes suggest possible earthworks",
+                "Low - Natural changes with minimal archaeological significance",
+                "Investigating - Requires ground verification"
+            ]),
+            "environmental_context": {
+                "soil_type": random.choice(["Clay-rich alluvial", "Sandy loam", "Organic peat", "Mixed sediment"]),
+                "vegetation_baseline": random.choice(["Dense rainforest", "Secondary growth", "Gallery forest", "Mixed canopy"]),
+                "hydrological_features": random.choice(["Near river", "Seasonal wetland", "Well-drained", "Periodic flooding"]),
+                "topographic_setting": random.choice(["River terrace", "Elevated plateau", "Gentle slope", "Natural levee"])
+            },
+            "change_timeline": [
+                {
+                    "date": (datetime.now() - timedelta(days=45)).isoformat(),
+                    "observation": "Initial baseline established",
+                    "confidence": 0.92
+                },
+                {
+                    "date": (datetime.now() - timedelta(days=20)).isoformat(),
+                    "observation": "First changes detected in vegetation patterns",
+                    "confidence": 0.78
+                },
+                {
+                    "date": (datetime.now() - timedelta(days=5)).isoformat(),
+                    "observation": "Change pattern confirmed with high confidence",
+                    "confidence": 0.94
+                }
+            ],
+            "recommendations": [
+                "Schedule high-resolution satellite follow-up within 30 days",
+                "Consider ground-penetrating radar survey if accessible",
+                "Cross-reference with historical aerial photography",
+                "Monitor for seasonal variation patterns",
+                "Coordinate with local archaeological authorities"
+            ],
+            "data_sources": {
+                "primary": ["Sentinel-2 MSI", "Landsat-8 OLI"],
+                "supplementary": ["Planet SkySat", "Historical aerial photos"],
+                "ground_truth": ["Field survey reports", "Soil samples", "Local knowledge"]
+            },
+            "technical_metadata": {
+                "processing_algorithm": "Multi-temporal change vector analysis",
+                "cloud_cover_filter": "< 15%",
+                "atmospheric_correction": "Sen2Cor Level-2A",
+                "geometric_accuracy": "Sub-pixel registration"
+            }
+        }
+        
+        return {
+            "success": True,
+            "data": change_details,
+            "processing_time": f"{random.uniform(0.8, 2.1):.1f}s"
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Error fetching change details: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch change details: {str(e)}")
+
+@app.post("/satellite/review-alert/{alert_id}")
+async def review_satellite_alert(alert_id: str, request: Dict):
+    """Review and analyze a specific satellite alert"""
+    try:
+        coordinates = request.get("coordinates", {})
+        logger.info(f"📋 Reviewing satellite alert ID: {alert_id}")
+        
+        # Simulate alert review process
+        alert_review = {
+            "alert_id": alert_id,
+            "review_timestamp": datetime.now().isoformat(),
+            "review_status": random.choice(["validated", "under_investigation", "false_positive", "requires_followup"]),
+            "detailed_information": {
+                "trigger_conditions": random.choice([
+                    "Rapid vegetation change detected",
+                    "Geometric anomaly identified",
+                    "Spectral signature change",
+                    "Multi-temporal pattern recognition"
+                ]),
+                "confidence_factors": [
+                    f"Statistical significance: {random.uniform(0.85, 0.99):.3f}",
+                    "Consistent across multiple sensors",
+                    "Temporal pattern matches known archaeological signatures",
+                    "Geographic context supports archaeological hypothesis"
+                ],
+                "analysis_methodology": {
+                    "primary_algorithm": "Machine learning classification",
+                    "secondary_validation": "Expert visual interpretation",
+                    "temporal_analysis": "Multi-year trend analysis",
+                    "spatial_context": "Regional pattern comparison"
+                }
+            },
+            "risk_assessment": {
+                "archaeological_potential": random.choice(["Very High", "High", "Moderate", "Low"]),
+                "threat_level": random.choice(["Immediate", "Short-term", "Medium-term", "Long-term"]),
+                "preservation_status": random.choice(["Excellent", "Good", "Fair", "At Risk"]),
+                "access_difficulty": random.choice(["Easy", "Moderate", "Difficult", "Extremely Difficult"])
+            },
+            "next_steps": [
+                "Schedule detailed satellite follow-up imaging",
+                "Coordinate with local archaeological institutions",
+                "Plan field verification mission",
+                "Document findings in archaeological database",
+                "Monitor for additional changes"
+            ],
+            "resource_requirements": {
+                "satellite_time": f"{random.randint(2, 8)} hours",
+                "analysis_time": f"{random.randint(4, 16)} hours",
+                "field_team_size": f"{random.randint(2, 6)} researchers",
+                "estimated_cost": f"${random.randint(1500, 8000):,}",
+                "timeline": f"{random.randint(2, 12)} weeks"
+            },
+            "environmental_considerations": {
+                "seasonal_accessibility": random.choice(["Year-round", "Dry season only", "Limited access", "Restricted"]),
+                "weather_factors": random.choice(["Minimal impact", "Seasonal constraints", "Weather dependent", "High risk"]),
+                "ecological_sensitivity": random.choice(["Low", "Moderate", "High", "Protected area"]),
+                "indigenous_territory": random.choice([True, False])
+            },
+            "collaboration_opportunities": {
+                "local_communities": random.choice([True, False]),
+                "academic_institutions": random.choice([True, False]),
+                "government_agencies": random.choice([True, False]),
+                "international_partnerships": random.choice([True, False])
+            }
+        }
+        
+        return {
+            "success": True,
+            "data": alert_review,
+            "processing_time": f"{random.uniform(1.2, 3.5):.1f}s"
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Error reviewing alert: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to review alert: {str(e)}")
 
 # Agent Analysis Management Models
 class SaveAnalysisRequest(BaseModel):

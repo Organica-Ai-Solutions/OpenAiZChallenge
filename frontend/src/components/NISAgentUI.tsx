@@ -59,7 +59,8 @@ import {
   Pause,
   CircleDot,
   Maximize,
-  PenTool
+  PenTool,
+  Upload
 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -1656,9 +1657,10 @@ export default function NISAgentUI() {
           }
           
           // Process regions data
-          if (regionsResponse.success && regionsResponse.data) {
-            setRegions(regionsResponse.data)
-            console.log(`✅ Loaded ${regionsResponse.data.length} regions`)
+          if (regionsResponse.success && 'data' in regionsResponse && regionsResponse.data) {
+            const regionData = Array.isArray(regionsResponse.data) ? regionsResponse.data : [];
+            setRegions(regionData);
+            console.log(`✅ Loaded ${regionData.length} regions`);
           } else {
             // Fallback regions for Amazon Basin
             setRegions([
@@ -1666,13 +1668,14 @@ export default function NISAgentUI() {
               { id: 'amazon_western', name: 'Western Amazon', bounds: [[-10, -75], [-5, -65]], site_count: 32 },
               { id: 'amazon_eastern', name: 'Eastern Amazon', bounds: [[-5, -60], [0, -50]], site_count: 28 },
               { id: 'amazon_southern', name: 'Southern Amazon', bounds: [[-15, -70], [-10, -60]], site_count: 24 }
-            ])
+            ]);
           }
           
           // Process data sources
-          if (sourcesResponse.success && sourcesResponse.data) {
-            setDataSources(sourcesResponse.data)
-            console.log(`✅ Loaded ${sourcesResponse.data.length} data sources`)
+          if (sourcesResponse.success && 'data' in sourcesResponse && sourcesResponse.data) {
+            const sourceData = Array.isArray(sourcesResponse.data) ? sourcesResponse.data : [];
+            setDataSources(sourceData);
+            console.log(`✅ Loaded ${sourceData.length} data sources`);
           } else {
             // Fallback data sources
             setDataSources([
@@ -1680,7 +1683,7 @@ export default function NISAgentUI() {
               { id: 'lidar', name: 'LIDAR Data', description: 'Light Detection and Ranging elevation data', availability: 'online', processing_time: '3-8s', accuracy_rate: 91 },
               { id: 'historical', name: 'Historical Records', description: 'Colonial and indigenous historical documents', availability: 'online', processing_time: '1-3s', accuracy_rate: 87 },
               { id: 'indigenous', name: 'Indigenous Knowledge', description: 'Traditional ecological knowledge and oral histories', availability: 'online', processing_time: '2-4s', accuracy_rate: 89 }
-            ])
+            ]);
           }
           
           console.log('🎉 Real data initialization complete - Backend connected!')
@@ -1878,7 +1881,7 @@ export default function NISAgentUI() {
                         </SelectTrigger>
                         <SelectContent className="bg-slate-800 border-slate-700">
                           <SelectItem value="all">All Amazon</SelectItem>
-                          {regions.map((region: Region) => (
+                          {Array.isArray(regions) && regions.map((region: Region) => (
                             <SelectItem key={region.id} value={region.id}>
                               {region.name} {region.site_count && `(${region.site_count} sites)`}
                             </SelectItem>
@@ -2505,7 +2508,7 @@ export default function NISAgentUI() {
                                 onClick={() => {
                                   setMapError(null);
                                   if (window.google) {
-                                    initMap();
+                                    initializeMap();
                                   }
                                 }}
                                 className="mt-4 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-all"
@@ -3128,6 +3131,422 @@ export default function NISAgentUI() {
                         )}
                       </div>
                     </div>
+                  </div>
+
+                  {/* Enhanced Results with IKRP Integration */}
+                  <div className="backdrop-blur-2xl bg-white/[0.02] rounded-2xl border border-white/[0.05] shadow-2xl p-6">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="p-2 bg-purple-500/10 rounded-lg">
+                        <Brain className="h-5 w-5 text-purple-400" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-white">IKRP Enhanced Analysis</h3>
+                      <Badge className="bg-purple-500/20 text-purple-400 text-xs">Advanced Research Platform</Badge>
+                    </div>
+
+                    <Tabs defaultValue="discovery" className="w-full">
+                      <TabsList className="grid w-full grid-cols-4 bg-white/[0.05] mb-6">
+                        <TabsTrigger value="discovery" className="text-white/70 data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300">
+                          Site Discovery
+                        </TabsTrigger>
+                        <TabsTrigger value="agents" className="text-white/70 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-300">
+                          AI Agents
+                        </TabsTrigger>
+                        <TabsTrigger value="research" className="text-white/70 data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-300">
+                          Research Sites
+                        </TabsTrigger>
+                        <TabsTrigger value="synthesis" className="text-white/70 data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-300">
+                          Synthesis
+                        </TabsTrigger>
+                      </TabsList>
+
+                      {/* IKRP Site Discovery */}
+                      <TabsContent value="discovery" className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="p-4 bg-white/[0.02] border border-white/[0.1] rounded-xl">
+                            <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                              <Target className="h-4 w-4 text-purple-400" />
+                              Discovery Submission
+                            </h4>
+                            <Button
+                              onClick={async () => {
+                                if (!coordinates) return
+                                const [lat, lng] = coordinates.split(',').map(c => parseFloat(c.trim()))
+                                
+                                try {
+                                  const response = await fetch('http://localhost:8001/research/sites/discover', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                      researcher_id: `researcher_${Date.now()}`,
+                                      sites: [{
+                                        latitude: lat,
+                                        longitude: lng,
+                                        data_sources: ["satellite", "lidar", "historical"],
+                                        description: results.description || "Archaeological site analysis",
+                                        researcher_metadata: {
+                                          confidence: results.confidence,
+                                          analysis_type: results.pattern_type || "general"
+                                        }
+                                      }]
+                                    })
+                                  })
+                                  
+                                  if (response.ok) {
+                                    const ikrpResult = await response.json()
+                                    setResults((prev: any) => ({
+                                      ...prev,
+                                      ikrp_discovery: ikrpResult
+                                    }))
+                                    console.log('✅ IKRP Discovery submitted:', ikrpResult)
+                                  }
+                                } catch (error) {
+                                  console.error('❌ IKRP Discovery failed:', error)
+                                }
+                              }}
+                              className="w-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border-purple-500/30"
+                              disabled={!coordinates}
+                            >
+                              <Upload className="h-4 w-4 mr-2" />
+                              Submit to IKRP Database
+                            </Button>
+                            
+                            {results.ikrp_discovery && (
+                              <div className="mt-4 p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg">
+                                <p className="text-xs text-purple-300 mb-1">Submission ID:</p>
+                                <p className="text-xs font-mono text-white">{results.ikrp_discovery.submission_id}</p>
+                                <p className="text-xs text-purple-300 mt-2">Validated Sites: {results.ikrp_discovery.validated_sites?.length || 0}</p>
+                                <p className="text-xs text-purple-300">Overall Confidence: {Math.round((results.ikrp_discovery.overall_confidence || 0) * 100)}%</p>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="p-4 bg-white/[0.02] border border-white/[0.1] rounded-xl">
+                            <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                              <Search className="h-4 w-4 text-emerald-400" />
+                              Related Sites Query
+                            </h4>
+                            <Button
+                              onClick={async () => {
+                                try {
+                                  const response = await fetch('http://localhost:8001/research/sites?min_confidence=0.7&max_sites=5', {
+                                    method: 'GET'
+                                  })
+                                  
+                                  if (response.ok) {
+                                    const relatedSites = await response.json()
+                                    setResults((prev: any) => ({
+                                      ...prev,
+                                      ikrp_related_sites: relatedSites
+                                    }))
+                                    console.log('✅ IKRP related sites loaded:', relatedSites.length)
+                                  }
+                                } catch (error) {
+                                  console.error('❌ IKRP sites query failed:', error)
+                                }
+                              }}
+                              className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border-emerald-500/30"
+                            >
+                              <Database className="h-4 w-4 mr-2" />
+                              Find Related Sites
+                            </Button>
+                            
+                            {results.ikrp_related_sites && (
+                              <div className="mt-4 space-y-2">
+                                <p className="text-xs text-emerald-300">Found {results.ikrp_related_sites.length} related sites:</p>
+                                {results.ikrp_related_sites.slice(0, 3).map((site: any, index: number) => (
+                                  <div key={`ikrp-site-${index}`} className="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded text-xs">
+                                    <p className="text-white font-medium">{site.site_id}</p>
+                                    <p className="text-emerald-300">{Math.round(site.confidence_score * 100)}% confidence</p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </TabsContent>
+
+                      {/* IKRP AI Agents */}
+                      <TabsContent value="agents" className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {[
+                            { type: 'vision', name: 'Vision Agent', icon: Eye, color: 'blue' },
+                            { type: 'memory', name: 'Memory Agent', icon: Brain, color: 'purple' },
+                            { type: 'reasoning', name: 'Reasoning Agent', icon: Zap, color: 'amber' },
+                            { type: 'action', name: 'Action Agent', icon: Target, color: 'emerald' }
+                          ].map((agent) => (
+                            <div key={agent.type} className="p-4 bg-white/[0.02] border border-white/[0.1] rounded-xl">
+                              <div className="flex items-center gap-2 mb-3">
+                                <agent.icon className={`h-4 w-4 text-${agent.color}-400`} />
+                                <h4 className="text-sm font-semibold text-white">{agent.name}</h4>
+                              </div>
+                              <Button
+                                onClick={async () => {
+                                  try {
+                                    const response = await fetch('http://localhost:8001/agents/process', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({
+                                        agent_type: agent.type,
+                                        data: {
+                                          coordinates: coordinates,
+                                          analysis_results: results
+                                        },
+                                        context: {
+                                          confidence: results.confidence,
+                                          site_type: results.pattern_type
+                                        }
+                                      })
+                                    })
+                                    
+                                    if (response.ok) {
+                                      const agentResult = await response.json()
+                                      setResults((prev: any) => ({
+                                        ...prev,
+                                        [`ikrp_${agent.type}_agent`]: agentResult
+                                      }))
+                                      console.log(`✅ IKRP ${agent.type} agent processed:`, agentResult)
+                                    }
+                                  } catch (error) {
+                                    console.error(`❌ IKRP ${agent.type} agent failed:`, error)
+                                  }
+                                }}
+                                size="sm"
+                                className={`w-full bg-${agent.color}-500/20 hover:bg-${agent.color}-500/30 text-${agent.color}-300 border-${agent.color}-500/30`}
+                              >
+                                Process with {agent.name}
+                              </Button>
+                              
+                              {results[`ikrp_${agent.type}_agent`] && (
+                                <div className="mt-3 p-3 bg-white/[0.03] border border-white/[0.1] rounded-lg">
+                                  <p className="text-xs text-white/70 mb-1">Confidence:</p>
+                                  <p className="text-sm font-semibold text-white">
+                                    {Math.round((results[`ikrp_${agent.type}_agent`].confidence_score || 0) * 100)}%
+                                  </p>
+                                  <p className="text-xs text-white/70 mt-2">Processing Time:</p>
+                                  <p className="text-xs text-white">
+                                    {results[`ikrp_${agent.type}_agent`].processing_time || 0}s
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                        
+                        {/* Agent Status Check */}
+                        <div className="p-4 bg-white/[0.02] border border-white/[0.1] rounded-xl">
+                          <Button
+                            onClick={async () => {
+                              try {
+                                const response = await fetch('http://localhost:8001/agents/status')
+                                if (response.ok) {
+                                  const status = await response.json()
+                                  setResults((prev: any) => ({
+                                    ...prev,
+                                    ikrp_agent_status: status
+                                  }))
+                                  console.log('✅ IKRP agent status loaded:', status)
+                                }
+                              } catch (error) {
+                                console.error('❌ IKRP agent status failed:', error)
+                              }
+                            }}
+                            className="w-full bg-slate-500/20 hover:bg-slate-500/30 text-slate-300 border-slate-500/30"
+                          >
+                            <Activity className="h-4 w-4 mr-2" />
+                            Check Agent Status
+                          </Button>
+                          
+                          {results.ikrp_agent_status && (
+                            <div className="mt-4 grid grid-cols-2 gap-2">
+                              {Object.entries(results.ikrp_agent_status).map(([key, value]: [string, any]) => (
+                                key !== 'model_services' && key !== 'processing_queue' && (
+                                  <div key={key} className="p-2 bg-white/[0.03] rounded text-xs">
+                                    <p className="text-white/70 capitalize">{key.replace('_', ' ')}:</p>
+                                    <p className={`font-semibold ${value === 'active' ? 'text-emerald-400' : 'text-amber-400'}`}>
+                                      {typeof value === 'string' ? value : JSON.stringify(value)}
+                                    </p>
+                                  </div>
+                                )
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </TabsContent>
+
+                      {/* Research Sites Integration */}
+                      <TabsContent value="research" className="space-y-4">
+                        <div className="p-4 bg-white/[0.02] border border-white/[0.1] rounded-xl">
+                          <h4 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                            <Database className="h-4 w-4 text-emerald-400" />
+                            IKRP Research Database Query
+                          </h4>
+                          
+                          <div className="grid grid-cols-3 gap-2 mb-4">
+                            <Button
+                              onClick={async () => {
+                                try {
+                                  const response = await fetch('http://localhost:8001/research/sites?min_confidence=0.8&max_sites=10')
+                                  if (response.ok) {
+                                    const sites = await response.json()
+                                    setResults((prev: any) => ({ ...prev, ikrp_high_confidence_sites: sites }))
+                                  }
+                                } catch (error) {
+                                  console.error('❌ High confidence sites query failed:', error)
+                                }
+                              }}
+                              size="sm"
+                              className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs"
+                            >
+                              High Confidence
+                            </Button>
+                            <Button
+                              onClick={async () => {
+                                try {
+                                  const response = await fetch('http://localhost:8001/research/sites?data_source=satellite&max_sites=8')
+                                  if (response.ok) {
+                                    const sites = await response.json()
+                                    setResults((prev: any) => ({ ...prev, ikrp_satellite_sites: sites }))
+                                  }
+                                } catch (error) {
+                                  console.error('❌ Satellite sites query failed:', error)
+                                }
+                              }}
+                              size="sm"
+                              className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-xs"
+                            >
+                              Satellite Data
+                            </Button>
+                            <Button
+                              onClick={async () => {
+                                try {
+                                  const response = await fetch('http://localhost:8001/research/sites?data_source=lidar&max_sites=6')
+                                  if (response.ok) {
+                                    const sites = await response.json()
+                                    setResults((prev: any) => ({ ...prev, ikrp_lidar_sites: sites }))
+                                  }
+                                } catch (error) {
+                                  console.error('❌ LIDAR sites query failed:', error)
+                                }
+                              }}
+                              size="sm"
+                              className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-xs"
+                            >
+                              LIDAR Data
+                            </Button>
+                          </div>
+
+                          {/* Display query results */}
+                          {(results.ikrp_high_confidence_sites || results.ikrp_satellite_sites || results.ikrp_lidar_sites) && (
+                            <div className="space-y-3">
+                              <h5 className="text-sm text-white/80">Query Results:</h5>
+                              <div className="max-h-48 overflow-y-auto space-y-2">
+                                {[
+                                  ...(results.ikrp_high_confidence_sites || []),
+                                  ...(results.ikrp_satellite_sites || []),
+                                  ...(results.ikrp_lidar_sites || [])
+                                ].slice(0, 10).map((site: any, index: number) => (
+                                  <div key={`research-site-${index}`} className="p-3 bg-white/[0.03] border border-white/[0.1] rounded-lg">
+                                    <div className="flex justify-between items-start mb-2">
+                                      <div>
+                                        <p className="text-sm font-medium text-white">{site.site_id || `Site ${index + 1}`}</p>
+                                        <p className="text-xs text-white/60">{site.coordinates}</p>
+                                      </div>
+                                      <Badge className="bg-emerald-500/20 text-emerald-400 text-xs">
+                                        {Math.round((site.confidence_score || site.confidence || 0) * 100)}%
+                                      </Badge>
+                                    </div>
+                                    <p className="text-xs text-white/70 mb-2">
+                                      Sources: {(site.data_sources || ['satellite']).join(', ')}
+                                    </p>
+                                    <p className="text-xs text-white/50">
+                                      Status: {site.validation_status || 'validated'}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </TabsContent>
+
+                      {/* Synthesis Tab */}
+                      <TabsContent value="synthesis" className="space-y-4">
+                        <div className="p-4 bg-white/[0.02] border border-white/[0.1] rounded-xl">
+                          <h4 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                            <Zap className="h-4 w-4 text-amber-400" />
+                            IKRP Comprehensive Analysis
+                          </h4>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-3">
+                              <h5 className="text-xs font-semibold text-white/80">Agent Results Summary</h5>
+                              {['vision', 'memory', 'reasoning', 'action'].map(agentType => {
+                                const agentData = results[`ikrp_${agentType}_agent`]
+                                return agentData ? (
+                                  <div key={agentType} className="p-2 bg-white/[0.03] rounded text-xs">
+                                    <div className="flex justify-between">
+                                      <span className="text-white/70 capitalize">{agentType}:</span>
+                                      <span className="text-emerald-400">{Math.round(agentData.confidence_score * 100)}%</span>
+                                    </div>
+                                    <p className="text-white/50 mt-1">{agentData.processing_time}s processing</p>
+                                  </div>
+                                ) : null
+                              })}
+                            </div>
+                            
+                            <div className="space-y-3">
+                              <h5 className="text-xs font-semibold text-white/80">Research Database Stats</h5>
+                              <div className="space-y-2">
+                                {results.ikrp_discovery && (
+                                  <div className="p-2 bg-purple-500/10 rounded text-xs">
+                                    <p className="text-purple-300">Discovery Submitted</p>
+                                    <p className="text-white/70">{results.ikrp_discovery.validated_sites?.length || 0} sites validated</p>
+                                  </div>
+                                )}
+                                {(results.ikrp_high_confidence_sites?.length || 0) > 0 && (
+                                  <div className="p-2 bg-emerald-500/10 rounded text-xs">
+                                    <p className="text-emerald-300">High Confidence Sites</p>
+                                    <p className="text-white/70">{results.ikrp_high_confidence_sites.length} found</p>
+                                  </div>
+                                )}
+                                {results.ikrp_agent_status && (
+                                  <div className="p-2 bg-blue-500/10 rounded text-xs">
+                                    <p className="text-blue-300">Agent Network Status</p>
+                                    <p className="text-white/70">
+                                      Queue: {results.ikrp_agent_status.processing_queue || 0} tasks
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Overall IKRP Integration Score */}
+                          <div className="mt-6 p-4 bg-gradient-to-r from-purple-500/10 to-emerald-500/10 border border-white/[0.1] rounded-xl">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h5 className="text-sm font-semibold text-white">IKRP Integration Score</h5>
+                                <p className="text-xs text-white/60">Based on agent consensus and database validation</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-2xl font-bold text-emerald-400">
+                                  {Math.round(
+                                    (
+                                      ((results.ikrp_vision_agent?.confidence_score || 0) +
+                                       (results.ikrp_memory_agent?.confidence_score || 0) +
+                                       (results.ikrp_reasoning_agent?.confidence_score || 0) +
+                                       (results.ikrp_action_agent?.confidence_score || 0) +
+                                       (results.ikrp_discovery?.overall_confidence || 0)) / 5
+                                    ) * 100
+                                  )}%
+                                </p>
+                                <p className="text-xs text-emerald-300">Comprehensive Score</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </TabsContent>
+                    </Tabs>
                   </div>
                 </motion.div>
               ) : (
