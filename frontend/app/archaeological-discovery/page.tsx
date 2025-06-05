@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from "next/link"
+import { motion } from 'framer-motion'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -29,7 +30,10 @@ import {
   Calendar,
   Activity,
   RefreshCw,
-  Clock
+  Clock,
+  ArrowLeft,
+  Wifi,
+  WifiOff
 } from 'lucide-react'
 import Navigation from "../../components/shared/Navigation"
 
@@ -502,96 +506,167 @@ export default function ArchaeologicalDiscoveryPage() {
 
   if (state.isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 p-8 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 mx-auto text-blue-500 animate-spin mb-4" />
-          <h2 className="text-xl font-semibold text-white mb-2">Loading Archaeological Discovery</h2>
-          <p className="text-slate-400">Fetching latest discoveries and agent data...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden">
+        {/* Animated Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-emerald-900/5 to-blue-900/10" />
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        </div>
+        
+        <div className="relative z-10 min-h-screen flex items-center justify-center p-8">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6 }}
+            className="text-center"
+          >
+            <Loader2 className="h-16 w-16 mx-auto text-emerald-400 animate-spin mb-6" />
+            <h2 className="text-2xl font-semibold text-white mb-4">Loading Archaeological Discovery</h2>
+            <p className="text-white/70">Fetching latest discoveries and agent data...</p>
+          </motion.div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-emerald-900/5 to-blue-900/10" />
+      <div className="absolute inset-0">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+      </div>
+
       <Navigation />
 
       {/* Main Content */}
-      <div className="p-8">
-        <div className="max-w-7xl mx-auto space-y-8">
-          {/* Page Header */}
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-white mb-2">Archaeological Discovery Dashboard</h1>
-            <p className="text-slate-400">
-              Real-time archaeological site discovery using AI-powered multi-source analysis
-            </p>
-          </div>
+      <div className="relative z-10">
+        <div className="container mx-auto px-6 py-8">
+          <div className="max-w-7xl mx-auto space-y-8">
+            {/* Page Header */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-8"
+            >
+              <div className="flex items-center gap-2 mb-6 justify-center">
+                <Link 
+                  href="/"
+                  className="flex items-center gap-2 text-white/60 hover:text-white transition-colors"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span className="text-sm">Back to Dashboard</span>
+                </Link>
+              </div>
 
-          {/* Statistics Cards */}
-          {state.statistics && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="bg-slate-800/50 border-slate-700">
-                <CardContent className="p-6">
-                  <div className="flex items-center">
-                    <div className="p-2 bg-blue-500/20 rounded-lg">
-                      <Database className="h-6 w-6 text-blue-400" />
-                    </div>
-                    <div className="ml-4">
-                      <p className="text-sm text-slate-400">Total Sites</p>
-                      <p className="text-2xl font-bold text-white">{state.statistics.total_sites_discovered}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <motion.div 
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                className="flex items-center justify-center mb-6"
+              >
+                <div className="p-4 rounded-2xl bg-white/[0.03] backdrop-blur-sm border border-white/[0.08]">
+                  <Search className="h-12 w-12 text-emerald-400" />
+                </div>
+              </motion.div>
 
-              <Card className="bg-slate-800/50 border-slate-700">
-                <CardContent className="p-6">
-                  <div className="flex items-center">
-                    <div className="p-2 bg-green-500/20 rounded-lg">
-                      <TrendingUp className="h-6 w-6 text-green-400" />
-                    </div>
-                    <div className="ml-4">
-                      <p className="text-sm text-slate-400">Success Rate</p>
-                      <p className="text-2xl font-bold text-white">{state.statistics.analysis_metrics.success_rate}%</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.6 }}
+                className="text-5xl font-bold text-white mb-6 tracking-tight"
+              >
+                Archaeological Discovery Dashboard
+              </motion.h1>
 
-              <Card className="bg-slate-800/50 border-slate-700">
-                <CardContent className="p-6">
-                  <div className="flex items-center">
-                    <div className="p-2 bg-purple-500/20 rounded-lg">
-                      <Users className="h-6 w-6 text-purple-400" />
-                    </div>
-                    <div className="ml-4">
-                      <p className="text-sm text-slate-400">Active Agents</p>
-                      <p className="text-2xl font-bold text-white">{state.agents.filter(a => a.status === 'online').length}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.6 }}
+                className="text-xl text-white/70 max-w-3xl mx-auto leading-relaxed"
+              >
+                Real-time archaeological site discovery using AI-powered multi-source analysis
+              </motion.p>
+            </motion.div>
 
-              <Card className="bg-slate-800/50 border-slate-700">
-                <CardContent className="p-6">
-                  <div className="flex items-center">
-                    <div className="p-2 bg-orange-500/20 rounded-lg">
-                      <Calendar className="h-6 w-6 text-orange-400" />
+            {/* Statistics Cards */}
+            {state.statistics && (
+              <motion.div 
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.8 }}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+              >
+                <Card className="bg-white/[0.05] backdrop-blur-sm border-white/[0.1] hover:bg-white/[0.08] transition-all duration-300">
+                  <CardContent className="p-6">
+                    <div className="flex items-center">
+                      <div className="p-3 bg-blue-500/20 rounded-2xl border border-blue-500/30">
+                        <Database className="h-6 w-6 text-blue-400" />
+                      </div>
+                      <div className="ml-4">
+                        <p className="text-sm text-white/60">Total Sites</p>
+                        <p className="text-2xl font-bold text-white">{state.statistics.total_sites_discovered}</p>
+                      </div>
                     </div>
-                    <div className="ml-4">
-                      <p className="text-sm text-slate-400">Last 24h</p>
-                      <p className="text-2xl font-bold text-white">{state.statistics.recent_activity.last_24h_analyses}</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white/[0.05] backdrop-blur-sm border-white/[0.1] hover:bg-white/[0.08] transition-all duration-300">
+                  <CardContent className="p-6">
+                    <div className="flex items-center">
+                      <div className="p-3 bg-emerald-500/20 rounded-2xl border border-emerald-500/30">
+                        <TrendingUp className="h-6 w-6 text-emerald-400" />
+                      </div>
+                      <div className="ml-4">
+                        <p className="text-sm text-white/60">Success Rate</p>
+                        <p className="text-2xl font-bold text-white">{state.statistics.analysis_metrics.success_rate}%</p>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white/[0.05] backdrop-blur-sm border-white/[0.1] hover:bg-white/[0.08] transition-all duration-300">
+                  <CardContent className="p-6">
+                    <div className="flex items-center">
+                      <div className="p-3 bg-purple-500/20 rounded-2xl border border-purple-500/30">
+                        <Users className="h-6 w-6 text-purple-400" />
+                      </div>
+                      <div className="ml-4">
+                        <p className="text-sm text-white/60">Active Agents</p>
+                        <p className="text-2xl font-bold text-white">{state.agents.filter(a => a.status === 'online').length}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white/[0.05] backdrop-blur-sm border-white/[0.1] hover:bg-white/[0.08] transition-all duration-300">
+                  <CardContent className="p-6">
+                    <div className="flex items-center">
+                      <div className="p-3 bg-orange-500/20 rounded-2xl border border-orange-500/30">
+                        <Calendar className="h-6 w-6 text-orange-400" />
+                      </div>
+                      <div className="ml-4">
+                        <p className="text-sm text-white/60">Last 24h</p>
+                        <p className="text-2xl font-bold text-white">{state.statistics.recent_activity.last_24h_analyses}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Discovery Form */}
-            <div className="lg:col-span-1">
-              <Card className="bg-slate-800/50 border-slate-700">
+            <motion.div 
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.8 }}
+              className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+            >
+              {/* Discovery Form */}
+              <div className="lg:col-span-1">
+                <Card className="bg-white/[0.02] backdrop-blur-sm border border-white/[0.08] hover:bg-white/[0.05] transition-all duration-300">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center">
                     <MapPin className="h-5 w-5 mr-2" />
@@ -1094,7 +1169,8 @@ export default function ArchaeologicalDiscoveryPage() {
                   )}
                 </TabsContent>
               </Tabs>
-            </div>
+              </div>
+            </motion.div>
           </div>
         </div>
       </div>

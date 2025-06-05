@@ -1716,12 +1716,12 @@ export default function NISAgentUI() {
             <div className="flex items-center justify-center gap-3 mb-4">
               <span className="text-4xl animate-pulse">🏛️</span>
               <h1 className="text-4xl font-medium tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-400 pb-1">
-                NIS Protocol Agent
+                Archaeological Analysis Platform
               </h1>
               <span className="text-4xl animate-pulse">🔬</span>
             </div>
             <p className="text-lg text-white/80 mb-3">
-              **Advanced Archaeological Discovery Platform**
+              **Multi-Modal Archaeological Analysis & Discovery Tools**
             </p>
             <motion.div 
               className="h-px bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent"

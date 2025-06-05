@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -42,7 +43,8 @@ import {
   Bot,
   User,
   Calendar,
-  TrendingUp
+  TrendingUp,
+  ArrowLeft
 } from 'lucide-react'
 import Image from 'next/image'
 import Navigation from "../../components/shared/Navigation"
@@ -1217,17 +1219,17 @@ export default function CodexReaderPage() {
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.1 }}
-                          className={`p-4 rounded-lg border border-${rec.color}-200 bg-${rec.color}-50 dark:bg-${rec.color}-950/20`}
+                          className="p-4 rounded-lg border border-white/[0.1] bg-white/[0.03] backdrop-blur-sm"
                         >
                           <div className="flex items-start gap-3">
-                            <div className={`p-2 bg-${rec.color}-100 dark:bg-${rec.color}-900 rounded-lg text-${rec.color}-600`}>
+                            <div className="p-2 bg-white/[0.1] rounded-lg text-violet-400">
                               {rec.icon}
                             </div>
                             <div className="flex-1">
-                              <h6 className={`font-medium text-sm text-${rec.color}-900 dark:text-${rec.color}-100`}>
+                              <h6 className="font-medium text-sm text-white">
                                 {rec.title}
                               </h6>
-                              <p className={`text-sm text-${rec.color}-800 dark:text-${rec.color}-200 mt-1`}>
+                              <p className="text-sm text-white/70 mt-1">
                                 {codexAnalysis.recommendations[key]}
                               </p>
                             </div>
@@ -1248,17 +1250,17 @@ export default function CodexReaderPage() {
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.1 }}
-                          className={`p-4 rounded-lg border border-${rec.color}-200 bg-${rec.color}-50 dark:bg-${rec.color}-950/20`}
+                          className="p-4 rounded-lg border border-white/[0.1] bg-white/[0.03] backdrop-blur-sm"
                         >
                           <div className="flex items-start gap-3">
-                            <div className={`p-2 bg-${rec.color}-100 dark:bg-${rec.color}-900 rounded-lg text-${rec.color}-600`}>
+                            <div className="p-2 bg-white/[0.1] rounded-lg text-violet-400">
                               {rec.icon}
                             </div>
                             <div>
-                              <h6 className={`font-medium text-sm text-${rec.color}-900 dark:text-${rec.color}-100`}>
+                              <h6 className="font-medium text-sm text-white">
                                 {rec.title}
                               </h6>
-                              <p className={`text-sm text-${rec.color}-800 dark:text-${rec.color}-200 mt-1`}>
+                              <p className="text-sm text-white/70 mt-1">
                                 {`${rec.title} recommendations available`}
                               </p>
                             </div>
@@ -1277,13 +1279,75 @@ export default function CodexReaderPage() {
   )
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-violet-900/5 to-purple-900/10" />
+      <div className="absolute inset-0">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-violet-500/5 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+      </div>
+
       <Navigation showBackendStatus={true} />
       
-      <div className="container mx-auto py-8 px-4">
-        <div className="max-w-6xl mx-auto">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5 mb-8">
+      <div className="relative z-10">
+        <div className="container mx-auto px-6 py-8">
+          {/* Page Header */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mb-8"
+          >
+            <div className="flex items-center gap-2 mb-6">
+              <Link 
+                href="/"
+                className="flex items-center gap-2 text-white/60 hover:text-white transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="text-sm">Back to Dashboard</span>
+              </Link>
+            </div>
+
+            <div className="text-center max-w-4xl mx-auto">
+              <motion.div 
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                className="flex items-center justify-center mb-6"
+              >
+                <div className="p-4 rounded-2xl bg-white/[0.03] backdrop-blur-sm border border-white/[0.08]">
+                  <BookOpen className="h-12 w-12 text-violet-400" />
+                </div>
+              </motion.div>
+
+              <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.6 }}
+                className="text-5xl font-bold text-white mb-6 tracking-tight"
+              >
+                Codex Reader & Analyzer
+              </motion.h1>
+
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.6 }}
+                className="text-xl text-white/70 max-w-3xl mx-auto leading-relaxed"
+              >
+                Discover and analyze ancient Mesoamerican codices with AI-powered archaeological insights
+              </motion.p>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.8 }}
+            className="max-w-6xl mx-auto"
+          >
+                      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-5 mb-8 bg-white/[0.03] backdrop-blur-sm border border-white/[0.08] rounded-2xl p-2">
               <TabsTrigger value="workflow" className="flex items-center gap-2">
                 <Play className="h-4 w-4" />
                 Workflow
@@ -1685,6 +1749,7 @@ export default function CodexReaderPage() {
               </div>
             </TabsContent>
           </Tabs>
+          </motion.div>
         </div>
       </div>
     </div>

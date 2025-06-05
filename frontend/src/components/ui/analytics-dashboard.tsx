@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
+import { motion } from 'framer-motion'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card"
 import { Button } from "../../../components/ui/button"
 import { Badge } from "../../../components/ui/badge"
@@ -349,33 +350,49 @@ export function AnalyticsDashboard() {
 
   if (loading) {
     return (
-      <Card className="w-full h-96 flex items-center justify-center bg-slate-800 border-slate-700">
-        <div className="flex items-center space-x-3 text-white">
-          <RefreshCw className="h-6 w-6 animate-spin text-emerald-400" />
-          <div>
-            <p className="font-medium">Loading Real Analytics Data...</p>
-            <p className="text-sm text-slate-400">Connecting to NIS Protocol backend</p>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6 }}
+      >
+        <Card className="w-full h-96 flex items-center justify-center bg-white/[0.02] backdrop-blur-sm border border-white/[0.08]">
+          <div className="flex items-center space-x-3 text-white">
+            <RefreshCw className="h-8 w-8 animate-spin text-emerald-400" />
+            <div>
+              <p className="font-medium text-lg">Loading Real Analytics Data...</p>
+              <p className="text-sm text-white/60">Connecting to NIS Protocol backend</p>
+            </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+      </motion.div>
     )
   }
 
   if (error || !isBackendOnline) {
     return (
-      <Card className="w-full h-96 flex items-center justify-center bg-slate-800 border-slate-700">
-        <div className="text-center text-white">
-          <AlertCircle className="h-12 w-12 mx-auto mb-4 text-red-400" />
-          <h3 className="text-lg font-semibold mb-2">Backend Connection Failed</h3>
-          <p className="text-slate-400 mb-4">
-            {error || 'Cannot connect to NIS Protocol backend at localhost:8000'}
-          </p>
-          <Button onClick={loadRealData} variant="outline" className="border-slate-600">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Retry Connection
-          </Button>
-        </div>
-      </Card>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6 }}
+      >
+        <Card className="w-full h-96 flex items-center justify-center bg-white/[0.02] backdrop-blur-sm border border-white/[0.08]">
+          <div className="text-center text-white">
+            <AlertCircle className="h-16 w-16 mx-auto mb-6 text-red-400" />
+            <h3 className="text-xl font-semibold mb-4">Backend Connection Failed</h3>
+            <p className="text-white/60 mb-6 max-w-md">
+              {error || 'Cannot connect to NIS Protocol backend at localhost:8000'}
+            </p>
+            <Button 
+              onClick={loadRealData} 
+              variant="outline" 
+              className="border-white/[0.2] text-white hover:bg-white/[0.1] backdrop-blur-sm"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retry Connection
+            </Button>
+          </div>
+        </Card>
+      </motion.div>
     )
   }
 
@@ -396,7 +413,12 @@ export function AnalyticsDashboard() {
   return (
     <div className="space-y-6">
       {/* Backend Status Banner */}
-      <div className="bg-emerald-900/20 border border-emerald-500/30 rounded-lg p-4">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="bg-emerald-500/10 backdrop-blur-sm border border-emerald-500/20 rounded-2xl p-6"
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <CheckCircle className="h-5 w-5 text-emerald-400" />
@@ -416,10 +438,15 @@ export function AnalyticsDashboard() {
             </Badge>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Controls */}
-      <Card className="bg-slate-800 border-slate-700">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.6 }}
+      >
+        <Card className="bg-white/[0.03] backdrop-blur-sm border border-white/[0.08] rounded-2xl">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -511,7 +538,8 @@ export function AnalyticsDashboard() {
             </div>
           </div>
         </CardContent>
-      </Card>
+        </Card>
+      </motion.div>
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

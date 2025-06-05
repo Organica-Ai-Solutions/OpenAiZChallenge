@@ -5,6 +5,33 @@ import { useState } from "react";
 import { cn } from "../../lib/utils";
 import { AnimatedMessage, ArchaeologicalTypingIndicator } from "./animated-message";
 import { ScrollArea } from "./scroll-area";
+import { 
+  TypingIndicator, 
+  EnhancedFileUpload, 
+  ConfidenceVisualization, 
+  MapIntegration 
+} from "./enhanced-chat-features";
+import { ChatHistory } from "./chat-history";
+import { ChatMessageDisplay } from "./chat-message-display";
+import { 
+  TypingBubble,
+  MessageBubble,
+  ChatScrollArea,
+  MessageTimestamp,
+  MessageStatus,
+  MessageActions
+} from "./enhanced-chat-styling";
+import { 
+  generateContextualResponse,
+  generateRealTimeResponse,
+  generateEnhancedArchaeologicalResponse,
+  generateEnhancedVisionResponse,
+  type ArchaeologicalAnalysis,
+  type VisionAnalysis
+} from "./enhanced-chat-responses";
+import { AdvancedChatInput } from "./advanced-chat-input";
+import { MobileChatLayout, useMobileChat } from "./mobile-chat-layout";
+import { useChatContext } from "../../src/lib/context/chat-context";
 import {
     ImageIcon,
     FileUp,
@@ -188,6 +215,21 @@ export function AnimatedAIChat({ onMessageSend, onCoordinateSelect }: AnimatedAI
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const [messages, setMessages] = useState<any[]>([]);
     const [lastResponse, setLastResponse] = useState<string>("");
+    const [showEnhancedFeatures, setShowEnhancedFeatures] = useState(false);
+    const [selectedCoordinates, setSelectedCoordinates] = useState<string>("");
+    const [recentMarkers, setRecentMarkers] = useState<Array<{ lat: number; lon: number; label: string; confidence?: number }>>([]);
+    
+    // Chat context integration
+    const { 
+        state: chatState, 
+        addMessage, 
+        setTyping,
+        exportChatHistory,
+        importChatHistory,
+        startNewSession,
+        clearChat
+    } = useChatContext();
+    
     const { textareaRef, adjustHeight } = useAutoResizeTextarea({
         minHeight: 60,
         maxHeight: 200,
@@ -229,6 +271,9 @@ export function AnimatedAIChat({ onMessageSend, onCoordinateSelect }: AnimatedAI
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
     const [isUploadingFile, setIsUploadingFile] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    
+    // Mobile chat features
+    const { isMobile, isKeyboardVisible, orientation } = useMobileChat();
 
     const commandSuggestions: CommandSuggestion[] = [
         { 
@@ -581,6 +626,15 @@ export function AnimatedAIChat({ onMessageSend, onCoordinateSelect }: AnimatedAI
 
     const handleDefaultChat = async (message: string) => {
         try {
+            // First try to get real data for coordinate analysis
+            const coordinates = message.match(/(-?\d+\.?\d*),\s*(-?\d+\.?\d*)/);
+            
+            if (coordinates && (message.toLowerCase().includes('/analyze') || message.toLowerCase().includes('/vision'))) {
+                // Use real-time response for coordinate analysis
+                return await generateRealTimeResponse(message);
+            }
+            
+            // For other messages, try the chat endpoint
             const response = await fetch('http://localhost:8000/agents/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -598,59 +652,8 @@ export function AnimatedAIChat({ onMessageSend, onCoordinateSelect }: AnimatedAI
                 throw new Error('Backend unavailable');
             }
         } catch (error) {
-            // More natural fallback responses for common queries
-            const lowerMessage = message.toLowerCase();
-            
-            if (lowerMessage.includes('help') || lowerMessage.includes('command')) {
-                return `🤖 **NIS Archaeological Assistant - Available Commands**
-
-**Agent Management:**
-• \`/agents\` - Check all agent status
-• \`/start [agent_name]\` - Start specific agent
-• \`/stop [agent_name]\` - Stop specific agent  
-• \`/deploy [agent_name] to [lat, lng]\` - Deploy agent
-• \`/tasks\` - View current analysis tasks
-• \`/config [agent_name]\` - Configure agent
-
-**Analysis Commands:**
-• \`/discover\` - Find archaeological sites
-• \`/analyze [coordinates]\` - Analyze location
-• \`/vision [coordinates]\` - AI vision analysis
-• \`/research [query]\` - Research capabilities
-• \`/status\` - System status
-
-Feel free to ask me anything about archaeological research or use any of these commands!`;
-            }
-            
-            if (lowerMessage.includes('how are you') || lowerMessage.includes('how do you do')) {
-                return "I'm doing great! I'm your AI assistant specialized in archaeological discovery and research. I can help you analyze coordinates, discover new sites, and manage our archaeological research agents. What would you like to explore today?";
-            }
-            
-            if (lowerMessage.includes('hello') || lowerMessage.includes('hi ') || lowerMessage.includes('hey')) {
-                const greetings = [
-                    "Hello! I'm your NIS Archaeological Assistant. I'm here to help you discover and analyze archaeological sites using advanced AI technology. What can I help you discover today?",
-                    "Hi there! Ready to explore some archaeological mysteries? I can analyze coordinates, examine satellite imagery, and help you discover ancient sites. What interests you?",
-                    "Hey! Great to meet you. I'm specialized in archaeological discovery using AI. Whether you want to analyze specific coordinates or discover new sites, I'm here to help!"
-                ];
-                return greetings[Math.floor(Math.random() * greetings.length)];
-            }
-            
-            if (lowerMessage.includes('what can you do') || lowerMessage.includes('capabilities')) {
-                return "I can help you with archaeological research in many ways:\n\n🔍 **Site Discovery** - Find new archaeological sites using AI analysis\n🎯 **Coordinate Analysis** - Analyze specific locations for archaeological potential\n👁️ **Vision Analysis** - Examine satellite imagery for patterns and features\n📚 **Historical Research** - Access and analyze historical records\n🤖 **Agent Management** - Control and deploy specialized research agents\n🗺️ **Mapping** - Visualize discoveries and research areas\n\nJust tell me what you'd like to explore or use `/` to see available commands!";
-            }
-            
-            if (lowerMessage.includes('dorado') || lowerMessage.includes('el dorado')) {
-                return "Ah, searching for El Dorado! That's exactly the kind of legendary archaeological discovery I can help with. I can analyze coordinates in South America, examine satellite imagery for ancient settlements, and cross-reference historical accounts.\n\nWould you like me to:\n• `/discover` potential sites in the Amazon basin\n• `/analyze` specific coordinates you're interested in\n• `/research` historical accounts of El Dorado\n\nLet's uncover some archaeological mysteries together!";
-            }
-            
-            // Generic friendly responses with variety
-            const genericResponses = [
-                "I understand! I'm your AI archaeological assistant and I'm here to help with site discovery, coordinate analysis, and research. Feel free to ask me anything about archaeology or use `/help` to see what I can do. What would you like to explore?",
-                "That's interesting! As your archaeological AI assistant, I can help you discover ancient sites, analyze coordinates, and research historical data. What aspect of archaeology would you like to explore?",
-                "I'm here to help with all things archaeological! Whether you want to discover new sites, analyze specific locations, or research historical data, I've got you covered. What can I help you with?",
-                "Great question! I specialize in archaeological discovery and analysis. I can examine coordinates, process satellite imagery, and help uncover ancient mysteries. What would you like to investigate?"
-            ];
-            return genericResponses[Math.floor(Math.random() * genericResponses.length)];
+            // Use enhanced contextual response generator for fallback
+            return generateContextualResponse(message);
         }
     };
 
@@ -879,10 +882,110 @@ Feel free to ask me anything about archaeological research or use any of these c
         }
     };
 
-    const removeAttachment = (index: number) => {
+        const removeAttachment = (index: number) => {
         setAttachments(prev => prev.filter((_, i) => i !== index));
     };
-    
+
+    // Enhanced file upload handler
+    const handleEnhancedFileUpload = async (files: File[]) => {
+        for (const file of files) {
+            try {
+                // Add file upload message using chat context
+                const messageId = addMessage({
+                    content: `Uploaded file: ${file.name}`,
+                    role: "user" as const,
+                    type: "file_upload" as const,
+                    metadata: {
+                        file_name: file.name,
+                        file_type: file.type,
+                        file_size: file.size,
+                    }
+                });
+
+                // Simulate file processing
+                if (file.type.startsWith('image/')) {
+                    // Handle image upload for vision analysis
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        const dataUrl = e.target?.result as string;
+                        
+                        addMessage({
+                            content: `Image uploaded: ${file.name}. Ready for analysis!\n\nYou can now use \`/vision\` command to analyze this image with AI vision, or the image will be automatically included in your next analysis request.`,
+                            role: "agent" as const,
+                            metadata: {
+                                file_preview: dataUrl,
+                                analysis_ready: true,
+                                file_name: file.name,
+                                file_type: file.type
+                            }
+                        });
+
+                        // Trigger real image analysis after upload
+                        setTimeout(async () => {
+                            try {
+                                // Call real vision analysis endpoint
+                                const analysisResponse = await fetch('http://localhost:8000/analysis/vision-image', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        image_data: dataUrl,
+                                        filename: file.name
+                                    })
+                                });
+
+                                if (analysisResponse.ok) {
+                                    const analysisData = await analysisResponse.json();
+                                    addMessage({
+                                        content: generateEnhancedVisionResponse(analysisData),
+                                        role: "agent" as const,
+                                        type: "analysis_result" as const,
+                                        metadata: {
+                                            confidence: analysisData.confidence || 0.78,
+                                            analysis_results: analysisData
+                                        }
+                                    });
+                                } else {
+                                    // Fallback message if backend unavailable
+                                    addMessage({
+                                        content: `📸 **Image Ready for Analysis**\n\n**${file.name}** has been uploaded successfully.\n\n**Next Steps:**\n• Use \`/vision analyze ${file.name}\` for AI analysis\n• Use \`/analyze\` with coordinates if location is known\n• Upload additional images for comparative analysis\n\n*Backend analysis service is currently unavailable. Please try manual analysis commands.*`,
+                                        role: "agent" as const,
+                                        type: "suggestion" as const
+                                    });
+                                }
+                            } catch (error) {
+                                console.error('Image analysis error:', error);
+                                addMessage({
+                                    content: `📸 **Image Uploaded Successfully**\n\n**${file.name}** is ready for analysis.\n\n**Available Commands:**\n• \`/vision analyze ${file.name}\` - AI-powered analysis\n• \`/research image-features\` - Feature identification\n• \`/extract coordinates\` - Location data extraction\n\n*Use any command above to analyze your uploaded image.*`,
+                                    role: "agent" as const,
+                                    type: "suggestion" as const
+                                });
+                            }
+                        }, 2000);
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    // Handle other file types
+                    addMessage({
+                        content: `📄 File processed: **${file.name}**\n\nFile is ready for analysis and integration into research queries.`,
+                        role: "agent" as const,
+                        metadata: {
+                            analysis_ready: true,
+                            file_name: file.name,
+                            file_type: file.type
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('File upload error:', error);
+                addMessage({
+                    content: `Failed to upload ${file.name}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                    role: "system" as const,
+                    type: "error" as const,
+                });
+            }
+        }
+    };
+
     const selectCommandSuggestion = (index: number) => {
         const selectedCommand = commandSuggestions[index];
         setValue(selectedCommand.prefix + ' ');
@@ -944,54 +1047,163 @@ Feel free to ask me anything about archaeological research or use any of these c
                         </div>
                     )}
 
+                    {/* Enhanced Features Panel */}
+                    <AnimatePresence>
+                        {showEnhancedFeatures && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="bg-white/[0.02] rounded-lg border border-white/[0.05] p-4 mb-4"
+                            >
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-medium text-white/90">Enhanced Features</h3>
+                                    <div className="flex items-center gap-2">
+                                        {/* Chat History Button */}
+                                        <ChatHistory
+                                            sessions={chatState.chatHistory.map((session, index) => ({
+                                                id: `session_${index}`,
+                                                timestamp: new Date(Date.now() - index * 24 * 60 * 60 * 1000),
+                                                messageCount: session.length,
+                                                lastMessage: session[session.length - 1]?.content || '',
+                                                title: `Session ${index + 1}`
+                                            }))}
+                                            onSessionSelect={(sessionId) => {
+                                                console.log('Selected session:', sessionId);
+                                            }}
+                                            onSessionDelete={(sessionId) => {
+                                                console.log('Delete session:', sessionId);
+                                            }}
+                                            onSessionStar={(sessionId) => {
+                                                console.log('Star session:', sessionId);
+                                            }}
+                                            onSessionArchive={(sessionId) => {
+                                                console.log('Archive session:', sessionId);
+                                            }}
+                                            onExportHistory={() => {
+                                                const data = exportChatHistory();
+                                                const blob = new Blob([data], { type: 'application/json' });
+                                                const url = URL.createObjectURL(blob);
+                                                const a = document.createElement('a');
+                                                a.href = url;
+                                                a.download = `nis-chat-history-${new Date().toISOString().split('T')[0]}.json`;
+                                                a.click();
+                                                URL.revokeObjectURL(url);
+                                            }}
+                                            onImportHistory={(data) => {
+                                                importChatHistory(data);
+                                            }}
+                                            currentSessionId={chatState.currentSessionId}
+                                        />
+                                        
+                                        <button
+                                            onClick={() => setShowEnhancedFeatures(false)}
+                                            className="p-1 text-gray-400 hover:text-white transition-colors"
+                                        >
+                                            <XIcon className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                    {/* File Upload */}
+                                    <div>
+                                        <h4 className="text-sm font-medium text-white/80 mb-2">File Upload</h4>
+                                        <EnhancedFileUpload
+                                            onFileUpload={handleEnhancedFileUpload}
+                                            acceptedTypes={['image/*', '.json', '.txt', '.csv']}
+                                            maxSize={50 * 1024 * 1024} // 50MB
+                                        />
+                                    </div>
+
+                                    {/* Map Integration */}
+                                    <div>
+                                        <h4 className="text-sm font-medium text-white/80 mb-2">Quick Coordinate Analysis</h4>
+                                        <MapIntegration
+                                            onCoordinateSelect={(coords) => {
+                                                if (onCoordinateSelect) {
+                                                    onCoordinateSelect(coords);
+                                                }
+                                                setSelectedCoordinates(coords);
+                                                setValue(`/analyze ${coords}`);
+                                            }}
+                                            selectedCoordinates={selectedCoordinates}
+                                            markers={recentMarkers}
+                                        />
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
                     {/* Messages Area */}
-                    {messages.length > 0 && (
+                    {(chatState.messages.length > 0 || messages.length > 0) && (
                         <div className="bg-white/[0.02] rounded-2xl border border-white/[0.05] h-[400px]">
                             <ScrollArea className="h-full p-4">
-                                <div className="space-y-4">
-                                    {messages.map((message) => (
-                                        <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                            <div className={`max-w-[80%] p-4 rounded-lg ${
-                                                message.role === 'user' 
-                                                    ? 'bg-emerald-600/20 border border-emerald-500/30 text-emerald-100 ml-auto' 
-                                                    : message.type === 'error'
-                                                    ? 'bg-red-600/20 border border-red-500/30 text-red-100'
-                                                    : 'bg-slate-800/40 border border-slate-700/30 text-white/90'
-                                            }`}>
-                                                {message.role === 'user' ? (
-                                                    // User messages - simple display
-                                                    <div className="text-sm whitespace-pre-wrap font-medium">
-                                                        {message.content}
-                                                    </div>
-                                                ) : (
-                                                    // AI messages - always animate (natural typing effect)
-                                                    <AnimatedMessage 
-                                                        content={message.content}
-                                                        isStreaming={true}
-                                                        className="text-sm"
-                                                    />
-                                                )}
-                                                <div className="text-xs opacity-60 mt-2 flex items-center justify-between">
-                                                    <span>
-                                                        {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                    </span>
-                                                    {message.role === 'assistant' && (
-                                                        <div className="flex items-center gap-1 text-xs">
-                                                            <span className="text-emerald-400">🏛️</span>
-                                                            <span className="text-slate-400">NIS Protocol</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
+                                <div className="space-y-6">
+                                    {/* Render messages from chat context */}
+                                    {chatState.messages.map((message) => (
+                                        <ChatMessageDisplay
+                                            key={message.id}
+                                            message={{
+                                                id: message.id,
+                                                content: message.content,
+                                                role: message.role,
+                                                timestamp: message.timestamp,
+                                                type: message.type,
+                                                metadata: message.metadata,
+                                                action_buttons: message.action_buttons
+                                            }}
+                                            onActionClick={(action, data) => {
+                                                console.log('Action clicked:', action, data);
+                                                // Handle action clicks (view map, download file, etc.)
+                                                if (action === 'view_map' && data?.coordinates) {
+                                                    if (onCoordinateSelect) {
+                                                        onCoordinateSelect(data.coordinates);
+                                                    }
+                                                }
+                                            }}
+                                            onImageClick={(imageUrl) => {
+                                                console.log('Image clicked:', imageUrl);
+                                            }}
+                                        />
                                     ))}
+
+                                    {/* Legacy messages for compatibility */}
+                                    {messages.filter(msg => !chatState.messages.find(cm => cm.id === msg.id)).map((message) => (
+                                        <ChatMessageDisplay
+                                            key={message.id}
+                                            message={{
+                                                id: message.id,
+                                                content: message.content,
+                                                role: message.role as any,
+                                                timestamp: new Date(message.timestamp),
+                                                type: message.type,
+                                                metadata: message.metadata,
+                                                action_buttons: message.action_buttons
+                                            }}
+                                            isTyping={message.role !== 'user' && isTyping && messages[messages.length - 1]?.id === message.id}
+                                            onActionClick={(action, data) => {
+                                                console.log('Legacy action clicked:', action, data);
+                                            }}
+                                        />
+                                    ))}
+
+                                    {/* Show typing indicators */}
+                                    <AnimatePresence>
+                                        {chatState.typingIndicators.map((indicator) => (
+                                            <TypingIndicator 
+                                                key={indicator.userId}
+                                                userId={indicator.userId}
+                                                userName={indicator.userId === 'nis-agent' ? 'NIS Agent' : 'Assistant'}
+                                            />
+                                        ))}
+                                    </AnimatePresence>
                                     
-                                    {/* Typing indicator */}
-                                    {isTyping && (
+                                    {/* Enhanced typing indicator */}
+                                    {isTyping && chatState.typingIndicators.length === 0 && (
                                         <div className="flex justify-start">
-                                            <div className="bg-slate-800/40 border border-slate-700/30 rounded-lg p-4 max-w-[80%]">
-                                                <ArchaeologicalTypingIndicator />
-                                            </div>
+                                            <TypingBubble />
                                         </div>
                                     )}
                                     
@@ -1232,6 +1444,25 @@ Feel free to ask me anything about archaeological research or use any of these c
                                     <motion.span
                                         className="absolute inset-0 bg-white/[0.05] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
                                         layoutId="button-highlight"
+                                    />
+                                </motion.button>
+                                
+                                <motion.button
+                                    type="button"
+                                    onClick={() => setShowEnhancedFeatures(!showEnhancedFeatures)}
+                                    whileTap={{ scale: 0.94 }}
+                                    className={cn(
+                                        "p-2 rounded-lg transition-colors relative group",
+                                        showEnhancedFeatures 
+                                            ? "bg-blue-600/20 text-blue-400" 
+                                            : "text-white/40 hover:text-white/90"
+                                    )}
+                                    title="Enhanced Features"
+                                >
+                                    <Settings className="w-4 h-4" />
+                                    <motion.span
+                                        className="absolute inset-0 bg-white/[0.05] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                                        layoutId="settings-highlight"
                                     />
                                 </motion.button>
                             </div>

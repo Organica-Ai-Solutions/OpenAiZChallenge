@@ -17,7 +17,7 @@ interface NavigationProps {
 const navigationLinks = [
   { href: "/", label: "Home" },
   { href: "/archaeological-discovery", label: "Discovery" },
-  { href: "/agent", label: "Agents" },
+  { href: "/agent", label: "Analysis" },
   { href: "/satellite", label: "Satellite" },
   { href: "/map", label: "Maps" },
   { href: "/analytics", label: "Analytics" },

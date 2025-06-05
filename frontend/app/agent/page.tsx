@@ -4,7 +4,7 @@ import Navigation from "../../components/shared/Navigation"
 import NISAgentUI from "../../src/components/NISAgentUI"
 import { TooltipProvider } from "../../components/ui/tooltip"
 
-export default function AgentPage() {
+export default function AnalysisPage() {
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-slate-900 lab-bg">

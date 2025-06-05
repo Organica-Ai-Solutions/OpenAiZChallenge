@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useAnimatedText } from "./animated-text";
+import { useAnimatedText, useAIResponseAnimation, useUserMessageAnimation } from "./animated-text";
 import { cn } from "../../lib/utils";
 
 interface AnimatedMessageProps {
@@ -9,6 +9,7 @@ interface AnimatedMessageProps {
   isStreaming?: boolean;
   className?: string;
   delay?: number;
+  role?: 'user' | 'assistant' | 'agent' | 'system';
 }
 
 // Function to parse and format markdown-like text with emoticons
@@ -66,9 +67,48 @@ function formatMessage(text: string): React.ReactNode[] {
     { regex: /(\d+(?:\.\d+)?%)/g, format: (match: string) => 
       <span key={`percent-${keyIndex++}`} className="bg-emerald-900/40 text-emerald-300 px-1.5 py-0.5 rounded font-semibold">{match}</span> 
     },
-    // URLs/Links
-    { regex: /(https?:\/\/[^\s]+)/g, format: (match: string) => 
+    // Image URLs
+    { regex: /(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif|webp|svg)(?:\?[^\s]*)?)/gi, format: (match: string) => 
+      <div key={`image-${keyIndex++}`} className="my-3">
+        <img 
+          src={match} 
+          alt="Image" 
+          className="max-w-full max-h-64 rounded-lg cursor-pointer hover:opacity-80 transition-opacity border border-slate-600/30" 
+          onClick={() => window.open(match, '_blank')}
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+            // Fallback to link display
+            const link = document.createElement('a');
+            link.href = match;
+            link.textContent = match;
+            link.className = "text-blue-400 hover:text-blue-300 underline";
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            target.parentNode?.replaceChild(link, target);
+          }}
+        />
+      </div>
+    },
+    // URLs/Links (non-images)
+    { regex: /(https?:\/\/[^\s]+\.(?!jpg|jpeg|png|gif|webp|svg)[^\s]*)/gi, format: (match: string) => 
       <a key={`link-${keyIndex++}`} href={match} className="text-blue-400 hover:text-blue-300 underline" target="_blank" rel="noopener noreferrer">{match}</a> 
+    },
+    // Base64 Images
+    { regex: /(data:image\/[^;]+;base64,[A-Za-z0-9+/=]+)/g, format: (match: string) => 
+      <div key={`base64-image-${keyIndex++}`} className="my-3">
+        <img 
+          src={match} 
+          alt="Uploaded Image" 
+          className="max-w-full max-h-64 rounded-lg cursor-pointer hover:opacity-80 transition-opacity border border-slate-600/30" 
+          onClick={() => {
+            const newWindow = window.open();
+            if (newWindow) {
+              newWindow.document.write(`<img src="${match}" style="max-width: 100%; max-height: 100vh; object-fit: contain;" />`);
+            }
+          }}
+        />
+      </div>
     }
   ];
 
@@ -163,12 +203,17 @@ function formatMessage(text: string): React.ReactNode[] {
   return parts;
 }
 
-export function AnimatedMessage({ content, isStreaming = false, className, delay = 0 }: AnimatedMessageProps) {
-  // Use word-by-word animation for a more natural reading experience
-  const animatedContent = useAnimatedText(
-    content, 
-    isStreaming ? " " : "" // Word by word when streaming, all at once when complete
-  );
+export function AnimatedMessage({ content, isStreaming = false, className, delay = 0, role = 'assistant' }: AnimatedMessageProps) {
+  // Use different animations based on role and streaming state
+  let animatedContent: string;
+  
+  if (role === 'user') {
+    // User messages appear instantly
+    animatedContent = useUserMessageAnimation(content);
+  } else {
+    // AI responses stream nicely
+    animatedContent = useAIResponseAnimation(content, isStreaming);
+  }
 
   const formattedContent = formatMessage(animatedContent || content); // Fallback to full content
 

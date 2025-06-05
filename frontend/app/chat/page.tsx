@@ -4,6 +4,7 @@ import Link from "next/link"
 import { Globe } from "lucide-react"
 import { AnimatedAIChat } from "../../components/ui/animated-ai-chat"
 import { NISDataProvider } from "../../src/lib/context/nis-data-context"
+import { ChatProvider } from "../../src/lib/context/chat-context"
 import { useState, useEffect } from "react"
 import Navigation from "../../components/shared/Navigation"
 
@@ -558,28 +559,30 @@ I'm here to help with archaeological discovery! ${message.toLowerCase().includes
 
   return (
     <NISDataProvider>
-      <div className="min-h-screen bg-slate-900 lab-bg">
-        <Navigation />
+      <ChatProvider>
+        <div className="min-h-screen bg-slate-900 lab-bg">
+          <Navigation />
 
-        {/* Main Content - Full height animated chat */}
-        <main className="relative">
-          <AnimatedAIChat 
-            onMessageSend={handleMessageSend}
-            onCoordinateSelect={handleCoordinateSelect}
-          />
-        </main>
+          {/* Main Content - Full height animated chat */}
+          <main className="relative">
+            <AnimatedAIChat 
+              onMessageSend={handleMessageSend}
+              onCoordinateSelect={handleCoordinateSelect}
+            />
+          </main>
 
-        {/* Footer - More minimal and unobtrusive */}
-        <footer className="absolute bottom-0 left-0 right-0 bg-slate-900/40 backdrop-blur-sm border-t border-slate-700/30 py-4 text-slate-400">
-          <div className="container mx-auto px-6">
-            <div className="text-center text-xs">
-              <p>© {new Date().getFullYear()} Organica-Ai-Solutions • NIS Protocol Archaeological Discovery 
-                <span className="ml-2">{isBackendOnline ? '🟢 Backend Online' : '🔴 Backend Offline'}</span>
-              </p>
+          {/* Footer - More minimal and unobtrusive */}
+          <footer className="absolute bottom-0 left-0 right-0 bg-slate-900/40 backdrop-blur-sm border-t border-slate-700/30 py-4 text-slate-400">
+            <div className="container mx-auto px-6">
+              <div className="text-center text-xs">
+                <p>© {new Date().getFullYear()} Organica-Ai-Solutions • NIS Protocol Archaeological Discovery 
+                  <span className="ml-2">{isBackendOnline ? '🟢 Backend Online' : '🔴 Backend Offline'}</span>
+                </p>
+              </div>
             </div>
-          </div>
-        </footer>
-      </div>
+          </footer>
+        </div>
+      </ChatProvider>
     </NISDataProvider>
   )
 }
