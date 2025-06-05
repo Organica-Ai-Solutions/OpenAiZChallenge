@@ -177,6 +177,94 @@ export default function ArchaeologicalMapPage() {
     }
   }, [])
 
+  // Initialize Google Maps
+  const initializeMap = useCallback(() => {
+    if (!mapRef.current || !window.google || !googleMapsLoaded) {
+      console.log('🗺️ Waiting for Google Maps to load...')
+      return
+    }
+
+    try {
+      console.log('🗺️ Initializing Google Maps...')
+      const mapOptions = {
+        center: { lat: mapCenter[0], lng: mapCenter[1] },
+        zoom: mapZoom,
+        mapTypeId: window.google.maps.MapTypeId?.SATELLITE || 'satellite',
+        mapTypeControl: true,
+        streetViewControl: false,
+        fullscreenControl: true,
+        zoomControl: true,
+        scaleControl: true,
+        rotateControl: false,
+        gestureHandling: 'greedy'
+      }
+
+      googleMapRef.current = new window.google.maps.Map(mapRef.current, mapOptions)
+      
+      // Initialize drawing manager if available
+      if ((window.google.maps as any).drawing) {
+        drawingManagerRef.current = new (window.google.maps as any).drawing.DrawingManager({
+          drawingMode: null,
+          drawingControl: false,
+          polygonOptions: {
+            fillColor: '#ff0000',
+            fillOpacity: 0.3,
+            strokeColor: '#ff0000',
+            strokeWeight: 2,
+            clickable: true,
+            editable: true
+          },
+          rectangleOptions: {
+            fillColor: '#0000ff',
+            fillOpacity: 0.3,
+            strokeColor: '#0000ff',
+            strokeWeight: 2,
+            clickable: true,
+            editable: true
+          },
+          circleOptions: {
+            fillColor: '#00ff00',
+            fillOpacity: 0.3,
+            strokeColor: '#00ff00',
+            strokeWeight: 2,
+            clickable: true,
+            editable: true
+          }
+        })
+        drawingManagerRef.current.setMap(googleMapRef.current)
+        
+        // Handle completed drawings
+        ;(window.google.maps as any).event.addListener(drawingManagerRef.current, 'overlaycomplete', (event: any) => {
+          try {
+            handleDrawingComplete(event)
+          } catch (error) {
+            console.error('❌ Drawing completion error:', error)
+          }
+        })
+      }
+      
+      console.log('✅ Google Maps initialized successfully')
+      
+      // Load markers after map is ready
+      setTimeout(() => {
+        if (googleMapRef.current && sites.length > 0) {
+          updateMapMarkers()
+        }
+      }, 100)
+    } catch (error) {
+      console.error('❌ Failed to initialize Google Maps:', error)
+      setMapError('Failed to initialize map')
+    }
+  }, [mapCenter, mapZoom, googleMapsLoaded, sites])
+
+  // Initialize effect - should wait for Google Maps to load
+  useEffect(() => {
+    if (googleMapsLoaded && window.google && window.google.maps) {
+      console.log('🗺️ Google Maps ready, initializing map...')
+      initializeMap()
+    }
+  }, [googleMapsLoaded, initializeMap])
+
   // Load sites
   const loadSites = useCallback(async () => {
     setLoading(true)
@@ -261,75 +349,6 @@ export default function ArchaeologicalMapPage() {
       setLoading(false)
     }
   }, [backendOnline])
-
-  // Initialize Google Maps
-  const initializeMap = useCallback(() => {
-    if (!mapRef.current || !window.google) {
-      return
-    }
-
-    try {
-      const mapOptions = {
-        center: { lat: mapCenter[0], lng: mapCenter[1] },
-        zoom: mapZoom,
-        mapTypeId: window.google.maps.MapTypeId?.SATELLITE || 'satellite',
-        mapTypeControl: true,
-        streetViewControl: false,
-        fullscreenControl: true,
-        zoomControl: true
-      }
-
-      googleMapRef.current = new window.google.maps.Map(mapRef.current, mapOptions)
-      
-      // Initialize drawing manager if available
-      if ((window.google.maps as any).drawing) {
-        drawingManagerRef.current = new (window.google.maps as any).drawing.DrawingManager({
-          drawingMode: null,
-          drawingControl: false,
-          polygonOptions: {
-            fillColor: '#ff0000',
-            fillOpacity: 0.3,
-            strokeColor: '#ff0000',
-            strokeWeight: 2,
-            clickable: true,
-            editable: true
-          },
-          rectangleOptions: {
-            fillColor: '#0000ff',
-            fillOpacity: 0.3,
-            strokeColor: '#0000ff',
-            strokeWeight: 2,
-            clickable: true,
-            editable: true
-          },
-          circleOptions: {
-            fillColor: '#00ff00',
-            fillOpacity: 0.3,
-            strokeColor: '#00ff00',
-            strokeWeight: 2,
-            clickable: true,
-            editable: true
-          }
-        })
-        drawingManagerRef.current.setMap(googleMapRef.current)
-        
-        // Handle completed drawings
-        ;(window.google.maps as any).event.addListener(drawingManagerRef.current, 'overlaycomplete', (event: any) => {
-          try {
-            handleDrawingComplete(event)
-          } catch (error) {
-            console.error('❌ Drawing completion error:', error)
-          }
-        })
-      }
-      
-      console.log('✅ Google Maps initialized')
-      updateMapMarkers()
-    } catch (error) {
-      console.error('❌ Failed to initialize Google Maps:', error)
-      setMapError('Failed to initialize map')
-    }
-  }, [mapCenter, mapZoom])
 
   // Update map markers
   const updateMapMarkers = useCallback(() => {
@@ -1592,17 +1611,6 @@ Currently showing ${sites.length} archaeological sites.`
   }, [loadSites])
 
   useEffect(() => {
-    const initMap = () => {
-      if (window.google && window.google.maps) {
-        initializeMap()
-      } else {
-        setTimeout(initMap, 1000)
-      }
-    }
-    initMap()
-  }, [initializeMap])
-
-  useEffect(() => {
     updateMapMarkers()
   }, [updateMapMarkers])
 
@@ -1615,6 +1623,14 @@ Currently showing ${sites.length} archaeological sites.`
       }
     })
   }, [layers, layerData, layersLoading, loadLayerData])
+
+  // Update layer overlays when layers or data change
+  useEffect(() => {
+    if (googleMapRef.current) {
+      console.log('🗺️ Updating layer overlays...')
+      updateLayerOverlays()
+    }
+  }, [layers, layerData, updateLayerOverlays])
 
   return (
     <div className="h-screen bg-slate-900 text-white flex flex-col">

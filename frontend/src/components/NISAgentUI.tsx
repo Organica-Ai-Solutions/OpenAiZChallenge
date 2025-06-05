@@ -270,92 +270,56 @@ export default function NISAgentUI() {
       return
     }
 
-    const mapOptions = {
-      center: { lat: mapCenter[0], lng: mapCenter[1] },
-      zoom: mapZoom,
-      mapTypeId: (window.google.maps as any).MapTypeId.SATELLITE,
-      streetViewControl: false,
-      fullscreenControl: true,
-      mapTypeControl: true,
-      zoomControl: true,
-      gestureHandling: 'cooperative',
-      styles: [
-        {
-          featureType: 'poi',
-          stylers: [{ visibility: 'off' }]
-        }
-      ]
-    }
+    try {
+      console.log('🗺️ Initializing Agent Map...')
+      const mapOptions = {
+        center: { lat: mapCenter[0], lng: mapCenter[1] },
+        zoom: mapZoom,
+        mapTypeId: (window.google.maps as any).MapTypeId.SATELLITE,
+        streetViewControl: false,
+        fullscreenControl: true,
+        mapTypeControl: true,
+        zoomControl: true,
+        gestureHandling: 'cooperative',
+        styles: [
+          {
+            featureType: 'poi',
+            stylers: [{ visibility: 'off' }]
+          }
+        ]
+      }
 
-    console.log('🗺️ Initializing Google Map')
-    googleMapRef.current = new (window.google.maps as any).Map(mapRef.current, mapOptions)
-
-    // Initialize drawing manager
-    if ((window.google.maps as any).drawing) {
-      drawingManagerRef.current = new (window.google.maps as any).drawing.DrawingManager({
-        drawingMode: null,
-        drawingControl: false,
-        polygonOptions: {
-          editable: true,
-          draggable: true,
-          fillColor: '#FF6B35',
-          fillOpacity: 0.3,
-          strokeColor: '#FF6B35',
-          strokeWeight: 2
-        },
-        rectangleOptions: {
-          editable: true,
-          draggable: true,
-          fillColor: '#4ECDC4',
-          fillOpacity: 0.3,
-          strokeColor: '#4ECDC4',
-          strokeWeight: 2
-        },
-        circleOptions: {
-          editable: true,
-          draggable: true,
-          fillColor: '#45B7D1',
-          fillOpacity: 0.3,
-          strokeColor: '#45B7D1',
-          strokeWeight: 2
-        }
-      })
+      googleMapRef.current = new (window.google.maps as any).Map(mapRef.current, mapOptions)
       
-      drawingManagerRef.current.setMap(googleMapRef.current)
-
-      // Handle drawing completion
-      (window.google.maps as any).event.addListener(drawingManagerRef.current, 'overlaycomplete', (event: any) => {
-        const newZone: AnalysisZone = {
-          id: `zone_${Date.now()}`,
-          name: `Analysis Zone ${analysisZones.length + 1}`,
-          coordinates: [],
-          type: event.type,
-          status: 'pending',
-          created_at: new Date().toISOString()
-        }
-
-        if (event.type === 'circle') {
-          const center = event.overlay.getCenter()
-          const radius = event.overlay.getRadius()
-          newZone.coordinates = [[center.lat(), center.lng()]]
-        } else if (event.type === 'rectangle') {
-          const bounds = event.overlay.getBounds()
-          const ne = bounds.getNorthEast()
-          const sw = bounds.getSouthWest()
-          newZone.coordinates = [[ne.lat(), ne.lng()], [sw.lat(), sw.lng()]]
-        } else if (event.type === 'polygon') {
-          const path = event.overlay.getPath()
-          newZone.coordinates = path.getArray().map((point: any) => [point.lat(), point.lng()])
-        }
-
-        setAnalysisZones(prev => [...prev, newZone])
-        setDrawingMode('none')
-        drawingManagerRef.current.setDrawingMode(null)
+      // Add map click listener for coordinate selection
+      googleMapRef.current.addListener('click', (event: any) => {
+        const lat = event.latLng.lat()
+        const lng = event.latLng.lng()
+        const coordinates = `${lat.toFixed(6)}, ${lng.toFixed(6)}`
+        console.log('🗺️ Map clicked:', coordinates)
+        setCoordinates(coordinates)
       })
-    }
 
-    console.log('✅ Google Map initialized successfully')
-  }, [mapCenter, mapZoom, analysisZones.length])
+      console.log('✅ Agent Map initialized successfully')
+      
+      // Load markers after a short delay
+      setTimeout(() => {
+        updateMapMarkers()
+      }, 100)
+      
+    } catch (error) {
+      console.error('❌ Failed to initialize Agent Map:', error)
+      setMapError(`Map initialization failed: ${(error as Error).message}`)
+    }
+  }, [mapCenter, mapZoom])
+
+  // Initialize map when Google Maps loads
+  useEffect(() => {
+    if (window.google && window.google.maps && mapRef.current) {
+      console.log('🗺️ Google Maps available, initializing agent map...')
+      initializeMap()
+    }
+  }, [initializeMap])
 
   // Update map markers when sites change
   const updateMapMarkers = useCallback(() => {

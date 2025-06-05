@@ -391,19 +391,28 @@ export function AnimatedAIChat({ onMessageSend, onCoordinateSelect }: AnimatedAI
         if (!value.trim()) return;
 
         const userMessage = {
+            id: `user_${Date.now()}`,
             type: 'user',
             content: value.trim(),
-            timestamp: new Date()
+            timestamp: new Date(),
+            role: 'user'
         };
 
-        setMessages(prev => [...prev, userMessage]);
-        setIsTyping(true);
+        const currentMessage = value.trim();
+        
+        // Clear input immediately and add user message
         setValue("");
         adjustHeight(true);
+        setMessages(prev => [...prev, userMessage]);
+        
+        // Show typing indicator with a small delay to feel natural
+        setTimeout(() => {
+            setIsTyping(true);
+        }, 300);
 
         try {
             let response;
-            const message = value.trim().toLowerCase();
+            const message = currentMessage.toLowerCase();
             
             // Agent-specific command handling
             if (message.startsWith('/agents')) {
@@ -424,17 +433,23 @@ export function AnimatedAIChat({ onMessageSend, onCoordinateSelect }: AnimatedAI
                 response = await handleConfigAgentCommand(params);
             } else if (onMessageSend) {
                 // Use custom message handler if provided (for map page)
-                response = await onMessageSend(value.trim());
+                response = await onMessageSend(currentMessage);
             } else {
                 // Default NIS chat handling
-                response = await handleDefaultChat(value.trim());
+                response = await handleDefaultChat(currentMessage);
             }
 
+            // Add natural delay to simulate thinking time (1-2 seconds)
+            const thinkingTime = Math.random() * 1000 + 1000; // 1-2 seconds
+            await new Promise(resolve => setTimeout(resolve, thinkingTime));
+
             const aiResponse = {
+                id: `ai_${Date.now()}`,
                 type: 'ai',
                 content: response?.message || response || 'I understand your request. How else can I help you with archaeological research?',
                 timestamp: new Date(),
-                data: response?.data || null
+                data: response?.data || null,
+                role: 'assistant'
             };
 
             setMessages(prev => [...prev, aiResponse]);
@@ -442,11 +457,17 @@ export function AnimatedAIChat({ onMessageSend, onCoordinateSelect }: AnimatedAI
 
         } catch (error) {
             console.error('Chat error:', error);
+            
+            // Add delay for error response too
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
             const errorResponse = {
+                id: `error_${Date.now()}`,
                 type: 'ai',
                 content: 'I apologize, but I encountered an issue processing your request. Please try again or check if the backend is accessible.',
                 timestamp: new Date(),
-                error: true
+                error: true,
+                role: 'assistant'
             };
             setMessages(prev => [...prev, errorResponse]);
         } finally {
@@ -577,29 +598,59 @@ export function AnimatedAIChat({ onMessageSend, onCoordinateSelect }: AnimatedAI
                 throw new Error('Backend unavailable');
             }
         } catch (error) {
-            // Fallback responses for common queries
-            if (message.includes('help') || message.includes('command')) {
-                return `🤖 Available Commands:
+            // More natural fallback responses for common queries
+            const lowerMessage = message.toLowerCase();
+            
+            if (lowerMessage.includes('help') || lowerMessage.includes('command')) {
+                return `🤖 **NIS Archaeological Assistant - Available Commands**
 
 **Agent Management:**
-• /agents - Check all agent status
-• /start [agent_name] - Start specific agent
-• /stop [agent_name] - Stop specific agent  
-• /deploy [agent_name] to [lat, lng] - Deploy agent
-• /tasks - View current analysis tasks
-• /config [agent_name] - Configure agent
+• \`/agents\` - Check all agent status
+• \`/start [agent_name]\` - Start specific agent
+• \`/stop [agent_name]\` - Stop specific agent  
+• \`/deploy [agent_name] to [lat, lng]\` - Deploy agent
+• \`/tasks\` - View current analysis tasks
+• \`/config [agent_name]\` - Configure agent
 
 **Analysis Commands:**
-• /discover - Find archaeological sites
-• /analyze [coordinates] - Analyze location
-• /vision [coordinates] - AI vision analysis
-• /research [query] - Research capabilities
-• /status - System status
+• \`/discover\` - Find archaeological sites
+• \`/analyze [coordinates]\` - Analyze location
+• \`/vision [coordinates]\` - AI vision analysis
+• \`/research [query]\` - Research capabilities
+• \`/status\` - System status
 
-Type any command or ask questions about archaeological research!`;
+Feel free to ask me anything about archaeological research or use any of these commands!`;
             }
             
-            return 'I can help you manage AI agents and conduct archaeological analysis. Type "/help" for available commands.';
+            if (lowerMessage.includes('how are you') || lowerMessage.includes('how do you do')) {
+                return "I'm doing great! I'm your AI assistant specialized in archaeological discovery and research. I can help you analyze coordinates, discover new sites, and manage our archaeological research agents. What would you like to explore today?";
+            }
+            
+            if (lowerMessage.includes('hello') || lowerMessage.includes('hi ') || lowerMessage.includes('hey')) {
+                const greetings = [
+                    "Hello! I'm your NIS Archaeological Assistant. I'm here to help you discover and analyze archaeological sites using advanced AI technology. What can I help you discover today?",
+                    "Hi there! Ready to explore some archaeological mysteries? I can analyze coordinates, examine satellite imagery, and help you discover ancient sites. What interests you?",
+                    "Hey! Great to meet you. I'm specialized in archaeological discovery using AI. Whether you want to analyze specific coordinates or discover new sites, I'm here to help!"
+                ];
+                return greetings[Math.floor(Math.random() * greetings.length)];
+            }
+            
+            if (lowerMessage.includes('what can you do') || lowerMessage.includes('capabilities')) {
+                return "I can help you with archaeological research in many ways:\n\n🔍 **Site Discovery** - Find new archaeological sites using AI analysis\n🎯 **Coordinate Analysis** - Analyze specific locations for archaeological potential\n👁️ **Vision Analysis** - Examine satellite imagery for patterns and features\n📚 **Historical Research** - Access and analyze historical records\n🤖 **Agent Management** - Control and deploy specialized research agents\n🗺️ **Mapping** - Visualize discoveries and research areas\n\nJust tell me what you'd like to explore or use `/` to see available commands!";
+            }
+            
+            if (lowerMessage.includes('dorado') || lowerMessage.includes('el dorado')) {
+                return "Ah, searching for El Dorado! That's exactly the kind of legendary archaeological discovery I can help with. I can analyze coordinates in South America, examine satellite imagery for ancient settlements, and cross-reference historical accounts.\n\nWould you like me to:\n• `/discover` potential sites in the Amazon basin\n• `/analyze` specific coordinates you're interested in\n• `/research` historical accounts of El Dorado\n\nLet's uncover some archaeological mysteries together!";
+            }
+            
+            // Generic friendly responses with variety
+            const genericResponses = [
+                "I understand! I'm your AI archaeological assistant and I'm here to help with site discovery, coordinate analysis, and research. Feel free to ask me anything about archaeology or use `/help` to see what I can do. What would you like to explore?",
+                "That's interesting! As your archaeological AI assistant, I can help you discover ancient sites, analyze coordinates, and research historical data. What aspect of archaeology would you like to explore?",
+                "I'm here to help with all things archaeological! Whether you want to discover new sites, analyze specific locations, or research historical data, I've got you covered. What can I help you with?",
+                "Great question! I specialize in archaeological discovery and analysis. I can examine coordinates, process satellite imagery, and help uncover ancient mysteries. What would you like to investigate?"
+            ];
+            return genericResponses[Math.floor(Math.random() * genericResponses.length)];
         }
     };
 
@@ -913,16 +964,16 @@ Type any command or ask questions about archaeological research!`;
                                                         {message.content}
                                                     </div>
                                                 ) : (
-                                                    // AI messages - animated with formatting
+                                                    // AI messages - always animate (natural typing effect)
                                                     <AnimatedMessage 
                                                         content={message.content}
-                                                        isStreaming={isTyping && message.id === messages[messages.length - 1]?.id}
+                                                        isStreaming={true}
                                                         className="text-sm"
                                                     />
                                                 )}
                                                 <div className="text-xs opacity-60 mt-2 flex items-center justify-between">
                                                     <span>
-                                                        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                     </span>
                                                     {message.role === 'assistant' && (
                                                         <div className="flex items-center gap-1 text-xs">

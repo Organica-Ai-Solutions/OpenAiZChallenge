@@ -170,7 +170,7 @@ export function AnimatedMessage({ content, isStreaming = false, className, delay
     isStreaming ? " " : "" // Word by word when streaming, all at once when complete
   );
 
-  const formattedContent = formatMessage(animatedContent);
+  const formattedContent = formatMessage(animatedContent || content); // Fallback to full content
 
   return (
     <div className={cn(
