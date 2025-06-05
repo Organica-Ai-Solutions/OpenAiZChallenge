@@ -67,7 +67,7 @@ export default function SatellitePage() {
                 <ArrowLeft className="h-4 w-4" />
                 <span className="text-sm">Back to Dashboard</span>
               </Link>
-            </div>
+        </div>
 
             {/* Page Header */}
             <div className="text-center max-w-4xl mx-auto">
@@ -148,8 +148,8 @@ export default function SatellitePage() {
               className="lg:col-span-1"
             >
               <div className="h-full rounded-2xl bg-white/[0.02] backdrop-blur-sm border border-white/[0.08] p-1">
-                <HealthStatusMonitor />
-              </div>
+            <HealthStatusMonitor />
+          </div>
             </motion.div>
 
             {/* Main Satellite Monitor */}
@@ -203,7 +203,7 @@ export default function SatellitePage() {
               >
                 <div className={`p-3 rounded-lg bg-${feature.color}-500/10 w-fit mb-4 group-hover:bg-${feature.color}-500/20 transition-colors`}>
                   <feature.icon className={`h-6 w-6 text-${feature.color}-400`} />
-                </div>
+          </div>
                 <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
                 <p className="text-white/60 text-sm leading-relaxed">{feature.description}</p>
               </motion.div>

@@ -224,7 +224,8 @@ export default function CodexReaderPage() {
         setSearchProgress(prev => Math.min(prev + 20, 90))
       }, 500)
 
-      const response = await fetch('http://localhost:8000/ikrp/search_codices', {
+      // Call IKRP service directly
+      const response = await fetch('http://localhost:8001/codex/discover', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -269,7 +270,8 @@ export default function CodexReaderPage() {
     setActiveTab('analysis')
 
     try {
-      const response = await fetch('http://localhost:8000/ikrp/analyze_codex', {
+      // Call IKRP service directly
+      const response = await fetch('http://localhost:8001/codex/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -316,8 +318,8 @@ export default function CodexReaderPage() {
       setIsAnalyzing(true)
       console.log(`📥 Downloading full codex: ${codex.title}`)
       
-      // Call the full download endpoint via main backend proxy
-      const response = await fetch('http://localhost:8000/ikrp/download_codex', {
+      // Call IKRP service directly
+      const response = await fetch('http://localhost:8001/codex/download', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -219,8 +219,8 @@ export default function SimpleMapFallback({
                 </>
               )}
             </div>
-            <Button
-              variant="outline"
+          <Button
+            variant="outline"
               size="sm"
               onClick={loadSites}
               disabled={loading}
@@ -233,7 +233,7 @@ export default function SimpleMapFallback({
               Refresh
             </Button>
           </div>
-        </div>
+            </div>
         
         {lastUpdate && (
           <div className="text-xs text-gray-500 mt-1">
@@ -332,7 +332,7 @@ export default function SimpleMapFallback({
             </div>
           )}
         </div>
-      </div>
+        </div>
 
       {/* Sites List with Real Data */}
       <div className="h-full overflow-y-auto bg-white">

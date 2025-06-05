@@ -293,7 +293,7 @@ export default function DocumentationPage() {
                     <li>• 8GB+ RAM recommended</li>
                     <li>• Ports 3000, 8000, 8001 available</li>
                   </ul>
-                </div>
+                    </div>
 
                 <Tabs defaultValue="macos" className="w-full">
                   <TabsList className="grid w-full grid-cols-2">
@@ -326,7 +326,7 @@ export default function DocumentationPage() {
                         <div className="text-gray-300">./stop.sh                 # Stop all services</div>
                         <div className="text-gray-300">docker-compose ps         # Check service status</div>
                         <div className="text-gray-300">docker-compose logs -f    # View live logs</div>
-                      </div>
+                    </div>
                     </div>
                     
                     <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
@@ -337,7 +337,7 @@ export default function DocumentationPage() {
                         <li>• Install Docker via Homebrew: <code className="bg-blue-200 dark:bg-blue-800 px-1 rounded">brew install --cask docker</code></li>
                         <li>• For M1/M2 Macs: Use <code className="bg-blue-200 dark:bg-blue-800 px-1 rounded">--platform linux/amd64</code> if needed</li>
                       </ul>
-                    </div>
+                  </div>
                   </TabsContent>
                   
                   <TabsContent value="windows" className="space-y-4">
@@ -358,8 +358,8 @@ export default function DocumentationPage() {
                         <div className="text-gray-300">docker-compose up -d     # Start in background</div>
                         <div className="text-gray-300">docker-compose down      # Stop services</div>
                         <div className="text-gray-300">docker-compose ps        # Check status</div>
-                      </div>
-                    </div>
+                            </div>
+                              </div>
                     
                     <div className="bg-purple-50 dark:bg-purple-950 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
                       <h5 className="font-semibold text-purple-800 dark:text-purple-200 mb-2">🪟 Windows-Specific Setup</h5>
@@ -370,7 +370,7 @@ export default function DocumentationPage() {
                         <li>• Git Bash also supported: run <code className="bg-purple-200 dark:bg-purple-800 px-1 rounded">./setup_gitbash.sh</code></li>
                         <li>• For file permissions: <code className="bg-purple-200 dark:bg-purple-800 px-1 rounded">icacls . /grant Everyone:F /t</code></li>
                       </ul>
-                    </div>
+                            </div>
                   </TabsContent>
                 </Tabs>
 
@@ -386,7 +386,7 @@ export default function DocumentationPage() {
                       <li>• <code>setup_env.sh</code> - Environment configuration</li>
                       <li>• <code>test_system_quick.sh</code> - Quick health check</li>
                     </ul>
-                  </div>
+                          </div>
                   
                   <div className="border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950 rounded-lg p-4">
                     <h5 className="font-semibold text-green-800 dark:text-green-200 mb-2">🎯 After Startup</h5>
@@ -448,7 +448,7 @@ export default function DocumentationPage() {
                         <span><strong>Scalable:</strong> Horizontal scaling with load balancers</span>
                       </li>
                     </ul>
-                  </div>
+                        </div>
                   
                   <div className="space-y-4">
                     <h4 className="font-semibold text-lg">🔧 Technology Stack</h4>
@@ -460,7 +460,7 @@ export default function DocumentationPage() {
                       <div className="bg-green-50 dark:bg-green-950 p-2 rounded">
                         <strong>Backend:</strong><br />
                         FastAPI, Python 3.10+, Uvicorn
-                      </div>
+                        </div>
                       <div className="bg-purple-50 dark:bg-purple-950 p-2 rounded">
                         <strong>Database:</strong><br />
                         PostgreSQL, Redis, SQLAlchemy
@@ -468,14 +468,14 @@ export default function DocumentationPage() {
                       <div className="bg-orange-50 dark:bg-orange-950 p-2 rounded">
                         <strong>Infrastructure:</strong><br />
                         Docker, Kafka, Zookeeper
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
                 <Separator />
 
-                <div className="space-y-4">
+                  <div className="space-y-4">
                   <h4 className="font-semibold text-lg">📊 Service Architecture</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <Card className="border-blue-200 dark:border-blue-800">
@@ -585,8 +585,8 @@ export default function DocumentationPage() {
                         </ul>
                       </CardContent>
                     </Card>
-                  </div>
-                </div>
+                        </div>
+                      </div>
 
                 <Separator />
 
@@ -597,7 +597,7 @@ export default function DocumentationPage() {
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full bg-blue-500"></div>
                         <span><strong>1. User Input:</strong> Coordinates entered in frontend interface</span>
-                      </div>
+                        </div>
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full bg-green-500"></div>
                         <span><strong>2. API Gateway:</strong> Request routed through backend API proxy</span>
@@ -605,7 +605,7 @@ export default function DocumentationPage() {
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full bg-purple-500"></div>
                         <span><strong>3. Service Processing:</strong> IKRP service discovers relevant codices</span>
-                      </div>
+                        </div>
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full bg-orange-500"></div>
                         <span><strong>4. AI Analysis:</strong> GPT-4.1 Vision analyzes codex imagery</span>
@@ -613,7 +613,7 @@ export default function DocumentationPage() {
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full bg-red-500"></div>
                         <span><strong>5. Cache Storage:</strong> Results cached in Redis for performance</span>
-                      </div>
+                    </div>
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full bg-gray-500"></div>
                         <span><strong>6. Event Streaming:</strong> Updates broadcast via Kafka</span>
@@ -650,9 +650,9 @@ export default function DocumentationPage() {
                       <li>• CDN integration for static assets</li>
                     </ul>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                        </div>
+                      </CardContent>
+                    </Card>
           </TabsContent>
 
           {/* API TAB */}
@@ -733,9 +733,9 @@ export default function DocumentationPage() {
                             <div><span className="bg-green-100 dark:bg-green-900 px-2 py-1 rounded text-green-800 dark:text-green-200">GET</span> /system/health</div>
                             <div>System health check</div>
                             <div>None</div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </CardContent>
+                    </Card>
 
                       <Card className="border-purple-200 dark:border-purple-800">
                         <CardHeader className="pb-3">
@@ -756,9 +756,9 @@ export default function DocumentationPage() {
                             <div><span className="bg-green-100 dark:bg-green-900 px-2 py-1 rounded text-green-800 dark:text-green-200">GET</span> /research/history</div>
                             <div>Get analysis history</div>
                             <div>limit, researcher_id</div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </CardContent>
+                    </Card>
 
                       <Card className="border-orange-200 dark:border-orange-800">
                         <CardHeader className="pb-3">
@@ -779,9 +779,9 @@ export default function DocumentationPage() {
                             <div><span className="bg-green-100 dark:bg-green-900 px-2 py-1 rounded text-green-800 dark:text-green-200">GET</span> /agents/status</div>
                             <div>Agent system status</div>
                             <div>None</div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </CardContent>
+                    </Card>
 
                       <Card className="border-red-200 dark:border-red-800">
                         <CardHeader className="pb-3">
@@ -792,7 +792,7 @@ export default function DocumentationPage() {
                             <div><span className="bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded text-blue-800 dark:text-blue-200">POST</span> /satellite/imagery/latest</div>
                             <div>Get latest satellite imagery</div>
                             <div>coordinates, radius</div>
-                          </div>
+                  </div>
                           <div className="grid grid-cols-3 gap-2">
                             <div><span className="bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded text-blue-800 dark:text-blue-200">POST</span> /satellite/change-detection</div>
                             <div>Detect changes over time</div>
@@ -807,25 +807,25 @@ export default function DocumentationPage() {
                             <div><span className="bg-green-100 dark:bg-green-900 px-2 py-1 rounded text-green-800 dark:text-green-200">GET</span> /batch/status/<code>batch_id</code></div>
                             <div>Get batch job status</div>
                             <div>batch_id</div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                </div>
+              </CardContent>
+            </Card>
 
                       <Card className="border-cyan-200 dark:border-cyan-800">
                         <CardHeader className="pb-3">
                           <CardTitle className="text-sm text-cyan-600 dark:text-cyan-400">🔗 IKRP Proxy Endpoints</CardTitle>
-                        </CardHeader>
+              </CardHeader>
                         <CardContent className="space-y-3 text-xs">
                           <div className="grid grid-cols-3 gap-2">
                             <div><span className="bg-green-100 dark:bg-green-900 px-2 py-1 rounded text-green-800 dark:text-green-200">GET</span> /ikrp/sources</div>
                             <div>Get available codex sources</div>
                             <div>None</div>
-                          </div>
+                  </div>
                           <div className="grid grid-cols-3 gap-2">
                             <div><span className="bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded text-blue-800 dark:text-blue-200">POST</span> /ikrp/search_codices</div>
                             <div>Search for relevant codices</div>
                             <div>coordinates, radius, sources</div>
-                          </div>
+                </div>
                           <div className="grid grid-cols-3 gap-2">
                             <div><span className="bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded text-blue-800 dark:text-blue-200">POST</span> /ikrp/analyze_codex</div>
                             <div>Analyze specific codex</div>
@@ -852,8 +852,8 @@ export default function DocumentationPage() {
                       <div className="text-sm text-purple-700 dark:text-purple-300 mb-4">
                         Base URL: <code className="bg-purple-200 dark:bg-purple-800 px-2 py-1 rounded">http://localhost:8001</code><br />
                         Specialized service for codex discovery and analysis with GPT-4.1 Vision integration
+                        </div>
                       </div>
-                    </div>
 
                     <div className="grid gap-4">
                       <Card className="border-indigo-200 dark:border-indigo-800">
@@ -865,12 +865,12 @@ export default function DocumentationPage() {
                             <div>Method & Endpoint</div>
                             <div>Description</div>
                             <div>Response Data</div>
-                          </div>
+                  </div>
                           <div className="grid grid-cols-3 gap-2">
                             <div><span className="bg-green-100 dark:bg-green-900 px-2 py-1 rounded text-green-800 dark:text-green-200">GET</span> /</div>
                             <div>Service info and features</div>
                             <div>version, features[], sources[]</div>
-                          </div>
+                </div>
                           <div className="grid grid-cols-3 gap-2">
                             <div><span className="bg-green-100 dark:bg-green-900 px-2 py-1 rounded text-green-800 dark:text-green-200">GET</span> /codex/sources</div>
                             <div>List digital archive sources</div>
@@ -909,7 +909,7 @@ export default function DocumentationPage() {
                           </ul>
                         </CardContent>
                       </Card>
-                    </div>
+                        </div>
                   </TabsContent>
 
                   <TabsContent value="frontend" className="space-y-4">
@@ -976,9 +976,9 @@ export default function DocumentationPage() {
                             <div><code>/documentation</code></div>
                             <div>Documentation</div>
                             <div>Complete system documentation, API reference</div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                      </div>
+                    </CardContent>
+                  </Card>
 
                       <Card className="border-teal-200 dark:border-teal-800">
                         <CardHeader className="pb-3">
@@ -997,8 +997,8 @@ export default function DocumentationPage() {
                             <li>• <strong>Performance Optimization:</strong> Code splitting, lazy loading, image optimization</li>
                             <li>• <strong>Accessibility:</strong> WCAG 2.1 compliant with keyboard navigation</li>
                           </ul>
-                        </CardContent>
-                      </Card>
+                    </CardContent>
+                  </Card>
                     </div>
                   </TabsContent>
                 </Tabs>
