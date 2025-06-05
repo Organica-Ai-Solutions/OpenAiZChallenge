@@ -51,17 +51,30 @@ fi
 # Clear Next.js cache and fix corrupted node_modules
 echo -e "${YELLOW}🧹 Clearing frontend cache and fixing dependencies...${NC}"
 if [ -d "frontend/.next" ]; then
-    rm -rf frontend/.next
+    rm -rf frontend/.next 2>/dev/null || {
+        echo -e "${YELLOW}⚠️  Some .next cache files couldn't be removed. This is usually okay.${NC}"
+        find frontend/.next -delete 2>/dev/null || true
+    }
 fi
 
 if [ -d "frontend/node_modules/.cache" ]; then
-    rm -rf frontend/node_modules/.cache
+    rm -rf frontend/node_modules/.cache 2>/dev/null || {
+        echo -e "${YELLOW}⚠️  Some cache files couldn't be removed. This is usually okay.${NC}"
+        find frontend/node_modules/.cache -delete 2>/dev/null || true
+    }
 fi
 
 # Fix corrupted pnpm/npm cache that's causing the JSON parsing error
 if [ -d "frontend/node_modules/.pnpm" ]; then
     echo -e "${YELLOW}🔧 Fixing corrupted pnpm cache...${NC}"
-    rm -rf frontend/node_modules/.pnpm
+    # Use find to forcefully remove directories, handling permissions issues
+    find frontend/node_modules/.pnpm -type d -exec chmod 755 {} \; 2>/dev/null || true
+    find frontend/node_modules/.pnpm -type f -exec chmod 644 {} \; 2>/dev/null || true
+    rm -rf frontend/node_modules/.pnpm 2>/dev/null || {
+        echo -e "${YELLOW}⚠️  Some pnpm cache files couldn't be removed. This is usually okay.${NC}"
+        # Try alternative removal method
+        find frontend/node_modules/.pnpm -delete 2>/dev/null || true
+    }
 fi
 
 # Clear npm/yarn cache if they exist
@@ -72,12 +85,37 @@ fi
 # Reinstall frontend dependencies to fix corruption
 echo -e "${YELLOW}📦 Reinstalling frontend dependencies...${NC}"
 cd frontend
+
+# Check if package.json exists
+if [ ! -f "package.json" ]; then
+    echo -e "${RED}❌ package.json not found in frontend directory${NC}"
+    cd ..
+    exit 1
+fi
+
+# Try to fix package-lock issues
+if [ -f "package-lock.json" ]; then
+    rm -f package-lock.json 2>/dev/null || true
+fi
+
+if [ -f "pnpm-lock.yaml" ]; then
+    rm -f pnpm-lock.yaml 2>/dev/null || true
+fi
+
+# Install dependencies with proper error handling
 if command -v pnpm &> /dev/null; then
-    pnpm install --force
+    echo -e "${BLUE}📦 Using pnpm...${NC}"
+    pnpm install --force 2>/dev/null || {
+        echo -e "${YELLOW}⚠️  pnpm install failed, trying npm...${NC}"
+        npm install --force
+    }
 elif command -v npm &> /dev/null; then
+    echo -e "${BLUE}📦 Using npm...${NC}"
     npm install --force
 else
     echo -e "${RED}❌ No package manager found (npm/pnpm). Please install Node.js.${NC}"
+    cd ..
+    exit 1
 fi
 cd ..
 

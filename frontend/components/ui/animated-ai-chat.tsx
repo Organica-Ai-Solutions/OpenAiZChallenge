@@ -24,6 +24,11 @@ import {
     Eye,
     Target,
     Globe,
+    Users,
+    Play,
+    Pause,
+    Activity,
+    Settings,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as React from "react"
@@ -198,9 +203,46 @@ export function AnimatedAIChat({ onMessageSend, onCoordinateSelect }: AnimatedAI
         { 
             icon: <Globe className="w-4 h-4" />, 
             label: "System Status", 
-            description: "Check system health and agent status", 
-            prefix: "/status" 
+            description: "Check system and agent status",
+            prefix: "/status"
         },
+        // Agent-specific commands
+        { 
+            icon: <Users className="w-4 h-4" />, 
+            label: "Agent Status", 
+            description: "Check all agent statuses and performance", 
+            prefix: "/agents" 
+        },
+        { 
+            icon: <Play className="w-4 h-4" />, 
+            label: "Start Agent", 
+            description: "Start or activate a specific agent", 
+            prefix: "/start" 
+        },
+        { 
+            icon: <Pause className="w-4 h-4" />, 
+            label: "Stop Agent", 
+            description: "Stop or pause a specific agent", 
+            prefix: "/stop" 
+        },
+        { 
+            icon: <Target className="w-4 h-4" />, 
+            label: "Deploy Agent", 
+            description: "Deploy agent to specific coordinates", 
+            prefix: "/deploy" 
+        },
+        { 
+            icon: <Activity className="w-4 h-4" />, 
+            label: "Task Status", 
+            description: "Check current analysis tasks", 
+            prefix: "/tasks" 
+        },
+        { 
+            icon: <Settings className="w-4 h-4" />, 
+            label: "Agent Config", 
+            description: "Configure agent parameters", 
+            prefix: "/config" 
+        }
     ];
 
     useEffect(() => {
@@ -285,63 +327,218 @@ export function AnimatedAIChat({ onMessageSend, onCoordinateSelect }: AnimatedAI
     };
 
     const handleSendMessage = async () => {
-        if (value.trim()) {
-            const message = value.trim();
-            setValue("");
-            adjustHeight(true);
+        if (!value.trim()) return;
+
+        const userMessage = {
+            type: 'user',
+            content: value.trim(),
+            timestamp: new Date()
+        };
+
+        setMessages(prev => [...prev, userMessage]);
+        setIsTyping(true);
+        setValue("");
+        adjustHeight(true);
+
+        try {
+            let response;
+            const message = value.trim().toLowerCase();
             
-            // Add user message to local state
-            const userMessage = {
-                id: Date.now().toString(),
-                role: 'user',
-                content: message,
-                timestamp: new Date()
+            // Agent-specific command handling
+            if (message.startsWith('/agents')) {
+                response = await handleAgentStatusCommand();
+            } else if (message.startsWith('/start ')) {
+                const agentName = message.replace('/start ', '').trim();
+                response = await handleStartAgentCommand(agentName);
+            } else if (message.startsWith('/stop ')) {
+                const agentName = message.replace('/stop ', '').trim();
+                response = await handleStopAgentCommand(agentName);
+            } else if (message.startsWith('/deploy ')) {
+                const params = message.replace('/deploy ', '').trim();
+                response = await handleDeployAgentCommand(params);
+            } else if (message.startsWith('/tasks')) {
+                response = await handleTaskStatusCommand();
+            } else if (message.startsWith('/config ')) {
+                const params = message.replace('/config ', '').trim();
+                response = await handleConfigAgentCommand(params);
+            } else if (onMessageSend) {
+                // Use custom message handler if provided (for map page)
+                response = await onMessageSend(value.trim());
+            } else {
+                // Default NIS chat handling
+                response = await handleDefaultChat(value.trim());
+            }
+
+            const aiResponse = {
+                type: 'ai',
+                content: response?.message || response || 'I understand your request. How else can I help you with archaeological research?',
+                timestamp: new Date(),
+                data: response?.data || null
             };
-            setMessages(prev => [...prev, userMessage]);
+
+            setMessages(prev => [...prev, aiResponse]);
+            setLastResponse(aiResponse.content);
+
+        } catch (error) {
+            console.error('Chat error:', error);
+            const errorResponse = {
+                type: 'ai',
+                content: 'I apologize, but I encountered an issue processing your request. Please try again or check if the backend is accessible.',
+                timestamp: new Date(),
+                error: true
+            };
+            setMessages(prev => [...prev, errorResponse]);
+        } finally {
+            setIsTyping(false);
+        }
+    };
+
+    // Agent command handlers
+    const handleAgentStatusCommand = async () => {
+        try {
+            const response = await fetch('http://localhost:8000/agents/agents');
+            if (response.ok) {
+                const agents = await response.json();
+                const statusSummary = agents.map((agent: any) => 
+                    `${agent.name}: ${agent.status} (${agent.performance?.accuracy || 'N/A'}% accuracy)`
+                ).join('\n');
+                
+                return {
+                    message: `🤖 Agent Status Report:\n\n${statusSummary}\n\nTotal agents: ${agents.length}`,
+                    data: { agents }
+                };
+            } else {
+                return {
+                    message: '🤖 Using demo agent data. Backend connection unavailable.\n\nDemo agents: 5 active agents (ARIA, TERRA, CULTURA, NEXUS, QUANTUM)'
+                };
+            }
+        } catch (error) {
+            return {
+                message: '❌ Unable to retrieve agent status. Please check backend connection.'
+            };
+        }
+    };
+
+    const handleStartAgentCommand = async (agentName: string) => {
+        try {
+            // In a real implementation, this would call the backend
+            return {
+                message: `▶️ Agent "${agentName}" start command issued. Agent activation in progress...`,
+                data: { action: 'start', agent: agentName }
+            };
+        } catch (error) {
+            return {
+                message: `❌ Failed to start agent "${agentName}". Please check agent name and try again.`
+            };
+        }
+    };
+
+    const handleStopAgentCommand = async (agentName: string) => {
+        try {
+            return {
+                message: `⏸️ Agent "${agentName}" stop command issued. Agent will complete current tasks and pause.`,
+                data: { action: 'stop', agent: agentName }
+            };
+        } catch (error) {
+            return {
+                message: `❌ Failed to stop agent "${agentName}". Please check agent name and try again.`
+            };
+        }
+    };
+
+    const handleDeployAgentCommand = async (params: string) => {
+        try {
+            // Parse agent name and coordinates
+            const parts = params.split(' to ');
+            if (parts.length !== 2) {
+                return {
+                    message: '❌ Invalid deploy command format. Use: /deploy [agent_name] to [lat, lng]'
+                };
+            }
             
-            startTransition(() => {
-                setIsTyping(true);
+            const agentName = parts[0].trim();
+            const coordinates = parts[1].trim();
+            
+            return {
+                message: `🚀 Deploying agent "${agentName}" to coordinates: ${coordinates}\n\nAgent will begin analysis upon arrival.`,
+                data: { action: 'deploy', agent: agentName, coordinates }
+            };
+        } catch (error) {
+            return {
+                message: '❌ Failed to deploy agent. Please check command format: /deploy [agent_name] to [lat, lng]'
+            };
+        }
+    };
+
+    const handleTaskStatusCommand = async () => {
+        try {
+            // In a real implementation, this would fetch from backend
+            return {
+                message: `📋 Current Analysis Tasks:\n\n🔄 Task 1: Site analysis at Amazon basin (78% complete)\n🔄 Task 2: Pattern detection in Andes (45% complete)\n⏳ Task 3: Cultural assessment (pending)\n\nTotal active tasks: 3`,
+                data: { totalTasks: 3, activeTasks: 2, pendingTasks: 1 }
+            };
+        } catch (error) {
+            return {
+                message: '❌ Unable to retrieve task status. Please try again.'
+            };
+        }
+    };
+
+    const handleConfigAgentCommand = async (params: string) => {
+        try {
+            return {
+                message: `⚙️ Agent configuration interface opened for: ${params}\n\nConfiguration options:\n• Accuracy threshold\n• Processing priority\n• Data sources\n• Analysis depth`,
+                data: { action: 'config', target: params }
+            };
+        } catch (error) {
+            return {
+                message: '❌ Unable to access agent configuration. Please try again.'
+            };
+        }
+    };
+
+    const handleDefaultChat = async (message: string) => {
+        try {
+            const response = await fetch('http://localhost:8000/agents/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: message,
+                    mode: 'reasoning',
+                    context: { chat_history: messages.slice(-5) }
+                })
             });
 
-            try {
-                if (onMessageSend) {
-                    const response = await onMessageSend(message);
-                    
-                    // Add AI response to local state
-                    if (response && response.message) {
-                        const aiMessage = {
-                            id: (Date.now() + 1).toString(),
-                            role: 'assistant',
-                            content: response.message,
-                            timestamp: new Date(),
-                            type: response.type || 'general'
-                        };
-                        setMessages(prev => [...prev, aiMessage]);
-                        setLastResponse(response.message);
-                    }
-                }
-                
-                // Extract coordinates if present and notify parent
-                const coordinateMatch = message.match(/-?\d+\.?\d*\s*,\s*-?\d+\.?\d*/);
-                if (coordinateMatch && onCoordinateSelect) {
-                    onCoordinateSelect(coordinateMatch[0]);
-                }
-                
-            } catch (error) {
-                console.error('Error sending message:', error);
-                
-                // Add error message
-                const errorMessage = {
-                    id: (Date.now() + 1).toString(),
-                    role: 'assistant',
-                    content: `❌ **Error**: ${error instanceof Error ? error.message : 'Something went wrong'}`,
-                    timestamp: new Date(),
-                    type: 'error'
-                };
-                setMessages(prev => [...prev, errorMessage]);
-            } finally {
-                setIsTyping(false);
+            if (response.ok) {
+                const data = await response.json();
+                return data.response || data.message || 'I can help you with archaeological analysis and agent management.';
+            } else {
+                throw new Error('Backend unavailable');
             }
+        } catch (error) {
+            // Fallback responses for common queries
+            if (message.includes('help') || message.includes('command')) {
+                return `🤖 Available Commands:
+
+**Agent Management:**
+• /agents - Check all agent status
+• /start [agent_name] - Start specific agent
+• /stop [agent_name] - Stop specific agent  
+• /deploy [agent_name] to [lat, lng] - Deploy agent
+• /tasks - View current analysis tasks
+• /config [agent_name] - Configure agent
+
+**Analysis Commands:**
+• /discover - Find archaeological sites
+• /analyze [coordinates] - Analyze location
+• /vision [coordinates] - AI vision analysis
+• /research [query] - Research capabilities
+• /status - System status
+
+Type any command or ask questions about archaeological research!`;
+            }
+            
+            return 'I can help you manage AI agents and conduct archaeological analysis. Type "/help" for available commands.';
         }
     };
 

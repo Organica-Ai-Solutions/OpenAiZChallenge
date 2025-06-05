@@ -1,18 +1,32 @@
 FROM node:18-alpine
 
+# Install dependencies
+RUN apk add --no-cache libc6-compat git
+
 # Set working directory
 WORKDIR /app
 
-# Install dependencies
-COPY package.json pnpm-lock.yaml ./
-RUN npm install -g pnpm
-RUN pnpm install
+# Copy package files first
+COPY package.json ./
+
+# Remove any existing lockfile to avoid conflicts
+RUN rm -f pnpm-lock.yaml package-lock.json yarn.lock
+
+# Install dependencies with npm (avoid pnpm lockfile issues)
+RUN npm install
 
 # Copy source code
 COPY . .
+
+# Set Next.js telemetry to disabled
+ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV development
+
+# Create .next directory with proper permissions
+RUN mkdir -p .next && chmod 755 .next
 
 # Expose port
 EXPOSE 3000
 
 # Start development server
-CMD ["pnpm", "dev"] 
+CMD ["npm", "run", "dev"] 

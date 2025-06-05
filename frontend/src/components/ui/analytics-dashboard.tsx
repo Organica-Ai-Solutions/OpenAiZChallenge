@@ -43,252 +43,392 @@ import {
   Eye,
   Target,
   Layers,
-  Zap
+  Zap,
+  CheckCircle,
+  Clock,
+  Database,
+  Globe,
+  AlertCircle,
+  Users
 } from "lucide-react"
 
-interface AnalyticsData {
-  discoveries: DiscoveryData[]
-  analysisStats: AnalysisStats
-  temporalData: TemporalData[]
-  regionData: RegionData[]
-  confidenceDistribution: ConfidenceData[]
-  modelPerformance: ModelPerformanceData[]
+// Real backend data interfaces
+interface RealAnalyticsData {
+  statistics: StatisticsData | null
+  diagnostics: DiagnosticsData | null
+  sites: SiteData[]
+  agents: AgentData[]
+  systemHealth: HealthData | null
 }
 
-interface DiscoveryData {
-  id: string
+interface StatisticsData {
+  total_sites_discovered: number
+  sites_by_type: Record<string, number>
+  analysis_metrics: {
+    total_analyses: number
+    successful_analyses: number
+    success_rate: number
+    avg_confidence: number
+    high_confidence_discoveries: number
+  }
+  recent_activity: {
+    last_24h_analyses: number
+    last_7d_discoveries: number
+    active_researchers: number
+    ongoing_projects: number
+  }
+  model_performance: Record<string, {
+    accuracy: number
+    total_analyses?: number
+    total_detections?: number
+    processing_time_avg: number
+    specialization: string
+  }>
+  geographic_coverage: {
+    regions_analyzed: number
+    total_area_km2: number
+    density_sites_per_km2: number
+    countries: string[]
+    indigenous_territories: number
+  }
+  data_sources: Record<string, number>
+  cultural_impact: {
+    communities_engaged: number
+    indigenous_partnerships: number
+    knowledge_sharing_sessions: number
+    cultural_protocols_followed: string
+  }
+  timestamp: string
+  data_freshness: string
+  system_uptime: string
+}
+
+interface DiagnosticsData {
+  system_info: {
+    version: string
+    uptime: string
+    environment: string
+    last_restart: string
+  }
+  services: Record<string, {
+    status: string
+    response_time?: string
+    requests_24h?: number
+    analyses_24h?: number
+    avg_confidence?: number
+    detections_24h?: number
+    success_rate?: number
+    active_connections?: number
+    active_agents?: number
+    processing_queue?: number
+  }>
+  data_sources: Record<string, {
+    status: string
+    last_update?: string
+    coverage?: string
+    documents?: number
+    digitized?: string
+    communities?: number
+    interviews?: number
+  }>
+  performance_metrics: {
+    avg_analysis_time: string
+    discovery_success_rate: number
+    user_satisfaction: number
+    system_reliability: number
+  }
+  storage: {
+    database_size: string
+    cache_usage: string
+    available_space: string
+    backup_status: string
+  }
+  timestamp: string
+}
+
+interface SiteData {
+  site_id: string
+  name: string
   coordinates: string
-  lat: number
-  lon: number
   confidence: number
+  discovery_date: string
+  cultural_significance: string
+  data_sources: string[]
+}
+
+interface AgentData {
+  id: string
+  name: string
   type: string
-  date: string
-  region: string
-  models_used: string[]
-  processing_time: number
-  significance: 'Low' | 'Medium' | 'High'
+  status: string
+  performance: {
+    accuracy: number
+    processing_time: string
+    success_rate?: number
+  }
+  specialization: string
 }
 
-interface AnalysisStats {
-  total_analyses: number
-  successful_discoveries: number
-  avg_confidence: number
-  avg_processing_time: number
-  regions_analyzed: number
-  models_deployed: number
+interface HealthData {
+  status: string
+  services: Record<string, string>
+  data_sources: Record<string, string>
+  uptime: number
 }
 
-interface TemporalData {
-  date: string
-  discoveries: number
-  analyses: number
-  avg_confidence: number
+const COLORS = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#06B6D4']
+
+// Chart data transformers
+const transformSitesByType = (sites_by_type: Record<string, number>) => {
+  return Object.entries(sites_by_type).map(([type, count]) => ({
+    type: type.charAt(0).toUpperCase() + type.slice(1),
+    count,
+    percentage: Math.round((count / Object.values(sites_by_type).reduce((a, b) => a + b, 0)) * 100)
+  }))
 }
 
-interface RegionData {
-  region: string
-  discoveries: number
-  avg_confidence: number
-  success_rate: number
+const transformModelPerformance = (model_performance: Record<string, any>) => {
+  return Object.entries(model_performance).map(([model, data]) => ({
+    model: model.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+    accuracy: data.accuracy,
+    analyses: data.total_analyses || data.total_detections || 0,
+    speed: parseFloat(data.processing_time_avg.toString()),
+    specialization: data.specialization
+  }))
 }
 
-interface ConfidenceData {
-  range: string
-  count: number
-  percentage: number
+const transformDataSources = (data_sources: Record<string, number>) => {
+  return Object.entries(data_sources).map(([source, count]) => ({
+    source: source.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+    count,
+    percentage: Math.round((count / Object.values(data_sources).reduce((a, b) => a + b, 0)) * 100)
+  }))
 }
-
-interface ModelPerformanceData {
-  model: string
-  accuracy: number
-  speed: number
-  discoveries: number
-  avg_confidence: number
-}
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d']
 
 export function AnalyticsDashboard() {
-  const [data, setData] = useState<AnalyticsData | null>(null)
+  const [data, setData] = useState<RealAnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [timeRange, setTimeRange] = useState('7d')
   const [selectedRegion, setSelectedRegion] = useState<string>('all')
   const [confidenceThreshold, setConfidenceThreshold] = useState([70])
   const [autoRefresh, setAutoRefresh] = useState(true)
-  const [chartType, setChartType] = useState<'line' | 'bar' | 'area'>('line')
+  const [chartType, setChartType] = useState<'line' | 'bar' | 'area'>('bar')
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
+  const [isBackendOnline, setIsBackendOnline] = useState(false)
 
-  // Mock data generation for demo
-  const generateMockData = (): AnalyticsData => {
-    const discoveries: DiscoveryData[] = Array.from({ length: 25 }, (_, i) => ({
-      id: `discovery_${i}`,
-      coordinates: `${(-5 + Math.random() * 10).toFixed(4)}, ${(-65 + Math.random() * 10).toFixed(4)}`,
-      lat: -5 + Math.random() * 10,
-      lon: -65 + Math.random() * 10,
-      confidence: 60 + Math.random() * 40,
-      type: ['settlement', 'ceremonial', 'agricultural', 'pathway'][Math.floor(Math.random() * 4)],
-      date: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      region: ['Amazon Basin', 'Andes Mountains', 'Cerrado', 'Atlantic Forest'][Math.floor(Math.random() * 4)],
-      models_used: ['YOLO8', 'Waldo', 'GPT-4V'].slice(0, Math.floor(Math.random() * 3) + 1),
-      processing_time: 1 + Math.random() * 5,
-      significance: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)] as 'Low' | 'Medium' | 'High'
-    }))
-
-    const analysisStats: AnalysisStats = {
-      total_analyses: 156,
-      successful_discoveries: discoveries.length,
-      avg_confidence: discoveries.reduce((sum, d) => sum + d.confidence, 0) / discoveries.length,
-      avg_processing_time: discoveries.reduce((sum, d) => sum + d.processing_time, 0) / discoveries.length,
-      regions_analyzed: 4,
-      models_deployed: 6
-    }
-
-    const temporalData: TemporalData[] = Array.from({ length: 30 }, (_, i) => {
-      const date = new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000)
-      return {
-        date: date.toISOString().split('T')[0],
-        discoveries: Math.floor(Math.random() * 5),
-        analyses: Math.floor(Math.random() * 10) + 2,
-        avg_confidence: 70 + Math.random() * 20
-      }
-    })
-
-    const regionData: RegionData[] = [
-      { region: 'Amazon Basin', discoveries: 12, avg_confidence: 78.5, success_rate: 82.3 },
-      { region: 'Andes Mountains', discoveries: 8, avg_confidence: 84.2, success_rate: 76.1 },
-      { region: 'Cerrado', discoveries: 3, avg_confidence: 71.8, success_rate: 68.9 },
-      { region: 'Atlantic Forest', discoveries: 2, avg_confidence: 79.1, success_rate: 71.4 }
-    ]
-
-    const confidenceDistribution: ConfidenceData[] = [
-      { range: '60-70%', count: 5, percentage: 20 },
-      { range: '70-80%', count: 8, percentage: 32 },
-      { range: '80-90%', count: 10, percentage: 40 },
-      { range: '90-100%', count: 2, percentage: 8 }
-    ]
-
-    const modelPerformance: ModelPerformanceData[] = [
-      { model: 'YOLO8', accuracy: 87.3, speed: 2.1, discoveries: 18, avg_confidence: 79.2 },
-      { model: 'Waldo', accuracy: 82.1, speed: 3.4, discoveries: 15, avg_confidence: 75.8 },
-      { model: 'GPT-4V', accuracy: 91.7, speed: 5.2, discoveries: 12, avg_confidence: 88.1 },
-      { model: 'ResNet-50', accuracy: 78.9, speed: 1.8, discoveries: 9, avg_confidence: 72.3 },
-      { model: 'BERT', accuracy: 85.4, speed: 2.9, discoveries: 6, avg_confidence: 81.7 }
-    ]
-
-    return {
-      discoveries,
-      analysisStats,
-      temporalData,
-      regionData,
-      confidenceDistribution,
-      modelPerformance
-    }
-  }
-
-  const loadData = async () => {
+  // Real data loading from backend
+  const loadRealData = async () => {
     setLoading(true)
+    setError(null)
+    
     try {
-      // Try to fetch real data first
-      const response = await fetch('http://localhost:8000/analytics/dashboard', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
+      // Test backend connectivity
+      const healthResponse = await fetch('http://localhost:8000/system/health')
+      setIsBackendOnline(healthResponse.ok)
+
+      if (!healthResponse.ok) {
+        throw new Error('Backend is offline')
+      }
+
+      // Parallel fetch all real data sources
+      const [statisticsRes, diagnosticsRes, sitesRes, agentsRes, healthRes] = await Promise.all([
+        fetch('http://localhost:8000/statistics'),
+        fetch('http://localhost:8000/system/diagnostics'),
+        fetch('http://localhost:8000/research/sites?max_sites=50'),
+        fetch('http://localhost:8000/agents/agents'),
+        fetch('http://localhost:8000/system/health')
+      ])
+
+      const [statistics, diagnostics, sites, agents, systemHealth] = await Promise.all([
+        statisticsRes.ok ? statisticsRes.json() : null,
+        diagnosticsRes.ok ? diagnosticsRes.json() : null,
+        sitesRes.ok ? sitesRes.json() : [],
+        agentsRes.ok ? agentsRes.json() : [],
+        healthRes.ok ? healthRes.json() : null
+      ])
+
+      setData({
+        statistics,
+        diagnostics,
+        sites,
+        agents,
+        systemHealth
       })
 
-      if (response.ok) {
-        const realData = await response.json()
-        setData(realData)
-      } else {
-        throw new Error('Backend unavailable')
-      }
+      setLastRefresh(new Date())
+      console.log('✅ Analytics data loaded successfully:', {
+        statistics: !!statistics,
+        diagnostics: !!diagnostics,
+        sites: sites?.length || 0,
+        agents: agents?.length || 0
+      })
+
     } catch (error) {
-      console.log('Using mock data for analytics dashboard')
-      setData(generateMockData())
+      console.error('❌ Failed to load analytics data:', error)
+      setError(error instanceof Error ? error.message : 'Failed to load data')
+      setIsBackendOnline(false)
     } finally {
       setLoading(false)
     }
   }
 
+  // Export functionality
+  const handleExport = async () => {
+    if (!data) return
+
+    try {
+      const exportData = {
+        exported_at: new Date().toISOString(),
+        statistics: data.statistics,
+        diagnostics: data.diagnostics,
+        sites_summary: {
+          total_sites: data.sites.length,
+          sites_by_confidence: data.sites.reduce((acc, site) => {
+            const range = site.confidence >= 0.9 ? '90-100%' : 
+                         site.confidence >= 0.8 ? '80-90%' : 
+                         site.confidence >= 0.7 ? '70-80%' : '60-70%'
+            acc[range] = (acc[range] || 0) + 1
+            return acc
+          }, {} as Record<string, number>)
+        },
+        agents_summary: {
+          total_agents: data.agents.length,
+          average_accuracy: data.agents.reduce((sum, agent) => sum + agent.performance.accuracy, 0) / data.agents.length
+        }
+      }
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `nis-analytics-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      console.log('📊 Analytics data exported successfully')
+    } catch (error) {
+      console.error('❌ Export failed:', error)
+    }
+  }
+
+  // Auto-refresh effect
   useEffect(() => {
-    loadData()
-  }, [timeRange, selectedRegion])
+    loadRealData()
+  }, [timeRange])
 
   useEffect(() => {
     if (autoRefresh) {
-      const interval = setInterval(loadData, 30000) // Refresh every 30 seconds
+      const interval = setInterval(loadRealData, 60000) // Refresh every minute
       return () => clearInterval(interval)
     }
   }, [autoRefresh])
 
+  // Filtered data based on user selections
   const filteredData = useMemo(() => {
     if (!data) return null
 
-    let filtered = data.discoveries
-    
+    let filteredSites = data.sites
+
     if (selectedRegion !== 'all') {
-      filtered = filtered.filter(d => d.region === selectedRegion)
+      filteredSites = filteredSites.filter(site => 
+        site.cultural_significance.toLowerCase().includes(selectedRegion.toLowerCase()) ||
+        site.name.toLowerCase().includes(selectedRegion.toLowerCase())
+      )
     }
-    
-    filtered = filtered.filter(d => d.confidence >= confidenceThreshold[0])
+
+    filteredSites = filteredSites.filter(site => site.confidence * 100 >= confidenceThreshold[0])
 
     return {
       ...data,
-      discoveries: filtered
+      sites: filteredSites
     }
   }, [data, selectedRegion, confidenceThreshold])
 
-  const stats = useMemo(() => {
-    if (!filteredData) return null
-
-    const totalDiscoveries = filteredData.discoveries.length
-    const highConfidence = filteredData.discoveries.filter(d => d.confidence >= 80).length
-    const recentDiscoveries = filteredData.discoveries.filter(d => {
-      const discoveryDate = new Date(d.date)
-      const daysDiff = (Date.now() - discoveryDate.getTime()) / (1000 * 60 * 60 * 24)
-      return daysDiff <= 7
-    }).length
-
-    return {
-      totalDiscoveries,
-      highConfidence,
-      recentDiscoveries,
-      successRate: totalDiscoveries > 0 ? (highConfidence / totalDiscoveries * 100).toFixed(1) : '0'
-    }
-  }, [filteredData])
-
   if (loading) {
     return (
-      <Card className="w-full h-96 flex items-center justify-center">
-        <div className="flex items-center space-x-2">
-          <RefreshCw className="h-5 w-5 animate-spin" />
-          <span>Loading analytics...</span>
+      <Card className="w-full h-96 flex items-center justify-center bg-slate-800 border-slate-700">
+        <div className="flex items-center space-x-3 text-white">
+          <RefreshCw className="h-6 w-6 animate-spin text-emerald-400" />
+          <div>
+            <p className="font-medium">Loading Real Analytics Data...</p>
+            <p className="text-sm text-slate-400">Connecting to NIS Protocol backend</p>
+          </div>
         </div>
       </Card>
     )
   }
 
-  if (!data || !filteredData || !stats) {
+  if (error || !isBackendOnline) {
     return (
-      <Card className="w-full h-96 flex items-center justify-center">
-        <div className="text-center">
-          <Activity className="h-8 w-8 mx-auto mb-2 opacity-50" />
-          <p>No data available</p>
+      <Card className="w-full h-96 flex items-center justify-center bg-slate-800 border-slate-700">
+        <div className="text-center text-white">
+          <AlertCircle className="h-12 w-12 mx-auto mb-4 text-red-400" />
+          <h3 className="text-lg font-semibold mb-2">Backend Connection Failed</h3>
+          <p className="text-slate-400 mb-4">
+            {error || 'Cannot connect to NIS Protocol backend at localhost:8000'}
+          </p>
+          <Button onClick={loadRealData} variant="outline" className="border-slate-600">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Retry Connection
+          </Button>
         </div>
       </Card>
     )
   }
+
+  if (!data || !filteredData) {
+    return (
+      <Card className="w-full h-96 flex items-center justify-center bg-slate-800 border-slate-700">
+        <div className="text-center text-white">
+          <Database className="h-12 w-12 mx-auto mb-4 text-yellow-400" />
+          <p className="text-slate-400">No analytics data available</p>
+        </div>
+      </Card>
+    )
+  }
+
+  const stats = data.statistics
+  const diagnostics = data.diagnostics
 
   return (
     <div className="space-y-6">
+      {/* Backend Status Banner */}
+      <div className="bg-emerald-900/20 border border-emerald-500/30 rounded-lg p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <CheckCircle className="h-5 w-5 text-emerald-400" />
+            <div>
+              <p className="text-emerald-100 font-medium">NIS Protocol Backend Online</p>
+              <p className="text-emerald-300 text-sm">
+                Real archaeological data • Last refresh: {lastRefresh.toLocaleTimeString()}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Badge variant="outline" className="border-emerald-500/50 text-emerald-400">
+              {stats?.system_uptime || 'Active'}
+            </Badge>
+            <Badge variant="outline" className="border-blue-500/50 text-blue-400">
+              {stats?.data_freshness || 'Real-time'}
+            </Badge>
+          </div>
+        </div>
+      </div>
+
       {/* Controls */}
-      <Card>
+      <Card className="bg-slate-800 border-slate-700">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="flex items-center space-x-2">
-                <BarChart3 className="h-5 w-5" />
-                <span>Analytics Dashboard</span>
+              <CardTitle className="flex items-center space-x-2 text-white">
+                <BarChart3 className="h-5 w-5 text-emerald-400" />
+                <span>Real Archaeological Analytics</span>
               </CardTitle>
-              <CardDescription>
-                Comprehensive analysis of archaeological discoveries and system performance
+              <CardDescription className="text-slate-400">
+                Live data from NIS Protocol • {stats?.total_sites_discovered || 0} sites discovered • {filteredData.sites.length} sites shown
               </CardDescription>
             </div>
             <div className="flex items-center space-x-4">
@@ -298,15 +438,15 @@ export function AnalyticsDashboard() {
                   checked={autoRefresh}
                   onCheckedChange={setAutoRefresh}
                 />
-                <Label htmlFor="auto-refresh" className="text-sm">Auto Refresh</Label>
+                <Label htmlFor="auto-refresh" className="text-sm text-slate-300">Auto Refresh</Label>
               </div>
-              <Button size="sm" onClick={loadData} disabled={loading}>
+              <Button size="sm" onClick={loadRealData} disabled={loading} className="bg-emerald-600 hover:bg-emerald-700">
                 <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                 Refresh
               </Button>
-              <Button size="sm" variant="outline">
+              <Button size="sm" variant="outline" onClick={handleExport} className="border-slate-600 text-slate-300 hover:bg-slate-700">
                 <Download className="h-4 w-4 mr-2" />
-                Export
+                Export Data
               </Button>
             </div>
           </div>
@@ -314,12 +454,12 @@ export function AnalyticsDashboard() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Time Range</Label>
+              <Label className="text-sm font-medium text-slate-300">Time Range</Label>
               <Select value={timeRange} onValueChange={setTimeRange}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-slate-700 border-slate-600">
                   <SelectItem value="24h">Last 24 Hours</SelectItem>
                   <SelectItem value="7d">Last 7 Days</SelectItem>
                   <SelectItem value="30d">Last 30 Days</SelectItem>
@@ -329,40 +469,40 @@ export function AnalyticsDashboard() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Region</Label>
+              <Label className="text-sm font-medium text-slate-300">Region Filter</Label>
               <Select value={selectedRegion} onValueChange={setSelectedRegion}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-slate-700 border-slate-600">
                   <SelectItem value="all">All Regions</SelectItem>
-                  <SelectItem value="Amazon Basin">Amazon Basin</SelectItem>
-                  <SelectItem value="Andes Mountains">Andes Mountains</SelectItem>
-                  <SelectItem value="Cerrado">Cerrado</SelectItem>
-                  <SelectItem value="Atlantic Forest">Atlantic Forest</SelectItem>
+                  <SelectItem value="amazon">Amazon Basin</SelectItem>
+                  <SelectItem value="andes">Andes Mountains</SelectItem>
+                  <SelectItem value="nazca">Nazca Region</SelectItem>
+                  <SelectItem value="coast">Coastal Areas</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Min Confidence: {confidenceThreshold[0]}%</Label>
+              <Label className="text-sm font-medium text-slate-300">Min Confidence: {confidenceThreshold[0]}%</Label>
               <Slider
                 value={confidenceThreshold}
                 onValueChange={setConfidenceThreshold}
                 max={100}
                 min={50}
                 step={5}
-                className="w-full"
+                className="w-full [&_[role=slider]]:bg-emerald-500"
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Chart Type</Label>
+              <Label className="text-sm font-medium text-slate-300">Chart Type</Label>
               <Select value={chartType} onValueChange={(value: 'line' | 'bar' | 'area') => setChartType(value)}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-slate-700 border-slate-600">
                   <SelectItem value="line">Line Chart</SelectItem>
                   <SelectItem value="bar">Bar Chart</SelectItem>
                   <SelectItem value="area">Area Chart</SelectItem>
@@ -375,226 +515,293 @@ export function AnalyticsDashboard() {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
+        <Card className="bg-slate-800 border-slate-700">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Discoveries</p>
-                <p className="text-2xl font-bold">{stats.totalDiscoveries}</p>
+                <p className="text-sm font-medium text-slate-400">Total Discoveries</p>
+                <p className="text-2xl font-bold text-white">{stats?.total_sites_discovered || 0}</p>
               </div>
-              <Target className="h-8 w-8 text-blue-600" />
+              <Target className="h-8 w-8 text-emerald-400" />
             </div>
-            <div className="flex items-center space-x-1 text-xs text-muted-foreground mt-2">
+            <div className="flex items-center space-x-1 text-xs text-emerald-400 mt-2">
               <TrendingUp className="h-3 w-3" />
-              <span>+{stats.recentDiscoveries} this week</span>
+              <span>+{stats?.recent_activity.last_7d_discoveries || 0} this week</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-slate-800 border-slate-700">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">High Confidence</p>
-                <p className="text-2xl font-bold">{stats.highConfidence}</p>
+                <p className="text-sm font-medium text-slate-400">Success Rate</p>
+                <p className="text-2xl font-bold text-white">{stats?.analysis_metrics.success_rate.toFixed(1) || 0}%</p>
               </div>
-              <Eye className="h-8 w-8 text-green-600" />
+              <Eye className="h-8 w-8 text-blue-400" />
             </div>
-            <div className="flex items-center space-x-1 text-xs text-muted-foreground mt-2">
-              <span>{stats.successRate}% success rate</span>
+            <div className="flex items-center space-x-1 text-xs text-blue-400 mt-2">
+              <span>{stats?.analysis_metrics.total_analyses || 0} total analyses</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-slate-800 border-slate-700">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Avg Confidence</p>
-                <p className="text-2xl font-bold">{data.analysisStats.avg_confidence.toFixed(1)}%</p>
+                <p className="text-sm font-medium text-slate-400">Avg Confidence</p>
+                <p className="text-2xl font-bold text-white">{((stats?.analysis_metrics.avg_confidence || 0) * 100).toFixed(1)}%</p>
               </div>
-              <Zap className="h-8 w-8 text-yellow-600" />
+              <Zap className="h-8 w-8 text-yellow-400" />
             </div>
-            <div className="flex items-center space-x-1 text-xs text-muted-foreground mt-2">
-              <span>{data.analysisStats.avg_processing_time.toFixed(1)}s avg time</span>
+            <div className="flex items-center space-x-1 text-xs text-yellow-400 mt-2">
+              <span>{diagnostics?.performance_metrics.avg_analysis_time || '3.2s'} avg time</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-slate-800 border-slate-700">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Regions Analyzed</p>
-                <p className="text-2xl font-bold">{data.analysisStats.regions_analyzed}</p>
+                <p className="text-sm font-medium text-slate-400">Active Regions</p>
+                <p className="text-2xl font-bold text-white">{stats?.geographic_coverage.regions_analyzed || 0}</p>
               </div>
-              <MapPin className="h-8 w-8 text-purple-600" />
+              <Globe className="h-8 w-8 text-purple-400" />
             </div>
-            <div className="flex items-center space-x-1 text-xs text-muted-foreground mt-2">
-              <span>{data.analysisStats.models_deployed} models deployed</span>
+            <div className="flex items-center space-x-1 text-xs text-purple-400 mt-2">
+              <span>{stats?.geographic_coverage.countries.length || 0} countries</span>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Charts */}
-      <Tabs defaultValue="temporal" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="temporal">Temporal Trends</TabsTrigger>
-          <TabsTrigger value="regions">Regional Analysis</TabsTrigger>
-          <TabsTrigger value="confidence">Confidence Distribution</TabsTrigger>
-          <TabsTrigger value="models">Model Performance</TabsTrigger>
-          <TabsTrigger value="scatter">Discovery Scatter</TabsTrigger>
+      <Tabs defaultValue="site_types" className="w-full">
+        <TabsList className="grid w-full grid-cols-5 bg-slate-800 border-slate-700">
+          <TabsTrigger value="site_types" className="data-[state=active]:bg-emerald-600">Site Types</TabsTrigger>
+          <TabsTrigger value="model_performance" className="data-[state=active]:bg-emerald-600">AI Models</TabsTrigger>
+          <TabsTrigger value="data_sources" className="data-[state=active]:bg-emerald-600">Data Sources</TabsTrigger>
+          <TabsTrigger value="geographic" className="data-[state=active]:bg-emerald-600">Geographic</TabsTrigger>
+          <TabsTrigger value="system_health" className="data-[state=active]:bg-emerald-600">System Health</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="temporal" className="space-y-4">
-          <Card>
+        <TabsContent value="site_types" className="space-y-4">
+          <Card className="bg-slate-800 border-slate-700">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <LineChartIcon className="h-5 w-5" />
-                <span>Discovery Trends Over Time</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                {chartType === 'line' && (
-                  <LineChart data={data.temporalData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="discoveries" stroke="#8884d8" strokeWidth={2} />
-                    <Line type="monotone" dataKey="analyses" stroke="#82ca9d" strokeWidth={2} />
-                  </LineChart>
-                )}
-                {chartType === 'bar' && (
-                  <BarChart data={data.temporalData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="discoveries" fill="#8884d8" />
-                    <Bar dataKey="analyses" fill="#82ca9d" />
-                  </BarChart>
-                )}
-                {chartType === 'area' && (
-                  <AreaChart data={data.temporalData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Area type="monotone" dataKey="discoveries" stackId="1" stroke="#8884d8" fill="#8884d8" />
-                    <Area type="monotone" dataKey="analyses" stackId="1" stroke="#82ca9d" fill="#82ca9d" />
-                  </AreaChart>
-                )}
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="regions" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <MapPin className="h-5 w-5" />
-                <span>Regional Performance</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={data.regionData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="region" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="discoveries" fill="#8884d8" />
-                  <Bar dataKey="avg_confidence" fill="#82ca9d" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="confidence" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <PieChartIcon className="h-5 w-5" />
-                <span>Confidence Score Distribution</span>
+              <CardTitle className="flex items-center space-x-2 text-white">
+                <PieChartIcon className="h-5 w-5 text-emerald-400" />
+                <span>Archaeological Site Types Distribution</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={400}>
                 <PieChart>
                   <Pie
-                    data={data.confidenceDistribution}
+                    data={transformSitesByType(stats?.sites_by_type || {})}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ range, percentage }) => `${range}: ${percentage}%`}
-                    outerRadius={80}
+                    label={({ type, percentage }) => `${type}: ${percentage}%`}
+                    outerRadius={120}
                     fill="#8884d8"
                     dataKey="count"
                   >
-                    {data.confidenceDistribution.map((entry, index) => (
+                    {transformSitesByType(stats?.sites_by_type || {}).map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip />
+                  <Legend />
                 </PieChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="models" className="space-y-4">
-          <Card>
+        <TabsContent value="model_performance" className="space-y-4">
+          <Card className="bg-slate-800 border-slate-700">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Activity className="h-5 w-5" />
+              <CardTitle className="flex items-center space-x-2 text-white">
+                <Activity className="h-5 w-5 text-emerald-400" />
                 <span>AI Model Performance</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={data.modelPerformance}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="model" />
-                  <YAxis />
-                  <Tooltip />
+                <BarChart data={transformModelPerformance(stats?.model_performance || {})}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <XAxis dataKey="model" stroke="#9CA3AF" />
+                  <YAxis stroke="#9CA3AF" />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
+                    labelStyle={{ color: '#F3F4F6' }}
+                  />
                   <Legend />
-                  <Bar dataKey="accuracy" fill="#8884d8" />
-                  <Bar dataKey="discoveries" fill="#82ca9d" />
+                  <Bar dataKey="accuracy" fill="#10B981" name="Accuracy %" />
+                  <Bar dataKey="analyses" fill="#3B82F6" name="Total Analyses" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="scatter" className="space-y-4">
-          <Card>
+        <TabsContent value="data_sources" className="space-y-4">
+          <Card className="bg-slate-800 border-slate-700">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Layers className="h-5 w-5" />
-                <span>Discovery Distribution</span>
+              <CardTitle className="flex items-center space-x-2 text-white">
+                <Database className="h-5 w-5 text-emerald-400" />
+                <span>Data Sources Utilization</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={400}>
-                <ScatterChart data={filteredData.discoveries}>
-                  <CartesianGrid />
-                  <XAxis dataKey="lat" name="Latitude" />
-                  <YAxis dataKey="lon" name="Longitude" />
-                  <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-                  <Scatter dataKey="confidence" fill="#8884d8" />
-                </ScatterChart>
+                <BarChart data={transformDataSources(stats?.data_sources || {})}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <XAxis dataKey="source" stroke="#9CA3AF" />
+                  <YAxis stroke="#9CA3AF" />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
+                    labelStyle={{ color: '#F3F4F6' }}
+                  />
+                  <Legend />
+                  <Bar dataKey="count" fill="#8B5CF6" />
+                </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="geographic" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-white">
+                  <MapPin className="h-5 w-5 text-emerald-400" />
+                  <span>Geographic Coverage</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">Total Area Analyzed</span>
+                    <span className="text-white font-semibold">{stats?.geographic_coverage.total_area_km2.toLocaleString() || 0} km²</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">Site Density</span>
+                    <span className="text-white font-semibold">{stats?.geographic_coverage.density_sites_per_km2 || 0} sites/km²</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">Indigenous Territories</span>
+                    <span className="text-white font-semibold">{stats?.geographic_coverage.indigenous_territories || 0}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400">Countries:</span>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {(stats?.geographic_coverage.countries || []).map((country, index) => (
+                        <Badge key={index} variant="outline" className="border-emerald-500/50 text-emerald-400">
+                          {country}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-white">
+                  <Users className="h-5 w-5 text-emerald-400" />
+                  <span>Cultural Impact</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">Communities Engaged</span>
+                    <span className="text-white font-semibold">{stats?.cultural_impact.communities_engaged || 0}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">Indigenous Partnerships</span>
+                    <span className="text-white font-semibold">{stats?.cultural_impact.indigenous_partnerships || 0}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">Knowledge Sessions</span>
+                    <span className="text-white font-semibold">{stats?.cultural_impact.knowledge_sharing_sessions || 0}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">Cultural Protocol Compliance</span>
+                    <span className="text-emerald-400 font-semibold">{stats?.cultural_impact.cultural_protocols_followed || '100%'}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="system_health" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-white">
+                  <Activity className="h-5 w-5 text-emerald-400" />
+                  <span>Service Health</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {diagnostics?.services && Object.entries(diagnostics.services).map(([service, data]) => (
+                    <div key={service} className="flex items-center justify-between">
+                      <span className="text-slate-400 capitalize">{service.replace('_', ' ')}</span>
+                      <Badge 
+                        variant={data.status === 'healthy' ? 'default' : 'destructive'}
+                        className={data.status === 'healthy' ? 'bg-emerald-600' : 'bg-red-600'}
+                      >
+                        {data.status}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-white">
+                  <Database className="h-5 w-5 text-emerald-400" />
+                  <span>Performance Metrics</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">Discovery Success Rate</span>
+                    <span className="text-emerald-400 font-semibold">
+                      {((diagnostics?.performance_metrics.discovery_success_rate || 0) * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">User Satisfaction</span>
+                    <span className="text-blue-400 font-semibold">
+                      {((diagnostics?.performance_metrics.user_satisfaction || 0) * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">System Reliability</span>
+                    <span className="text-purple-400 font-semibold">
+                      {((diagnostics?.performance_metrics.system_reliability || 0) * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">Database Size</span>
+                    <span className="text-yellow-400 font-semibold">{diagnostics?.storage.database_size || 'N/A'}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

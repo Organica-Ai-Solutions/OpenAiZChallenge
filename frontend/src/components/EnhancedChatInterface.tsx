@@ -1,13 +1,14 @@
 "use client"
 
 import React, { useState, useRef, useEffect, useCallback } from "react"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Avatar } from "@/components/ui/avatar"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import {
   Brain,
@@ -36,30 +37,48 @@ import {
   ArrowRight,
   Copy,
   ExternalLink,
-  RotateCcw
+  RotateCcw,
+  MessageSquare,
+  Microscope,
+  RefreshCw,
+  Download,
+  Settings,
+  Star,
+  Globe,
+  Plus,
+  ChevronDown,
+  Filter,
+  Archive,
+  FileText,
+  Image,
+  BookOpen,
+  ArrowUp,
+  Users,
+  History
 } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { ResearchTools } from "./research-tools"
 
 // ====================================================================
 // TYPES & INTERFACES
 // ====================================================================
 
-interface Message {
+interface ChatMessage {
   id: string
-  role: "user" | "assistant" | "system" | "reasoning" | "action" | "observation"
+  type: 'user' | 'agent' | 'system'
   content: string
-  timestamp: Date
-  coordinates?: string
-  confidence?: number
-  actionType?: string
-  reasoning?: string
-  observation?: string
+  timestamp: string
   metadata?: {
-    processing_time?: number
-    models_used?: string[]
-    data_sources?: string[]
-    finding_id?: string
+    coordinates?: string
+    confidence?: number
+    sources?: string[]
+    research_id?: string
+    analysis_type?: string
   }
+  attachments?: {
+    type: 'image' | 'document' | 'location' | 'analysis'
+    data: any
+  }[]
 }
 
 type ChatMode = "general" | "discovery" | "analysis" | "research"
@@ -75,7 +94,6 @@ interface QuickAction {
 
 interface EnhancedChatInterfaceProps {
   onCoordinateSelect?: (coordinates: string) => void
-  onAnalysisResult?: (result: any) => void
 }
 
 // ====================================================================
@@ -137,982 +155,623 @@ const QUICK_ACTIONS: QuickAction[] = [
 // MAIN COMPONENT
 // ====================================================================
 
-export default function EnhancedChatInterface({ 
-  onCoordinateSelect, 
-  onAnalysisResult 
-}: EnhancedChatInterfaceProps) {
-  // ====================================================================
-  // STATE MANAGEMENT
-  // ====================================================================
-  
-  const [messages, setMessages] = useState<Message[]>([
+export default function EnhancedChatInterface({ onCoordinateSelect }: EnhancedChatInterfaceProps) {
+  const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "welcome",
-      role: "system",
-      content: "🌟 Welcome to the Enhanced NIS Protocol Agent! I'm your AI assistant for archaeological discovery. I use ReAct (Reasoning + Acting) to help you discover and analyze archaeological sites. How can I assist you today?",
-      timestamp: new Date(),
-    },
+      type: "system",
+      content: "Welcome to the NIS Protocol Archaeological Research Assistant. I can help you with site analysis, historical research, and coordinate-based investigations. How can I assist you today?",
+      timestamp: new Date().toISOString()
+    }
   ])
   
-  const [input, setInput] = useState("")
+  const [inputValue, setInputValue] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [chatMode, setChatMode] = useState<"reasoning" | "discovery" | "analysis" | "research">("reasoning")
-  const [showQuickActions, setShowQuickActions] = useState(true)
-  const [reasoning, setReasoning] = useState<string>("")
-  const [isThinking, setIsThinking] = useState(false)
-  
-  // Refs
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [activeMode, setActiveMode] = useState<'chat' | 'research' | 'analysis'>('chat')
+  const [chatContext, setChatContext] = useState({
+    currentCoordinates: null as string | null,
+    researchFocus: null as string | null,
+    analysisHistory: [] as any[]
+  })
+  const [backendOnline, setBackendOnline] = useState(false)
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  
-  // Simple backend connection check
-  const [isBackendOnline, setIsBackendOnline] = useState(false)
 
+  // Check backend status
   useEffect(() => {
     const checkBackend = async () => {
       try {
         const response = await fetch('http://localhost:8000/system/health')
-        setIsBackendOnline(response.ok)
+        setBackendOnline(response.ok)
       } catch {
-        setIsBackendOnline(false)
+        setBackendOnline(false)
       }
     }
     checkBackend()
+    const interval = setInterval(checkBackend, 30000)
+    return () => clearInterval(interval)
   }, [])
 
-  // ====================================================================
-  // EFFECTS
-  // ====================================================================
-
+  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight
+    }
   }, [messages])
 
-  useEffect(() => {
-    inputRef.current?.focus()
-  }, [])
-
-  // ====================================================================
-  // REACT IMPLEMENTATION
-  // ====================================================================
-
-  const addMessage = useCallback((message: Omit<Message, "id" | "timestamp">) => {
-    setMessages(prev => [...prev, {
-      ...message,
-      id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
-      timestamp: new Date()
-    }])
-  }, [])
-
-  const addReasoningStep = useCallback((reasoning: string) => {
-    setReasoning(reasoning)
-    addMessage({
-      role: "reasoning",
-      content: reasoning
-    })
-  }, [addMessage])
-
-  const addActionStep = useCallback((action: string, actionType: string) => {
-    addMessage({
-      role: "action",
-      content: action,
-      actionType
-    })
-  }, [addMessage])
-
-  const addObservationStep = useCallback((observation: string, metadata?: any) => {
-    addMessage({
-      role: "observation",
-      content: observation,
-      metadata
-    })
-  }, [addMessage])
-
-  // ====================================================================
-  // REASONING ENGINE (ReAct Implementation)
-  // ====================================================================
-
-  const reasonAboutQuery = async (query: string, context: any): Promise<string> => {
-    if (isBackendOnline) {
-      try {
-        // Use backend reasoning
-        const response = await fetch('http://localhost:8000/agents/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: query,
-            mode: chatMode,
-            coordinates: extractCoordinates(query),
-            context
-          })
-        })
-        
-        if (response.ok) {
-          const data = await response.json()
-          return data.reasoning || "Backend reasoning completed successfully."
-        }
-      } catch (error) {
-        console.warn("Backend reasoning failed, using fallback:", error)
-      }
-    }
-    
-    // Fallback reasoning
-    if (query.toLowerCase().includes("coordinate") || query.toLowerCase().includes("analyze")) {
-      return "The user is asking about coordinate analysis. I should check if coordinates are provided and offer archaeological analysis services."
-    } else if (query.toLowerCase().includes("site") || query.toLowerCase().includes("discover")) {
-      return "The user is interested in archaeological site discovery. I should provide information about discovery methods and suggest analysis options."
-    } else if (query.toLowerCase().includes("vision") || query.toLowerCase().includes("image")) {
-      return "The user is asking about vision analysis capabilities. I should explain our satellite imagery analysis and offer to run analysis if coordinates are available."
-    } else {
-      return "The user has a general query about archaeological research. I should provide helpful information about NIS Protocol capabilities."
-    }
-  }
-
-  const planAction = async (query: string, reasoning: string): Promise<{ action: string; actionType: string }> => {
-    const queryLower = query.toLowerCase()
-    
-    if (queryLower.includes("analyze") || queryLower.includes("coordinate")) {
-      return {
-        action: "I'll analyze the provided coordinates for archaeological potential using our comprehensive analysis system.",
-        actionType: "coordinate_analysis"
-      }
-    } else if (queryLower.includes("discover") || queryLower.includes("find") || queryLower.includes("site")) {
-      return {
-        action: "I'll search our database for archaeological sites and discovery opportunities.",
-        actionType: "site_discovery"
-      }
-    } else if (queryLower.includes("vision") || queryLower.includes("image") || queryLower.includes("satellite")) {
-      return {
-        action: "I'll perform advanced vision analysis on satellite imagery to detect archaeological features.",
-        actionType: "vision_analysis"
-      }
-    } else if (queryLower.includes("system") || queryLower.includes("status") || queryLower.includes("health")) {
-      return {
-        action: "I'll check the current system status and provide information about all services.",
-        actionType: "system_check"
-      }
-    } else {
-      return {
-        action: "I'll provide general assistance and information about archaeological research capabilities.",
-        actionType: "general_assistance"
-      }
-    }
-  }
-
-  const executeAction = async (actionType: string, query: string): Promise<string> => {
-    if (isBackendOnline) {
-      try {
-        // Try to execute action through backend
-        const coordinates = extractCoordinates(query)
-        
-        const response = await fetch('http://localhost:8000/agents/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: query,
-            mode: chatMode,
-            coordinates
-          })
-        })
-        
-        if (response.ok) {
-          const data = await response.json()
-          return data.response || "Action completed successfully."
-        }
-      } catch (error) {
-        console.warn("Backend action failed, using fallback:", error)
-      }
-    }
-    
-    // Fallback action execution
-    switch (actionType) {
-      case "coordinate_analysis":
-        return performCoordinateAnalysis(query)
-      case "site_discovery":
-        return performSiteDiscovery(query)
-      case "system_check":
-        return performSystemCheck()
-      case "vision_analysis":
-        return performVisionAnalysis(query)
-      default:
-        return performGeneralAssistance(query)
-    }
-  }
-
-  // ====================================================================
-  // ACTION IMPLEMENTATIONS
-  // ====================================================================
-
-  const performCoordinateAnalysis = async (query: string): Promise<string> => {
-    const coordinates = extractCoordinates(query)
-    
-    if (coordinates) {
-      if (isBackendOnline) {
-        try {
-          // Try backend analysis
-          const [lat, lon] = coordinates.split(',').map(c => parseFloat(c.trim()))
-          const response = await fetch('http://localhost:8000/agents/analyze/enhanced', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              lat,
-              lon,
-              data_sources: ["satellite", "lidar", "historical"],
-              confidence_threshold: 0.7
-            })
-          })
-          
-          if (response.ok) {
-            const data = await response.json()
-            onCoordinateSelect?.(coordinates)
-            
-            return `🎯 Analysis complete for coordinates ${coordinates}!
-
-**Results Summary:**
-- **Confidence:** ${Math.round((data.confidence || 0.85) * 100)}%
-- **Pattern Type:** ${data.pattern_type || "Archaeological Feature"}
-- **Finding ID:** ${data.finding_id || "enhanced_analysis"}
-
-**Key Insights:**
-${data.description || "Comprehensive archaeological analysis completed successfully."}
-
-**Recommendations:**
-${data.recommendations?.map((r: any, i: number) => `${i + 1}. ${r.action}: ${r.description}`).join('\n') || "Field verification recommended."}
-
-The coordinates have been loaded into the main interface for detailed review.`
-          }
-        } catch (error) {
-          console.warn("Backend coordinate analysis failed:", error)
-        }
-      }
-      
-      // Fallback analysis
-      onCoordinateSelect?.(coordinates)
-      return `🔍 Coordinate analysis initiated for ${coordinates}.
-
-I've loaded these coordinates into the main analysis interface. The system will analyze:
-- Satellite imagery patterns
-- LIDAR elevation data  
-- Historical context
-- Indigenous knowledge correlation
-
-Please check the Results tab for the complete analysis. ${isBackendOnline ? "Using live backend data." : "Using enhanced demo mode."}`
-    } else {
-      return `📍 To analyze coordinates, please provide them in the format: latitude, longitude
-
-Example: "Analyze -3.4653, -62.2159"
-
-I can then run comprehensive archaeological analysis including:
-- Multi-source data correlation
-- Pattern recognition
-- Cultural context analysis
-- Field survey recommendations`
-    }
-  }
-
-  const performSiteDiscovery = async (query: string): Promise<string> => {
-    if (isBackendOnline) {
-      try {
-        const response = await fetch('http://localhost:8000/research/sites?min_confidence=0.7&max_sites=5')
-        if (response.ok) {
-          const sites = await response.json()
-          
-          const siteList = sites.map((site: any, index: number) => 
-            `${index + 1}. **${site.name}** (${site.coordinates})
-   - Confidence: ${Math.round(site.confidence * 100)}%
-   - Type: ${site.cultural_significance}
-   - Discovery: ${site.discovery_date}`
-          ).join('\n\n')
-          
-          return `🏛️ **Archaeological Site Discovery Results**
-
-Found ${sites.length} high-confidence sites in our database:
-
-${siteList}
-
-Each site has been validated through multiple data sources including satellite imagery, LIDAR, and cultural analysis. Click on any coordinates to load them for detailed analysis.`
-        }
-      } catch (error) {
-        console.warn("Backend site discovery failed:", error)
-      }
-    }
-    
-    // Fallback discovery
-    return `🗺️ **Site Discovery Capabilities**
-
-Our AI system can discover archaeological sites using:
-
-**Data Sources:**
-- High-resolution satellite imagery
-- LIDAR terrain analysis
-- Historical document correlation
-- Indigenous knowledge databases
-
-**Discovery Methods:**
-- Pattern recognition algorithms
-- Vegetation anomaly detection
-- Geometric feature identification
-- Cultural landscape analysis
-
-**Recent Discoveries:**
-- Amazon river settlements
-- Andean terracing systems
-- Coastal ceremonial centers
-
-To discover sites in a specific area, provide coordinates or a region name. ${isBackendOnline ? "Connected to live discovery database." : "Using enhanced demo capabilities."}`
-  }
-
-  const performSystemCheck = async (): Promise<string> => {
-    if (isBackendOnline) {
-      try {
-        const [healthResponse, agentResponse] = await Promise.all([
-          fetch('http://localhost:8000/system/health'),
-          fetch('http://localhost:8000/agents/status')
-        ])
-        
-        if (healthResponse.ok && agentResponse.ok) {
-          const healthData = await healthResponse.json()
-          const agentData = await agentResponse.json()
-          
-          return `🟢 **System Status: OPERATIONAL**
-
-**Core Services:**
-- API Server: ${healthData.services?.api || "Online"}
-- Vision Processing: ${healthData.services?.vision_processing || "Online"}
-- Archaeological Analysis: ${healthData.services?.archaeological_analysis || "Online"}
-
-**AI Agents:**
-- Vision Agent: ${agentData.vision_agent || "Active"}
-- Analysis Agent: ${agentData.analysis_agent || "Active"}
-- Cultural Agent: ${agentData.cultural_agent || "Active"}
-- Recommendation Agent: ${agentData.recommendation_agent || "Active"}
-
-**Data Sources:**
-- Satellite Imagery: Available
-- LIDAR Data: Available
-- Historical Records: Available
-- Indigenous Knowledge: Available
-
-**Processing Queue:** ${agentData.processing_queue || 0} tasks
-**Last Analysis:** ${agentData.last_analysis || "Just now"}
-
-All systems operational and ready for archaeological discovery.`
-        }
-      } catch (error) {
-        console.warn("System check failed:", error)
-      }
-    }
-    
-    return `🔶 **System Status: ${isBackendOnline ? "PARTIAL" : "DEMO MODE"}**
-
-**Available Services:**
-- Enhanced Chat Interface: ✅ Active
-- Coordinate Analysis: ✅ Available
-- Vision Analysis: ✅ Available
-- Site Discovery: ✅ Available
-- Data Export: ✅ Available
-
-**Agent Capabilities:**
-- Archaeological Pattern Recognition
-- Cultural Context Analysis
-- Multi-source Data Integration
-- Recommendation Generation
-
-${isBackendOnline ? "🟡 Backend services partially available" : "🟠 Running in enhanced demo mode"}
-
-All core archaeological analysis features are functional.`
-  }
-
-  const performVisionAnalysis = async (query: string): Promise<string> => {
-    const coordinates = extractCoordinates(query)
-    
-    if (coordinates && isBackendOnline) {
-      try {
-        const response = await fetch('http://localhost:8000/agents/vision/analyze', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            coordinates,
-            analysis_settings: {
-              enable_multispectral: true,
-              enable_thermal: false,
-              enable_lidar_fusion: true
-            }
-          })
-        })
-        
-        if (response.ok) {
-          const data = await response.json()
-          
-          return `👁️ **Vision Analysis Complete for ${coordinates}**
-
-**Detection Results:**
-- Features Detected: ${data.detection_results?.length || 0}
-- Analysis Confidence: ${Math.round((data.metadata?.confidence_average || 0.85) * 100)}%
-- Processing Time: ${data.metadata?.processing_time || "3.2s"}
-
-**Enhanced Features:**
-- ✅ Multi-spectral Analysis
-- ✅ Pattern Recognition
-- ✅ Archaeological Classification
-- ✅ Cultural Context Integration
-
-**Key Findings:**
-${data.detection_results?.map((detection: any, index: number) => 
-  `${index + 1}. ${detection.label} (${Math.round(detection.confidence * 100)}% confidence)`
-).join('\n') || "Archaeological patterns detected"}
-
-**Recommendations:**
-${data.processing_pipeline?.map((step: any) => `- ${step.step}: ${step.status}`).join('\n') || "Analysis pipeline completed successfully"}
-
-The vision analysis has been integrated with the main coordinate analysis system.`
-        }
-      } catch (error) {
-        console.warn("Vision analysis failed:", error)
-      }
-    }
-    
-    return `👁️ **Vision Analysis Capabilities**
-
-Our advanced vision system can analyze:
-
-**Image Sources:**
-- Satellite imagery (multiple providers)
-- Aerial photography
-- LIDAR elevation data
-- Multi-spectral imagery
-
-**Detection Capabilities:**
-- Geometric pattern recognition
-- Vegetation anomaly detection
-- Archaeological feature classification
-- Cultural landscape analysis
-
-**Analysis Features:**
-- Real-time processing
-- Multi-model consensus
-- Confidence scoring
-- Cultural context integration
-
-${coordinates ? 
-  `To analyze ${coordinates}, I'll need to access the vision analysis tab. The coordinates have been loaded for you.` :
-  "Provide coordinates in the format 'latitude, longitude' for specific analysis."
-}
-
-${isBackendOnline ? "🟢 Connected to advanced vision processing" : "🟡 Enhanced demo vision analysis available"}`
-  }
-
-  const performGeneralAssistance = async (query: string): Promise<string> => {
-    // Check for specific keywords and provide targeted help
-    const queryLower = query.toLowerCase()
-    
-    if (queryLower.includes("help") || queryLower.includes("how")) {
-      return `🌟 **NIS Protocol Agent Help**
-
-I'm your AI assistant for archaeological discovery. I can help you:
-
-**🔍 Coordinate Analysis**
-- Analyze specific coordinates for archaeological potential
-- Use multi-source data (satellite, LIDAR, historical)
-- Provide cultural context and recommendations
-
-**🗺️ Site Discovery**
-- Search database of known archaeological sites
-- Suggest new locations for investigation
-- Provide discovery methodology guidance
-
-**👁️ Vision Analysis**
-- Analyze satellite imagery for patterns
-- Detect archaeological features
-- Perform multi-spectral analysis
-
-**💬 Interactive Chat**
-- Ask questions in natural language
-- Get real-time archaeological insights
-- Access research databases
-
-**Quick Actions Available:**
-- "Analyze -3.4653, -62.2159" → Coordinate analysis
-- "Discover sites" → Site database search
-- "System status" → Check all services
-- "Vision analysis for [coordinates]" → Image analysis
-
-What would you like to explore today?`
-    }
-    
-    if (queryLower.includes("amazon") || queryLower.includes("rainforest")) {
-      return `🌳 **Amazon Archaeological Research**
-
-The Amazon rainforest contains remarkable archaeological heritage:
-
-**Known Features:**
-- Pre-Columbian settlements and earthworks
-- Agricultural terracing systems
-- River-based trading networks
-- Ceremonial and residential complexes
-
-**Research Methods:**
-- LIDAR penetrates forest canopy
-- Satellite imagery reveals patterns
-- Indigenous oral histories provide context
-- Ground-truthing validates discoveries
-
-**Recent Discoveries:**
-- Geometric earthworks in Acre, Brazil
-- Settlement networks along major rivers
-- Agricultural landscape modifications
-- Complex water management systems
-
-Our AI system specializes in Amazon archaeology. Provide coordinates to analyze specific locations, or ask about discovery methods.
-
-${isBackendOnline ? "🟢 Live Amazon research database connected" : "🟡 Enhanced demo mode available"}`
-    }
-    
-    return `🎯 **Archaeological Discovery Assistant**
-
-I'm here to help you explore and analyze archaeological sites using advanced AI technology.
-
-**What I Can Do:**
-- Analyze coordinates for archaeological potential
-- Search and discover new sites
-- Perform vision analysis on satellite imagery
-- Provide cultural and historical context
-- Generate field survey recommendations
-
-**Getting Started:**
-- Provide coordinates to analyze: "Analyze -3.4653, -62.2159"
-- Ask about specific regions: "Tell me about Amazon archaeology"
-- Request system information: "System status"
-- Explore vision capabilities: "How does vision analysis work?"
-
-**Current Status:**
-${isBackendOnline ? 
-  "🟢 Connected to full backend services with real-time data" : 
-  "🟡 Running in enhanced demo mode with comprehensive capabilities"
-}
-
-What aspect of archaeological discovery interests you most?`
-  }
-
-  // ====================================================================
-  // MESSAGE HANDLING
-  // ====================================================================
-
-  const handleSendMessage = async (e?: React.FormEvent) => {
-    e?.preventDefault()
-    
-    if (!input.trim()) return
-    
-    const userMessage = input.trim()
-    setInput("")
+  // Enhanced message processing with archaeological context
+  const processMessage = async (userMessage: string) => {
     setIsLoading(true)
-    setIsThinking(true)
     
     // Add user message
-    addMessage({
-      role: "user",
-      content: userMessage
-    })
-    
-    try {
-      // Step 1: Reasoning
-      setReasoning("Analyzing your request and determining the best approach...")
-      const reasoning = await reasonAboutQuery(userMessage, { chatMode, isBackendOnline })
-      
-      addMessage({
-        role: "reasoning", 
-        content: reasoning,
-        reasoning
-      })
-      
-      // Step 2: Action Planning
-      setReasoning("Planning the most effective action to address your needs...")
-      const { action, actionType } = await planAction(userMessage, reasoning)
-      
-      addMessage({
-        role: "action",
-        content: action,
-        actionType
-      })
-      
-      // Step 3: Action Execution
-      setReasoning("Executing action and gathering results...")
-      const observation = await executeAction(actionType, userMessage)
-      
-      addMessage({
-        role: "observation",
-        content: observation,
-        observation
-      })
-      
-      // Step 4: Final Response
-      setReasoning("")
-      setIsThinking(false)
-      
-      // If coordinates were found, notify parent
-      const coords = extractCoordinates(userMessage)
-      if (coords && onCoordinateSelect) {
-        onCoordinateSelect(coords)
-      }
-      
-    } catch (error) {
-      console.error("Chat processing error:", error)
-      setIsThinking(false)
-      setReasoning("")
-      
-      addMessage({
-        role: "assistant",
-        content: `I encountered an error while processing your request. ${isBackendOnline ? "Backend services may be temporarily unavailable." : "Running in demo mode."} Please try rephrasing your question or contact support if the issue persists.`
-      })
-    } finally {
-      setIsLoading(false)
+    const userMsg: ChatMessage = {
+      id: `user_${Date.now()}`,
+      type: "user",
+      content: userMessage,
+      timestamp: new Date().toISOString()
     }
-  }
-
-  const handleQuickAction = async (actionId: string) => {
-    setIsLoading(true)
     
+    setMessages(prev => [...prev, userMsg])
+
     try {
-      if (isBackendOnline) {
-        const response = await fetch('http://localhost:8000/agents/quick-actions', {
+      let agentResponse = ""
+      let metadata = {}
+      let attachments = []
+
+      // Enhanced AI processing with archaeological intelligence
+      if (backendOnline) {
+        // Use backend chat API with enhanced archaeological context
+        const response = await fetch('http://localhost:8000/chat/archaeological-assistant', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action_id: actionId })
+          body: JSON.stringify({
+            message: userMessage,
+            context: chatContext,
+            include_coordinates: true,
+            include_research: true,
+            analysis_mode: activeMode
+          })
         })
-        
+
         if (response.ok) {
           const data = await response.json()
-          
-          addMessage({
-            role: "assistant",
-            content: `⚡ **Quick Action: ${data.action}**\n\n${data.message}\n\n${JSON.stringify(data.result, null, 2)}`,
-            metadata: {
-              processing_time: 500,
-              models_used: ["quick_action_processor"],
-              action_type: actionId
-            }
-          })
-          
-          setIsLoading(false)
-          return
+          agentResponse = data.response
+          metadata = data.metadata || {}
+          attachments = data.attachments || []
+        } else {
+          throw new Error('Backend chat failed')
         }
+      } else {
+        // Enhanced local archaeological AI simulation
+        const result = await simulateArchaeologicalAgent(userMessage, chatContext)
+        agentResponse = result.response
+        metadata = result.metadata
+        attachments = result.attachments
+      }
+
+      // Add agent response
+      const agentMsg: ChatMessage = {
+        id: `agent_${Date.now()}`,
+        type: "agent",
+        content: agentResponse,
+        timestamp: new Date().toISOString(),
+        metadata,
+        attachments
+      }
+
+      setMessages(prev => [...prev, agentMsg])
+
+      // Handle coordinate extraction and selection
+      if ((metadata as any).coordinates && onCoordinateSelect) {
+        onCoordinateSelect((metadata as any).coordinates as string)
+        setChatContext(prev => ({
+          ...prev,
+          currentCoordinates: (metadata as any).coordinates as string
+        }))
+      }
+
+    } catch (error) {
+      console.error('Chat processing failed:', error)
+      
+      // Error fallback with helpful message
+      const errorMsg: ChatMessage = {
+        id: `error_${Date.now()}`,
+        type: "system",
+        content: "I'm having trouble processing your request. Let me try with local archaeological knowledge instead.",
+        timestamp: new Date().toISOString()
       }
       
-      // Fallback quick action
-      const action = QUICK_ACTIONS.find(a => a.id === actionId)
-      if (action) {
-        const result = await action.action()
-        
-        addMessage({
-          role: "assistant", 
-          content: `⚡ Executed ${action.label}: ${action.description}`,
-          metadata: {
-            processing_time: 800,
-            action_type: actionId
-          }
-        })
+      setMessages(prev => [...prev, errorMsg])
+
+      // Try local fallback
+      const fallbackResult = await simulateArchaeologicalAgent(userMessage, chatContext)
+      const fallbackMsg: ChatMessage = {
+        id: `fallback_${Date.now()}`,
+        type: "agent", 
+        content: fallbackResult.response,
+        timestamp: new Date().toISOString(),
+        metadata: fallbackResult.metadata
       }
-    } catch (error) {
-      console.error("Quick action failed:", error)
-      addMessage({
-        role: "assistant",
-        content: `❌ Quick action failed. ${isBackendOnline ? "Backend may be temporarily unavailable." : "Demo mode limitations."}`
-      })
+      
+      setMessages(prev => [...prev, fallbackMsg])
     } finally {
       setIsLoading(false)
     }
   }
 
-  // ====================================================================
-  // UTILITY FUNCTIONS
-  // ====================================================================
+  // Enhanced archaeological agent simulation
+  const simulateArchaeologicalAgent = async (message: string, context: any) => {
+    // Simulate processing time
+    await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 2000))
 
-  const extractCoordinates = (text: string): string | undefined => {
-    const coordRegex = /-?\d+\.?\d*,?\s*-?\d+\.?\d*/
-    const match = text.match(coordRegex)
-    return match ? match[0] : undefined
+    const messageLower = message.toLowerCase()
+    
+    // Archaeological knowledge base
+    const knowledgePatterns = {
+      coordinates: /(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)/,
+      sites: ['nazca', 'caral', 'kuhikugu', 'machu picchu', 'amazon', 'andes'],
+      techniques: ['lidar', 'satellite', 'excavation', 'survey', 'ground penetrating radar'],
+      periods: ['pre-columbian', 'inca', 'colonial', 'prehistoric', 'ancient'],
+      cultures: ['inca', 'nazca', 'moche', 'chavin', 'tiwanaku', 'chimu']
+    }
+
+    let response = ""
+    let metadata = {}
+    let attachments = []
+
+    // Coordinate analysis
+    const coordMatch = messageLower.match(knowledgePatterns.coordinates)
+    if (coordMatch) {
+      const lat = parseFloat(coordMatch[1])
+      const lon = parseFloat(coordMatch[2])
+      const coordinates = `${lat}, ${lon}`
+      
+      response = `I've detected coordinates ${coordinates}. This location appears to be in the ${getRegionName(lat, lon)} region. Based on archaeological patterns in this area, I recommend conducting a multi-spectral analysis including LIDAR and satellite imagery review. Would you like me to initiate a comprehensive site analysis?`
+      
+      metadata = { 
+        coordinates,
+        confidence: 0.9,
+        analysis_type: 'coordinate_recognition',
+        region: getRegionName(lat, lon)
+      }
+      
+      attachments.push({
+        type: 'location',
+        data: { coordinates, region: getRegionName(lat, lon) }
+      })
+    }
+    
+    // Site-specific knowledge
+    else if (knowledgePatterns.sites.some(site => messageLower.includes(site))) {
+      const matchedSite = knowledgePatterns.sites.find(site => messageLower.includes(site))
+      response = getSiteInformation(matchedSite!)
+      metadata = { 
+        research_focus: matchedSite,
+        confidence: 0.85,
+        analysis_type: 'site_information'
+      }
+    }
+    
+    // Technical questions
+    else if (knowledgePatterns.techniques.some(tech => messageLower.includes(tech))) {
+      const technique = knowledgePatterns.techniques.find(tech => messageLower.includes(tech))
+      response = getTechnicalInformation(technique!)
+      metadata = { 
+        technique,
+        confidence: 0.8,
+        analysis_type: 'technical_consultation'
+      }
+    }
+    
+    // Cultural/historical questions
+    else if (knowledgePatterns.cultures.some(culture => messageLower.includes(culture))) {
+      const culture = knowledgePatterns.cultures.find(culture => messageLower.includes(culture))
+      response = getCulturalInformation(culture!)
+      metadata = { 
+        culture,
+        confidence: 0.85,
+        analysis_type: 'cultural_information'
+      }
+    }
+    
+    // General archaeological assistance
+    else {
+      response = `I understand you're asking about ${message}. As an archaeological research assistant, I can help you with:
+
+🗺️ **Site Analysis**: Coordinate-based investigations and site characterization
+🔬 **Research Methods**: LIDAR, satellite imagery, geophysical surveys
+📚 **Historical Context**: Pre-Columbian cultures, colonial periods, indigenous knowledge
+🎯 **Data Integration**: Multi-source analysis and pattern recognition
+
+Would you like to focus on any specific aspect? You can also provide coordinates for detailed site analysis, or ask about specific archaeological techniques or cultures.`
+      
+      metadata = { 
+        confidence: 0.7,
+        analysis_type: 'general_assistance'
+      }
+    }
+
+    return { response, metadata, attachments }
   }
 
-  const handleCoordinateClick = (coordinates: string) => {
-    if (onCoordinateSelect) {
-      onCoordinateSelect(coordinates)
-    }
+  // Helper functions for archaeological knowledge
+  const getRegionName = (lat: number, lon: number): string => {
+    if (lat < -10 && lon < -70) return "Amazon Basin"
+    if (lat < -10 && lon > -75) return "Andean Highlands" 
+    if (lat > -10 && lon < -75) return "Coastal Plains"
+    return "Highland Regions"
   }
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
+  const getSiteInformation = (site: string): string => {
+    const siteInfo: Record<string, string> = {
+      nazca: "The Nazca Lines are a series of large ancient geoglyphs in southern Peru, created between 500 BCE and 500 CE. These remarkable ground drawings include geometric patterns and stylized animals, best viewed from above. Recent research suggests they may have been created for astronomical or ceremonial purposes.",
+      caral: "Caral is one of the oldest cities in the Americas, dating to approximately 3500-1800 BCE. Located in Peru's Supe Valley, it represents the Norte Chico civilization and features impressive pyramid complexes and urban planning that predates other major civilizations.",
+      kuhikugu: "Kuhikugu is an ancient settlement complex in the Amazon rainforest, representing sophisticated indigenous engineering. The site features circular plazas, defensive earthworks, and agricultural systems that supported large populations in the rainforest environment.",
+      amazon: "The Amazon Basin contains numerous archaeological sites that challenge assumptions about rainforest habitation. Evidence includes terra preta (anthropogenic soils), earthworks, and settlement patterns indicating complex societies managed vast forest areas sustainably."
+    }
+    return siteInfo[site] || `The ${site} region contains significant archaeological evidence that requires detailed investigation.`
   }
 
-  // ====================================================================
-  // RENDER MESSAGE COMPONENTS
-  // ====================================================================
-
-  const renderMessage = (message: Message) => {
-    const isUser = message.role === "user"
-    const isReasoning = message.role === "reasoning"
-    const isAction = message.role === "action"
-    const isObservation = message.role === "observation"
-    const isSystem = message.role === "system"
-
-    if (isSystem) {
-      return (
-        <div className="mx-auto max-w-[85%] rounded-lg bg-muted px-4 py-2 text-center text-sm">
-          {message.content}
-        </div>
-      )
+  const getTechnicalInformation = (technique: string): string => {
+    const techInfo: Record<string, string> = {
+      lidar: "LIDAR (Light Detection and Ranging) has revolutionized archaeology by penetrating forest canopy to reveal hidden structures. This technology has discovered thousands of previously unknown sites in places like the Amazon and Central America, revealing complex settlement patterns and landscape modifications.",
+      satellite: "Satellite imagery analysis uses multispectral and hyperspectral data to identify archaeological features. Changes in vegetation patterns, soil composition, and thermal signatures can indicate buried structures or ancient land use patterns.",
+      excavation: "Archaeological excavation remains fundamental for understanding site formation, chronology, and cultural practices. Modern techniques combine traditional methods with 3D documentation, environmental sampling, and interdisciplinary collaboration."
     }
-
-    if (isReasoning) {
-      return (
-        <div className="mx-auto max-w-[90%] rounded-lg bg-blue-50 border border-blue-200 px-4 py-3">
-          <div className="flex items-center gap-2 mb-2">
-            <Lightbulb className="h-4 w-4 text-blue-600" />
-            <span className="text-sm font-medium text-blue-800">Reasoning</span>
-          </div>
-          <p className="text-sm text-blue-700">{message.content}</p>
-        </div>
-      )
-    }
-
-    if (isAction) {
-      return (
-        <div className="mx-auto max-w-[90%] rounded-lg bg-orange-50 border border-orange-200 px-4 py-3">
-          <div className="flex items-center gap-2 mb-2">
-            <Target className="h-4 w-4 text-orange-600" />
-            <span className="text-sm font-medium text-orange-800">Action Plan</span>
-          </div>
-          <p className="text-sm text-orange-700">{message.content}</p>
-        </div>
-      )
-    }
-
-    if (isObservation) {
-      return (
-        <div className="mx-auto max-w-[90%] rounded-lg bg-green-50 border border-green-200 px-4 py-3">
-          <div className="flex items-center gap-2 mb-2">
-            <CheckCircle className="h-4 w-4 text-green-600" />
-            <span className="text-sm font-medium text-green-800">Observation</span>
-          </div>
-          <p className="text-sm text-green-700 whitespace-pre-line">{message.content}</p>
-          {message.metadata && (
-            <div className="mt-2 text-xs text-green-600">
-              {message.metadata.processing_time && `⏱️ ${message.metadata.processing_time}s`}
-              {message.metadata.models_used && ` • 🤖 ${message.metadata.models_used.join(", ")}`}
-            </div>
-          )}
-        </div>
-      )
-    }
-
-    return (
-      <div className={`flex max-w-[85%] gap-3 ${isUser ? "ml-auto flex-row-reverse" : "mr-auto flex-row"}`}>
-        <Avatar className={isUser ? "bg-primary" : "bg-emerald-100 text-emerald-700"}>
-          {isUser ? (
-            <User className="h-5 w-5 text-primary-foreground" />
-          ) : (
-            <Bot className="h-5 w-5" />
-          )}
-        </Avatar>
-        <div className={`rounded-lg px-4 py-2 ${isUser ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>
-          <div className="text-sm whitespace-pre-line">{message.content}</div>
-          {message.coordinates && !isUser && (
-            <div className="mt-2 flex items-center gap-2">
-              <button
-                className="inline-flex items-center gap-1 rounded bg-emerald-100 px-2 py-1 text-xs font-mono text-emerald-800 hover:bg-emerald-200 transition-colors"
-                onClick={() => handleCoordinateClick(message.coordinates!)}
-              >
-                <MapPin className="h-3 w-3" />
-                {message.coordinates}
-              </button>
-              <button
-                className="text-xs text-muted-foreground hover:text-foreground"
-                onClick={() => copyToClipboard(message.coordinates!)}
-              >
-                <Copy className="h-3 w-3" />
-              </button>
-            </div>
-          )}
-          <div className="mt-1 text-right text-xs opacity-70">
-            {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-          </div>
-        </div>
-      </div>
-    )
+    return techInfo[technique] || `${technique} is an important archaeological method that requires specialized expertise and proper implementation.`
   }
 
-  // ====================================================================
-  // MAIN RENDER
-  // ====================================================================
+  const getCulturalInformation = (culture: string): string => {
+    const cultureInfo: Record<string, string> = {
+      inca: "The Inca Empire (1438-1533 CE) was the largest empire in pre-Columbian America, known for sophisticated architecture, road systems, and administrative organization. Their archaeological record includes Machu Picchu, road networks, and agricultural terraces.",
+      nazca: "The Nazca culture (100-700 CE) is famous for the Nazca Lines but also produced remarkable textiles, ceramics, and irrigation systems. They developed sophisticated water management techniques in Peru's arid coastal region.",
+      moche: "The Moche civilization (100-700 CE) created some of the finest Pre-Columbian art, including detailed ceramics and metalwork. Their monumental architecture includes huacas (pyramid temples) and complex urban centers."
+    }
+    return cultureInfo[culture] || `The ${culture} culture represents an important archaeological tradition that contributed significantly to pre-Columbian development.`
+  }
+
+  const handleSendMessage = async () => {
+    if (!inputValue.trim() || isLoading) return
+    
+    const message = inputValue.trim()
+    setInputValue("")
+    await processMessage(message)
+  }
+
+  const handleResearchComplete = (results: any) => {
+    setChatContext(prev => ({
+      ...prev,
+      analysisHistory: [...prev.analysisHistory, results]
+    }))
+    
+    // Add research results as a system message
+    const researchMsg: ChatMessage = {
+      id: `research_${Date.now()}`,
+      type: "system",
+      content: `Research completed: ${results.summary || 'Analysis finished successfully'}`,
+      timestamp: new Date().toISOString(),
+      metadata: {
+        research_id: results.id,
+        confidence: results.confidence_score
+      },
+      attachments: [{
+        type: 'analysis',
+        data: results
+      }]
+    }
+    
+    setMessages(prev => [...prev, researchMsg])
+  }
+
+  const clearChat = () => {
+    setMessages([{
+      id: "welcome",
+      type: "system", 
+      content: "Chat cleared. How can I assist with your archaeological research?",
+      timestamp: new Date().toISOString()
+    }])
+    setChatContext({
+      currentCoordinates: null,
+      researchFocus: null, 
+      analysisHistory: []
+    })
+  }
 
   return (
-    <TooltipProvider>
-      <Card className="flex h-[700px] w-full flex-col">
-        <CardHeader className="px-4 pb-2">
+    <div className="h-full flex flex-col space-y-4">
+      {/* Enhanced Header */}
+      <Card className="bg-slate-800 border-slate-700">
+        <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-xl">
-              <Brain className="h-5 w-5 text-emerald-600" />
-              NIS Protocol Agent
-              <Badge variant="outline" className="ml-2">
-                {isBackendOnline ? (
-                  <>
-                    <Wifi className="h-3 w-3 mr-1" />
-                    Connected
-                  </>
-                ) : (
-                  <>
-                    <WifiOff className="h-3 w-3 mr-1" />
-                    Offline
-                  </>
-                )}
+            <div>
+              <CardTitle className="flex items-center space-x-2 text-white">
+                <MessageSquare className="h-5 w-5 text-emerald-400" />
+                <span>Archaeological Research Assistant</span>
+              </CardTitle>
+              <CardDescription className="text-slate-400">
+                Advanced AI-powered archaeological investigation and analysis
+              </CardDescription>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Badge variant="outline" className={`${
+                backendOnline ? 'border-emerald-500/50 text-emerald-400' : 'border-red-500/50 text-red-400'
+              }`}>
+                {backendOnline ? 'Enhanced AI' : 'Local Mode'}
               </Badge>
-            </CardTitle>
-            <div className="flex items-center gap-2">
-              <Tabs value={chatMode} onValueChange={(value) => setChatMode(value as "reasoning" | "discovery" | "analysis" | "research")} className="w-auto">
-                <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="reasoning" className="px-2 py-1 text-xs">Reasoning</TabsTrigger>
-                  <TabsTrigger value="discovery" className="px-2 py-1 text-xs">Discovery</TabsTrigger>
-                  <TabsTrigger value="analysis" className="px-2 py-1 text-xs">Analysis</TabsTrigger>
-                  <TabsTrigger value="research" className="px-2 py-1 text-xs">Research</TabsTrigger>
-                </TabsList>
-              </Tabs>
+              <Button size="sm" variant="outline" onClick={clearChat} className="border-slate-600 text-slate-300">
+                <RefreshCw className="h-3 w-3 mr-1" />
+                Clear
+              </Button>
             </div>
           </div>
-          
-          {/* Current Reasoning Display */}
-          {isThinking && reasoning && (
-            <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-              <div className="animate-spin">
-                <Brain className="h-4 w-4" />
-              </div>
-              <span>{reasoning}</span>
-            </div>
-          )}
         </CardHeader>
+      </Card>
 
-        <CardContent className="flex-1 overflow-hidden p-4">
-          {/* Quick Actions */}
-          {showQuickActions && (
-            <div className="mb-4 p-3 bg-muted/50 rounded-lg">
-              <div className="flex justify-between items-center mb-2">
-                <h4 className="text-sm font-medium">Quick Actions</h4>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowQuickActions(!showQuickActions)}
-                  className="h-6 w-6 p-0"
+      {/* Mode Selector */}
+      <Tabs value={activeMode} onValueChange={(value: any) => setActiveMode(value)} className="w-full">
+        <TabsList className="grid w-full grid-cols-3 bg-slate-800">
+          <TabsTrigger value="chat" className="text-slate-300">
+            <MessageSquare className="h-4 w-4 mr-2" />
+            Chat
+          </TabsTrigger>
+          <TabsTrigger value="research" className="text-slate-300">
+            <Microscope className="h-4 w-4 mr-2" />
+            Research
+          </TabsTrigger>
+          <TabsTrigger value="analysis" className="text-slate-300">
+            <Target className="h-4 w-4 mr-2" />
+            Analysis
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="chat" className="space-y-4">
+          {/* Chat Messages */}
+          <Card className="bg-slate-800 border-slate-700 h-[500px] flex flex-col">
+            <CardContent className="flex-1 p-0">
+              <ScrollArea className="h-full p-4" ref={scrollAreaRef}>
+                <div className="space-y-4">
+                  {messages.map((message) => (
+                    <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`flex space-x-3 max-w-[80%] ${message.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                        <Avatar className="w-8 h-8">
+                          <AvatarFallback className={`${
+                            message.type === 'user' ? 'bg-emerald-600' : 
+                            message.type === 'agent' ? 'bg-blue-600' : 'bg-slate-600'
+                          }`}>
+                            {message.type === 'user' ? <User className="h-4 w-4" /> : 
+                             message.type === 'agent' ? <Bot className="h-4 w-4" /> : 
+                             <Sparkles className="h-4 w-4" />}
+                          </AvatarFallback>
+                        </Avatar>
+                        
+                        <div className={`rounded-lg p-3 ${
+                          message.type === 'user' ? 'bg-emerald-600 text-white' :
+                          message.type === 'agent' ? 'bg-slate-700 text-white' :
+                          'bg-slate-900 text-slate-300 border border-slate-600'
+                        }`}>
+                          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                          
+                          {message.metadata && (
+                            <div className="mt-2 pt-2 border-t border-slate-600/50">
+                              <div className="flex flex-wrap gap-1">
+                                {message.metadata.coordinates && (
+                                  <Badge variant="outline" className="text-xs border-blue-500/50 text-blue-400">
+                                    <MapPin className="h-2 w-2 mr-1" />
+                                    {message.metadata.coordinates}
+                                  </Badge>
+                                )}
+                                {message.metadata.confidence && (
+                                  <Badge variant="outline" className="text-xs border-emerald-500/50 text-emerald-400">
+                                    {Math.round(message.metadata.confidence * 100)}% confidence
+                                  </Badge>
+                                )}
+                                {message.metadata.analysis_type && (
+                                  <Badge variant="outline" className="text-xs border-purple-500/50 text-purple-400">
+                                    {message.metadata.analysis_type.replace('_', ' ')}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {message.attachments && message.attachments.length > 0 && (
+                            <div className="mt-2 pt-2 border-t border-slate-600/50">
+                              <div className="flex flex-wrap gap-2">
+                                {message.attachments.map((attachment, index) => (
+                                  <Button
+                                    key={index}
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-xs border-slate-600 text-slate-300"
+                                    onClick={() => {
+                                      if (attachment.type === 'location' && onCoordinateSelect) {
+                                        onCoordinateSelect(attachment.data.coordinates)
+                                      }
+                                    }}
+                                  >
+                                    {attachment.type === 'location' && <MapPin className="h-3 w-3 mr-1" />}
+                                    {attachment.type === 'analysis' && <Target className="h-3 w-3 mr-1" />}
+                                    {attachment.type === 'document' && <FileText className="h-3 w-3 mr-1" />}
+                                    View {attachment.type}
+                                  </Button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          
+                          <p className="text-xs text-slate-500 mt-2">
+                            {new Date(message.timestamp).toLocaleTimeString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {isLoading && (
+                    <div className="flex justify-start">
+                      <div className="flex space-x-3 max-w-[80%]">
+                        <Avatar className="w-8 h-8">
+                          <AvatarFallback className="bg-blue-600">
+                            <Bot className="h-4 w-4 animate-pulse" />
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="bg-slate-700 rounded-lg p-3">
+                          <div className="flex items-center space-x-2">
+                            <RefreshCw className="h-4 w-4 animate-spin text-emerald-400" />
+                            <span className="text-white text-sm">Analyzing archaeological data...</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </CardContent>
+            
+            {/* Enhanced Input */}
+            <div className="border-t border-slate-700 p-4">
+              <div className="flex space-x-2">
+                <Input
+                  ref={inputRef}
+                  placeholder="Ask about archaeological sites, coordinates, research methods..."
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  className="bg-slate-700 border-slate-600 text-white"
+                  disabled={isLoading}
+                />
+                <Button 
+                  onClick={handleSendMessage}
+                  disabled={isLoading || !inputValue.trim()}
+                  className="bg-emerald-600 hover:bg-emerald-700"
                 >
-                  ×
+                  <Send className="h-4 w-4" />
                 </Button>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {QUICK_ACTIONS.slice(0, 6).map((action) => (
-                  <Tooltip key={action.id}>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="justify-start text-xs"
-                        onClick={() => handleQuickAction(action.id)}
-                      >
-                        <action.icon className="h-3 w-3 mr-1" />
-                        {action.label}
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{action.description}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                ))}
+              
+              {/* Quick Actions */}
+              <div className="flex flex-wrap gap-2 mt-3">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={() => setInputValue("Analyze coordinates -12.2551, -53.2134")}
+                  className="text-xs border-slate-600 text-slate-300"
+                  disabled={isLoading}
+                >
+                  <MapPin className="h-3 w-3 mr-1" />
+                  Sample Coordinates
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={() => setInputValue("Tell me about LIDAR archaeology")}
+                  className="text-xs border-slate-600 text-slate-300"
+                  disabled={isLoading}
+                >
+                  <Eye className="h-3 w-3 mr-1" />
+                  LIDAR Methods
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={() => setInputValue("What are the Nazca Lines?")}
+                  className="text-xs border-slate-600 text-slate-300"
+                  disabled={isLoading}
+                >
+                  <Globe className="h-3 w-3 mr-1" />
+                  Nazca Lines
+                </Button>
               </div>
             </div>
-          )}
+          </Card>
+        </TabsContent>
 
-          {/* Messages */}
-          <ScrollArea className="h-full pr-4">
-            <div className="space-y-4 pb-4">
-              {messages.map((message) => (
-                <div key={message.id}>
-                  {renderMessage(message)}
-                </div>
-              ))}
-              
-              {/* Thinking Indicator */}
-              {isLoading && (
-                <div className="flex justify-center">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <div className="animate-pulse">
-                      <Sparkles className="h-4 w-4" />
+        <TabsContent value="research" className="space-y-4">
+          <ResearchTools 
+            onResearchComplete={handleResearchComplete}
+            onCoordinateSelect={onCoordinateSelect}
+            backendOnline={backendOnline}
+          />
+        </TabsContent>
+
+        <TabsContent value="analysis" className="space-y-4">
+          <Card className="bg-slate-800 border-slate-700">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center space-x-2">
+                <Target className="h-5 w-5 text-purple-400" />
+                <span>Cross-Platform Analysis</span>
+              </CardTitle>
+              <CardDescription className="text-slate-400">
+                Integrated analysis combining chat insights, research data, and coordinate analysis
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 bg-slate-700/50 rounded-lg border border-slate-600">
+                  <h4 className="text-white font-medium mb-2 flex items-center space-x-2">
+                    <MessageSquare className="h-4 w-4 text-emerald-400" />
+                    <span>Chat Context</span>
+                  </h4>
+                  <div className="space-y-2 text-sm text-slate-300">
+                    <div className="flex justify-between">
+                      <span>Current Coordinates:</span>
+                      <span className="font-mono">{chatContext.currentCoordinates || 'None'}</span>
                     </div>
-                    <span>Agent is thinking...</span>
+                    <div className="flex justify-between">
+                      <span>Research Focus:</span>
+                      <span>{chatContext.researchFocus || 'General'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Analysis History:</span>
+                      <span>{chatContext.analysisHistory.length} items</span>
+                    </div>
                   </div>
                 </div>
-              )}
-              
-              <div ref={messagesEndRef} />
-            </div>
-          </ScrollArea>
-        </CardContent>
 
-        <CardFooter className="border-t p-4">
-          <form onSubmit={handleSendMessage} className="flex w-full items-center gap-2">
-            <div className="flex gap-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button type="button" size="icon" variant="ghost" className="h-9 w-9 rounded-full">
-                    <Paperclip className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Attach file</TooltipContent>
-              </Tooltip>
-              
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button type="button" size="icon" variant="ghost" className="h-9 w-9 rounded-full">
-                    <ImageIcon className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Upload image</TooltipContent>
-              </Tooltip>
-              
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button type="button" size="icon" variant="ghost" className="h-9 w-9 rounded-full">
-                    <Mic className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Voice input</TooltipContent>
-              </Tooltip>
-            </div>
-            
-            <Input
-              ref={inputRef}
-              type="text"
-              placeholder="Ask about archaeological discoveries, analyze coordinates, or discover new sites..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              className="flex-1"
-              disabled={isLoading}
-            />
-            
-            <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
-              {isLoading ? (
-                <Sparkles className="h-4 w-4 animate-pulse" />
-              ) : (
-                <Send className="h-4 w-4" />
-              )}
-            </Button>
-          </form>
-          
-          {/* Status Bar */}
-          <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
-            <span>Mode: {chatMode.charAt(0).toUpperCase() + chatMode.slice(1)}</span>
-            <span>
-              {isBackendOnline ? "🟢 Backend Online" : "🔴 Offline Mode"} • 
-              {messages.length} messages
-            </span>
-          </div>
-        </CardFooter>
-      </Card>
-    </TooltipProvider>
+                <div className="p-4 bg-slate-700/50 rounded-lg border border-slate-600">
+                  <h4 className="text-white font-medium mb-2 flex items-center space-x-2">
+                    <Database className="h-4 w-4 text-blue-400" />
+                    <span>Data Integration</span>
+                  </h4>
+                  <div className="space-y-2 text-sm text-slate-300">
+                    <div className="flex justify-between">
+                      <span>Backend Status:</span>
+                      <Badge variant="outline" className={`text-xs ${
+                        backendOnline ? 'border-emerald-500/50 text-emerald-400' : 'border-red-500/50 text-red-400'
+                      }`}>
+                        {backendOnline ? 'Connected' : 'Offline'}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Data Sources:</span>
+                      <span>{backendOnline ? '4 active' : '2 demo'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Analysis Mode:</span>
+                      <span className="capitalize">{activeMode}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Button variant="outline" className="h-16 flex-col border-slate-600 text-slate-300">
+                  <Brain className="h-6 w-6 mb-1 text-emerald-400" />
+                  <span className="text-xs">AI Synthesis</span>
+                </Button>
+                <Button variant="outline" className="h-16 flex-col border-slate-600 text-slate-300">
+                  <Globe className="h-6 w-6 mb-1 text-blue-400" />
+                  <span className="text-xs">Spatial Analysis</span>
+                </Button>
+                <Button variant="outline" className="h-16 flex-col border-slate-600 text-slate-300">
+                  <Clock className="h-6 w-6 mb-1 text-purple-400" />
+                  <span className="text-xs">Temporal Trends</span>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   )
 } 

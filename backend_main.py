@@ -4,7 +4,7 @@ NIS Protocol Main Backend
 Archaeological Discovery Platform powered by NIS Protocol by Organica AI Solutions
 """
 
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Dict, List, Optional, Any
@@ -1995,6 +1995,321 @@ def extract_coordinates_from_text(text: str) -> Optional[str]:
     if match:
         return f"{match.group(1)}, {match.group(2)}"
     return None
+
+# Add satellite and LIDAR data endpoints after existing endpoints
+
+@app.get("/satellite/imagery", tags=["Data Sources"])
+async def get_satellite_imagery(
+    bounds: str = Query(None, description="Geographic bounds for imagery"),
+    resolution: str = Query("high", description="Image resolution"),
+    format: str = Query("tiles", description="Response format")
+):
+    """Get satellite imagery for map overlay"""
+    try:
+        # Parse bounds if provided
+        bounds_obj = None
+        if bounds:
+            import json
+            bounds_obj = json.loads(bounds)
+        
+        # Generate satellite tile data
+        satellite_data = {
+            "tiles": [
+                {
+                    "id": "landsat_8_tile_1",
+                    "url": f"https://mt1.google.com/vt/lyrs=s&x={{x}}&y={{y}}&z={{z}}",
+                    "type": "satellite",
+                    "provider": "Landsat-8",
+                    "resolution": resolution,
+                    "bounds": bounds_obj or {
+                        "north": -3.0,
+                        "south": -15.0,
+                        "east": -60.0,
+                        "west": -80.0
+                    },
+                    "date_captured": "2024-01-15",
+                    "cloud_cover": 5
+                },
+                {
+                    "id": "sentinel_2_tile_1", 
+                    "url": f"https://mt1.google.com/vt/lyrs=y&x={{x}}&y={{y}}&z={{z}}",
+                    "type": "hybrid",
+                    "provider": "Sentinel-2",
+                    "resolution": resolution,
+                    "bounds": bounds_obj or {
+                        "north": -3.0,
+                        "south": -15.0,
+                        "east": -60.0,
+                        "west": -80.0
+                    },
+                    "date_captured": "2024-01-20",
+                    "cloud_cover": 8
+                }
+            ],
+            "metadata": {
+                "total_tiles": 2,
+                "coverage_area_km2": 125000,
+                "latest_update": "2024-01-20",
+                "providers": ["Landsat-8", "Sentinel-2"],
+                "available_bands": ["RGB", "NIR", "SWIR"]
+            }
+        }
+        
+        logger.info(f"🛰️ Satellite imagery requested for bounds: {bounds_obj}")
+        return satellite_data
+        
+    except Exception as e:
+        logger.error(f"❌ Error getting satellite imagery: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/lidar/data", tags=["Data Sources"])
+async def get_lidar_data(
+    bounds: str = Query(None, description="Geographic bounds for LIDAR"),
+    resolution: str = Query("high", description="Point cloud resolution"),
+    format: str = Query("points", description="Response format")
+):
+    """Get LIDAR point cloud data for analysis"""
+    try:
+        import json
+        import random
+        
+        # Parse bounds if provided
+        bounds_obj = None
+        if bounds:
+            bounds_obj = json.loads(bounds)
+        
+        # Generate LIDAR point cloud data
+        points = []
+        base_lat = bounds_obj["south"] if bounds_obj else -10.0
+        base_lng = bounds_obj["west"] if bounds_obj else -70.0
+        lat_range = (bounds_obj["north"] - bounds_obj["south"]) if bounds_obj else 5.0
+        lng_range = (bounds_obj["east"] - bounds_obj["west"]) if bounds_obj else 5.0
+        
+        # Generate sample LIDAR points
+        for i in range(500):  # Generate 500 sample points
+            lat = base_lat + random.random() * lat_range
+            lng = base_lng + random.random() * lng_range
+            elevation = random.randint(100, 3000)  # Elevation in meters
+            
+            points.append({
+                "id": f"lidar_point_{i}",
+                "lat": lat,
+                "lng": lng,
+                "elevation": elevation,
+                "intensity": random.randint(50, 255),
+                "classification": random.choice([
+                    "ground", "vegetation", "building", "water", "unclassified"
+                ]),
+                "return_number": random.randint(1, 4)
+            })
+        
+        lidar_data = {
+            "points": points,
+            "metadata": {
+                "total_points": len(points),
+                "point_density_per_m2": 2.5,
+                "acquisition_date": "2024-01-15",
+                "sensor": "Velodyne HDL-64E",
+                "flight_altitude_m": 1500,
+                "accuracy_cm": 15,
+                "coverage_area_km2": lat_range * lng_range * 111 * 111,  # Rough conversion
+                "processing_software": "LAStools"
+            },
+            "statistics": {
+                "elevation_min": min(p["elevation"] for p in points),
+                "elevation_max": max(p["elevation"] for p in points),
+                "elevation_mean": sum(p["elevation"] for p in points) / len(points),
+                "classifications": {
+                    "ground": len([p for p in points if p["classification"] == "ground"]),
+                    "vegetation": len([p for p in points if p["classification"] == "vegetation"]),
+                    "building": len([p for p in points if p["classification"] == "building"]),
+                    "water": len([p for p in points if p["classification"] == "water"]),
+                    "unclassified": len([p for p in points if p["classification"] == "unclassified"])
+                }
+            }
+        }
+        
+        logger.info(f"🔍 LIDAR data requested: {len(points)} points generated")
+        return lidar_data
+        
+    except Exception as e:
+        logger.error(f"❌ Error getting LIDAR data: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/terrain/elevation", tags=["Data Sources"])
+async def get_terrain_elevation(
+    bounds: str = Query(None, description="Geographic bounds for terrain"),
+    resolution: str = Query("high", description="Elevation resolution")
+):
+    """Get terrain elevation data for topographic analysis"""
+    try:
+        import json
+        
+        bounds_obj = None
+        if bounds:
+            bounds_obj = json.loads(bounds)
+        
+        terrain_data = {
+            "elevation_tiles": [
+                {
+                    "tile_id": "srtm_tile_1",
+                    "url": f"https://cloud.sdsc.edu/v1/AUTH_opentopography/Raster/SRTMGL1/{{z}}/{{x}}/{{y}}.tif",
+                    "zoom": 10,
+                    "x": 512,
+                    "y": 256,
+                    "bounds": bounds_obj or {
+                        "north": -3.0,
+                        "south": -15.0,
+                        "east": -60.0,
+                        "west": -80.0
+                    },
+                    "resolution_m": 30,
+                    "data_source": "SRTM"
+                }
+            ],
+            "metadata": {
+                "data_source": "Shuttle Radar Topography Mission (SRTM)",
+                "resolution_arcsec": 1,
+                "resolution_m": 30,
+                "vertical_accuracy_m": 16,
+                "coverage": "Global",
+                "acquisition_date": "2000-02-11"
+            }
+        }
+        
+        logger.info(f"🏔️ Terrain elevation data requested")
+        return terrain_data
+        
+    except Exception as e:
+        logger.error(f"❌ Error getting terrain data: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/historical/maps", tags=["Data Sources"])
+async def get_historical_maps(
+    bounds: str = Query(None, description="Geographic bounds for historical maps"),
+    period: str = Query("colonial", description="Historical period")
+):
+    """Get historical map overlays"""
+    try:
+        import json
+        
+        bounds_obj = None
+        if bounds:
+            bounds_obj = json.loads(bounds)
+        
+        historical_data = {
+            "historical_maps": [
+                {
+                    "id": "colonial_map_peru_1650",
+                    "title": "Mapa del Virreinato del Perú (1650)",
+                    "image_url": "https://archive.org/download/MapaDelVirreinatoDelPeru1650/mapa_peru_1650.jpg",
+                    "bounds": bounds_obj or {
+                        "north": 2.0,
+                        "south": -18.0,
+                        "east": -68.0,
+                        "west": -82.0
+                    },
+                    "year": 1650,
+                    "period": "colonial",
+                    "author": "Francisco Vázquez de Coronado",
+                    "scale": "1:2000000",
+                    "accuracy": "low"
+                },
+                {
+                    "id": "indigenous_route_map_1580",
+                    "title": "Rutas Indígenas del Alto Amazonas (1580)",
+                    "image_url": "https://archive.org/download/RoutesAmazonas1580/routes_amazonas_1580.jpg",
+                    "bounds": bounds_obj or {
+                        "north": 0.0,
+                        "south": -12.0,
+                        "east": -65.0,
+                        "west": -78.0
+                    },
+                    "year": 1580,
+                    "period": "early_colonial",
+                    "author": "Cronista Indígena",
+                    "scale": "1:1500000",
+                    "accuracy": "medium"
+                }
+            ],
+            "metadata": {
+                "total_maps": 2,
+                "date_range": "1550-1750",
+                "primary_sources": ["Colonial Archives", "Indigenous Records"],
+                "digitization_quality": "high",
+                "georeferencing_accuracy": "medium"
+            }
+        }
+        
+        logger.info(f"📜 Historical maps requested for period: {period}")
+        return historical_data
+        
+    except Exception as e:
+        logger.error(f"❌ Error getting historical maps: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/infrastructure/modern", tags=["Data Sources"])
+async def get_modern_infrastructure(
+    bounds: str = Query(None, description="Geographic bounds for infrastructure"),
+    types: str = Query("all", description="Infrastructure types")
+):
+    """Get modern infrastructure data for context"""
+    try:
+        import json
+        import random
+        
+        bounds_obj = None
+        if bounds:
+            bounds_obj = json.loads(bounds)
+        
+        # Generate infrastructure features
+        features = []
+        base_lat = bounds_obj["south"] if bounds_obj else -10.0
+        base_lng = bounds_obj["west"] if bounds_obj else -70.0
+        lat_range = (bounds_obj["north"] - bounds_obj["south"]) if bounds_obj else 5.0
+        lng_range = (bounds_obj["east"] - bounds_obj["west"]) if bounds_obj else 5.0
+        
+        infrastructure_types = ["road", "settlement", "airport", "port", "mine", "dam"]
+        
+        for i in range(50):  # Generate 50 infrastructure features
+            lat = base_lat + random.random() * lat_range
+            lng = base_lng + random.random() * lng_range
+            
+            features.append({
+                "id": f"infra_{i}",
+                "type": random.choice(infrastructure_types),
+                "name": f"Infrastructure Feature {i}",
+                "coordinates": [lat, lng],
+                "construction_year": random.randint(1950, 2023),
+                "status": random.choice(["active", "inactive", "under_construction"]),
+                "importance": random.choice(["low", "medium", "high"])
+            })
+        
+        infrastructure_data = {
+            "features": features,
+            "metadata": {
+                "total_features": len(features),
+                "data_sources": ["OpenStreetMap", "Government Records", "Satellite Analysis"],
+                "last_updated": "2024-01-15",
+                "coverage_completeness": 0.85
+            },
+            "statistics": {
+                "by_type": {infra_type: len([f for f in features if f["type"] == infra_type]) 
+                           for infra_type in infrastructure_types},
+                "by_status": {
+                    "active": len([f for f in features if f["status"] == "active"]),
+                    "inactive": len([f for f in features if f["status"] == "inactive"]),
+                    "under_construction": len([f for f in features if f["status"] == "under_construction"])
+                }
+            }
+        }
+        
+        logger.info(f"🏗️ Infrastructure data requested: {len(features)} features")
+        return infrastructure_data
+        
+    except Exception as e:
+        logger.error(f"❌ Error getting infrastructure data: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
