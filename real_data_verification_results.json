@@ -1,0 +1,64 @@
+{
+  "backend_status": {
+    "online": false,
+    "status_code": 404,
+    "response_time": 0.004546
+  },
+  "frontend_pages": {
+    "satellite": {
+      "accessible": true,
+      "status_code": 200,
+      "has_real_data_references": true,
+      "no_mock_references": false,
+      "has_backend_connection_checks": true,
+      "content_size": 19428
+    },
+    "discovery": {
+      "accessible": true,
+      "status_code": 200,
+      "has_real_data_references": false,
+      "no_mock_references": true,
+      "has_backend_connection_checks": false,
+      "content_size": 9619
+    }
+  },
+  "backend_endpoints": {
+    "health": {
+      "accessible": false,
+      "status_code": 404,
+      "response_time": 0.00227
+    },
+    "satellite_health": {
+      "accessible": false,
+      "status_code": 404,
+      "response_time": 0.001711
+    },
+    "research_sites": {
+      "accessible": true,
+      "status_code": 200,
+      "response_time": 0.004464
+    },
+    "agents": {
+      "accessible": true,
+      "status_code": 200,
+      "response_time": 0.002038
+    }
+  },
+  "satellite_code_analysis": {
+    "contains_real_data_only_text": true,
+    "has_backend_online_checks": true,
+    "no_mock_data_generation": true,
+    "has_error_handling_for_offline": true,
+    "disables_functionality_when_offline": true,
+    "makes_real_api_calls": true,
+    "no_demo_mode": true
+  },
+  "discovery_code_analysis": {
+    "makes_real_api_calls_only": true,
+    "no_mock_fallbacks": true,
+    "handles_api_errors": true,
+    "uses_real_endpoints": true,
+    "no_demo_data": true,
+    "handles_backend_failures": true
+  }
+}
