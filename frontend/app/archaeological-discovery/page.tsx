@@ -31,6 +31,7 @@ import {
   RefreshCw,
   Clock
 } from 'lucide-react'
+import Navigation from "../../components/shared/Navigation"
 
 // Types
 interface DiscoveredSite {
@@ -513,63 +514,7 @@ export default function ArchaeologicalDiscoveryPage() {
 
   return (
     <div className="min-h-screen bg-slate-900">
-      {/* Navigation Header */}
-      <header className="bg-slate-900/80 backdrop-blur-sm border-b border-slate-700 py-4 text-white sticky top-0 z-50">
-        <div className="container mx-auto flex items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2 text-xl font-bold">
-            <Globe className="h-8 w-8 text-blue-400" />
-            <span className="text-white">NIS Protocol</span>
-          </Link>
-          <nav className="hidden space-x-6 md:flex">
-            <Link href="/" className="hover:text-blue-400 transition-colors">
-              Home
-            </Link>
-            <Link href="/archaeological-discovery" className="text-blue-400 font-medium">
-              Discovery
-            </Link>
-            <Link href="/agent" className="hover:text-blue-400 transition-colors">
-              Agents
-            </Link>
-            <Link href="/satellite" className="hover:text-blue-400 transition-colors">
-              Satellite
-            </Link>
-            <Link href="/map" className="hover:text-blue-400 transition-colors">
-              Maps
-            </Link>
-            <Link href="/analytics" className="hover:text-blue-400 transition-colors">
-              Analytics
-            </Link>
-            <Link href="/chat" className="hover:text-blue-400 transition-colors">
-              Chat
-            </Link>
-            <Link href="/documentation" className="hover:text-blue-400 transition-colors">
-              Docs
-            </Link>
-          </nav>
-          
-          {/* Status indicator */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 text-sm text-slate-400">
-              <Clock className="h-4 w-4" />
-              <span>Last update: {state.lastRefresh}</span>
-              {statisticsCache && (
-                <span className="text-xs text-slate-500 ml-2">
-                  (Stats cached)
-                </span>
-              )}
-            </div>
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              onClick={refreshLatestData}
-              className="text-slate-400 hover:text-white"
-              title="Force refresh all data including statistics"
-            >
-              <RefreshCw className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Navigation />
 
       {/* Main Content */}
       <div className="p-8">

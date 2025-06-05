@@ -47,6 +47,7 @@ import {
   LineChart,
   BarChart3
 } from "lucide-react"
+import Navigation from "../../components/shared/Navigation"
 
 export default function DocumentationPage() {
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
@@ -59,51 +60,7 @@ export default function DocumentationPage() {
 
   return (
     <div className="min-h-screen bg-slate-900">
-      {/* Navigation Header */}
-      <header className="bg-slate-900/80 backdrop-blur-sm border-b border-slate-700 py-4 text-white sticky top-0 z-50">
-        <div className="container mx-auto flex items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2 text-xl font-bold">
-            <Globe className="h-8 w-8 text-blue-400" />
-            <div className="flex flex-col">
-              <span className="text-white text-lg leading-tight">Archaeological Discovery</span>
-              <span className="text-slate-400 text-xs leading-tight">NIS Protocol by Organica AI</span>
-            </div>
-          </Link>
-          <nav className="hidden space-x-6 md:flex">
-            <Link href="/" className="hover:text-blue-400 transition-colors">
-              Home
-            </Link>
-            <Link href="/archaeological-discovery" className="hover:text-blue-400 transition-colors">
-              Discovery
-            </Link>
-            <Link href="/agent" className="hover:text-blue-400 transition-colors">
-              Agents
-            </Link>
-            <Link href="/satellite" className="hover:text-blue-400 transition-colors">
-              Satellite
-            </Link>
-            <Link href="/map" className="hover:text-blue-400 transition-colors">
-              Maps
-            </Link>
-            <Link href="/analytics" className="hover:text-blue-400 transition-colors">
-              Analytics
-            </Link>
-            <Link href="/chat" className="hover:text-blue-400 transition-colors">
-              Chat
-            </Link>
-            <Link href="/documentation" className="text-blue-400 font-medium">
-              Docs
-            </Link>
-          </nav>
-          
-          {/* Mobile menu button */}
-          <button className="md:hidden text-slate-300 hover:text-white">
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
-      </header>
+      <Navigation />
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">

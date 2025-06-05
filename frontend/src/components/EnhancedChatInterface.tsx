@@ -69,8 +69,8 @@ interface ChatMessage {
   content: string
   timestamp: string
   metadata?: {
-    coordinates?: string
-    confidence?: number
+  coordinates?: string
+  confidence?: number
     sources?: string[]
     research_id?: string
     analysis_type?: string
@@ -176,7 +176,7 @@ export default function EnhancedChatInterface({ onCoordinateSelect }: EnhancedCh
   const [backendOnline, setBackendOnline] = useState(false)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-
+  
   // Check backend status
   useEffect(() => {
     const checkBackend = async () => {
@@ -232,7 +232,7 @@ export default function EnhancedChatInterface({ onCoordinateSelect }: EnhancedCh
             analysis_mode: activeMode
           })
         })
-
+        
         if (response.ok) {
           const data = await response.json()
           agentResponse = data.response
@@ -241,7 +241,7 @@ export default function EnhancedChatInterface({ onCoordinateSelect }: EnhancedCh
         } else {
           throw new Error('Backend chat failed')
         }
-      } else {
+    } else {
         // Enhanced local archaeological AI simulation
         const result = await simulateArchaeologicalAgent(userMessage, chatContext)
         agentResponse = result.response
@@ -270,7 +270,7 @@ export default function EnhancedChatInterface({ onCoordinateSelect }: EnhancedCh
         }))
       }
 
-    } catch (error) {
+      } catch (error) {
       console.error('Chat processing failed:', error)
       
       // Error fallback with helpful message
@@ -450,7 +450,7 @@ Would you like to focus on any specific aspect? You can also provide coordinates
       type: "system",
       content: `Research completed: ${results.summary || 'Analysis finished successfully'}`,
       timestamp: new Date().toISOString(),
-      metadata: {
+            metadata: {
         research_id: results.id,
         confidence: results.confidence_score
       },
@@ -570,8 +570,8 @@ Would you like to focus on any specific aspect? You can also provide coordinates
                                     {message.metadata.analysis_type.replace('_', ' ')}
                                   </Badge>
                                 )}
-                              </div>
-                            </div>
+        </div>
+          </div>
                           )}
 
                           {message.attachments && message.attachments.length > 0 && (
@@ -595,16 +595,16 @@ Would you like to focus on any specific aspect? You can also provide coordinates
                                     View {attachment.type}
                                   </Button>
                                 ))}
-                              </div>
-                            </div>
+          </div>
+        </div>
                           )}
                           
                           <p className="text-xs text-slate-500 mt-2">
                             {new Date(message.timestamp).toLocaleTimeString()}
                           </p>
-                        </div>
-                      </div>
-                    </div>
+          </div>
+            </div>
+        </div>
                   ))}
                   
                   {isLoading && (
@@ -614,17 +614,17 @@ Would you like to focus on any specific aspect? You can also provide coordinates
                           <AvatarFallback className="bg-blue-600">
                             <Bot className="h-4 w-4 animate-pulse" />
                           </AvatarFallback>
-                        </Avatar>
+        </Avatar>
                         <div className="bg-slate-700 rounded-lg p-3">
                           <div className="flex items-center space-x-2">
                             <RefreshCw className="h-4 w-4 animate-spin text-emerald-400" />
                             <span className="text-white text-sm">Analyzing archaeological data...</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+            </div>
+          </div>
+        </div>
+      </div>
                   )}
-                </div>
+            </div>
               </ScrollArea>
             </CardContent>
             
@@ -648,11 +648,11 @@ Would you like to focus on any specific aspect? You can also provide coordinates
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
-              
-              {/* Quick Actions */}
+
+          {/* Quick Actions */}
               <div className="flex flex-wrap gap-2 mt-3">
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   variant="outline" 
                   onClick={() => setInputValue("Analyze coordinates -12.2551, -53.2134")}
                   className="text-xs border-slate-600 text-slate-300"
@@ -661,9 +661,9 @@ Would you like to focus on any specific aspect? You can also provide coordinates
                   <MapPin className="h-3 w-3 mr-1" />
                   Sample Coordinates
                 </Button>
-                <Button 
+                      <Button
                   size="sm" 
-                  variant="outline" 
+                        variant="outline"
                   onClick={() => setInputValue("Tell me about LIDAR archaeology")}
                   className="text-xs border-slate-600 text-slate-300"
                   disabled={isLoading}
@@ -672,7 +672,7 @@ Would you like to focus on any specific aspect? You can also provide coordinates
                   LIDAR Methods
                 </Button>
                 <Button 
-                  size="sm" 
+                        size="sm"
                   variant="outline" 
                   onClick={() => setInputValue("What are the Nazca Lines?")}
                   className="text-xs border-slate-600 text-slate-300"
@@ -680,7 +680,7 @@ Would you like to focus on any specific aspect? You can also provide coordinates
                 >
                   <Globe className="h-3 w-3 mr-1" />
                   Nazca Lines
-                </Button>
+                      </Button>
               </div>
             </div>
           </Card>
@@ -720,11 +720,11 @@ Would you like to focus on any specific aspect? You can also provide coordinates
                     <div className="flex justify-between">
                       <span>Research Focus:</span>
                       <span>{chatContext.researchFocus || 'General'}</span>
-                    </div>
+                  </div>
                     <div className="flex justify-between">
                       <span>Analysis History:</span>
                       <span>{chatContext.analysisHistory.length} items</span>
-                    </div>
+                </div>
                   </div>
                 </div>
 
@@ -741,7 +741,7 @@ Would you like to focus on any specific aspect? You can also provide coordinates
                       }`}>
                         {backendOnline ? 'Connected' : 'Offline'}
                       </Badge>
-                    </div>
+            </div>
                     <div className="flex justify-between">
                       <span>Data Sources:</span>
                       <span>{backendOnline ? '4 active' : '2 demo'}</span>
@@ -758,18 +758,18 @@ Would you like to focus on any specific aspect? You can also provide coordinates
                 <Button variant="outline" className="h-16 flex-col border-slate-600 text-slate-300">
                   <Brain className="h-6 w-6 mb-1 text-emerald-400" />
                   <span className="text-xs">AI Synthesis</span>
-                </Button>
+                  </Button>
                 <Button variant="outline" className="h-16 flex-col border-slate-600 text-slate-300">
                   <Globe className="h-6 w-6 mb-1 text-blue-400" />
                   <span className="text-xs">Spatial Analysis</span>
-                </Button>
+                  </Button>
                 <Button variant="outline" className="h-16 flex-col border-slate-600 text-slate-300">
                   <Clock className="h-6 w-6 mb-1 text-purple-400" />
                   <span className="text-xs">Temporal Trends</span>
-                </Button>
-              </div>
+                  </Button>
+            </div>
             </CardContent>
-          </Card>
+      </Card>
         </TabsContent>
       </Tabs>
     </div>

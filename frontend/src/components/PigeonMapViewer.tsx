@@ -271,12 +271,12 @@ export default function PigeonMapViewer({
   useEffect(() => {
     // Check for Google Maps billing issues
     const checkGoogleMapsErrors = () => {
-      const originalConsoleError = console.error
+        const originalConsoleError = console.error
       console.error = (...args) => {
-        const message = args.join(' ').toLowerCase()
-        if (message.includes('billingnotenabledmaperror') || 
-            message.includes('billing not enabled') ||
-            message.includes('quota') ||
+          const message = args.join(' ').toLowerCase()
+          if (message.includes('billingnotenabledmaperror') || 
+              message.includes('billing not enabled') ||
+              message.includes('quota') ||
             message.includes('api key')) {
           setMapError("Google Maps billing not enabled - using archaeological grid view")
         }
@@ -317,7 +317,7 @@ export default function PigeonMapViewer({
               backendStatus === "online" ? 'bg-emerald-400' : 
               backendStatus === "checking" ? 'bg-blue-400 animate-pulse' :
               'bg-red-400'
-            }`} />
+          }`} />
             {backendStatus === "checking" ? "Connecting to NIS Protocol..." : 
              backendStatus === "online" ? "NIS Backend Online" : "NIS Backend Offline"}
           </Badge>
@@ -410,7 +410,7 @@ export default function PigeonMapViewer({
                         <div className="flex items-center space-x-2">
                           <MapPin className="h-3 w-3 text-blue-400" />
                           <span className="font-medium">{site.name}</span>
-                        </div>
+                </div>
                         <div className="flex items-center space-x-2 ml-4">
                           {site.type === 'backend' && (
                             <Badge variant="outline" className="text-xs border-emerald-500/50 text-emerald-400">
@@ -424,9 +424,9 @@ export default function PigeonMapViewer({
                             >
                               {Math.round(site.confidence * 100)}%
                             </Badge>
-                          )}
-                        </div>
-                      </div>
+            )}
+          </div>
+            </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -445,8 +445,8 @@ export default function PigeonMapViewer({
               )}
             </CardContent>
           </Card>
-        </div>
-      )}
+                  </div>
+                )}
 
       {/* Loading Overlay */}
       {loading && (
@@ -455,8 +455,8 @@ export default function PigeonMapViewer({
             <RefreshCw className="h-5 w-5 animate-spin text-emerald-400" />
             <span className="text-sm font-medium">Loading archaeological sites...</span>
           </div>
-        </div>
-      )}
+                  </div>
+                )}
     </div>
   )
 }

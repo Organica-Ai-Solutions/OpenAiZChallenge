@@ -575,7 +575,7 @@ export function EnhancedMap() {
     <div className="space-y-6">
       {/* Backend Status */}
       <div className={`border rounded-lg p-4 ${backendOnline ? 'bg-emerald-900/20 border-emerald-500/30' : 'bg-red-900/20 border-red-500/30'}`}>
-        <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             {backendOnline ? (
               <CheckCircle className="h-5 w-5 text-emerald-400" />
@@ -595,7 +595,7 @@ export function EnhancedMap() {
           <div className="flex items-center space-x-2">
             <Badge variant="outline" className={backendOnline ? 'border-emerald-500/50 text-emerald-400' : 'border-red-500/50 text-red-400'}>
               {filteredSites.length} sites shown
-            </Badge>
+                </Badge>
             <Badge variant="outline" className={isGoogleMapsAvailable ? 'border-blue-500/50 text-blue-400' : 'border-yellow-500/50 text-yellow-400'}>
               {isGoogleMapsAvailable ? 'Enhanced' : 'Grid View'}
             </Badge>
@@ -700,21 +700,21 @@ export function EnhancedMap() {
                 step={0.01}
                 className="[&_[role=slider]]:bg-purple-500"
               />
-            </div>
+          </div>
 
             {/* Terrain Blend */}
-            <div className="space-y-2">
+                <div className="space-y-2">
               <Label className="text-slate-300">Terrain Blend: {Math.round(terrainBlend * 100)}%</Label>
-              <Slider
+                  <Slider
                 value={[terrainBlend]}
                 onValueChange={([value]) => setTerrainBlend(value)}
-                max={1}
-                min={0}
-                step={0.01}
+                    max={1}
+                    min={0}
+                    step={0.01}
                 className="[&_[role=slider]]:bg-green-500"
-              />
-            </div>
-          </div>
+                  />
+                </div>
+                  </div>
         </CardContent>
       </Card>
 
@@ -728,8 +728,8 @@ export function EnhancedMap() {
                   <div className="flex items-center space-x-3 text-white">
                     <RefreshCw className="h-6 w-6 animate-spin text-emerald-400" />
                     <span>Loading archaeological sites...</span>
-                  </div>
-                </div>
+                      </div>
+                    </div>
               )}
               
               {isAnalyzing && (
@@ -737,8 +737,8 @@ export function EnhancedMap() {
                   <div className="flex items-center space-x-2">
                     <Eye className="h-4 w-4 animate-pulse" />
                     <span className="text-sm">Analyzing location...</span>
-                  </div>
-                </div>
+                    </div>
+                    </div>
               )}
 
               {/* Conditional Map Rendering */}
@@ -767,9 +767,9 @@ export function EnhancedMap() {
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Reload Page
                     </Button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </CardContent>
           </Card>
         </div>
@@ -788,15 +788,15 @@ export function EnhancedMap() {
               {layers.map((layer) => (
                 <div key={layer.id} className="flex items-center justify-between">
                   <Label className="text-sm flex items-center space-x-2 text-slate-300">
-                    {layer.type === 'satellite' && <Satellite className="h-3 w-3" />}
-                    {layer.type === 'terrain' && <Mountain className="h-3 w-3" />}
-                    {layer.type === 'hybrid' && <Globe className="h-3 w-3" />}
+                      {layer.type === 'satellite' && <Satellite className="h-3 w-3" />}
+                      {layer.type === 'terrain' && <Mountain className="h-3 w-3" />}
+                      {layer.type === 'hybrid' && <Globe className="h-3 w-3" />}
                     {layer.type === 'roadmap' && <Navigation className="h-3 w-3" />}
-                    <span>{layer.name}</span>
-                  </Label>
-                  <Switch
-                    checked={layer.visible}
-                    onCheckedChange={() => toggleLayer(layer.id)}
+                      <span>{layer.name}</span>
+                    </Label>
+                    <Switch
+                      checked={layer.visible}
+                      onCheckedChange={() => toggleLayer(layer.id)}
                   />
                 </div>
               ))}

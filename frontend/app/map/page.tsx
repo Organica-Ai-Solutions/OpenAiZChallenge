@@ -42,6 +42,7 @@ import { Switch } from "../../components/ui/switch"
 import { Label } from "../../components/ui/label"
 import { Input } from "../../components/ui/input"
 import { AnimatedAIChat } from "../../components/ui/animated-ai-chat"
+import Navigation from "../../components/shared/Navigation"
 
 // Interfaces
 interface ArchaeologicalSite {
@@ -1616,7 +1617,7 @@ Currently showing ${sites.length} archaeological sites.`
   }, [layers, layerData, layersLoading, loadLayerData])
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white">
+    <div className="h-screen bg-slate-900 text-white flex flex-col">
       {/* Google Maps API Script */}
       <Script
         src={`https://maps.googleapis.com/maps/api/js?key=AIzaSyC-eqKjOMYNw-FMabknw6Bnxf1fjo-EW2Y&libraries=places,geometry,drawing`}
@@ -1631,38 +1632,13 @@ Currently showing ${sites.length} archaeological sites.`
         }}
       />
 
-      {/* Navigation Header */}
-      <header className="bg-slate-900/80 backdrop-blur-sm border-b border-slate-700 py-4 sticky top-0 z-50">
-        <div className="container mx-auto flex items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2 text-xl font-bold">
-            <Globe className="h-8 w-8 text-emerald-400" />
-            <span className="text-white">NIS Protocol</span>
-          </Link>
-          
-          <nav className="hidden space-x-6 md:flex">
-            <Link href="/" className="hover:text-emerald-400 transition-colors">Home</Link>
-            <Link href="/archaeological-discovery" className="hover:text-emerald-400 transition-colors">Discovery</Link>
-            <Link href="/agent" className="hover:text-emerald-400 transition-colors">Agents</Link>
-            <Link href="/satellite" className="hover:text-emerald-400 transition-colors">Satellite</Link>
-            <Link href="/map" className="text-emerald-400 font-medium">Maps</Link>
-            <Link href="/analytics" className="hover:text-emerald-400 transition-colors">Analytics</Link>
-            <Link href="/chat" className="hover:text-emerald-400 transition-colors">Chat</Link>
-          </nav>
-          
-          <div className="flex items-center gap-4">
-            <Badge variant={backendOnline ? "default" : "secondary"}>
-              {backendOnline ? <Wifi className="h-3 w-3 mr-1" /> : <WifiOff className="h-3 w-3 mr-1" />}
-              {backendOnline ? 'Backend Online' : 'Demo Mode'}
-            </Badge>
-            <Button variant="outline" size="sm" onClick={() => setChatOpen(!chatOpen)}>
-              <MessageSquare className="h-4 w-4 mr-2" />
-              AI Assistant
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Navigation 
+        showBackendStatus={true}
+        showChatButton={true}
+        onChatToggle={() => setChatOpen(!chatOpen)}
+      />
 
-      <div className="flex h-[calc(100vh-80px)]">
+      <div className="flex h-[calc(100vh-64px)]">
         {/* Sidebar */}
         <div className={`${sidebarOpen ? 'w-80' : 'w-0'} transition-all duration-300 overflow-hidden bg-slate-800 border-r border-slate-700`}>
           <div className="p-4 h-full overflow-y-auto">
@@ -1698,7 +1674,7 @@ Currently showing ${sites.length} archaeological sites.`
                     {globalSearchLoading && (
                       <RefreshCw className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin text-slate-400" />
                     )}
-                  </div>
+        </div>
                   
                   {/* Search Results */}
                   {showGlobalSearchResults && globalSearchResults.length > 0 && (
@@ -1706,7 +1682,7 @@ Currently showing ${sites.length} archaeological sites.`
                       <CardContent className="p-2">
                         <div className="text-xs font-medium mb-2 text-slate-300">
                           Search Results ({globalSearchResults.length})
-                        </div>
+        </div>
                         <div className="space-y-1">
                           {globalSearchResults.map((result, index) => (
                             <div
@@ -1755,8 +1731,8 @@ Currently showing ${sites.length} archaeological sites.`
                         step={5}
                       />
                     </div>
-                  </div>
-                  
+      </div>
+
                   {/* Sites List */}
                   <div className="space-y-2 max-h-96 overflow-y-auto">
                     {loading ? (
@@ -1786,7 +1762,7 @@ Currently showing ${sites.length} archaeological sites.`
                                 <Badge variant="outline" className="text-xs">
                                   {(site.confidence * 100).toFixed(0)}%
                                 </Badge>
-                              </div>
+          </div>
                               <div className="text-xs text-slate-300 space-y-1">
                                 <div>Type: {site.type}</div>
                                 <div>Period: {site.period}</div>
