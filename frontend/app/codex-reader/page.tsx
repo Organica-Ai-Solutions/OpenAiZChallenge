@@ -109,7 +109,7 @@ export default function CodexReaderPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [searchProgress, setSearchProgress] = useState(0)
   const [activeTab, setActiveTab] = useState('workflow')
-  const [availableSources, setAvailableSources] = useState([])
+  const [availableSources, setAvailableSources] = useState<any[]>([])
   
   // Chat functionality
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
@@ -164,22 +164,43 @@ export default function CodexReaderPage() {
 
   const checkBackendStatus = async () => {
     try {
-      const response = await fetch('http://localhost:8000/ikrp/status')
-      setIsBackendOnline(response.ok)
+      // Try main backend first
+      const response = await fetch('http://localhost:8000/health')
+      if (response.ok) {
+        setIsBackendOnline(true)
+        return
+      }
     } catch {
-      setIsBackendOnline(false)
+      // Try IKRP service as fallback
+      try {
+        const response = await fetch('http://localhost:8001/status')
+        setIsBackendOnline(response.ok)
+      } catch {
+        setIsBackendOnline(false)
+      }
     }
   }
 
   const fetchAvailableSources = async () => {
     try {
-      const response = await fetch('http://localhost:8000/ikrp/sources')
+      // Try main backend first
+      let response = await fetch('http://localhost:8000/api/codex/sources')
+      if (!response.ok) {
+        // Fallback to IKRP service
+        response = await fetch('http://localhost:8001/codex/sources')
+      }
       if (response.ok) {
         const data = await response.json()
         setAvailableSources(data.sources)
       }
     } catch (error) {
       console.error('Failed to fetch available sources:', error)
+      // Set default sources if both backends fail
+      setAvailableSources([
+        {id: "famsi", name: "Foundation for Ancient Mesoamerican Studies", total_codices: 8, status: "active"},
+        {id: "world_digital_library", name: "World Digital Library", total_codices: 12, status: "active"},
+        {id: "inah", name: "Instituto Nacional de Antropología e Historia", total_codices: 6, status: "active"}
+      ])
     }
   }
 
@@ -225,20 +246,38 @@ export default function CodexReaderPage() {
         setSearchProgress(prev => Math.min(prev + 20, 90))
       }, 500)
 
-      // Call IKRP service directly
-      const response = await fetch('http://localhost:8001/codex/discover', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          coordinates: { lat, lng },
-          radius_km: radiusKm,
-          period: period,
-          sources: sources,
-          max_results: 20
-        }),
-      })
+      // Try main backend first, fallback to IKRP service
+      let response
+      try {
+        response = await fetch('http://localhost:8000/api/codex/discover', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            coordinates: { lat, lng },
+            radius_km: radiusKm,
+            period: period,
+            sources: sources,
+            max_results: 20
+          }),
+        })
+      } catch (error) {
+        // Fallback to IKRP service
+        response = await fetch('http://localhost:8001/codex/discover', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            coordinates: { lat, lng },
+            radius_km: radiusKm,
+            period: period,
+            sources: sources,
+            max_results: 20
+          }),
+        })
+      }
 
       clearInterval(progressInterval)
       setSearchProgress(100)
@@ -271,22 +310,42 @@ export default function CodexReaderPage() {
     setActiveTab('analysis')
 
     try {
-      // Call IKRP service directly
-      const response = await fetch('http://localhost:8001/codex/analyze', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          codex_id: codex.id,
-          image_url: codex.image_url,
-          coordinates: coordinates ? (() => {
-            const [lat, lng] = coordinates.split(',').map(coord => parseFloat(coord.trim()))
-            return { lat, lng }
-          })() : null,
-          context: `Archaeological analysis for ${codex.title}`
-        }),
-      })
+      // Try main backend first, fallback to IKRP service
+      let response
+      try {
+        response = await fetch('http://localhost:8000/api/codex/analyze', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            codex_id: codex.id,
+            image_url: codex.image_url,
+            coordinates: coordinates ? (() => {
+              const [lat, lng] = coordinates.split(',').map(coord => parseFloat(coord.trim()))
+              return { lat, lng }
+            })() : null,
+            context: `Archaeological analysis for ${codex.title}`
+          }),
+        })
+      } catch (error) {
+        // Fallback to IKRP service
+        response = await fetch('http://localhost:8001/codex/analyze', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            codex_id: codex.id,
+            image_url: codex.image_url,
+            coordinates: coordinates ? (() => {
+              const [lat, lng] = coordinates.split(',').map(coord => parseFloat(coord.trim()))
+              return { lat, lng }
+            })() : null,
+            context: `Archaeological analysis for ${codex.title}`
+          }),
+        })
+      }
 
       if (response.ok) {
         const analysisData = await response.json()
