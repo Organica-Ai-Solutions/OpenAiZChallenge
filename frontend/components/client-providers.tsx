@@ -1,10 +1,7 @@
 "use client"
 
 import * as React from 'react'
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
-import { ToastProvider } from "@/contexts/toast-context"
-import { NotificationSystem } from "../src/components/ui/notification-system"
+import { ThemeProvider } from "./theme-provider"
 
 interface ClientProvidersProps {
   children: React.ReactNode
@@ -12,7 +9,6 @@ interface ClientProvidersProps {
 
 export function ClientProviders({ children }: ClientProvidersProps) {
   return (
-    <ToastProvider>
       <ThemeProvider
         attribute="class"
         defaultTheme="system"
@@ -20,9 +16,6 @@ export function ClientProviders({ children }: ClientProvidersProps) {
         disableTransitionOnChange
       >
         {children}
-        <Toaster />
-        <NotificationSystem />
       </ThemeProvider>
-    </ToastProvider>
   )
 } 

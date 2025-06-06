@@ -81,14 +81,10 @@ import {
 import ChatInterface from "./ChatInterface"
 import EnhancedChatInterface from "./EnhancedChatInterface"
 import { EnhancedHistoryTab } from "./EnhancedHistoryTab"
-import DynamicMapViewer from "./DynamicMapViewer"
-import SimpleMapFallback from "./SimpleMapFallback"
-import { VisionAgentVisualization } from "./vision-agent-visualization"
-import PigeonMapViewer from "@/components/PigeonMapViewer"
-import type { SiteData } from "@/types/site-data"
-import { AnimatedAIChat } from "../../components/ui/animated-ai-chat"
-import ArchaeologicalMapViewer from "./ArchaeologicalMapViewer"
+import VisionAgentInterface from "./VisionAgentInterface"
 import { config, makeBackendRequest, isBackendAvailable } from "../lib/config"
+
+// Google Maps integration
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "../../lib/utils"
 
@@ -2186,44 +2182,10 @@ export default function NISAgentUI() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="backdrop-blur-2xl bg-white/[0.02] rounded-2xl border border-white/[0.05] shadow-2xl p-8"
               >
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-purple-500/10 rounded-xl">
-                    <Eye className="h-6 w-6 text-purple-400" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-semibold text-white">AI Vision Analysis</h2>
-                    <p className="text-white/60 text-sm">Advanced archaeological pattern recognition</p>
-                  </div>
-                  <div className="ml-auto flex items-center gap-2">
-                    <Badge className={cn(
-                      "text-xs",
-                      isBackendOnline ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
-                    )}>
-                      {isBackendOnline ? "🟢 Live" : "🔴 Demo"}
-                    </Badge>
-                    <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
-                      GPT-4o Vision
-                    </Badge>
-                  </div>
-                </div>
-
-            <VisionAgentVisualization 
-              coordinates={coordinates} 
-              imageSrc={results?.imageSrc || "/placeholder.svg?height=400&width=600"}
-              onAnalysisComplete={(visionResults) => {
-                if (results) {
-                  setResults({
-                    ...results,
-                    vision_analysis: visionResults,
-                    enhanced_features: visionResults.detection_results || [],
-                    processing_pipeline: [...(results.processing_pipeline || []), ...(visionResults.processing_pipeline || [])]
-                  })
-                }
-              }}
+                <VisionAgentInterface 
+                  onCoordinateSelect={handleCoordinateSelect}
               isBackendOnline={isBackendOnline}
-              autoAnalyze={coordinates !== ""}
             />
               </motion.div>
             </TabsContent>
@@ -2591,8 +2553,7 @@ export default function NISAgentUI() {
                 </div>
 
                 <div className="h-[500px] bg-transparent">
-                  <AnimatedAIChat 
-                    onMessageSend={handleChatMessageSend}
+                  <EnhancedChatInterface 
                     onCoordinateSelect={handleCoordinateSelect}
                   />
                 </div>
@@ -3839,4 +3800,3 @@ export default function NISAgentUI() {
     </div>
   )
 }
-

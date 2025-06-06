@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react"
 import { motion } from 'framer-motion'
 import Link from "next/link"
 import { Globe, Satellite, ArrowLeft, Wifi, WifiOff, MapPin, RefreshCw, Download, Eye, Activity, Zap, AlertCircle } from "lucide-react"
-import Navigation from "../../components/shared/Navigation"
 
 // Enhanced Satellite Monitor Component - REAL DATA ONLY
 function SatelliteMonitor({ isBackendOnline = false }: { isBackendOnline?: boolean }) {
@@ -554,16 +553,14 @@ export default function SatellitePage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden pt-20">
       <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-emerald-900/5 to-blue-900/10" />
       <div className="absolute inset-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
-      <Navigation />
-
-      <div className="relative z-10">
+      <div className="relative z-10 pt-20">
         <div className="container mx-auto px-6 py-8">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}

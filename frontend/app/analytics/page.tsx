@@ -3,12 +3,12 @@
 import { motion } from 'framer-motion'
 import Link from "next/link"
 import { BarChart3, ArrowLeft } from "lucide-react"
-import Navigation from "../../components/shared/Navigation"
+
 import { AnalyticsDashboard } from "../../src/components/ui/analytics-dashboard"
 
 export default function AnalyticsPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden pt-20">
       {/* Animated Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-emerald-900/5 to-blue-900/10" />
       <div className="absolute inset-0">
@@ -16,7 +16,7 @@ export default function AnalyticsPage() {
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
-      <Navigation />
+      
 
       {/* Main Content */}
       <div className="relative z-10">

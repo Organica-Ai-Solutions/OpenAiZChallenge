@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react'
-import NISProtocolChat from '../../components/NISProtocolChat'
+import UltimateArchaeologicalChat from '../../../components/ui/ultimate-archaeological-chat'
 
 export default function AgentPage() {
   return (
@@ -15,7 +15,7 @@ export default function AgentPage() {
         </p>
       </div>
       
-      <NISProtocolChat />
+      <UltimateArchaeologicalChat />
     </div>
   )
 } 

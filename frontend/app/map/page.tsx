@@ -25,8 +25,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Slider } from "../../components/ui/slider"
 import { Label } from "../../components/ui/label"
 import { Input } from "../../components/ui/input"
-import { AnimatedAIChat } from "../../components/ui/animated-ai-chat"
-import Navigation from "../../components/shared/Navigation"
+import UltimateArchaeologicalChat from "../../components/ui/ultimate-archaeological-chat"
+
 
 // Interfaces
 interface ArchaeologicalSite {
@@ -66,6 +66,48 @@ export default function ArchaeologicalMapPage() {
   // Refs
   const mapRef = useRef<HTMLDivElement>(null)
   const googleMapRef = useRef<any>(null)
+
+  // Planning state
+  const [planningMode, setPlanningMode] = useState(false)
+  const [researchPlan, setResearchPlan] = useState<{
+    expedition_name: string
+    objectives: string[]
+    planned_sites: ArchaeologicalSite[]
+    route_optimization: boolean
+    timeline_days: number
+    budget_estimate: number
+    team_size: number
+    equipment_needed: string[]
+    risk_assessment: string
+    nisProtocolActive: boolean
+  }>({
+    expedition_name: '',
+    objectives: [],
+    planned_sites: [],
+    route_optimization: true,
+    timeline_days: 7,
+    budget_estimate: 50000,
+    team_size: 5,
+    equipment_needed: [],
+    risk_assessment: '',
+    nisProtocolActive: true
+  })
+
+  const [routeVisualization, setRouteVisualization] = useState<{
+    waypoints: Array<{site: ArchaeologicalSite, order: number, travel_time: number}>
+    total_distance_km: number
+    total_time_hours: number
+    optimization_score: number
+    cultural_correlation_score: number
+  } | null>(null)
+
+  const [siteCorrelations, setSiteCorrelations] = useState<Array<{
+    site1: string
+    site2: string
+    correlation_type: 'cultural' | 'temporal' | 'spatial' | 'trade_route' | 'defensive'
+    confidence: number
+    description: string
+  }>>([])
 
   // Check backend status
   const checkBackend = useCallback(async () => {
@@ -209,8 +251,226 @@ export default function ArchaeologicalMapPage() {
     }
   }, [googleMapsLoaded])
 
+  // Enhanced site selection for planning
+  const handleSiteSelection = useCallback((site: ArchaeologicalSite, addToPlan: boolean = false) => {
+    setSelectedSite(site)
+    
+    if (addToPlan && planningMode) {
+      setResearchPlan(prev => ({
+        ...prev,
+        planned_sites: prev.planned_sites.some(s => s.id === site.id) 
+          ? prev.planned_sites.filter(s => s.id !== site.id)
+          : [...prev.planned_sites, site]
+      }))
+      
+      // Auto-generate route when sites are added
+      if (researchPlan.planned_sites.length > 0) {
+        generateOptimalRoute()
+      }
+    }
+    
+    // Focus map on site
+    if (googleMapRef.current) {
+      const [lat, lng] = site.coordinates.split(',').map(c => parseFloat(c.trim()))
+      googleMapRef.current.setCenter({ lat, lng })
+      googleMapRef.current.setZoom(12)
+    }
+  }, [planningMode, researchPlan.planned_sites])
+
+  // Generate optimal research route
+  const generateOptimalRoute = useCallback(async () => {
+    if (researchPlan.planned_sites.length < 2) return
+    
+    console.log('🗺️ Generating optimal research route...')
+    
+    try {
+      // Calculate distances and travel times between all sites
+      const sites = researchPlan.planned_sites
+      const distanceMatrix: number[][] = []
+      
+      for (let i = 0; i < sites.length; i++) {
+        distanceMatrix[i] = []
+        for (let j = 0; j < sites.length; j++) {
+          const [lat1, lng1] = sites[i].coordinates.split(',').map(c => parseFloat(c.trim()))
+          const [lat2, lng2] = sites[j].coordinates.split(',').map(c => parseFloat(c.trim()))
+          
+          // Haversine distance calculation
+          const R = 6371 // Earth's radius in km
+          const dLat = (lat2 - lat1) * Math.PI / 180
+          const dLng = (lng2 - lng1) * Math.PI / 180
+          const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                   Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                   Math.sin(dLng/2) * Math.sin(dLng/2)
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+          distanceMatrix[i][j] = R * c
+        }
+      }
+      
+      // Simple greedy optimization (start from first site, always go to nearest unvisited)
+      const visited = new Array(sites.length).fill(false)
+      const route: number[] = [0]
+      visited[0] = true
+      let totalDistance = 0
+      
+      for (let i = 1; i < sites.length; i++) {
+        let minDistance = Infinity
+        let nextSite = -1
+        
+        for (let j = 0; j < sites.length; j++) {
+          if (!visited[j] && distanceMatrix[route[route.length - 1]][j] < minDistance) {
+            minDistance = distanceMatrix[route[route.length - 1]][j]
+            nextSite = j
+          }
+        }
+        
+        if (nextSite !== -1) {
+          route.push(nextSite)
+          visited[nextSite] = true
+          totalDistance += minDistance
+        }
+      }
+      
+      // Generate route visualization data
+      const waypoints = route.map((siteIndex, order) => ({
+        site: sites[siteIndex],
+        order: order + 1,
+        travel_time: order === 0 ? 0 : distanceMatrix[route[order - 1]][siteIndex] / 60 // Assume 60 km/h average
+      }))
+      
+      // Calculate cultural correlation score
+      const culturalScore = calculateCulturalCorrelation(sites)
+      
+      setRouteVisualization({
+        waypoints,
+        total_distance_km: Math.round(totalDistance),
+        total_time_hours: Math.round(totalDistance / 60 * 10) / 10,
+        optimization_score: 0.85, // Simplified score
+        cultural_correlation_score: culturalScore
+      })
+      
+      console.log('✅ Route optimization complete:', waypoints.length, 'waypoints')
+      
+    } catch (error) {
+      console.error('❌ Route generation failed:', error)
+    }
+  }, [researchPlan.planned_sites])
+
+  // Calculate cultural correlation between sites
+  const calculateCulturalCorrelation = useCallback((sites: ArchaeologicalSite[]): number => {
+    if (sites.length < 2) return 0
+    
+    let totalCorrelation = 0
+    let comparisons = 0
+    
+    for (let i = 0; i < sites.length; i++) {
+      for (let j = i + 1; j < sites.length; j++) {
+        const site1 = sites[i]
+        const site2 = sites[j]
+        
+        // Calculate correlation based on type, period, and cultural significance
+        let correlation = 0
+        
+        // Type similarity
+        if (site1.type === site2.type) correlation += 0.3
+        
+        // Period similarity (simplified)
+        if (site1.period === site2.period) correlation += 0.4
+        
+        // Cultural significance keywords overlap
+        const keywords1 = site1.cultural_significance.toLowerCase().split(' ')
+        const keywords2 = site2.cultural_significance.toLowerCase().split(' ')
+        const overlap = keywords1.filter(k => keywords2.includes(k)).length
+        correlation += Math.min(overlap / keywords1.length, 0.3)
+        
+        totalCorrelation += correlation
+        comparisons++
+      }
+    }
+    
+    return comparisons > 0 ? totalCorrelation / comparisons : 0
+  }, [])
+
+  // NIS Protocol chat integration for planning
+  const handleChatPlanningSelect = useCallback((coordinates: string, metadata?: any) => {
+    console.log('🧠 NIS Protocol planning integration:', coordinates, metadata)
+    
+    if (metadata?.planning_action === 'add_to_expedition') {
+      // Find site by coordinates and add to plan
+      const site = sites.find(s => s.coordinates === coordinates)
+      if (site) {
+        handleSiteSelection(site, true)
+      }
+    } else if (metadata?.planning_action === 'optimize_route') {
+      generateOptimalRoute()
+    } else if (metadata?.planning_action === 'cultural_analysis') {
+      generateSiteCorrelations()
+    }
+  }, [sites, handleSiteSelection, generateOptimalRoute])
+
+  // Generate site correlations for planning
+  const generateSiteCorrelations = useCallback(async () => {
+    console.log('🔗 Generating site correlations...')
+    
+    const correlations: Array<{
+      site1: string
+      site2: string
+      correlation_type: 'cultural' | 'temporal' | 'spatial' | 'trade_route' | 'defensive'
+      confidence: number
+      description: string
+    }> = []
+    
+    // Simple correlation analysis based on available data
+    for (let i = 0; i < sites.length; i++) {
+      for (let j = i + 1; j < sites.length; j++) {
+        const site1 = sites[i]
+        const site2 = sites[j]
+        
+        // Calculate distance
+        const [lat1, lng1] = site1.coordinates.split(',').map(c => parseFloat(c.trim()))
+        const [lat2, lng2] = site2.coordinates.split(',').map(c => parseFloat(c.trim()))
+        const distance = Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lng2 - lng1, 2))
+        
+        // Cultural correlation
+        if (site1.type === site2.type && site1.period === site2.period) {
+          correlations.push({
+            site1: site1.name,
+            site2: site2.name,
+            correlation_type: 'cultural',
+            confidence: 0.85,
+            description: `Both sites are ${site1.type} from ${site1.period} period`
+          })
+        }
+        
+        // Spatial correlation (nearby sites)
+        if (distance < 0.5) { // Within ~50km
+          correlations.push({
+            site1: site1.name,
+            site2: site2.name,
+            correlation_type: 'spatial',
+            confidence: 0.78,
+            description: `Sites are geographically proximate (${Math.round(distance * 100)}km apart)`
+          })
+        }
+        
+        // Trade route correlation (different types, same period)
+        if (site1.type !== site2.type && site1.period === site2.period && distance < 2.0) {
+          correlations.push({
+            site1: site1.name,
+            site2: site2.name,
+            correlation_type: 'trade_route',
+            confidence: 0.72,
+            description: `Different site types from same period suggest trade connections`
+          })
+        }
+      }
+    }
+    
+    setSiteCorrelations(correlations)
+    console.log('✅ Generated', correlations.length, 'site correlations')
+  }, [sites])
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden pt-20">
       {/* Animated Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-emerald-900/5 to-blue-900/10" />
       <div className="absolute inset-0">
@@ -218,27 +478,9 @@ export default function ArchaeologicalMapPage() {
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
-      {/* Google Maps API Script */}
-      <Script
-        src={`https://maps.googleapis.com/maps/api/js?key=AIzaSyC-eqKjOMYNw-FMabknw6Bnxf1fjo-EW2Y&libraries=places,geometry,drawing`}
-        strategy="afterInteractive"
-        onLoad={() => {
-          console.log('✅ Google Maps API loaded successfully')
-          setGoogleMapsLoaded(true)
-        }}
-        onError={(error) => {
-          console.error('❌ Google Maps API failed to load:', error)
-          setMapError('Failed to load Google Maps API. Please check your internet connection.')
-        }}
-      />
+                    {/* Google Maps loaded globally in layout.tsx */}
 
-      <Navigation 
-        showBackendStatus={true}
-        showChatButton={true}
-        onChatToggle={() => setChatOpen(!chatOpen)}
-      />
-
-      <div className="relative z-10">
+      <div className="relative z-10 pt-20">
         <div className="container mx-auto px-6 py-8">
           {/* Header Section */}
           <motion.div 
@@ -332,116 +574,418 @@ export default function ArchaeologicalMapPage() {
               className={`${sidebarOpen ? 'w-80' : 'w-0'} transition-all duration-300 overflow-hidden rounded-2xl bg-white/[0.02] backdrop-blur-sm border border-white/[0.08]`}
             >
               <div className="p-4 h-full overflow-y-auto">
-                <Tabs value={activeTab} onValueChange={setActiveTab}>
-                  <TabsList className="grid w-full grid-cols-3 bg-white/[0.05] border border-white/[0.1]">
-                    <TabsTrigger value="sites" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400">Sites</TabsTrigger>
-                    <TabsTrigger value="layers" className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400">Layers</TabsTrigger>
-                    <TabsTrigger value="tools" className="data-[state=active]:bg-orange-500/20 data-[state=active]:text-orange-400">Tools</TabsTrigger>
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
+                  <TabsList className="grid w-full grid-cols-4 bg-slate-800 border-slate-700">
+                    <TabsTrigger value="sites" className="text-slate-300 data-[state=active]:text-white">
+                      Sites
+                    </TabsTrigger>
+                    <TabsTrigger value="planning" className="text-slate-300 data-[state=active]:text-white">
+                      Planning
+                    </TabsTrigger>
+                    <TabsTrigger value="correlations" className="text-slate-300 data-[state=active]:text-white">
+                      Correlations
+                    </TabsTrigger>
+                    <TabsTrigger value="chat" className="text-slate-300 data-[state=active]:text-white">
+                      AI Assistant
+                    </TabsTrigger>
                   </TabsList>
 
                   {/* Sites Tab */}
-                  <TabsContent value="sites" className="space-y-4">
-                    <div className="space-y-3">
-                      <h3 className="text-lg font-semibold text-white">Archaeological Sites</h3>
-                      
-                      {/* Site Filters */}
-                      <div className="space-y-3">
+                  <TabsContent value="sites" className="space-y-4 mt-4">
+                    {/* Enhanced search and filters */}
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="search" className="text-slate-300">Search Sites</Label>
                         <Input
-                          placeholder="Search sites..."
+                          id="search"
+                          placeholder="Search by name or significance..."
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="bg-white/[0.05] border-white/[0.1] text-white placeholder-white/50"
+                          className="bg-slate-800 border-slate-700 text-white"
                         />
-                        
-                        <Select value={typeFilter} onValueChange={setTypeFilter}>
-                          <SelectTrigger className="bg-white/[0.05] border-white/[0.1] text-white">
-                            <SelectValue placeholder="Site Type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All Types</SelectItem>
-                            <SelectItem value="settlement">Settlement</SelectItem>
-                            <SelectItem value="ceremonial">Ceremonial</SelectItem>
-                            <SelectItem value="agricultural">Agricultural</SelectItem>
-                            <SelectItem value="defensive">Defensive</SelectItem>
-                          </SelectContent>
-                        </Select>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-slate-300">Type Filter</Label>
+                          <Select value={typeFilter} onValueChange={setTypeFilter}>
+                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-800 border-slate-700">
+                              <SelectItem value="all">All Types</SelectItem>
+                              <SelectItem value="settlement">Settlement</SelectItem>
+                              <SelectItem value="ceremonial">Ceremonial</SelectItem>
+                              <SelectItem value="agricultural">Agricultural</SelectItem>
+                              <SelectItem value="defensive">Defensive</SelectItem>
+                              <SelectItem value="burial">Burial</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                         
                         <div className="space-y-2">
-                          <Label className="text-white">Confidence: {confidenceFilter}%</Label>
+                          <Label className="text-slate-300">Min Confidence: {confidenceFilter}%</Label>
                           <Slider
                             value={[confidenceFilter]}
-                            onValueChange={([value]) => setConfidenceFilter(value)}
+                            onValueChange={(value) => setConfidenceFilter(value[0])}
                             max={100}
                             min={0}
                             step={5}
-                            className="w-full"
+                            className="bg-slate-800"
                           />
                         </div>
                       </div>
+                      
+                      {planningMode && (
+                        <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                              <span className="text-emerald-300 font-medium">Planning Mode Active</span>
+                            </div>
+                            <Badge variant="outline" className="text-emerald-300 border-emerald-300">
+                              {researchPlan.planned_sites.length} sites selected
+                            </Badge>
+                          </div>
+                          <p className="text-emerald-200 text-sm mt-2">
+                            Click sites to add/remove from research expedition plan
+                          </p>
+                        </div>
+                      )}
+                    </div>
 
-                      {/* Sites List */}
-                      <div className="space-y-2 max-h-96 overflow-y-auto">
-                        {loading ? (
-                          <div className="text-center py-4 text-white/70">Loading sites...</div>
+                    {/* Sites list with planning integration */}
+                    <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                      {loading ? (
+                        <div className="text-center py-8">
+                          <RefreshCw className="h-6 w-6 animate-spin mx-auto text-slate-400" />
+                          <p className="text-slate-400 mt-2">Loading archaeological sites...</p>
+                        </div>
+                      ) : (
+                        sites
+                          .filter(site => site.confidence * 100 >= confidenceFilter)
+                          .filter(site => typeFilter === 'all' || site.type === typeFilter)
+                          .filter(site => !searchQuery || site.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                          .map((site) => (
+                            <Card 
+                              key={site.id} 
+                              className={`bg-slate-800/50 border-slate-700 cursor-pointer transition-all hover:bg-slate-800/70 ${
+                                selectedSite?.id === site.id ? 'ring-2 ring-emerald-500' : ''
+                              } ${
+                                planningMode && researchPlan.planned_sites.some(s => s.id === site.id) 
+                                  ? 'ring-2 ring-blue-500 bg-blue-500/10' : ''
+                              }`}
+                              onClick={() => handleSiteSelection(site, planningMode)}
+                            >
+                              <CardContent className="p-4">
+                                <div className="flex justify-between items-start mb-2">
+                                  <h3 className="font-semibold text-white">{site.name}</h3>
+                                  <div className="flex items-center gap-2">
+                                    <Badge 
+                                      variant={site.confidence > 0.8 ? "default" : "secondary"}
+                                      className="text-xs"
+                                    >
+                                      {Math.round(site.confidence * 100)}%
+                                    </Badge>
+                                    {planningMode && researchPlan.planned_sites.some(s => s.id === site.id) && (
+                                      <Badge variant="outline" className="text-blue-300 border-blue-300 text-xs">
+                                        Selected
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                                
+                                <div className="space-y-1 text-sm">
+                                  <p className="text-slate-300">
+                                    <span className="text-slate-400">Type:</span> {site.type}
+                                  </p>
+                                  <p className="text-slate-300">
+                                    <span className="text-slate-400">Period:</span> {site.period}
+                                  </p>
+                                  <p className="text-slate-300">
+                                    <span className="text-slate-400">Location:</span> {site.coordinates}
+                                  </p>
+                                  {site.size_hectares && (
+                                    <p className="text-slate-300">
+                                      <span className="text-slate-400">Size:</span> {site.size_hectares} hectares
+                                    </p>
+                                  )}
+                                </div>
+                                
+                                <p className="text-slate-400 text-xs mt-2 line-clamp-2">
+                                  {site.cultural_significance}
+                                </p>
+                              </CardContent>
+                            </Card>
+                          ))
+                      )}
+                    </div>
+                  </TabsContent>
+
+                  {/* Enhanced Planning Tab */}
+                  <TabsContent value="planning" className="space-y-4 mt-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-white">Research Expedition Planning</h3>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          onClick={() => setPlanningMode(!planningMode)}
+                          variant={planningMode ? "default" : "outline"}
+                          size="sm"
+                        >
+                          {planningMode ? 'Exit Planning' : 'Start Planning'}
+                        </Button>
+                        <Button
+                          onClick={generateOptimalRoute}
+                          disabled={researchPlan.planned_sites.length < 2}
+                          size="sm"
+                        >
+                          Optimize Route
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Planning Configuration */}
+                    <Card className="bg-slate-800/30 border-slate-700">
+                      <CardContent className="p-4 space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label className="text-slate-300">Expedition Name</Label>
+                            <Input
+                              value={researchPlan.expedition_name}
+                              onChange={(e) => setResearchPlan(prev => ({ ...prev, expedition_name: e.target.value }))}
+                              placeholder="Enter expedition name..."
+                              className="bg-slate-800 border-slate-700 text-white"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label className="text-slate-300">Timeline (days)</Label>
+                            <Input
+                              type="number"
+                              value={researchPlan.timeline_days}
+                              onChange={(e) => setResearchPlan(prev => ({ ...prev, timeline_days: parseInt(e.target.value) || 7 }))}
+                              className="bg-slate-800 border-slate-700 text-white"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label className="text-slate-300">Team Size</Label>
+                            <Input
+                              type="number"
+                              value={researchPlan.team_size}
+                              onChange={(e) => setResearchPlan(prev => ({ ...prev, team_size: parseInt(e.target.value) || 5 }))}
+                              className="bg-slate-800 border-slate-700 text-white"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label className="text-slate-300">Budget Estimate ($)</Label>
+                            <Input
+                              type="number"
+                              value={researchPlan.budget_estimate}
+                              onChange={(e) => setResearchPlan(prev => ({ ...prev, budget_estimate: parseInt(e.target.value) || 50000 }))}
+                              className="bg-slate-800 border-slate-700 text-white"
+                            />
+                          </div>
+                        </div>
+                        
+                        {/* NIS Protocol Enhancement Toggle */}
+                        <div className="flex items-center justify-between p-3 bg-slate-900/50 rounded-lg border border-slate-700/50">
+                          <div className="flex items-center gap-3">
+                            <Brain className="h-5 w-5 text-purple-400" />
+                            <div>
+                              <p className="text-white font-medium">NIS Protocol Enhancement</p>
+                              <p className="text-slate-400 text-sm">Biologically-inspired planning optimization</p>
+                            </div>
+                          </div>
+                          <Button
+                            onClick={() => setResearchPlan(prev => ({ ...prev, nisProtocolActive: !prev.nisProtocolActive }))}
+                            variant={researchPlan.nisProtocolActive ? "default" : "outline"}
+                            size="sm"
+                          >
+                            {researchPlan.nisProtocolActive ? 'Active' : 'Inactive'}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    {/* Selected Sites for Planning */}
+                    <Card className="bg-slate-800/30 border-slate-700">
+                      <CardContent className="p-4">
+                        <h4 className="font-semibold text-white mb-3">
+                          Selected Sites ({researchPlan.planned_sites.length})
+                        </h4>
+                        
+                        {researchPlan.planned_sites.length === 0 ? (
+                          <p className="text-slate-400 text-sm">
+                            No sites selected. Enable planning mode and click sites to add them to your expedition.
+                          </p>
                         ) : (
-                          sites
-                            .filter(site => site.confidence * 100 >= confidenceFilter)
-                            .filter(site => typeFilter === 'all' || site.type === typeFilter)
-                            .filter(site => !searchQuery || site.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                            .map(site => (
-                              <Card 
-                                key={site.id} 
-                                className="bg-white/[0.05] backdrop-blur-sm border-white/[0.1] cursor-pointer hover:bg-white/[0.1] transition-all duration-300"
-                                onClick={() => {
-                                  setSelectedSite(site)
-                                  const [lat, lng] = site.coordinates.split(', ').map(Number)
-                                  setMapCenter([lat, lng])
-                                  if (googleMapRef.current) {
-                                    googleMapRef.current.setCenter({ lat, lng })
-                                    googleMapRef.current.setZoom(14)
-                                  }
-                                }}
-                              >
-                                <CardContent className="p-3">
-                                  <div className="flex justify-between items-start mb-2">
-                                    <h4 className="font-medium text-sm text-white">{site.name}</h4>
+                          <div className="space-y-2">
+                            {researchPlan.planned_sites.map((site, index) => (
+                              <div key={site.id} className="flex items-center justify-between p-2 bg-slate-900/50 rounded border border-slate-700/50">
+                                <div className="flex items-center gap-3">
+                                  <Badge variant="outline" className="text-xs">
+                                    {index + 1}
+                                  </Badge>
+                                  <div>
+                                    <p className="text-white font-medium text-sm">{site.name}</p>
+                                    <p className="text-slate-400 text-xs">{site.type} • {site.period}</p>
+                                  </div>
+                                </div>
+                                <Button
+                                  onClick={() => setResearchPlan(prev => ({
+                                    ...prev,
+                                    planned_sites: prev.planned_sites.filter(s => s.id !== site.id)
+                                  }))}
+                                  variant="outline"
+                                  size="sm"
+                                >
+                                  Remove
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                    
+                    {/* Route Visualization */}
+                    {routeVisualization && (
+                      <Card className="bg-slate-800/30 border-slate-700">
+                        <CardContent className="p-4">
+                          <h4 className="font-semibold text-white mb-3">Optimized Research Route</h4>
+                          
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                            <div className="text-center">
+                              <p className="text-slate-400 text-xs">Total Distance</p>
+                              <p className="text-white font-semibold">{routeVisualization.total_distance_km} km</p>
+                            </div>
+                            <div className="text-center">
+                              <p className="text-slate-400 text-xs">Travel Time</p>
+                              <p className="text-white font-semibold">{routeVisualization.total_time_hours}h</p>
+                            </div>
+                            <div className="text-center">
+                              <p className="text-slate-400 text-xs">Route Score</p>
+                              <p className="text-white font-semibold">{Math.round(routeVisualization.optimization_score * 100)}%</p>
+                            </div>
+                            <div className="text-center">
+                              <p className="text-slate-400 text-xs">Cultural Score</p>
+                              <p className="text-white font-semibold">{Math.round(routeVisualization.cultural_correlation_score * 100)}%</p>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <h5 className="font-medium text-slate-300 mb-2">Route Waypoints</h5>
+                            {routeVisualization.waypoints.map((waypoint, index) => (
+                              <div key={index} className="flex items-center gap-3 p-2 bg-slate-900/30 rounded">
+                                <Badge variant="outline">{waypoint.order}</Badge>
+                                <div className="flex-1">
+                                  <p className="text-white font-medium text-sm">{waypoint.site.name}</p>
+                                  <p className="text-slate-400 text-xs">{waypoint.site.coordinates}</p>
+                                </div>
+                                {waypoint.travel_time > 0 && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    +{Math.round(waypoint.travel_time * 10) / 10}h
+                                  </Badge>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </TabsContent>
+
+                  {/* Site Correlations Tab */}
+                  <TabsContent value="correlations" className="space-y-4 mt-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-white">Site Correlations & Pattern Analysis</h3>
+                      <Button onClick={generateSiteCorrelations} size="sm">
+                        Analyze Correlations
+                      </Button>
+                    </div>
+                    
+                    <Card className="bg-slate-800/30 border-slate-700">
+                      <CardContent className="p-4">
+                        {siteCorrelations.length === 0 ? (
+                          <div className="text-center py-8">
+                            <p className="text-slate-400">No correlations generated yet.</p>
+                            <p className="text-slate-500 text-sm mt-1">
+                              Click "Analyze Correlations" to discover patterns between archaeological sites
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            <h4 className="font-semibold text-white mb-3">
+                              Discovered Correlations ({siteCorrelations.length})
+                            </h4>
+                            {siteCorrelations.map((correlation, index) => (
+                              <div key={index} className="p-3 bg-slate-900/50 rounded border border-slate-700/50">
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <Badge 
+                                      variant={
+                                        correlation.correlation_type === 'cultural' ? 'default' :
+                                        correlation.correlation_type === 'temporal' ? 'secondary' :
+                                        correlation.correlation_type === 'spatial' ? 'outline' :
+                                        'destructive'
+                                      }
+                                      className="text-xs"
+                                    >
+                                      {correlation.correlation_type}
+                                    </Badge>
                                     <Badge variant="outline" className="text-xs">
-                                      {(site.confidence * 100).toFixed(0)}%
+                                      {Math.round(correlation.confidence * 100)}%
                                     </Badge>
                                   </div>
-                                  <div className="text-xs text-white/70 space-y-1">
-                                    <div>Type: {site.type}</div>
-                                    <div>Period: {site.period}</div>
-                                    <div>Size: {site.size_hectares || 'Unknown'} ha</div>
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            ))
+                                </div>
+                                
+                                <div className="space-y-1">
+                                  <p className="text-white font-medium text-sm">
+                                    {correlation.site1} ↔ {correlation.site2}
+                                  </p>
+                                  <p className="text-slate-300 text-xs">
+                                    {correlation.description}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                         )}
-                      </div>
-                    </div>
+                      </CardContent>
+                    </Card>
                   </TabsContent>
 
-                  {/* Layers Tab */}
-                  <TabsContent value="layers" className="space-y-4">
-                    <div className="space-y-3">
-                      <h3 className="text-lg font-semibold text-white">Map Layers</h3>
-                      <div className="text-center text-white/50 py-8">
-                        <Satellite className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                        <p className="text-sm">Layer controls coming soon</p>
-                      </div>
-                    </div>
-                  </TabsContent>
-
-                  {/* Tools Tab */}
-                  <TabsContent value="tools" className="space-y-4">
-                    <div className="space-y-3">
-                      <h3 className="text-lg font-semibold text-white">Analysis Tools</h3>
-                      <div className="text-center text-white/50 py-8">
-                        <Brain className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                        <p className="text-sm">Analysis tools coming soon</p>
-                      </div>
-                    </div>
+                  {/* Enhanced Chat Tab */}
+                  <TabsContent value="chat" className="mt-4">
+                    <Card className="bg-slate-800/30 border-slate-700">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-4">
+                          <h4 className="font-semibold text-white">🧠 NIS Protocol Planning Assistant</h4>
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                            <span className="text-emerald-300 text-sm">Enhanced Planning Mode</span>
+                          </div>
+                        </div>
+                        
+                        <div className="h-[500px]">
+                          <UltimateArchaeologicalChat onCoordinateSelect={handleChatPlanningSelect} />
+                        </div>
+                        
+                        <div className="mt-4 p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                          <h5 className="font-medium text-purple-300 mb-2">Enhanced Planning Commands</h5>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-purple-200">
+                            <p>• "plan expedition to ceremonial sites"</p>
+                            <p>• "optimize route for selected sites"</p>
+                            <p>• "analyze cultural correlations"</p>
+                            <p>• "suggest sites near [coordinates]"</p>
+                            <p>• "estimate expedition timeline"</p>
+                            <p>• "find defensive sites in andes"</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   </TabsContent>
                 </Tabs>
               </div>
@@ -534,7 +1078,7 @@ export default function ArchaeologicalMapPage() {
                 className="w-80 rounded-2xl bg-white/[0.02] backdrop-blur-sm border border-white/[0.08]"
               >
                 <div className="p-4 h-full">
-                  <AnimatedAIChat />
+                  <UltimateArchaeologicalChat />
                 </div>
               </motion.div>
             )}

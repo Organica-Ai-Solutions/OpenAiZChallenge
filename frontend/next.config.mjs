@@ -9,24 +9,10 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
-  },
+  poweredByHeader: false,
   env: {
-    NEXT_PUBLIC_API_URL: process.env.BACKEND_PORT 
-      ? `http://localhost:${process.env.BACKEND_PORT}` 
-      : 'http://localhost:8000',
-    NEXT_PUBLIC_GOOGLE_MAPS_KEY: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY,
-  },
-  webpack: (config) => {
-    config.resolve.fallback = { 
-      fs: false, 
-      net: false, 
-      tls: false,
-      child_process: false,
-      worker_threads: false 
-    };
-    return config;
+    NEXT_PUBLIC_API_URL: 'http://localhost:8000',
+    NEXT_PUBLIC_SKIP_PREFLIGHT_CHECK: 'true',
   },
 }
 

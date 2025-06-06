@@ -816,4 +816,4 @@ export function ResearchTools({
       </Tabs>
     </div>
   )
-} 
+}

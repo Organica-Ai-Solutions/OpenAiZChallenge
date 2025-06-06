@@ -26,8 +26,33 @@ VENV/
 env.bak/
 venv.bak/
 
+# Environment and API Keys (CRITICAL!)
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+api_keys.txt
+secrets.json
+credentials.json
+config/secrets.*
+src/config/secrets.*
+
 # Jupyter Notebook
 .ipynb_checkpoints
+
+# Node.js (Frontend)
+node_modules/
+.next/
+.nuxt/
+dist/
+.cache/
+.parcel-cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Data files (optional, uncomment if needed)
 # data/lidar/*
@@ -43,14 +68,40 @@ outputs/memory/*
 !outputs/logs/.gitkeep
 !outputs/memory/.gitkeep
 
+# Logs
+logs/
+*.log
+
 # IDEs and editors
 .idea/
 .vscode/
 *.swp
 *.swo
 *~
+.project
+.classpath
+.settings/
 
 # OS specific files
 .DS_Store
-Thumbs.db logs/*.log
-logs/*.log
+Thumbs.db
+*.tmp
+*.temp
+
+# Docker
+.dockerignore
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+tmp/
+temp/
+.tmp/

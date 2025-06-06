@@ -774,4 +774,4 @@ Would you like to focus on any specific aspect? You can also provide coordinates
       </Tabs>
     </div>
   )
-} 
+}

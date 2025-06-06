@@ -53,7 +53,7 @@ export default function VisionAnalysisPage() {
     
     try {
       // Try to call the real backend first
-      const response = await fetch('http://localhost:8000/vision/analyze', {
+      const response = await fetch('http://localhost:2777/vision/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

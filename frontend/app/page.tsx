@@ -36,7 +36,6 @@ import {
   Play
 } from "lucide-react"
 import { nisDataService } from '@/lib/api/nis-data-service'
-import Navigation from "../components/shared/Navigation"
 
 interface SystemStats {
   totalDiscoveries: number
@@ -307,8 +306,7 @@ export default function HomePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      <Navigation />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 pt-20">
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
