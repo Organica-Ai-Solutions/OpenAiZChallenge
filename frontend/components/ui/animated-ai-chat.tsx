@@ -272,9 +272,9 @@ export function AnimatedAIChat({ onSendMessage, onCoordinateSelect }: AnimatedAI
             const currentAttachments = [...attachments];
             
             // Reset UI immediately
-            setValue("");
+        setValue("");
             setAttachments([]);
-            adjustHeight(true);
+        adjustHeight(true);
             
             // Call the parent callback if provided
             if (onSendMessage) {
@@ -282,11 +282,11 @@ export function AnimatedAIChat({ onSendMessage, onCoordinateSelect }: AnimatedAI
             } else {
                 // Default behavior - simulate backend call
                 startTransition(() => {
-                    setIsTyping(true);
+            setIsTyping(true);
                     
                     // Simulate backend response
                     setTimeout(() => {
-                        setIsTyping(false);
+            setIsTyping(false);
                         
                         // Extract coordinates if message contains them
                         const coordMatch = message.match(/(-?\d+\.?\d*),\s*(-?\d+\.?\d*)/);
@@ -306,10 +306,10 @@ export function AnimatedAIChat({ onSendMessage, onCoordinateSelect }: AnimatedAI
         setAttachments(prev => [...prev, mockFileName]);
     };
 
-    const removeAttachment = (index: number) => {
+        const removeAttachment = (index: number) => {
         setAttachments(prev => prev.filter((_, i) => i !== index));
     };
-    
+
     const selectCommandSuggestion = (index: number) => {
         const selectedCommand = commandSuggestions[index];
         setValue(selectedCommand.prefix + ' ');
@@ -335,31 +335,31 @@ export function AnimatedAIChat({ onSendMessage, onCoordinateSelect }: AnimatedAI
                     transition={{ duration: 0.6, ease: "easeOut" }}
                 >
                     <div className="text-center space-y-3">
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2, duration: 0.5 }}
-                            className="inline-block"
-                        >
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2, duration: 0.5 }}
+                                className="inline-block"
+                            >
                             <h1 className="text-3xl font-medium tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white/90 to-white/40 pb-1">
                                 Archaeological Discovery Chat
-                            </h1>
-                            <motion.div 
+                                    </h1>
+                                <motion.div 
                                 className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                                initial={{ width: 0, opacity: 0 }}
-                                animate={{ width: "100%", opacity: 1 }}
-                                transition={{ delay: 0.5, duration: 0.8 }}
-                            />
-                        </motion.div>
+                                    initial={{ width: 0, opacity: 0 }}
+                                    animate={{ width: "100%", opacity: 1 }}
+                                    transition={{ delay: 0.5, duration: 0.8 }}
+                                />
+                            </motion.div>
                         <motion.p 
                             className="text-sm text-white/40"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.3 }}
-                        >
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.3 }}
+                            >
                             Ask about archaeological sites, analyze coordinates, or upload imagery
                         </motion.p>
-                    </div>
+                        </div>
 
                     <motion.div 
                         className="relative backdrop-blur-2xl bg-white/[0.02] rounded-2xl border border-white/[0.05] shadow-2xl"
@@ -397,7 +397,7 @@ export function AnimatedAIChat({ onSendMessage, onCoordinateSelect }: AnimatedAI
                                                 </div>
                                                 <div className="font-medium">{suggestion.label}</div>
                                                 <div className="text-white/40 text-xs ml-1">
-                                                    {suggestion.prefix}
+                                                            {suggestion.prefix}
                                                 </div>
                                             </motion.div>
                                         ))}
@@ -473,7 +473,7 @@ export function AnimatedAIChat({ onSendMessage, onCoordinateSelect }: AnimatedAI
                                     whileTap={{ scale: 0.94 }}
                                     className="p-2 text-white/40 hover:text-white/90 rounded-lg transition-colors relative group"
                                 >
-                                    <Paperclip className="w-4 h-4" />
+                                        <Paperclip className="w-4 h-4" />
                                     <motion.span
                                         className="absolute inset-0 bg-white/[0.05] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
                                         layoutId="button-highlight"
@@ -525,20 +525,20 @@ export function AnimatedAIChat({ onSendMessage, onCoordinateSelect }: AnimatedAI
                     </motion.div>
 
                     <div className="flex flex-wrap items-center justify-center gap-2">
-                        {commandSuggestions.map((suggestion, index) => (
-                            <motion.button
-                                key={suggestion.prefix}
-                                onClick={() => selectCommandSuggestion(index)}
+                            {commandSuggestions.map((suggestion, index) => (
+                                <motion.button
+                                    key={suggestion.prefix}
+                                    onClick={() => selectCommandSuggestion(index)}
                                 className="flex items-center gap-2 px-3 py-2 bg-white/[0.02] hover:bg-white/[0.05] rounded-lg text-sm text-white/60 hover:text-white/90 transition-all relative group"
                                 initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1 }}
-                            >
-                                {suggestion.icon}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.1 }}
+                                >
+                                        {suggestion.icon}
                                 <span>{suggestion.label}</span>
-                                <motion.div
+                                    <motion.div
                                     className="absolute inset-0 border border-white/[0.05] rounded-lg"
-                                    initial={false}
+                                        initial={false}
                                     animate={{
                                         opacity: [0, 1],
                                         scale: [0.98, 1],
@@ -547,10 +547,10 @@ export function AnimatedAIChat({ onSendMessage, onCoordinateSelect }: AnimatedAI
                                         duration: 0.3,
                                         ease: "easeOut",
                                     }}
-                                />
-                            </motion.button>
-                        ))}
-                    </div>
+                                    />
+                                </motion.button>
+                            ))}
+                        </div>
                 </motion.div>
             </div>
 

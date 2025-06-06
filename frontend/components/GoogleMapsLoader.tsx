@@ -17,9 +17,22 @@ export default function GoogleMapsLoader() {
       return;
     }
 
+    // Only load if we have a valid API key
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+      console.log('⚠️ No Google Maps API key found, skipping load');
+      // Dispatch an event anyway so components can handle gracefully
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('google-maps-error', { 
+          detail: 'No API key configured' 
+        }));
+      }, 100);
+      return;
+    }
+
     // Load Google Maps script
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyC-eqKjOMYNw-FMabknw6Bnxf1fjo-EW2Y'}&libraries=places,geometry,drawing`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry,drawing`;
     script.async = true;
     script.defer = true;
 

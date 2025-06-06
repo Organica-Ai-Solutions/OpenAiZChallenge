@@ -2,7 +2,18 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import Link from "next/link"
-import Script from "next/script"
+
+
+// Google Maps callback function
+declare global {
+  interface Window {
+    google: any
+    currentMarkers: any[]
+    currentInfoWindow: any
+    selectSiteFromMap: (siteId: string) => void
+    initGoogleMaps: () => void
+  }
+}
 import { motion } from 'framer-motion'
 import { 
   Globe, 
@@ -26,6 +37,14 @@ import { Slider } from "../../components/ui/slider"
 import { Label } from "../../components/ui/label"
 import { Input } from "../../components/ui/input"
 import UltimateArchaeologicalChat from "../../components/ui/ultimate-archaeological-chat"
+
+// Google Maps marker types
+declare global {
+  interface Window {
+    google: any
+    initGoogleMaps: () => void
+  }
+}
 
 
 // Interfaces
@@ -109,175 +128,21 @@ export default function ArchaeologicalMapPage() {
     description: string
   }>>([])
 
-  // Check backend status
+  // Check NIS Protocol backend status
   const checkBackend = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8000/system/health')
+      const response = await fetch('http://localhost:8002/system/health')
       setBackendOnline(response.ok)
+      if (response.ok) {
+        console.log('✅ NIS Protocol backend online on port 8002')
+      }
     } catch {
       setBackendOnline(false)
+      console.log('❌ NIS Protocol backend offline')
     }
   }, [])
 
-  // Initialize Google Maps
-  const initializeMap = useCallback(() => {
-    if (!mapRef.current || !window.google || !googleMapsLoaded) {
-      console.log('🗺️ Waiting for Google Maps to load...')
-      return
-    }
-
-    try {
-      console.log('🗺️ Initializing Google Maps...')
-      const mapOptions = {
-        center: { lat: mapCenter[0], lng: mapCenter[1] },
-        zoom: mapZoom,
-        mapTypeId: window.google.maps.MapTypeId?.SATELLITE || 'satellite',
-        mapTypeControl: true,
-        streetViewControl: false,
-        fullscreenControl: true,
-        zoomControl: true,
-        scaleControl: true,
-        rotateControl: false,
-        gestureHandling: 'greedy'
-      }
-
-      googleMapRef.current = new window.google.maps.Map(mapRef.current, mapOptions)
-      console.log('✅ Google Maps initialized successfully')
-    } catch (error) {
-      console.error('❌ Failed to initialize Google Maps:', error)
-      setMapError('Failed to initialize map')
-    }
-  }, [mapCenter, mapZoom, googleMapsLoaded])
-
-  // Load archaeological sites
-  const loadSites = useCallback(async () => {
-    setLoading(true)
-    try {
-      if (backendOnline) {
-        const response = await fetch('http://localhost:8000/research/sites?max_sites=50')
-        if (response.ok) {
-          const data = await response.json()
-          setSites(data)
-          console.log('✅ Loaded', data.length, 'archaeological sites')
-        }
-      } else {
-        // Demo data
-        const demoSites: ArchaeologicalSite[] = [
-          {
-            id: 'demo_1',
-            name: 'Nazca Lines Complex',
-            coordinates: '-14.739, -75.13',
-            confidence: 0.92,
-            discovery_date: '2023-01-15',
-            cultural_significance: 'Ancient ceremonial geoglyphs with astronomical alignments',
-            data_sources: ['satellite', 'lidar'],
-            type: 'ceremonial',
-            period: 'Nazca (100-700 CE)',
-            size_hectares: 450
-          },
-          {
-            id: 'demo_2',
-            name: 'Amazon Settlement Platform',
-            coordinates: '-3.4653, -62.2159',
-            confidence: 0.87,
-            discovery_date: '2023-02-20',
-            cultural_significance: 'Pre-Columbian riverine settlement with raised platforms',
-            data_sources: ['satellite', 'lidar'],
-            type: 'settlement',
-            period: 'Late Pre-Columbian (1000-1500 CE)',
-            size_hectares: 85
-          },
-          {
-            id: 'demo_3',
-            name: 'Andean Terracing System',
-            coordinates: '-13.1631, -72.545',
-            confidence: 0.84,
-            discovery_date: '2023-03-10',
-            cultural_significance: 'Agricultural terracing with water management',
-            data_sources: ['satellite', 'terrain'],
-            type: 'agricultural',
-            period: 'Inca (1400-1533 CE)',
-            size_hectares: 230
-          }
-        ]
-        setSites(demoSites)
-        console.log('✅ Loaded demo archaeological sites')
-      }
-    } catch (error) {
-      console.error('❌ Failed to load sites:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [backendOnline])
-
-  // Initialize effects
-  useEffect(() => {
-    checkBackend()
-    const interval = setInterval(checkBackend, 30000)
-    return () => clearInterval(interval)
-  }, [checkBackend])
-
-  useEffect(() => {
-    loadSites()
-  }, [loadSites])
-
-  useEffect(() => {
-    if (googleMapsLoaded && window.google && window.google.maps) {
-      console.log('🗺️ Google Maps ready, initializing map...')
-      initializeMap()
-    }
-  }, [googleMapsLoaded, initializeMap])
-
-  // Fallback mechanism for Google Maps
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!googleMapsLoaded && window.google && window.google.maps) {
-        console.log('🔄 Force loading Google Maps after timeout...')
-        setGoogleMapsLoaded(true)
-      } else if (!googleMapsLoaded && !window.google) {
-        console.error('❌ Google Maps failed to load - check network connection')
-        setMapError('Google Maps failed to load. Please check your internet connection.')
-      }
-    }, 10000)
-
-    return () => clearTimeout(timer)
-  }, [googleMapsLoaded])
-
-  // Check if Google Maps is already loaded
-  useEffect(() => {
-    if (window.google && window.google.maps && !googleMapsLoaded) {
-      console.log('🗺️ Google Maps already loaded, setting state...')
-      setGoogleMapsLoaded(true)
-    }
-  }, [googleMapsLoaded])
-
-  // Enhanced site selection for planning
-  const handleSiteSelection = useCallback((site: ArchaeologicalSite, addToPlan: boolean = false) => {
-    setSelectedSite(site)
-    
-    if (addToPlan && planningMode) {
-      setResearchPlan(prev => ({
-        ...prev,
-        planned_sites: prev.planned_sites.some(s => s.id === site.id) 
-          ? prev.planned_sites.filter(s => s.id !== site.id)
-          : [...prev.planned_sites, site]
-      }))
-      
-      // Auto-generate route when sites are added
-      if (researchPlan.planned_sites.length > 0) {
-        generateOptimalRoute()
-      }
-    }
-    
-    // Focus map on site
-    if (googleMapRef.current) {
-      const [lat, lng] = site.coordinates.split(',').map(c => parseFloat(c.trim()))
-      googleMapRef.current.setCenter({ lat, lng })
-      googleMapRef.current.setZoom(12)
-    }
-  }, [planningMode, researchPlan.planned_sites])
-
-  // Generate optimal research route
+  // Generate optimal research route (moved up to fix dependency issue)
   const generateOptimalRoute = useCallback(async () => {
     if (researchPlan.planned_sites.length < 2) return
     
@@ -389,6 +254,344 @@ export default function ArchaeologicalMapPage() {
     
     return comparisons > 0 ? totalCorrelation / comparisons : 0
   }, [])
+
+  // Enhanced site selection for planning (moved up to fix dependency issue)
+  const handleSiteSelection = useCallback((site: ArchaeologicalSite, addToPlan: boolean = false) => {
+    setSelectedSite(site)
+    
+    if (addToPlan && planningMode) {
+      setResearchPlan(prev => ({
+        ...prev,
+        planned_sites: prev.planned_sites.some(s => s.id === site.id) 
+          ? prev.planned_sites.filter(s => s.id !== site.id)
+          : [...prev.planned_sites, site]
+      }))
+      
+      // Auto-generate route when sites are added (temporarily disabled to fix dependencies)
+      // if (researchPlan.planned_sites.length > 0) {
+      //   generateOptimalRoute()
+      // }
+    }
+    
+    // Focus map on site
+    if (googleMapRef.current) {
+      const [lat, lng] = site.coordinates.split(',').map(c => parseFloat(c.trim()))
+      googleMapRef.current.setCenter({ lat, lng })
+      googleMapRef.current.setZoom(12)
+    }
+  }, [planningMode, researchPlan.planned_sites])
+
+  // Initialize Google Maps
+  const initializeMap = useCallback(() => {
+    if (!mapRef.current || !window.google || !googleMapsLoaded) {
+      console.log('🗺️ Waiting for Google Maps to load...')
+      return
+    }
+
+    try {
+      console.log('🗺️ Initializing Google Maps...')
+      const mapOptions = {
+        center: { lat: mapCenter[0], lng: mapCenter[1] },
+        zoom: mapZoom,
+        mapTypeId: window.google.maps.MapTypeId?.SATELLITE || 'satellite',
+        mapTypeControl: true,
+        streetViewControl: false,
+        fullscreenControl: true,
+        zoomControl: true,
+        scaleControl: true,
+        rotateControl: false,
+        gestureHandling: 'greedy'
+      }
+
+      googleMapRef.current = new window.google.maps.Map(mapRef.current, mapOptions)
+      console.log('✅ Google Maps initialized successfully')
+      
+      // Plot all discoveries as markers
+      plotAllDiscoveries()
+    } catch (error) {
+      console.error('❌ Failed to initialize Google Maps:', error)
+      setMapError('Failed to initialize map')
+    }
+  }, [mapCenter, mapZoom, googleMapsLoaded])
+
+  // Plot all archaeological discoveries on the map
+  const plotAllDiscoveries = useCallback(() => {
+    if (!googleMapRef.current || !window.google || sites.length === 0) {
+      console.log('🗺️ Map or sites not ready for plotting')
+      return
+    }
+
+    console.log('🗺️ Plotting', sites.length, 'archaeological discoveries...')
+
+    // Clear existing markers
+    if (window.currentMarkers) {
+      window.currentMarkers.forEach((marker: any) => marker.setMap(null))
+    }
+    window.currentMarkers = []
+
+    sites.forEach((site, index) => {
+      try {
+        const [lat, lng] = site.coordinates.split(',').map(c => parseFloat(c.trim()))
+        
+        if (isNaN(lat) || isNaN(lng)) {
+          console.warn(`⚠️ Invalid coordinates for site ${site.name}: ${site.coordinates}`)
+          return
+        }
+
+        // Determine marker color based on site type and confidence
+        const getMarkerColor = () => {
+          if (site.confidence >= 0.85) return '#10B981' // Green for high confidence
+          if (site.confidence >= 0.70) return '#F59E0B' // Yellow for medium confidence
+          return '#EF4444' // Red for lower confidence
+        }
+
+        // Determine marker icon based on site type
+        const getMarkerIcon = () => {
+          const color = getMarkerColor()
+          const symbols = {
+            'settlement': '🏘️',
+            'ceremonial': '⛩️',
+            'burial': '⚱️',
+            'agricultural': '🌾',
+            'trade': '🏪',
+            'defensive': '🏰'
+          }
+          
+          return {
+            path: window.google.maps.SymbolPath.CIRCLE,
+            fillColor: color,
+            fillOpacity: 0.8,
+            strokeColor: '#FFFFFF',
+            strokeWeight: 2,
+            scale: site.confidence >= 0.85 ? 12 : 
+                   site.confidence >= 0.70 ? 10 : 8
+          }
+        }
+
+        // Create marker
+        const marker = new window.google.maps.Marker({
+          position: { lat, lng },
+          map: googleMapRef.current,
+          title: site.name,
+          icon: getMarkerIcon(),
+          animation: window.google.maps.Animation.DROP
+        })
+
+        // Create info window
+        const infoWindow = new window.google.maps.InfoWindow({
+          content: `
+            <div style="padding: 12px; max-width: 300px; color: #1f2937;">
+              <h3 style="margin: 0 0 8px 0; color: #111827; font-size: 16px; font-weight: 600;">
+                ${site.name}
+              </h3>
+              <div style="margin-bottom: 8px;">
+                <span style="background: ${getMarkerColor()}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px;">
+                  ${(site.confidence * 100).toFixed(1)}% confidence
+                </span>
+                <span style="background: #6B7280; color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px; margin-left: 4px;">
+                  ${site.type}
+                </span>
+              </div>
+              <p style="margin: 8px 0; font-size: 14px; color: #374151;">
+                <strong>Period:</strong> ${site.period}
+              </p>
+              <p style="margin: 8px 0; font-size: 14px; color: #374151;">
+                <strong>Significance:</strong> ${site.cultural_significance}
+              </p>
+              <p style="margin: 8px 0; font-size: 14px; color: #374151;">
+                <strong>Coordinates:</strong> ${site.coordinates}
+              </p>
+              <p style="margin: 8px 0; font-size: 14px; color: #374151;">
+                <strong>Data Sources:</strong> ${site.data_sources.join(', ')}
+              </p>
+              ${site.size_hectares ? `
+                <p style="margin: 8px 0; font-size: 14px; color: #374151;">
+                  <strong>Size:</strong> ${site.size_hectares} hectares
+                </p>
+              ` : ''}
+              <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #E5E7EB;">
+                <button onclick="window.selectSiteFromMap('${site.id}')" 
+                        style="background: #3B82F6; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer;">
+                  Select Site
+                </button>
+              </div>
+            </div>
+          `
+        })
+
+        // Add click listener
+        marker.addListener('click', () => {
+          // Close other info windows
+          if (window.currentInfoWindow) {
+            window.currentInfoWindow.close()
+          }
+          
+          infoWindow.open(googleMapRef.current, marker)
+          window.currentInfoWindow = infoWindow
+          
+          // Update selected site
+          handleSiteSelection(site)
+        })
+
+        // Store marker reference
+        window.currentMarkers.push(marker)
+
+        console.log(`📍 Plotted ${site.name} at ${lat}, ${lng} (${(site.confidence * 100).toFixed(1)}% confidence)`)
+      } catch (error) {
+        console.error(`❌ Failed to plot marker for ${site.name}:`, error)
+      }
+    })
+
+    console.log(`✅ Successfully plotted ${window.currentMarkers.length} discovery markers`)
+
+    // Add site selection function to window
+    window.selectSiteFromMap = (siteId: string) => {
+      const site = sites.find(s => s.id === siteId)
+      if (site) {
+        handleSiteSelection(site, true)
+      }
+    }
+
+  }, [sites, handleSiteSelection])
+
+  // Set up Google Maps callback
+  useEffect(() => {
+    window.initGoogleMaps = () => {
+      console.log('🗺️ Google Maps API loaded via callback')
+      setGoogleMapsLoaded(true)
+    }
+    
+    // Cleanup
+    return () => {
+      delete window.initGoogleMaps
+    }
+  }, [])
+
+  // Plot markers when sites change and map is ready
+  useEffect(() => {
+    if (sites.length > 0 && googleMapRef.current && googleMapsLoaded) {
+      console.log('🗺️ Sites loaded, plotting', sites.length, 'markers...')
+      plotAllDiscoveries()
+    }
+  }, [sites, googleMapsLoaded, plotAllDiscoveries])
+
+  // Load archaeological sites from NIS Protocol backend
+  const loadSites = useCallback(async () => {
+    setLoading(true)
+    try {
+      if (backendOnline) {
+        const response = await fetch('http://localhost:8002/research/sites?max_sites=148')
+        if (response.ok) {
+          const data = await response.json()
+          setSites(data)
+          console.log('✅ NIS Protocol: Loaded', data.length, 'archaeological sites from 148 total discoveries')
+          
+          // Plot markers after sites are loaded
+          setTimeout(() => {
+            if (googleMapRef.current && window.google) {
+              plotAllDiscoveries()
+            }
+          }, 1000)
+        }
+      } else {
+        // Demo data
+        const demoSites: ArchaeologicalSite[] = [
+          {
+            id: 'demo_1',
+            name: 'Nazca Lines Complex',
+            coordinates: '-14.739, -75.13',
+            confidence: 0.92,
+            discovery_date: '2023-01-15',
+            cultural_significance: 'Ancient ceremonial geoglyphs with astronomical alignments',
+            data_sources: ['satellite', 'lidar'],
+            type: 'ceremonial',
+            period: 'Nazca (100-700 CE)',
+            size_hectares: 450
+          },
+          {
+            id: 'demo_2',
+            name: 'Amazon Settlement Platform',
+            coordinates: '-3.4653, -62.2159',
+            confidence: 0.87,
+            discovery_date: '2023-02-20',
+            cultural_significance: 'Pre-Columbian riverine settlement with raised platforms',
+            data_sources: ['satellite', 'lidar'],
+            type: 'settlement',
+            period: 'Late Pre-Columbian (1000-1500 CE)',
+            size_hectares: 85
+          },
+          {
+            id: 'demo_3',
+            name: 'Andean Terracing System',
+            coordinates: '-13.1631, -72.545',
+            confidence: 0.84,
+            discovery_date: '2023-03-10',
+            cultural_significance: 'Agricultural terracing with water management',
+            data_sources: ['satellite', 'terrain'],
+            type: 'agricultural',
+            period: 'Inca (1400-1533 CE)',
+            size_hectares: 230
+          }
+        ]
+        setSites(demoSites)
+        console.log('✅ Loaded demo archaeological sites')
+      }
+    } catch (error) {
+      console.error('❌ Failed to load sites:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [backendOnline])
+
+  // Initialize effects
+  useEffect(() => {
+    checkBackend()
+    const interval = setInterval(checkBackend, 30000)
+    return () => clearInterval(interval)
+  }, [checkBackend])
+
+  useEffect(() => {
+    loadSites()
+  }, [loadSites])
+
+  // Plot markers when sites change
+  useEffect(() => {
+    if (sites.length > 0 && googleMapRef.current) {
+      console.log('🗺️ Sites loaded, plotting markers...')
+      plotAllDiscoveries()
+    }
+  }, [sites, plotAllDiscoveries])
+
+  useEffect(() => {
+    if (googleMapsLoaded && window.google && window.google.maps) {
+      console.log('🗺️ Google Maps ready, initializing map...')
+      initializeMap()
+    }
+  }, [googleMapsLoaded, initializeMap])
+
+  // Fallback mechanism for Google Maps
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!googleMapsLoaded && window.google && window.google.maps) {
+        console.log('🔄 Force loading Google Maps after timeout...')
+        setGoogleMapsLoaded(true)
+      } else if (!googleMapsLoaded && !window.google) {
+        console.log('📍 Google Maps not available - continuing with static interface')
+        // Don't set an error, just continue with the interface
+        setMapError(null)
+      }
+    }, 5000) // Reduced timeout
+
+    return () => clearTimeout(timer)
+  }, [googleMapsLoaded])
+
+  // Check if Google Maps is already loaded
+  useEffect(() => {
+    if (window.google && window.google.maps && !googleMapsLoaded) {
+      console.log('🗺️ Google Maps already loaded, setting state...')
+      setGoogleMapsLoaded(true)
+    }
+  }, [googleMapsLoaded])
 
   // NIS Protocol chat integration for planning
   const handleChatPlanningSelect = useCallback((coordinates: string, metadata?: any) => {
@@ -878,7 +1081,7 @@ export default function ArchaeologicalMapPage() {
                           <div className="space-y-2">
                             <h5 className="font-medium text-slate-300 mb-2">Route Waypoints</h5>
                             {routeVisualization.waypoints.map((waypoint, index) => (
-                              <div key={index} className="flex items-center gap-3 p-2 bg-slate-900/30 rounded">
+                              <div key={`waypoint-${waypoint.order}-${index}`} className="flex items-center gap-3 p-2 bg-slate-900/30 rounded">
                                 <Badge variant="outline">{waypoint.order}</Badge>
                                 <div className="flex-1">
                                   <p className="text-white font-medium text-sm">{waypoint.site.name}</p>
@@ -921,7 +1124,7 @@ export default function ArchaeologicalMapPage() {
                               Discovered Correlations ({siteCorrelations.length})
                             </h4>
                             {siteCorrelations.map((correlation, index) => (
-                              <div key={index} className="p-3 bg-slate-900/50 rounded border border-slate-700/50">
+                              <div key={`correlation-${correlation.site1}-${correlation.site2}-${index}`} className="p-3 bg-slate-900/50 rounded border border-slate-700/50">
                                 <div className="flex items-center justify-between mb-2">
                                   <div className="flex items-center gap-2">
                                     <Badge 
@@ -976,12 +1179,16 @@ export default function ArchaeologicalMapPage() {
                         <div className="mt-4 p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
                           <h5 className="font-medium text-purple-300 mb-2">Enhanced Planning Commands</h5>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-purple-200">
-                            <p>• "plan expedition to ceremonial sites"</p>
-                            <p>• "optimize route for selected sites"</p>
-                            <p>• "analyze cultural correlations"</p>
-                            <p>• "suggest sites near [coordinates]"</p>
-                            <p>• "estimate expedition timeline"</p>
-                            <p>• "find defensive sites in andes"</p>
+                            {[
+                              "plan expedition to ceremonial sites",
+                              "optimize route for selected sites", 
+                              "analyze cultural correlations",
+                              "suggest sites near [coordinates]",
+                              "estimate expedition timeline",
+                              "find defensive sites in andes"
+                            ].map((command, index) => (
+                              <p key={`planning-command-${index}`}>• "{command}"</p>
+                            ))}
                           </div>
                         </div>
                       </CardContent>
@@ -1097,6 +1304,8 @@ export default function ArchaeologicalMapPage() {
           </motion.footer>
         </div>
       </div>
+      
+
     </div>
   )
 } 

@@ -195,8 +195,8 @@ export default function AnalysisPage() {
   const checkSystemHealth = async () => {
     try {
       const [healthRes, agentsRes] = await Promise.all([
-        fetch('http://localhost:8000/system/health'),
-        fetch('http://localhost:8000/agents/agents')
+        fetch('http://localhost:8002/system/health'),
+        fetch('http://localhost:8002/agents/agents')
       ])
       
       if (healthRes.ok && agentsRes.ok) {
@@ -213,7 +213,7 @@ export default function AnalysisPage() {
 
   const loadRealSites = async () => {
     try {
-      const response = await fetch('http://localhost:8000/research/sites?max_sites=15')
+      const response = await fetch('http://localhost:8002/research/sites?max_sites=15')
       if (response.ok) {
         const sites = await response.json()
         const mappedSites = sites.map((site: any) => ({
