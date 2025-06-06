@@ -482,18 +482,7 @@ export default function ArchaeologicalMapViewer({
 
   return (
     <div className={`h-full bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border border-slate-200 shadow-lg overflow-hidden ${className}`}>
-      {/* Google Maps Script */}
-      <Script
-        src={`https://maps.googleapis.com/maps/api/js?key=${config.maps.googleMapsApiKey}&libraries=drawing,geometry`}
-        onLoad={() => {
-          console.log('✅ Google Maps API loaded')
-          setGoogleMapsLoaded(true)
-        }}
-        onError={(error) => {
-          console.error('❌ Google Maps API failed to load:', error)
-          setMapError('Google Maps API failed to load')
-        }}
-      />
+      {/* Google Maps loading handled by centralized GoogleMapsLoader */}
 
       {/* Enhanced Header with Professional Styling */}
       <div className="bg-white border-b border-slate-200 p-4">

@@ -1404,19 +1404,7 @@ export function VisionAgentVisualization({
 
   return (
     <TooltipProvider>
-      {/* Google Maps Script */}
-      <Script
-        src={`https://maps.googleapis.com/maps/api/js?key=${config.maps.googleMapsApiKey}&libraries=places,geometry`}
-        strategy="lazyOnload"
-        onLoad={() => {
-          console.log('✅ Google Maps API loaded for Vision Agent')
-          setGoogleMapsLoaded(true)
-        }}
-        onError={() => {
-          console.log('❌ Google Maps API failed to load')
-          setMapError('Failed to load Google Maps')
-        }}
-      />
+      {/* Google Maps loading handled by centralized GoogleMapsLoader */}
       
       <Card className="w-full">
         <CardHeader className="pb-2">

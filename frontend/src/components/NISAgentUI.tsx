@@ -2241,19 +2241,7 @@ export default function NISAgentUI() {
                     </div>
                   </div>
 
-                {/* Google Maps API Script */}
-                <Script
-                  src={`https://maps.googleapis.com/maps/api/js?key=AIzaSyC-eqKjOMYNw-FMabknw6Bnxf1fjo-EW2Y&libraries=places,geometry,drawing`}
-                  strategy="beforeInteractive"
-                  onLoad={() => {
-                    console.log('✅ Google Maps API loaded for NIS Agent')
-                    setGoogleMapsLoaded(true)
-                  }}
-                  onError={() => {
-                    console.log('❌ Google Maps API failed to load')
-                    setMapError('Failed to load Google Maps')
-                  }}
-                />
+                {/* Google Maps loading handled by centralized GoogleMapsLoader */}
 
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 p-6">
                   {/* Map Controls Panel */}
