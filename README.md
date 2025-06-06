@@ -1,26 +1,25 @@
-# 🏛️ The NIS Protocol: Biologically-Inspired Universal Intelligence Platform
+# ��️ The NIS Protocol: Neural Intelligence System for Archaeological Discovery
 
 <div align="center">
 
 ![NIS Protocol Logo](frontend/public/MainLogo.png)
 
-**Revolutionizing AI Through Cognitive Architecture**
+**OpenAI to Z Challenge: Advanced Archaeological Discovery Platform**
 
-*Developed by [Diego Fuego](https://www.linkedin.com/in/diego-fuego-organica-ai-solutions/) | [Organica AI Solutions](https://www.organicaai.com)*
+*Developed by [Diego Torres](https://www.linkedin.com/in/diego-torres--/) | [Organica AI Solutions](https://www.linkedin.com/company/organica-ai-solutions/?viewAsMember=true)*
 
-*Featured on [The NIS Protocol Podcast](https://open.spotify.com/show/NIS_Protocol) | Season 2: Quantum Frontiers & Cognitive Architectures*
+*Featured on [The NIS Protocol Podcast](https://open.spotify.com/show/0PuvaeHOTtJssMg79bFO80) | Archaeological Intelligence & Discovery Systems*
 
 ---
 
 ![System Status](https://img.shields.io/badge/NIS%20Protocol-🧠%20Fully%20Operational-brightgreen)
 ![Cognitive Architecture](https://img.shields.io/badge/Cognitive%20Layers-6%20Active-purple)
 ![AI Agents](https://img.shields.io/badge/AI%20Agents-5%20Coordinated-blue)
-![Applications](https://img.shields.io/badge/Active%20Domains-12+%20Industries-orange)
 ![Archaeological Success](https://img.shields.io/badge/Archaeological%20Discovery-96.8%25%20Success-brightgreen)
-![Space Ready](https://img.shields.io/badge/Space%20Applications-Terraforming%20Ready-red)
-![Edge Deployment](https://img.shields.io/badge/Edge%20Ready-Raspberry%20Pi%20Compatible-lightblue)
+![OpenAI Challenge](https://img.shields.io/badge/OpenAI%20to%20Z-Challenge%20Ready-red)
+![Real Data](https://img.shields.io/badge/Real%20Data-Integrated-lightblue)
 
-### 🎬 Experience the NIS Protocol Revolution
+### 🎬 Experience the Archaeological Discovery Revolution
 
 <div align="center">
 
@@ -31,172 +30,157 @@
 </div>
 
 **What You're Seeing:**
-- 🧠 **6-Layer Cognitive Architecture** processing real-world data
-- 🔍 **Archaeological Site Discovery** with 96.8% accuracy
-- 🤖 **Multi-Agent Coordination** using MCP/A2A/ACP protocols
-- 🌍 **Universal Intelligence** applicable from Earth to Mars
-- ⚡ **Real-time Reasoning** with biological memory patterns
-- 🚀 **Edge Deployment** ready for autonomous systems
+- 🧠 **6-Layer Cognitive Architecture** processing archaeological data
+- 🏛️ **Real Archaeological Site Discovery** with 96.8% accuracy
+- 🤖 **Multi-Agent Coordination** for comprehensive site analysis
+- 🌍 **Global Intelligence** from Amazonian settlements to Andean terraces
+- ⚡ **Real-time Vision Analysis** with GPT-4o and satellite imagery
+- 🚀 **OpenAI to Z Challenge** demonstrating cutting-edge AI capabilities
 
 </div>
 
 ---
 
-## 🌟 **The Vision: From Kitchen to Cognitive Revolution**
+## 🌟 **The Vision: Archaeological Intelligence Revolution**
 
-> *"What started as a simple idea in my kitchen has become the foundation for the next generation of artificial intelligence. The NIS Protocol doesn't just process data—it thinks, feels, remembers, and reasons like a biological brain."*  
-> — Diego Torres, Creator of the NIS Protocol
+> *"The NIS Protocol represents the future of archaeological discovery - an AI system that doesn't just process data, but truly understands the cultural and historical significance of what it finds. This is how we bridge ancient wisdom with modern technology."*  
+> — Diego Torres, Creator of the NIS Protocol & Founder of Organica AI Solutions
 
-### 🧠 **The Breakthrough: Biologically-Inspired Cognitive Architecture**
+### 🧠 **The Breakthrough: Cognitive Archaeological Intelligence**
 
-The **NIS Protocol** represents a paradigm shift in AI development, moving beyond traditional machine learning to create systems that mirror human cognitive processes:
+The **NIS Protocol** represents a paradigm shift in archaeological research, moving beyond traditional data processing to create systems that understand cultural context and historical significance:
 
 **🔬 6-Layer Cognitive Architecture:**
 
-1. **🔍 Sensory Layer**: Input processing with priority calculation and attention mechanisms
-2. **👁️ Perception Layer**: Pattern recognition (commands, coordinates, emotions, archaeological features)
-3. **🧠 Memory Layer**: Working memory (7±2 items) with long-term consolidation and retrieval
-4. **❤️ Emotional Layer**: Dynamic state tracking (valence, arousal, dominance, empathy, curiosity, confidence)
-5. **⚡ Executive Layer**: Goal formation, decision making, and cognitive control
-6. **🎯 Motor Layer**: Intelligent response generation with emotional modulation
+1. **🔍 Sensory Layer**: Multi-source data processing (satellite, LIDAR, cultural texts)
+2. **👁️ Perception Layer**: Archaeological feature recognition and cultural pattern detection
+3. **🧠 Memory Layer**: Historical context retention and cultural knowledge integration
+4. **❤️ Emotional Layer**: Cultural significance assessment and heritage sensitivity
+5. **⚡ Executive Layer**: Discovery prioritization and research planning
+6. **🎯 Motor Layer**: Intelligent response generation with cultural awareness
 
 ---
 
-## 🚀 **Universal Applications: 12+ Active Domains**
+## 🏛️ **Archaeological Discovery: Core Application**
 
-### 🏛️ **Archaeological Discovery** (Primary Proof-of-Concept)
-- **129+ Verified Sites** discovered using cognitive processing
-- **96.8% Success Rate** in site identification and analysis
-- **Cultural Intelligence** respecting indigenous knowledge
-- **Multi-zone Analysis** without requiring specific coordinates
-- **Emotional Context** for archaeological significance assessment
+### 🎯 **Core Features**
+
+**🔍 Advanced Site Discovery:**
+- **CodexReader**: Real Vatican Library, Bodleian Library, and SLUB Dresden integration
+- **SatellitePage**: Planet Labs, Landsat, and Sentinel imagery analysis
+- **VisionAgent**: GPT-4o Vision with archaeological context understanding
+- **DiscoveriesView**: Comprehensive site database with AI-powered insights
+- **Cultural Intelligence**: Respecting indigenous knowledge and heritage
+
+**🗺️ **Interactive Archaeological Mapping:**
+- **Google Maps Integration** with satellite imagery overlay
+- **Research Expedition Planning** with cultural route optimization
+- **Site Correlation Analysis** (cultural, temporal, spatial patterns)
+- **Haversine Distance Calculations** for optimal archaeological surveys
+- **Real-time Discovery Visualization** with cultural significance markers
+
+**💬 **NIS Protocol Chat:**
+- **Archaeological Reasoning** through cognitive processing pipeline
+- **Cultural Sensitivity** in all communications and analyses
+- **Historical Context Integration** from multiple knowledge sources
+- **Research Workflow Automation** for complex archaeological studies
+
+**📊 **Comprehensive Analytics:**
+- **Discovery Success Metrics** with 96.8% accuracy rates
+- **Cultural Impact Assessment** for responsible archaeology
+- **Research Trend Analysis** for strategic archaeological planning
+- **Real-time Performance Monitoring** across all discovery agents
+
+---
+
+## 🚀 **Universal Applications: Beyond Archaeology**
 
 ### 🌍 **Environmental Conservation**
-- **Vision Agents** for real-time deforestation detection
-- **Memory Agents** for species migration and habitat data
-- **Reasoning Agents** for conservation intervention recommendations
-- **Emotional Weighting** for urgency and biodiversity prioritization
+- **Vision Agents** for real-time habitat monitoring
+- **Cultural Landscape Protection** with indigenous knowledge integration
+- **Conservation Priority Assessment** using cognitive reasoning
 
-### 🚀 **Space Exploration & Terraforming**
-- **Mars Surface Mapping** with autonomous geological analysis
-- **Exoplanet Classification** using cognitive pattern recognition
-- **Interplanetary Mission Coordination** with multi-agent systems
-- **Core Operating System** for terraforming missions
-- **Emotional Intelligence** for crew psychological support
+### 🌤️ **Climate Intelligence**
+- **Archaeological Climate Reconstruction** from site data
+- **Historical Weather Pattern Analysis** for cultural context
+- **Predictive Modeling** for site preservation planning
 
-### 🌤️ **Weather Intelligence**
-- **Real-time Analysis** of satellite imagery and radar data
-- **Historical Climate Context** through memory layer integration
-- **Dynamic Alert Systems** with emotional urgency weighting
-- **Predictive Modeling** using cognitive reasoning patterns
+### 🛰️ **Satellite Intelligence**
+- **Autonomous Archaeological Anomaly Detection**
+- **Reduced Ground Survey Requirements** through AI analysis
+- **Edge Deployment** for remote archaeological missions
 
-### 🛰️ **Cognitive Satellites**
-- **Autonomous Anomaly Detection** with on-board reasoning
-- **Reduced Earth-Control Latency** through independent decision-making
-- **Edge Deployment** on Raspberry Pi and space-grade hardware
-- **Self-learning** capabilities for new phenomena recognition
+### 🏙️ **Cultural Heritage Management**
+- **Smart Heritage Sites** with cognitive monitoring
+- **Adaptive Conservation Systems** responding to threats
+- **Cultural Significance Assessment** for policy making
 
-### 🏙️ **Smart Cities**
-- **Urban Cognition** for traffic flow optimization
-- **Adaptive Control Systems** responding to real-time conditions
-- **Emergency Response Prioritization** using emotional intelligence
-- **Citizen Sentiment Analysis** for policy recommendations
-
-### 🤖 **Ethical Robotics**
-- **Emotionally Aware Robots** with suspicion/urgency weighting
-- **Bias Regulation** through cognitive architecture constraints
-- **Human-Robot Interaction** enhanced by emotional processing
-- **Autonomous Decision Making** with ethical frameworks
-
-### 🏥 **Healthcare Intelligence**
-- **Emotion Agents** for patient prioritization and care
-- **Memory Agents** for medical history context retention
-- **Reasoning Agents** for diagnostic support
-- **Empathy Modeling** for patient interaction optimization
-
-### 🚗 **Autonomous Vehicles**
-- **Judgment-Based Driving** beyond traditional sensor fusion
-- **Emotional State Recognition** of passengers and pedestrians
-- **Contextual Decision Making** in complex traffic scenarios
-- **Adaptive Learning** from real-world driving experiences
-
-### 🛡️ **Defense & Border Intelligence**
-- **Real-time Threat Assessment** with cognitive processing
-- **Multi-source Intelligence Fusion** through reasoning agents
-- **Emotional Threat Evaluation** for priority classification
-- **Autonomous Response Coordination** with human oversight
+### 🤖 **Educational Robotics**
+- **Culturally Aware Educational Systems** for archaeology training
+- **Interactive Heritage Experiences** with emotional intelligence
+- **Museum Guide Intelligence** with deep cultural knowledge
 
 ---
 
-## 🏗️ **Technical Architecture: The Foundation of Intelligence**
+## 🏗️ **Technical Architecture: Archaeological Intelligence Foundation**
 
 <div align="center">
 
 ```mermaid
 graph TB
-    subgraph "🧠 NIS Protocol Core - 6 Cognitive Layers"
-        A1[🔍 Sensory Layer - Input Processing]
-        A2[👁️ Perception Layer - Pattern Recognition]
-        A3[🧠 Memory Layer - Working + Long-term]
-        A4[❤️ Emotional Layer - State Tracking]
-        A5[⚡ Executive Layer - Decision Making]
-        A6[🎯 Motor Layer - Response Generation]
+    subgraph "🧠 NIS Protocol Core - Archaeological Cognitive Layers"
+        A1[🔍 Sensory Layer - Multi-Source Data Input]
+        A2[👁️ Perception Layer - Archaeological Feature Recognition]
+        A3[🧠 Memory Layer - Cultural Knowledge & Historical Context]
+        A4[❤️ Emotional Layer - Cultural Significance Assessment]
+        A5[⚡ Executive Layer - Research Decision Making]
+        A6[🎯 Motor Layer - Discovery Response Generation]
     end
     
-    subgraph "🤖 Multi-Agent Coordination"
-        B1[👁️ Vision Agent - GPT-4o Vision]
-        B2[🧠 Memory Agent - Context Retention]
-        B3[🤔 Reasoning Agent - Inference Engine]
-        B4[⚡ Action Agent - Workflow Management]
-        B5[🔗 Integration Agent - Data Synthesis]
+    subgraph "🤖 Archaeological Agent Coordination"
+        B1[👁️ Vision Agent - GPT-4o Archaeological Analysis]
+        B2[🧠 Memory Agent - Cultural Context Retention]
+        B3[🤔 Reasoning Agent - Archaeological Inference]
+        B4[⚡ Action Agent - Research Workflow Management]
+        B5[🔗 Integration Agent - Multi-Source Data Synthesis]
     end
     
-    subgraph "🌐 Protocol Stack"
-        C1[MCP - Model Context Protocol]
-        C2[A2A - Agent-to-Agent Protocol]
-        C3[ACP - Action Control Protocol]
-    end
-    
-    subgraph "🎯 Application Domains"
-        D1[🏛️ Archaeological Discovery]
-        D2[🌍 Environmental Conservation]
-        D3[🚀 Space Exploration]
-        D4[🌤️ Weather Intelligence]
-        D5[🛰️ Cognitive Satellites]
-        D6[🏙️ Smart Cities]
-        D7[🤖 Ethical Robotics]
-        D8[🏥 Healthcare AI]
-        D9[🚗 Autonomous Vehicles]
-        D10[🛡️ Defense Intelligence]
+    subgraph "🏛️ Archaeological Applications"
+        D1[📜 CodexReader - Ancient Text Analysis]
+        D2[🛰️ SatellitePage - Remote Sensing Discovery]
+        D3[👁️ VisionAgent - Image Analysis & Recognition]
+        D4[🗺️ DiscoveriesView - Site Database & Planning]
+        D5[💬 NIS Chat - Archaeological Intelligence Assistant]
+        D6[📊 Analytics - Discovery Performance Metrics]
     end
     
     A1 --> A2 --> A3 --> A4 --> A5 --> A6
     A6 --> B1 & B2 & B3 & B4 & B5
-    B1 & B2 & B3 & B4 & B5 --> C1 & C2 & C3
-    C1 & C2 & C3 --> D1 & D2 & D3 & D4 & D5 & D6 & D7 & D8 & D9 & D10
+    B1 & B2 & B3 & B4 & B5 --> D1 & D2 & D3 & D4 & D5 & D6
 ```
 
 </div>
 
 ### ⚙️ **Core Technologies**
 
-**🧠 Cognitive Processing Engine:**
-- **Biologically-Inspired Architecture** mimicking human brain functions
-- **Real-time Learning** with bias regulation and ethical constraints
-- **Emotional Intelligence** with dynamic state management
-- **Memory Consolidation** following biological memory patterns
+**🧠 Archaeological Processing Engine:**
+- **Cultural Context Understanding** with indigenous knowledge integration
+- **Real-time Learning** from archaeological databases
+- **Heritage Sensitivity** with cultural preservation priorities
+- **Historical Pattern Recognition** across civilizations
 
 **🤖 AI Model Integration:**
-- **OpenAI GPT-4o Vision** for visual analysis and reasoning
-- **YOLOv8** for real-time object detection
-- **BERT/spaCy** for natural language understanding
-- **Custom Neural Networks** for domain-specific pattern recognition
+- **OpenAI GPT-4o Vision** for archaeological image analysis
+- **Custom Neural Networks** for cultural feature detection
+- **Historical Text Processing** with ancient language understanding
+- **Satellite Imagery Analysis** with archaeological context
 
-**📡 Protocol Implementation:**
-- **MCP (Model Context Protocol)** for context sharing between models
-- **A2A (Agent-to-Agent Protocol)** for multi-agent coordination
-- **ACP (Action Control Protocol)** for autonomous action management
-- **Edge Deployment** optimized for Raspberry Pi and embedded systems
+**📡 Real Data Integration:**
+- **Vatican Library** codex and manuscript access
+- **Bodleian Library** archaeological document collection
+- **SLUB Dresden** historical archive integration
+- **Planet Labs, Landsat, Sentinel** satellite imagery
+- **Cultural Heritage Databases** with respectful access protocols
 
 ---
 
@@ -310,6 +294,7 @@ python test_system_health.py
 
 ### 🏗️ **Organica AI Solutions Portfolio**
 
+**🏛️ NIS Protocol**: Neural Intelligence System for Archaeological Discovery
 **💰 SmartPortfolio**: AI-driven personal finance management
 **🎮 PortfolioChallenge**: Gamified investment learning platform  
 **💫 Tanda Circles**: Digital community savings groups
@@ -332,22 +317,30 @@ From archaeological discoveries on Earth to terraforming operations on Mars, fro
 
 ## 📞 **Connect with the Creator**
 
-**Diego Fuego** - Founder & Chief Architect
-- **LinkedIn**: [Diego Fuego - Organica AI Solutions](https://www.linkedin.com/in/diego-fuego-organica-ai-solutions/)
-- **Company**: [Organica AI Solutions](https://www.organicaai.com)
-- **Podcast**: [The NIS Protocol on Spotify](https://open.spotify.com/show/NIS_Protocol)
-- **Email**: Contact through LinkedIn or company website
+**Diego Torres** - Founder & Chief Architect
+- **LinkedIn**: [Diego Torres](https://www.linkedin.com/in/diego-torres--/)
+- **Company**: [Organica AI Solutions](https://www.linkedin.com/company/organica-ai-solutions/?viewAsMember=true)
+- **Podcast**: [The NIS Protocol on Spotify](https://open.spotify.com/show/0PuvaeHOTtJssMg79bFO80)
+- **Contact**: Connect through LinkedIn for collaboration opportunities
+
+### 🏗️ **Organica AI Solutions Portfolio**
+
+**🏛️ NIS Protocol**: Neural Intelligence System for Archaeological Discovery
+**💰 SmartPortfolio**: AI-driven personal finance management
+**🎮 PortfolioChallenge**: Gamified investment learning platform  
+**💫 Tanda Circles**: Digital community savings groups
+**🤖 AlphaCortex**: Autonomous AI trading system
 
 ---
 
-## 📜 **License & Ethics**
+## 📜 **License & Cultural Ethics**
 
-The NIS Protocol is developed with the highest ethical standards:
+The NIS Protocol is developed with the highest ethical standards for archaeological research:
 
 - **Cultural Respect**: All archaeological applications respect indigenous knowledge and cultural heritage
-- **Bias Regulation**: Built-in cognitive constraints prevent harmful biases
+- **Responsible Discovery**: Ethical frameworks for sensitive archaeological sites
 - **Open Science**: Research contributions shared for scientific advancement
-- **Responsible AI**: Ethical frameworks integrated at the architectural level
+- **Heritage Protection**: Built-in safeguards for cultural preservation
 
 *Licensed under MIT License - See LICENSE file for details*
 
@@ -355,10 +348,10 @@ The NIS Protocol is developed with the highest ethical standards:
 
 <div align="center">
 
-**🧠 From Kitchen to Cognitive Revolution 🚀**
+**🏛️ From Ancient Wisdom to Modern Intelligence 🚀**
 
-*The NIS Protocol: Where Biological Intelligence Meets Artificial Capability*
+*The NIS Protocol: Where Archaeological Discovery Meets Artificial Intelligence*
 
-**⭐ Star this repository to follow the journey of Universal Intelligence ⭐**
+**⭐ Star this repository to follow the journey of Archaeological Intelligence ⭐**
 
 </div> 
