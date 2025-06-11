@@ -155,8 +155,8 @@ interface SearchFilters {
   showHighConfidenceOnly: boolean
 }
 
-// API functions with caching - Updated for NIS Protocol on port 8002
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8002'
+// API functions with caching - Updated for NIS Protocol on port 8000
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 // NIS Protocol Constants
 const NIS_TOTAL_SITES = 148

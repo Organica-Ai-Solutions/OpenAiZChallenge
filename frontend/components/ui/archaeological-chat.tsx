@@ -96,20 +96,17 @@ export function ArchaeologicalChat() {
     setIsTyping(true);
 
     try {
-      // Backend requires lat/lon directly, not nested coordinates
-      const requestBody = {
-        message: message,
-        lat: selectedCoordinates?.lat || -12.5, // Default to Peru region
-        lon: selectedCoordinates?.lon || -76.8,
-        attachments: attachments || []
-      };
-
-      const response = await fetch('http://localhost:8000/analyze', {
+      // Use the correct backend endpoint to fix 404 errors
+      const response = await fetch('http://localhost:8000/agents/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify({
+          message: message,
+          mode: 'reasoning',
+          coordinates: selectedCoordinates ? `${selectedCoordinates.lat}, ${selectedCoordinates.lon}` : undefined
+        }),
       });
 
       if (response.ok) {
@@ -117,7 +114,7 @@ export function ArchaeologicalChat() {
         const assistantMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: data.description || data.analysis || data.message || 'Analysis complete.',
+          content: data.response || data.description || data.analysis || data.message || 'Analysis complete.',
           confidence: data.confidence || Math.random() * 0.3 + 0.7,
           timestamp: new Date(),
           coordinates: selectedCoordinates || undefined,
@@ -206,40 +203,12 @@ export function ArchaeologicalChat() {
         </Button>
       </div>
 
-      {/* Chat Messages Display (if any) */}
-      {messages.length > 0 && (
-        <div className="fixed bottom-4 left-4 right-4 max-w-2xl mx-auto z-40 pointer-events-none">
-          <div className="space-y-3 max-h-32 overflow-y-auto">
-            {messages.slice(-2).map((message) => (
-              <Card key={message.id} className="bg-slate-800/30 border-slate-700/30 backdrop-blur-sm pointer-events-auto">
-                <CardContent className="p-3">
-                  <div className="flex items-start gap-2">
-                    <Badge variant="outline" className="text-xs">
-                      {message.role === 'user' ? 'You' : 'NIS'}
-                    </Badge>
-                    <div className="flex-1">
-                      <p className="text-xs text-slate-300 line-clamp-2">{message.content}</p>
-                      {message.confidence && (
-                        <div className="mt-1 flex items-center gap-1">
-                          <Sparkles className="w-3 h-3 text-emerald-400" />
-                          <span className="text-xs text-emerald-400">
-                            {Math.round(message.confidence * 100)}% confident
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Main Animated Chat Interface */}
       <AnimatedAIChat 
         onSendMessage={handleSendMessage}
         onCoordinateSelect={handleCoordinateSelect}
+        messages={messages}
+        isTyping={isTyping}
       />
     </div>
   );

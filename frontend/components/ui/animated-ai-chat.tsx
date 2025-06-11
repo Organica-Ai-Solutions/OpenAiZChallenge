@@ -23,6 +23,9 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as React from "react"
+// Import Claude-inspired enhancements
+import { ThinkingProcess, StructuredAnalysis, IntelligentQuestionGenerator } from './claude-inspired-features';
+import { MessageOptimizer, CitationManager } from './claude-like-enhancements';
 
 interface UseAutoResizeTextareaProps {
     minHeight: number;
@@ -272,9 +275,9 @@ export function AnimatedAIChat({ onSendMessage, onCoordinateSelect }: AnimatedAI
             const currentAttachments = [...attachments];
             
             // Reset UI immediately
-        setValue("");
+            setValue("");
             setAttachments([]);
-        adjustHeight(true);
+            adjustHeight(true);
             
             // Call the parent callback if provided
             if (onSendMessage) {
@@ -282,11 +285,11 @@ export function AnimatedAIChat({ onSendMessage, onCoordinateSelect }: AnimatedAI
             } else {
                 // Default behavior - simulate backend call
                 startTransition(() => {
-            setIsTyping(true);
+                    setIsTyping(true);
                     
                     // Simulate backend response
                     setTimeout(() => {
-            setIsTyping(false);
+                        setIsTyping(false);
                         
                         // Extract coordinates if message contains them
                         const coordMatch = message.match(/(-?\d+\.?\d*),\s*(-?\d+\.?\d*)/);
@@ -306,7 +309,7 @@ export function AnimatedAIChat({ onSendMessage, onCoordinateSelect }: AnimatedAI
         setAttachments(prev => [...prev, mockFileName]);
     };
 
-        const removeAttachment = (index: number) => {
+    const removeAttachment = (index: number) => {
         setAttachments(prev => prev.filter((_, i) => i !== index));
     };
 

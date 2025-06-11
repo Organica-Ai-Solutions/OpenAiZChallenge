@@ -52,15 +52,14 @@ export default function VisionAnalysisPage() {
     const startTime = Date.now();
     
     try {
-      // Try to call the real backend first
-      const response = await fetch('http://localhost:2777/vision/analyze', {
+      // Call the real NIS backend for OpenAI challenge
+      const response = await fetch('http://localhost:8000/agents/vision/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          coordinates: `${latitude}, ${longitude}`,
-          analysis_type: 'comprehensive'
+          coordinates: `${latitude}, ${longitude}`
         }),
       });
 
