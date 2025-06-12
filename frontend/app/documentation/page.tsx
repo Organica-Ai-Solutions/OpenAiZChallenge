@@ -63,11 +63,11 @@ export default function DocumentationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 pt-20">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pt-20">
       
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-6 py-10">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold text-white mb-4">🧠 The NIS Protocol: Cognitive Architecture Platform</h1>
           <p className="text-xl text-slate-300 max-w-3xl mx-auto mb-4">
@@ -79,7 +79,7 @@ export default function DocumentationPage() {
               href="https://www.linkedin.com/in/diego-torres--/" 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="text-blue-400 hover:text-blue-300 font-semibold underline transition-colors"
+              className="text-emerald-400 hover:text-emerald-300 font-semibold underline transition-colors"
             >
               Diego Torres
             </a>
@@ -88,45 +88,45 @@ export default function DocumentationPage() {
               href="https://www.linkedin.com/company/organica-ai-solutions/?viewAsMember=true" 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="text-green-400 hover:text-green-300 font-semibold underline transition-colors"
+              className="text-cyan-400 hover:text-cyan-300 font-semibold underline transition-colors"
             >
               Organica AI Solutions
             </a>
           </p>
-          <p className="text-md text-purple-400 max-w-2xl mx-auto mb-4">
+          <p className="text-md text-blue-400 max-w-2xl mx-auto mb-4">
             Featured on{" "}
             <a 
               href="https://open.spotify.com/show/0PuvaeHOTtJssMg79bFO80" 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="text-purple-300 hover:text-purple-200 font-semibold underline transition-colors"
+              className="text-blue-300 hover:text-blue-200 font-semibold underline transition-colors"
             >
               "The NIS Protocol" Podcast
             </a>
             {" "}| Season 2: Quantum Frontiers & Cognitive Architectures
           </p>
           <div className="flex justify-center gap-4 mt-6 flex-wrap">
-            <Badge variant="outline" className="px-3 py-1 border-purple-600 text-purple-300 bg-purple-950/20">
+            <Badge variant="outline" className="px-3 py-1 border-emerald-600 text-emerald-300 bg-emerald-900/20">
               <Brain className="h-4 w-4 mr-1" />
               6-Layer Cognitive Architecture
             </Badge>
-            <Badge variant="outline" className="px-3 py-1 border-blue-600 text-blue-300 bg-blue-950/20">
+            <Badge variant="outline" className="px-3 py-1 border-cyan-600 text-cyan-300 bg-cyan-900/20">
               <Zap className="h-4 w-4 mr-1" />
               5-Agent Coordination
             </Badge>
-            <Badge variant="outline" className="px-3 py-1 border-green-600 text-green-300 bg-green-950/20">
+            <Badge variant="outline" className="px-3 py-1 border-blue-600 text-blue-300 bg-blue-900/20">
               <Target className="h-4 w-4 mr-1" />
               96.8% Success Rate
             </Badge>
-            <Badge variant="outline" className="px-3 py-1 border-orange-600 text-orange-300 bg-orange-950/20">
+            <Badge variant="outline" className="px-3 py-1 border-slate-600 text-slate-300 bg-slate-800/40">
               <Globe className="h-4 w-4 mr-1" />
               Archaeological Discovery
             </Badge>
-            <Badge variant="outline" className="px-3 py-1 border-red-600 text-red-300 bg-red-950/20">
+            <Badge variant="outline" className="px-3 py-1 border-slate-600 text-slate-300 bg-slate-800/40">
               <Search className="h-4 w-4 mr-1" />
               OpenAI to Z Challenge
             </Badge>
-            <Badge variant="outline" className="px-3 py-1 border-slate-600 text-slate-300">
+            <Badge variant="outline" className="px-3 py-1 border-slate-600 text-slate-300 bg-slate-800/40">
               <Users className="h-4 w-4 mr-1" />
               Universal Intelligence
             </Badge>
@@ -146,13 +146,13 @@ export default function DocumentationPage() {
 
           {/* OVERVIEW TAB */}
           <TabsContent value="overview" className="space-y-8">
-            <Card className="bg-gradient-to-br from-slate-800/50 via-purple-900/20 to-blue-900/20 border-purple-500/30">
+            <Card className="bg-white/[0.02] backdrop-blur-sm border border-white/[0.08]">
               <CardHeader>
                 <CardTitle className="flex items-center text-2xl text-white">
-                  <Brain className="mr-3 h-8 w-8 text-purple-400" />
+                  <Brain className="mr-3 h-8 w-8 text-emerald-400" />
                   The NIS Protocol: Universal Intelligence
                 </CardTitle>
-                <CardDescription className="text-lg text-purple-200">
+                <CardDescription className="text-lg text-slate-300">
                   A revolutionary biologically-inspired cognitive architecture that thinks, feels, remembers, and reasons like a human brain. The NIS Protocol represents a paradigm shift from traditional AI to universal intelligence systems that can adapt to archaeological discovery challenges and beyond.
                 </CardDescription>
               </CardHeader>
@@ -160,7 +160,7 @@ export default function DocumentationPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <h3 className="text-xl font-semibold flex items-center text-white">
-                      <Target className="h-5 w-5 mr-2 text-purple-400" />
+                      <Target className="h-5 w-5 mr-2 text-emerald-400" />
                       The Vision: Universal Intelligence
                     </h3>
                     <p className="text-slate-300">
@@ -198,9 +198,9 @@ export default function DocumentationPage() {
                   <Card className="bg-slate-700/50 border-slate-600">
                     <CardContent className="pt-6">
                       <div className="text-center">
-                        <Scroll className="h-12 w-12 mx-auto mb-4 text-purple-400" />
-                        <h4 className="text-lg font-semibold mb-2 text-white">Codex Reader</h4>
-                        <p className="text-sm text-slate-300">🆕 GPT-4.1 Vision analysis of historical codices with 91.17% confidence</p>
+                                        <Scroll className="h-12 w-12 mx-auto mb-4 text-cyan-400" />
+                <h4 className="text-lg font-semibold mb-2 text-white">Codex Reader</h4>
+                <p className="text-sm text-slate-300">🆕 GPT-4.1 Vision analysis of historical codices with 91.17% confidence</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -227,13 +227,13 @@ export default function DocumentationPage() {
             </Card>
 
             {/* New Enhanced Codex Reader Section */}
-            <Card className="bg-gradient-to-br from-purple-900/20 to-blue-900/20 border-purple-500/30">
+            <Card className="bg-white/[0.02] backdrop-blur-sm border border-white/[0.08]">
               <CardHeader>
                 <CardTitle className="flex items-center text-white">
-                  <Scroll className="mr-2 h-6 w-6 text-purple-400" />
+                  <Scroll className="mr-2 h-6 w-6 text-cyan-400" />
                   🆕 Enhanced Codex Reader v2.1
                 </CardTitle>
-                <CardDescription className="text-purple-200">
+                <CardDescription className="text-slate-300">
                   Revolutionary archaeological codex discovery and analysis platform with GPT-4.1 Vision integration
                 </CardDescription>
               </CardHeader>
@@ -241,27 +241,27 @@ export default function DocumentationPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-white">Key Features</h3>
-                    <ul className="space-y-2 text-purple-100">
-                      <li className="flex items-center"><CheckCircle2 className="h-4 w-4 mr-2 text-purple-400" />4-Step Guided Workflow</li>
-                      <li className="flex items-center"><CheckCircle2 className="h-4 w-4 mr-2 text-purple-400" />Multi-Archive Integration (FAMSI, World Digital Library, INAH)</li>
-                      <li className="flex items-center"><CheckCircle2 className="h-4 w-4 mr-2 text-purple-400" />GPT-4.1 Vision Analysis (91.17% confidence)</li>
-                      <li className="flex items-center"><CheckCircle2 className="h-4 w-4 mr-2 text-purple-400" />Real-time Progress Tracking</li>
-                      <li className="flex items-center"><CheckCircle2 className="h-4 w-4 mr-2 text-purple-400" />26 Total Codices Available</li>
+                    <ul className="space-y-2 text-slate-300">
+                      <li className="flex items-center"><CheckCircle2 className="h-4 w-4 mr-2 text-emerald-400" />4-Step Guided Workflow</li>
+                      <li className="flex items-center"><CheckCircle2 className="h-4 w-4 mr-2 text-emerald-400" />Multi-Archive Integration (FAMSI, World Digital Library, INAH)</li>
+                      <li className="flex items-center"><CheckCircle2 className="h-4 w-4 mr-2 text-emerald-400" />GPT-4.1 Vision Analysis (91.17% confidence)</li>
+                      <li className="flex items-center"><CheckCircle2 className="h-4 w-4 mr-2 text-emerald-400" />Real-time Progress Tracking</li>
+                      <li className="flex items-center"><CheckCircle2 className="h-4 w-4 mr-2 text-emerald-400" />26 Total Codices Available</li>
                     </ul>
                   </div>
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-white">Analysis Capabilities</h3>
-                    <ul className="space-y-2 text-purple-100">
-                      <li className="flex items-center"><CheckCircle2 className="h-4 w-4 mr-2 text-purple-400" />Visual Element Detection</li>
-                      <li className="flex items-center"><CheckCircle2 className="h-4 w-4 mr-2 text-purple-400" />Glyph Translation & Interpretation</li>
-                      <li className="flex items-center"><CheckCircle2 className="h-4 w-4 mr-2 text-purple-400" />Archaeological Site Type Identification</li>
-                      <li className="flex items-center"><CheckCircle2 className="h-4 w-4 mr-2 text-purple-400" />Cultural Context Analysis</li>
-                      <li className="flex items-center"><CheckCircle2 className="h-4 w-4 mr-2 text-purple-400" />Actionable Field Recommendations</li>
+                    <ul className="space-y-2 text-slate-300">
+                      <li className="flex items-center"><CheckCircle2 className="h-4 w-4 mr-2 text-emerald-400" />Visual Element Detection</li>
+                      <li className="flex items-center"><CheckCircle2 className="h-4 w-4 mr-2 text-emerald-400" />Glyph Translation & Interpretation</li>
+                      <li className="flex items-center"><CheckCircle2 className="h-4 w-4 mr-2 text-emerald-400" />Archaeological Site Type Identification</li>
+                      <li className="flex items-center"><CheckCircle2 className="h-4 w-4 mr-2 text-emerald-400" />Cultural Context Analysis</li>
+                      <li className="flex items-center"><CheckCircle2 className="h-4 w-4 mr-2 text-emerald-400" />Actionable Field Recommendations</li>
                     </ul>
                   </div>
                 </div>
-                <div className="bg-purple-950/30 p-4 rounded-lg border border-purple-500/20">
-                  <p className="text-purple-100 text-sm">
+                <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-600/30">
+                  <p className="text-slate-300 text-sm">
                     <strong>Test Results:</strong> 100% success rate across all system components. Successfully analyzed Codex Borgia 
                     with 88% confidence, detecting 3 visual figures, 3 symbols, and providing comprehensive archaeological insights.
                   </p>
@@ -360,7 +360,7 @@ export default function DocumentationPage() {
                     <div className="text-sm text-slate-400">Avg Analysis Time</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-purple-400">26</div>
+                                            <div className="text-3xl font-bold text-emerald-400">26</div>
                     <div className="text-sm text-slate-400">Codices Available</div>
                   </div>
                   <div className="text-center">
@@ -499,7 +499,7 @@ export default function DocumentationPage() {
                         <div className="text-xs text-slate-400">Total Analyses</div>
                       </div>
                       <div className="text-center p-3 bg-slate-700/50 rounded-lg border border-slate-600">
-                        <div className="text-2xl font-bold text-purple-400">97.2%</div>
+                        <div className="text-2xl font-bold text-emerald-400">97.2%</div>
                         <div className="text-xs text-slate-400">Success Rate</div>
                       </div>
                       <div className="text-center p-3 bg-slate-700/50 rounded-lg border border-slate-600">
@@ -529,9 +529,9 @@ export default function DocumentationPage() {
                     <Zap className="h-4 w-4 text-blue-400" />
                     <span className="text-blue-300 text-sm font-semibold">Edge Deployable</span>
                   </div>
-                  <div className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 border border-purple-400/30 rounded-xl">
-                    <Rocket className="h-4 w-4 text-purple-400" />
-                    <span className="text-purple-300 text-sm font-semibold">Mars Ready</span>
+                                      <div className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-400/30 rounded-xl">
+                      <Rocket className="h-4 w-4 text-blue-400" />
+                      <span className="text-blue-300 text-sm font-semibold">Mars Ready</span>
                   </div>
                 </div>
               </CardContent>
@@ -1449,84 +1449,144 @@ MAX_BATCH_SIZE=32`}</code>
 
           {/* ROADMAP TAB */}
           <TabsContent value="roadmap" className="space-y-8">
-            <Card className="bg-slate-800/50 border-slate-700">
+            <Card className="bg-white/[0.02] backdrop-blur-sm border border-white/[0.08]">
               <CardHeader>
-                <CardTitle className="flex items-center text-white">
-                  <Calendar className="mr-2 h-5 w-5 text-blue-400" />
-                  Development Roadmap
+                <CardTitle className="flex items-center text-2xl text-white">
+                  <Rocket className="mr-3 h-8 w-8 text-emerald-400" />
+                  NIS Protocol Roadmap
                 </CardTitle>
-                <CardDescription className="text-slate-300">
-                  Future enhancements and planned features for NIS Protocol
+                <CardDescription className="text-lg text-slate-300">
+                  The evolution of the NIS Protocol: from flagship v1 to AGI-ready v3 with KAN integration.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-6">
-                  {[
-                    {
-                      phase: "Phase 1 - Foundation",
-                      status: "completed",
-                      items: ["Core AI agents implementation", "Docker architecture", "Basic frontend", "API endpoints"],
-                      color: "bg-green-600 text-white"
-                    },
-                    {
-                      phase: "Phase 2 - Enhancement",
-                      status: "in_progress", 
-                      items: ["Advanced ReAct chat", "Vision agent improvements", "Real-time notifications", "Documentation"],
-                      color: "bg-blue-600 text-white"
-                    },
-                    {
-                      phase: "Phase 3 - Scaling",
-                      status: "planned",
-                      items: ["Mobile app", "Real-time satellite feeds", "Advanced mapping", "User authentication"],
-                      color: "bg-orange-600 text-white"
-                    },
-                    {
-                      phase: "Phase 4 - Intelligence",
-                      status: "future",
-                      items: ["Model ensemble", "Active learning", "Automated reports", "API marketplace"],
-                      color: "bg-slate-600 text-white"
-                    }
-                  ].map((phase, index) => (
-                    <Card key={index} className="bg-slate-700/50 border-slate-600">
-                      <CardContent className="pt-6">
-                        <div className="flex items-start space-x-4">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white font-semibold">
-                            {index + 1}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2 mb-2">
-                              <h3 className="text-lg font-semibold text-white">{phase.phase}</h3>
-                              <Badge className={phase.color}>{phase.status.replace('_', ' ')}</Badge>
-                            </div>
-                            <ul className="space-y-1">
-                              {phase.items.map((item, itemIndex) => (
-                                <li key={itemIndex} className="flex items-center text-sm text-slate-300">
-                                  <CheckCircle2 className="h-4 w-4 mr-2 text-green-400" />
-                                  {item}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+              <CardContent className="space-y-8">
+                {/* v1 */}
+                <div>
+                  <h3 className="text-xl font-semibold text-emerald-300 mb-2 flex items-center">
+                    <CheckCircle2 className="h-5 w-5 mr-2 text-emerald-400" />
+                    v1 — Flagship Release (Current)
+                  </h3>
+                  <ul className="list-disc ml-6 text-slate-300 space-y-1">
+                    <li>Production-ready, multi-agent cognitive architecture</li>
+                    <li>148 archaeological sites, high-confidence discoveries</li>
+                    <li>Real-time backend, advanced filtering, professional research UI</li>
+                    <li>Trojan horse strategy: specialist AI for archaeology & indigenous knowledge</li>
+                  </ul>
                 </div>
-
-                <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-600/30 rounded-lg p-6">
-                  <h3 className="text-lg font-semibold mb-4 text-white">Contribute to the Future</h3>
-                  <p className="text-slate-300 mb-4">
-                    NIS Protocol is open for collaboration. Join our community to help shape the future of AI-powered archaeological discovery.
+                {/* v2 */}
+                <div>
+                  <h3 className="text-xl font-semibold text-cyan-300 mb-2 flex items-center">
+                    <Sparkles className="h-5 w-5 mr-2 text-cyan-400" />
+                    v2 — Next-Gen Agents (Planned)
+                  </h3>
+                  <ul className="list-disc ml-6 text-slate-300 space-y-1">
+                    <li>Further agent specialization and modularity</li>
+                    <li>More robust multi-modal integration (vision, text, spatial, temporal)</li>
+                    <li>Improved data pipelines and real-time collaboration</li>
+                    <li>Expanded professional research tools and cultural context modules</li>
+                  </ul>
+                </div>
+                {/* v3 */}
+                <div>
+                  <h3 className="text-xl font-semibold text-blue-300 mb-2 flex items-center">
+                    <Brain className="h-5 w-5 mr-2 text-blue-400" />
+                    v3 — KAN Integration & AGI Roadmap
+                  </h3>
+                  <p className="text-slate-300 mb-2">
+                    <span className="font-semibold text-emerald-300">Kolmogorov-Arnold Networks (KANs)</span> are a new neural architecture that:
                   </p>
-                  <div className="flex space-x-4">
-                    <Button className="bg-blue-600 hover:bg-blue-700">
-                      <GitBranch className="h-4 w-4 mr-2" />
-                      Contribute on GitHub
-                    </Button>
-                    <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-700">
-                      <Users className="h-4 w-4 mr-2" />
-                      Join Discord
-                    </Button>
+                  <ul className="list-disc ml-6 text-slate-300 space-y-1">
+                    <li>Learn mathematical structure behind data</li>
+                    <li>Require less data to generalize</li>
+                    <li>Are more interpretable than standard MLPs</li>
+                    <li>Work well in low-data or symbolic-reasoning tasks</li>
+                  </ul>
+                  <div className="mt-4">
+                    <h4 className="text-lg font-semibold text-blue-200 mb-2">KAN-Enhanced Agents (Planned):</h4>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full text-sm text-slate-300 border border-slate-700 rounded-lg">
+                        <thead>
+                          <tr className="bg-slate-800 text-slate-200">
+                            <th className="px-3 py-2 border-b border-slate-700">Agent</th>
+                            <th className="px-3 py-2 border-b border-slate-700">Role in NIS</th>
+                            <th className="px-3 py-2 border-b border-slate-700">KAN Use Case</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td className="px-3 py-2 border-b border-slate-700">Simulation Agent</td>
+                            <td className="px-3 py-2 border-b border-slate-700">Predict outcomes, model scenarios</td>
+                            <td className="px-3 py-2 border-b border-slate-700">Causal graphs, probabilistic branches</td>
+                          </tr>
+                          <tr>
+                            <td className="px-3 py-2 border-b border-slate-700">Memory Agent</td>
+                            <td className="px-3 py-2 border-b border-slate-700">Pattern extraction, semantic links</td>
+                            <td className="px-3 py-2 border-b border-slate-700">Symbolic + spatial logic</td>
+                          </tr>
+                          <tr>
+                            <td className="px-3 py-2 border-b border-slate-700">Reasoning Agent</td>
+                            <td className="px-3 py-2 border-b border-slate-700">Logic chains, deduction trees</td>
+                            <td className="px-3 py-2 border-b border-slate-700">Abstract relationship encoding</td>
+                          </tr>
+                          <tr>
+                            <td className="px-3 py-2 border-b border-slate-700">Goal Agent</td>
+                            <td className="px-3 py-2 border-b border-slate-700">Prioritization, optimization</td>
+                            <td className="px-3 py-2 border-b border-slate-700">Efficient reward modeling</td>
+                          </tr>
+                          <tr>
+                            <td className="px-3 py-2 border-b border-slate-700">Alignment Agent</td>
+                            <td className="px-3 py-2 border-b border-slate-700">Value function & ethics weighting</td>
+                            <td className="px-3 py-2 border-b border-slate-700">Interpretable moral vector mappings</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <h4 className="text-lg font-semibold text-blue-200 mb-2">Sample KAN Integration (Python):</h4>
+                    <pre className="bg-slate-800 text-slate-200 rounded-lg p-4 overflow-x-auto text-xs">
+{`from kan import KolmogorovArnoldNetwork
+
+class SimPredictionKAN:
+    def __init__(self):
+        self.model = KolmogorovArnoldNetwork(
+            in_features=6,
+            out_features=3,
+            grid_size=16,
+            interpolation='linear'
+        )
+
+    def simulate(self, input_vector):
+        return self.model(input_vector)
+`}
+                    </pre>
+                  </div>
+                  <div className="mt-4">
+                    <h4 className="text-lg font-semibold text-blue-200 mb-2">Cognitive Benefits:</h4>
+                    <ul className="list-disc ml-6 text-slate-300 space-y-1">
+                      <li><span className="font-semibold text-emerald-300">Generalization:</span> KAN learns functions, not just patterns</li>
+                      <li><span className="font-semibold text-emerald-300">Explainability:</span> Each unit is a mathematical component</li>
+                      <li><span className="font-semibold text-emerald-300">Data Efficiency:</span> Fewer examples needed</li>
+                      <li><span className="font-semibold text-emerald-300">Structural Reasoning:</span> Natural for nested reasoning graphs</li>
+                    </ul>
+                  </div>
+                  <div className="mt-4">
+                    <h4 className="text-lg font-semibold text-blue-200 mb-2">Planned v3 Features:</h4>
+                    <ul className="list-disc ml-6 text-slate-300 space-y-1">
+                      <li>KANModuleInterface: Plug-in API for any agent to use a KAN model</li>
+                      <li>KAN-Enhanced Simulation: Multi-agent scenario planner</li>
+                      <li>KANPatternMemory: Pattern recall + compression for episodic memory</li>
+                      <li>KAN-Ethics Layer: Interpretable ethical scoring</li>
+                    </ul>
+                  </div>
+                  <div className="mt-4">
+                    <h4 className="text-lg font-semibold text-blue-200 mb-2">Compatibility:</h4>
+                    <ul className="list-disc ml-6 text-slate-300 space-y-1">
+                      <li>Works with PyTorch</li>
+                      <li>Modular (e.g., <code>src/modules/kan/</code>)</li>
+                      <li>Integrates with LangGraph, Redis-based inference graphs</li>
+                      <li>Exportable for mobile/edge AGI</li>
+                    </ul>
                   </div>
                 </div>
               </CardContent>
