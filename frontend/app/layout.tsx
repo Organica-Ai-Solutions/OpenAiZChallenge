@@ -3,13 +3,20 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { ClientProviders } from "../components/client-providers"
 import OptimizedNavigation from "../components/shared/OptimizedNavigation"
-import GoogleMapsLoader from "../components/GoogleMapsLoader"
+import PageLoader from "../components/ui/page-loader"
+import { Suspense } from "react"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ 
+  subsets: ["latin"],
+  display: 'swap', // Optimize font loading
+  preload: true
+})
 
 export const metadata: Metadata = {
   title: "NIS Protocol - Indigenous Knowledge Research Platform",
   description: "Advanced AI-powered archaeological site discovery and satellite monitoring system",
+  keywords: "archaeological discovery, AI, satellite monitoring, indigenous knowledge",
+  viewport: "width=device-width, initial-scale=1",
 }
 
 export default function RootLayout({
@@ -19,13 +26,24 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Preload critical resources */}
+        <link rel="preload" href="/MainLogo.png" as="image" />
+        <link rel="dns-prefetch" href="//localhost:8000" />
+      </head>
       <body className={inter.className} suppressHydrationWarning>
         <ClientProviders>
           <OptimizedNavigation showBackendStatus={true} />
-          {children}
+          <PageLoader>
+            <Suspense fallback={
+              <div className="min-h-[60vh] flex items-center justify-center">
+                <div className="text-slate-400">Loading...</div>
+              </div>
+            }>
+              {children}
+            </Suspense>
+          </PageLoader>
         </ClientProviders>
-        
-        <GoogleMapsLoader />
       </body>
     </html>
   )

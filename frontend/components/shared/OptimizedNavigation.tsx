@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect, useTransition, Suspense } from "react";
+import { usePathname } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Wifi, WifiOff, Menu, X } from "lucide-react";
@@ -33,32 +33,18 @@ function NavigationLink({ href, label, isActive, onClick }: {
   isActive: boolean;
   onClick?: () => void;
 }) {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (onClick) onClick();
-    
-    startTransition(() => {
-      router.push(href);
-    });
-  };
-
   return (
     <Link
       href={href}
-      onClick={handleClick}
+      onClick={onClick}
       className={`relative transition-colors duration-200 text-sm ${
         isActive 
           ? "text-emerald-400 font-medium" 
           : "text-slate-200 hover:text-emerald-400"
-      } ${isPending ? "opacity-70" : ""}`}
+      }`}
+      prefetch={true}
     >
       {label}
-      {isPending && (
-        <div className="absolute -bottom-1 left-0 w-full h-0.5 bg-emerald-400 animate-pulse" />
-      )}
     </Link>
   );
 }
@@ -78,17 +64,18 @@ export default function OptimizedNavigation({
     setMounted(true);
   }, []);
 
-  // Check backend status with lighter polling
+  // Optimized backend status check with reduced frequency and timeout
   useEffect(() => {
     if (showBackendStatus && mounted) {
       const checkBackend = async () => {
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 2000);
+          const timeoutId = setTimeout(() => controller.abort(), 1000); // Reduced timeout
           
           const response = await fetch('http://localhost:8000/system/health', {
             signal: controller.signal,
-            cache: 'no-store'
+            cache: 'force-cache', // Cache for faster subsequent loads
+            next: { revalidate: 30 } // Cache for 30 seconds
           });
           
           clearTimeout(timeoutId);
@@ -99,7 +86,7 @@ export default function OptimizedNavigation({
       };
       
       checkBackend();
-      const interval = setInterval(checkBackend, 45000); // Reduced frequency
+      const interval = setInterval(checkBackend, 60000); // Reduced to 1 minute
       return () => clearInterval(interval);
     }
   }, [showBackendStatus, mounted]);
@@ -126,7 +113,11 @@ export default function OptimizedNavigation({
     <header className="bg-slate-900/80 backdrop-blur-sm border-b border-slate-700/50 py-3 text-white sticky top-0 z-50">
       <div className="container mx-auto flex items-center justify-between px-6">
         {/* Logo and Brand */}
-        <Link href="/" className="flex items-center gap-3 text-xl font-semibold hover:opacity-90 transition-opacity">
+        <Link 
+          href="/" 
+          className="flex items-center gap-3 text-xl font-semibold hover:opacity-90 transition-opacity"
+          prefetch={true}
+        >
           <div className="relative w-12 h-12">
             <Image
               src="/MainLogo.png"
@@ -193,6 +184,7 @@ export default function OptimizedNavigation({
           <button 
             className="md:hidden text-slate-300 hover:text-white p-2 transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle mobile menu"
           >
             {mobileMenuOpen ? (
               <X className="h-5 w-5" />

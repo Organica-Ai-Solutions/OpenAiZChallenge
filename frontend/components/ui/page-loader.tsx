@@ -1,27 +1,43 @@
 "use client";
 
-import { motion } from 'framer-motion';
-import { Loader2, Sparkles } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { Loader2, Activity } from "lucide-react";
 
-export function PageLoader() {
-  return (
-    <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.8 }}
-        className="flex flex-col items-center gap-4"
-      >
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-        >
-          <Sparkles className="w-8 h-8 text-emerald-400" />
-        </motion.div>
-        <div className="text-white text-sm">Loading...</div>
-      </motion.div>
-    </div>
-  );
+interface PageLoaderProps {
+  children: React.ReactNode;
+}
+
+export default function PageLoader({ children }: PageLoaderProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    setIsLoading(true);
+    
+    // Quick loading simulation to smooth transitions  
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 150); // Very short delay
+
+    return () => clearTimeout(timer);
+  }, [pathname]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="relative">
+            <Activity className="h-8 w-8 text-blue-400 animate-pulse" />
+            <Loader2 className="h-12 w-12 text-emerald-400 animate-spin absolute -top-2 -left-2" />
+          </div>
+          <div className="text-slate-400 text-sm">Loading NIS Protocol...</div>
+        </div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
 }
 
 export function MinimalLoader() {
