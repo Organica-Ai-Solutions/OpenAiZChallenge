@@ -738,7 +738,7 @@ export default function ArchaeologicalMapPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden pt-20">
       {/* Google Maps Script */}
       <Script
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC-eqKjOMYNw-FMabknw6Bnxf1fjo-EW2Y&callback=initGoogleMaps&libraries=places"
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC-eqKjOMYNw-FMabknw6Bnxf1fjo-EW2Y&callback=initGoogleMaps&libraries=places&loading=async"
         strategy="afterInteractive"
         onLoad={() => {
           console.log('🗺️ Google Maps script loaded successfully')
@@ -959,9 +959,9 @@ export default function ArchaeologicalMapPage() {
                           <p className="text-slate-400 mt-2">Loading archaeological sites...</p>
                         </div>
                       ) : (
-                        filteredSites.map((site) => (
+                        filteredSites.map((site, index) => (
                             <Card 
-                              key={site.id} 
+                              key={`${site.id}-${index}`} 
                               className={`bg-slate-800/50 border-slate-700 cursor-pointer transition-all hover:bg-slate-800/70 ${
                                 selectedSite?.id === site.id ? 'ring-2 ring-emerald-500' : ''
                               } ${
