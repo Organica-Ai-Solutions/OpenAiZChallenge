@@ -322,7 +322,7 @@ export default function ArchaeologicalMapPage() {
 
   // Initialize Google Maps
   const initializeMap = useCallback(() => {
-    if (!mapRef.current || !window.google || !googleMapsLoaded) {
+    if (!mapRef.current || !googleMapsLoaded || !window.google || !window.google.maps || !window.google.maps.Map) {
       console.log('🗺️ Waiting for Google Maps to load...')
       return
     }
@@ -350,6 +350,7 @@ export default function ArchaeologicalMapPage() {
     } catch (error) {
       console.error('❌ Failed to initialize Google Maps:', error)
       setMapError('Failed to initialize map')
+      console.log('📍 Google Maps not available - continuing with static interface')
     }
   }, [mapCenter, mapZoom, googleMapsLoaded])
 
@@ -497,12 +498,22 @@ export default function ArchaeologicalMapPage() {
   useEffect(() => {
     window.initGoogleMaps = () => {
       console.log('🗺️ Google Maps API loaded via callback')
-      setGoogleMapsLoaded(true)
+      // Add a small delay to ensure API is fully ready
+      setTimeout(() => {
+        if (window.google && window.google.maps && window.google.maps.Map) {
+          setGoogleMapsLoaded(true)
+        } else {
+          console.log('⏳ Google Maps API not fully ready, retrying...')
+          setTimeout(() => setGoogleMapsLoaded(true), 500)
+        }
+      }, 100)
     }
     
     // Cleanup
     return () => {
-      delete window.initGoogleMaps
+      if (window.initGoogleMaps) {
+        delete window.initGoogleMaps
+      }
     }
   }, [])
 
