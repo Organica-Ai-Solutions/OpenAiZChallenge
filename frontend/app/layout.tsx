@@ -16,7 +16,11 @@ export const metadata: Metadata = {
   title: "NIS Protocol - Indigenous Knowledge Research Platform",
   description: "Advanced AI-powered archaeological site discovery and satellite monitoring system",
   keywords: "archaeological discovery, AI, satellite monitoring, indigenous knowledge",
-  viewport: "width=device-width, initial-scale=1",
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 }
 
 export default function RootLayout({

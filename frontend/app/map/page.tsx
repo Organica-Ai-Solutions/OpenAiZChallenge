@@ -37,6 +37,7 @@ import { Slider } from "../../components/ui/slider"
 import { Label } from "../../components/ui/label"
 import { Input } from "../../components/ui/input"
 import UltimateArchaeologicalChat from "../../components/ui/ultimate-archaeological-chat"
+import Script from "next/script"
 
 // Google Maps marker types
 declare global {
@@ -67,6 +68,14 @@ export default function ArchaeologicalMapPage() {
   const [selectedSite, setSelectedSite] = useState<ArchaeologicalSite | null>(null)
   const [mapCenter, setMapCenter] = useState<[number, number]>([-3.4653, -62.2159])
   const [mapZoom, setMapZoom] = useState(6)
+  const [filteredSites, setFilteredSites] = useState<ArchaeologicalSite[]>([])
+  const [mapStats, setMapStats] = useState({
+    totalSites: 0,
+    highConfidenceSites: 0,
+    averageConfidence: 0,
+    culturalDiversity: 0,
+    recentDiscoveries: 0
+  })
   
   // UI state
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -81,6 +90,9 @@ export default function ArchaeologicalMapPage() {
   const [confidenceFilter, setConfidenceFilter] = useState(70)
   const [typeFilter, setTypeFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [periodFilter, setPeriodFilter] = useState('all')
+  const [showHeatmap, setShowHeatmap] = useState(false)
+  const [showClusters, setShowClusters] = useState(true)
 
   // Refs
   const mapRef = useRef<HTMLDivElement>(null)
@@ -127,6 +139,33 @@ export default function ArchaeologicalMapPage() {
     confidence: number
     description: string
   }>>([])
+
+  // Calculate map statistics
+  const calculateMapStats = useCallback((siteData: ArchaeologicalSite[]) => {
+    const totalSites = siteData.length
+    const highConfidenceSites = siteData.filter(site => site.confidence >= 0.85).length
+    const averageConfidence = siteData.length > 0 
+      ? siteData.reduce((sum, site) => sum + site.confidence, 0) / siteData.length 
+      : 0
+    
+    // Count unique periods for cultural diversity
+    const uniquePeriods = new Set(siteData.map(site => site.period)).size
+    
+    // Count recent discoveries (last 30 days)
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+    const recentDiscoveries = siteData.filter(site => 
+      new Date(site.discovery_date) > thirtyDaysAgo
+    ).length
+
+    setMapStats({
+      totalSites,
+      highConfidenceSites,
+      averageConfidence,
+      culturalDiversity: uniquePeriods,
+      recentDiscoveries
+    })
+  }, [])
 
   // Check NIS Protocol backend status
   const checkBackend = useCallback(async () => {
@@ -484,6 +523,7 @@ export default function ArchaeologicalMapPage() {
         if (response.ok) {
           const data = await response.json()
           setSites(data)
+          calculateMapStats(data)
           console.log('✅ NIS Protocol: Loaded', data.length, 'archaeological sites from 148 total discoveries')
           
           // Plot markers after sites are loaded
@@ -553,6 +593,28 @@ export default function ArchaeologicalMapPage() {
   useEffect(() => {
     loadSites()
   }, [loadSites])
+
+  // Filter sites based on current filters
+  useEffect(() => {
+    let filtered = sites.filter(site => {
+      // Confidence filter
+      if (site.confidence * 100 < confidenceFilter) return false
+      
+      // Type filter
+      if (typeFilter !== 'all' && site.type !== typeFilter) return false
+      
+      // Period filter
+      if (periodFilter !== 'all' && !site.period.toLowerCase().includes(periodFilter.toLowerCase())) return false
+      
+      // Search query
+      if (searchQuery && !site.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
+          !site.cultural_significance.toLowerCase().includes(searchQuery.toLowerCase())) return false
+      
+      return true
+    })
+    
+    setFilteredSites(filtered)
+  }, [sites, confidenceFilter, typeFilter, periodFilter, searchQuery])
 
   // Plot markers when sites change
   useEffect(() => {
@@ -674,14 +736,28 @@ export default function ArchaeologicalMapPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden pt-20">
+      {/* Google Maps Script */}
+      <Script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC-eqKjOMYNw-FMabknw6Bnxf1fjo-EW2Y&callback=initGoogleMaps&libraries=places"
+        strategy="afterInteractive"
+        onLoad={() => {
+          console.log('🗺️ Google Maps script loaded successfully')
+          if (window.google && window.google.maps) {
+            setGoogleMapsLoaded(true)
+          }
+        }}
+        onError={() => {
+          console.error('❌ Failed to load Google Maps script')
+          setMapError('Failed to load Google Maps. Please check your internet connection.')
+        }}
+      />
+      
       {/* Animated Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-emerald-900/5 to-blue-900/10" />
       <div className="absolute inset-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
-
-                    {/* Google Maps loaded globally in layout.tsx */}
 
       <div className="relative z-10 pt-20">
         <div className="container mx-auto px-6 py-8">
@@ -837,6 +913,24 @@ export default function ArchaeologicalMapPage() {
                             className="bg-slate-800"
                           />
                         </div>
+
+                        <div className="space-y-2">
+                          <Label className="text-slate-300">Historical Period</Label>
+                          <Select value={periodFilter} onValueChange={setPeriodFilter}>
+                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                              <SelectValue placeholder="Select period" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-800 border-slate-700">
+                              <SelectItem value="all">All Periods</SelectItem>
+                              <SelectItem value="pre-columbian">Pre-Columbian</SelectItem>
+                              <SelectItem value="inca">Inca</SelectItem>
+                              <SelectItem value="nazca">Nazca</SelectItem>
+                              <SelectItem value="moche">Moche</SelectItem>
+                              <SelectItem value="chimu">Chimú</SelectItem>
+                              <SelectItem value="colonial">Colonial</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
                       
                       {planningMode && (
@@ -865,11 +959,7 @@ export default function ArchaeologicalMapPage() {
                           <p className="text-slate-400 mt-2">Loading archaeological sites...</p>
                         </div>
                       ) : (
-                        sites
-                          .filter(site => site.confidence * 100 >= confidenceFilter)
-                          .filter(site => typeFilter === 'all' || site.type === typeFilter)
-                          .filter(site => !searchQuery || site.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                          .map((site) => (
+                        filteredSites.map((site) => (
                             <Card 
                               key={site.id} 
                               className={`bg-slate-800/50 border-slate-700 cursor-pointer transition-all hover:bg-slate-800/70 ${
@@ -1205,7 +1295,7 @@ export default function ArchaeologicalMapPage() {
               transition={{ delay: 0.8, duration: 0.6 }}
               className="flex-1 relative rounded-2xl bg-white/[0.02] backdrop-blur-sm border border-white/[0.08] overflow-hidden"
             >
-              {/* Map Controls */}
+              {/* Enhanced Map Controls */}
               <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
                 <Button
                   variant="outline"
@@ -1215,16 +1305,38 @@ export default function ArchaeologicalMapPage() {
                 >
                   {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
                 </Button>
+                
+                <div className="bg-white/[0.1] backdrop-blur-sm border border-white/[0.2] rounded-lg p-2 space-y-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowClusters(!showClusters)}
+                    className={`w-full justify-start text-xs ${showClusters ? 'text-emerald-400' : 'text-white/60'}`}
+                  >
+                    <Globe className="h-3 w-3 mr-1" />
+                    Clusters
+                  </Button>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowHeatmap(!showHeatmap)}
+                    className={`w-full justify-start text-xs ${showHeatmap ? 'text-emerald-400' : 'text-white/60'}`}
+                  >
+                    <Satellite className="h-3 w-3 mr-1" />
+                    Heatmap
+                  </Button>
+                </div>
               </div>
 
-              {/* Map Status */}
+              {/* Enhanced Map Status */}
               <div className="absolute top-4 right-4 z-10">
                 <div className="bg-white/[0.1] backdrop-blur-sm border border-white/[0.2] rounded-lg p-3">
-                  <div className="flex items-center gap-2 text-xs">
+                  <div className="flex items-center gap-2 text-xs mb-2">
                     {backendOnline ? (
                       <>
                         <Wifi className="h-3 w-3 text-emerald-400" />
-                        <span className="text-emerald-400">Live Data</span>
+                        <span className="text-emerald-400">NIS Protocol Live</span>
                       </>
                     ) : (
                       <>
@@ -1233,8 +1345,23 @@ export default function ArchaeologicalMapPage() {
                       </>
                     )}
                   </div>
-                  <div className="text-xs text-slate-300 mt-1">
-                    {sites.length} sites
+                  <div className="space-y-1 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Total Sites:</span>
+                      <span className="text-white font-medium">{mapStats.totalSites}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">High Confidence:</span>
+                      <span className="text-emerald-400 font-medium">{mapStats.highConfidenceSites}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Avg Confidence:</span>
+                      <span className="text-blue-400 font-medium">{Math.round(mapStats.averageConfidence * 100)}%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Filtered:</span>
+                      <span className="text-yellow-400 font-medium">{filteredSites.length}</span>
+                    </div>
                   </div>
                 </div>
               </div>
