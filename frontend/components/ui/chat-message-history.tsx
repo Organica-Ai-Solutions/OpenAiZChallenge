@@ -1,9 +1,9 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChatMessage } from '@/lib/api/chat-service';
-import { User, Bot, MapPin, Eye, Sparkles, AlertCircle } from 'lucide-react';
+import { User, Bot, MapPin, Eye, Sparkles, AlertCircle, Minimize2, Maximize2 } from 'lucide-react';
 
 interface ChatMessageHistoryProps {
   messages: ChatMessage[];
@@ -11,25 +11,47 @@ interface ChatMessageHistoryProps {
 }
 
 export function ChatMessageHistory({ messages, isTyping = false }: ChatMessageHistoryProps) {
+  const [isMinimized, setIsMinimized] = useState(false);
+
   if (messages.length === 0 && !isTyping) {
     return null;
   }
 
   return (
-    <div className="fixed top-20 right-4 w-96 max-h-[70vh] overflow-y-auto bg-black/90 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl z-40">
-      <div className="p-4 border-b border-white/10">
-        <h3 className="text-white font-medium flex items-center gap-2">
-          <Bot className="w-4 h-4 text-emerald-400" />
-          Chat History
-        </h3>
-        <p className="text-xs text-white/40 mt-1">
-          {messages.length} messages • Real-time analysis
-        </p>
+    <motion.div 
+      className="fixed top-20 right-4 w-96 bg-black/90 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl z-40"
+      animate={{ 
+        height: isMinimized ? 'auto' : 'auto',
+        maxHeight: isMinimized ? '60px' : '70vh'
+      }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className="p-4 border-b border-white/10 flex items-center justify-between">
+        <div>
+          <h3 className="text-white font-medium flex items-center gap-2">
+            <Bot className="w-4 h-4 text-emerald-400" />
+            Chat History
+          </h3>
+          <p className="text-xs text-white/40 mt-1">
+            {messages.length} messages • Real-time analysis
+          </p>
+        </div>
+        <button
+          onClick={() => setIsMinimized(!isMinimized)}
+          className="text-white/40 hover:text-white/80 transition-colors p-1 rounded"
+        >
+          {isMinimized ? (
+            <Maximize2 className="w-4 h-4" />
+          ) : (
+            <Minimize2 className="w-4 h-4" />
+          )}
+        </button>
       </div>
       
-      <div className="p-4 space-y-4 max-h-96 overflow-y-auto">
-        <AnimatePresence>
-          {messages.map((message, index) => (
+      {!isMinimized && (
+        <div className="p-4 space-y-4 max-h-96 overflow-y-auto">
+          <AnimatePresence>
+            {messages.map((message, index) => (
             <motion.div
               key={message.id}
               initial={{ opacity: 0, y: 10 }}
@@ -141,8 +163,9 @@ export function ChatMessageHistory({ messages, isTyping = false }: ChatMessageHi
             </div>
           </motion.div>
         )}
-      </div>
-    </div>
+        </div>
+      )}
+    </motion.div>
   );
 }
 

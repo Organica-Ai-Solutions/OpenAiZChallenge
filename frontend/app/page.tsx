@@ -80,9 +80,9 @@ export default function HomePage() {
       
       // Get real NIS system data from our backend
       const [healthResult, sitesResult, highConfidenceResult] = await Promise.allSettled([
-        fetch('http://localhost:8002/system/health').then(r => r.ok ? r.json() : null),
-        fetch('http://localhost:8002/debug/sites-count').then(r => r.ok ? r.json() : null),
-        fetch('http://localhost:8002/research/all-discoveries?min_confidence=0.85').then(r => r.ok ? r.json() : null)
+        fetch('http://localhost:8000/system/health').then(r => r.ok ? r.json() : null),
+        fetch('http://localhost:8000/debug/sites-count').then(r => r.ok ? r.json() : null),
+        fetch('http://localhost:8000/research/all-discoveries?min_confidence=0.85').then(r => r.ok ? r.json() : null)
       ])
 
       let stats: SystemStats = {
@@ -188,7 +188,7 @@ export default function HomePage() {
     // Real-time updates using actual NIS system monitoring
     const interval = setInterval(async () => {
       try {
-        const health = await fetch('http://localhost:8002/system/health').then(r => r.ok ? r.json() : null)
+        const health = await fetch('http://localhost:8000/system/health').then(r => r.ok ? r.json() : null)
         if (health) {
           setSystemStats(prev => ({
             ...prev,

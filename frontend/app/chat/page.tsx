@@ -16,6 +16,7 @@ export default function ChatPage() {
   // Subscribe to chat service updates
   useEffect(() => {
     const unsubscribe = chatService.subscribe((newMessages) => {
+      console.log('📨 Chat service updated with messages:', newMessages.length);
       setMessages(newMessages)
       setIsTyping(false) // Stop typing when new message arrives
     })
@@ -28,12 +29,14 @@ export default function ChatPage() {
 
   // Handle message sending with backend integration
   const handleSendMessage = async (message: string, attachments?: string[]) => {
+    console.log('🚀 Chat page sending message:', message);
     setIsTyping(true)
     
     try {
       await chatService.sendMessage(message, attachments)
+      console.log('✅ Message sent successfully');
     } catch (error) {
-      console.error('Failed to send message:', error)
+      console.error('❌ Failed to send message:', error)
       setIsTyping(false)
     }
   }

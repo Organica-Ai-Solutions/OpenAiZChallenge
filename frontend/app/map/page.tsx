@@ -131,7 +131,7 @@ export default function ArchaeologicalMapPage() {
   // Check NIS Protocol backend status
   const checkBackend = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8002/system/health')
+      const response = await fetch('http://localhost:8000/system/health')
       setBackendOnline(response.ok)
       if (response.ok) {
         console.log('✅ NIS Protocol backend online on port 8002')
@@ -480,7 +480,7 @@ export default function ArchaeologicalMapPage() {
     setLoading(true)
     try {
       if (backendOnline) {
-        const response = await fetch('http://localhost:8002/research/sites?max_sites=148')
+        const response = await fetch('http://localhost:8000/research/sites?max_sites=148')
         if (response.ok) {
           const data = await response.json()
           setSites(data)
