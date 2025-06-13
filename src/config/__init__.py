@@ -26,8 +26,10 @@ load_dotenv()
 # Assuming these are still relevant or will be used by Settings/ConfigManager
 # API Keys
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
-# SENTINEL_USERNAME = os.getenv('SENTINEL_USERNAME') # Handled by Settings
-# SENTINEL_PASSWORD = os.getenv('SENTINEL_PASSWORD') # Handled by Settings
+SENTINEL_USERNAME = os.getenv('SENTINEL_USERNAME')
+SENTINEL_PASSWORD = os.getenv('SENTINEL_PASSWORD')
+LIDAR_USERNAME = os.getenv('LIDAR_USERNAME')
+LIDAR_PASSWORD = os.getenv('LIDAR_PASSWORD')
 
 # Data paths - these might be better defined within Settings or derived from a base dir in settings
 # BASE_DIR_CONFIG = Path(__file__).resolve().parent.parent # src directory

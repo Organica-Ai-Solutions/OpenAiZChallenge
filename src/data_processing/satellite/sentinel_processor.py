@@ -36,8 +36,8 @@ class SentinelProcessor:
         self.output_dir = output_dir
         os.makedirs(output_dir, exist_ok=True)
         
-        # Initialize Sentinel API client
-        self.api = SentinelAPI(self.username, self.password, 'https://scihub.copernicus.eu/dhus')
+        # Initialize Sentinel API client with new Copernicus Data Space Ecosystem
+        self.api = SentinelAPI(self.username, self.password, 'https://catalogue.dataspace.copernicus.eu/')
     
     def search_images(
         self, 
