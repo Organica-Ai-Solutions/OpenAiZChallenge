@@ -11,6 +11,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Eye, Camera, Satellite, Brain, Activity, MapPin, Target, Wifi, WifiOff, BarChart3, Sparkles, RefreshCw, Zap, Clock, ArrowRight } from "lucide-react"
+import dynamic from 'next/dynamic'
+
+const SatelliteLidarMap = dynamic(() => import('../../src/components/SatelliteLidarMap'), { ssr: false })
 
 export default function VisionAgentPage() {
   const [selectedCoordinates, setSelectedCoordinates] = useState("5.1542, -73.7792")
@@ -212,12 +215,15 @@ export default function VisionAgentPage() {
                 </CardHeader>
                 <CardContent>
                   {isBackendOnline ? (
-                    <VisionAgentVisualization
-                      coordinates={selectedCoordinates}
-                      onAnalysisComplete={handleAnalysisComplete}
-                      isBackendOnline={isBackendOnline}
-                      autoAnalyze={false}
-                    />
+                    <>
+                      <VisionAgentVisualization
+                        coordinates={selectedCoordinates}
+                        onAnalysisComplete={handleAnalysisComplete}
+                        isBackendOnline={isBackendOnline}
+                        autoAnalyze={false}
+                      />
+                      <SatelliteLidarMap satelliteData={[]} coordinates={{ lat: 5.1542, lng: -73.7792 }} onCoordinateChange={() => {}} />
+                    </>
                   ) : (
                     <VisionAgentFallback
                       coordinates={selectedCoordinates}
