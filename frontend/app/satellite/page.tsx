@@ -79,10 +79,14 @@ function SatelliteMonitor({ isBackendOnline = false }: { isBackendOnline?: boole
     try {
       console.log('🔬 Analyzing real satellite imagery...')
       
-      const response = await fetch('http://localhost:8000/satellite/analyze', {
+      const response = await fetch('http://localhost:8000/satellite/analyze-imagery', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageId, coordinates })
+        body: JSON.stringify({ 
+          image_id: imageId, 
+          coordinates: coordinates,
+          analysis_type: 'archaeological'
+        })
       })
       
       if (!response.ok) {
@@ -110,10 +114,16 @@ function SatelliteMonitor({ isBackendOnline = false }: { isBackendOnline?: boole
     try {
       console.log('📁 Exporting real satellite data...')
       
-      const response = await fetch('http://localhost:8000/satellite/export', {
+      const response = await fetch('http://localhost:8000/satellite/export-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageId, coordinates, format: 'json' })
+        body: JSON.stringify({ 
+          data_type: 'imagery',
+          format: 'json',
+          coordinates: coordinates,
+          include_metadata: true,
+          image_id: imageId
+        })
       })
       
       if (!response.ok) {
@@ -535,7 +545,7 @@ export default function SatellitePage() {
   useEffect(() => {
     const checkBackendStatus = async () => {
       try {
-        const response = await fetch('http://localhost:8000/', { method: 'GET' })
+        const response = await fetch('http://localhost:8000/satellite/status', { method: 'GET' })
         const isOnline = response.ok
         setIsBackendOnline(isOnline)
         console.log(`🛰️ Backend status: ${isOnline ? 'Online' : 'Offline'}`)
