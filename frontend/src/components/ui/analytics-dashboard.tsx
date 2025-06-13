@@ -53,13 +53,17 @@ import {
   Users
 } from "lucide-react"
 
-// Real backend data interfaces
+// Enhanced backend data interfaces
 interface RealAnalyticsData {
   statistics: StatisticsData | null
   diagnostics: DiagnosticsData | null
   sites: SiteData[]
   agents: AgentData[]
   systemHealth: HealthData | null
+  regions: RegionData[]
+  dataSources: DataSourceData[]
+  satelliteStatus: SatelliteStatusData | null
+  satelliteAlerts: SatelliteAlertData[]
 }
 
 interface StatisticsData {
@@ -177,6 +181,49 @@ interface HealthData {
   uptime: number
 }
 
+interface RegionData {
+  id: string
+  name: string
+  bounds: number[][]
+  description: string
+  cultural_groups: string[]
+  site_count: number
+  recent_discoveries: number
+  priority_level: string
+}
+
+interface DataSourceData {
+  id: string
+  name: string
+  description: string
+  availability: string
+  processing_time: string
+  accuracy_rate: number
+  data_types: string[]
+  resolution: string
+  coverage: string
+  update_frequency: string
+  status: string
+}
+
+interface SatelliteStatusData {
+  system_status: string
+  active_satellites: number
+  data_quality: string
+  last_update: string
+  coverage_percentage: number
+}
+
+interface SatelliteAlertData {
+  id: string
+  type: string
+  severity: string
+  location: string
+  description: string
+  timestamp: string
+  status: string
+}
+
 const COLORS = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#06B6D4']
 
 // Chart data transformers
@@ -218,7 +265,7 @@ export function AnalyticsDashboard() {
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
   const [isBackendOnline, setIsBackendOnline] = useState(false)
 
-  // Real data loading from backend
+  // Enhanced real data loading from backend with additional endpoints
   const loadRealData = async () => {
     setLoading(true)
     setError(null)
@@ -232,21 +279,49 @@ export function AnalyticsDashboard() {
         throw new Error('Backend is offline')
       }
 
-      // Parallel fetch all real data sources
-      const [statisticsRes, diagnosticsRes, sitesRes, agentsRes, healthRes] = await Promise.all([
+      // Parallel fetch all real data sources including new analytics endpoints
+      const [
+        statisticsRes, 
+        diagnosticsRes, 
+        sitesRes, 
+        agentsRes, 
+        healthRes,
+        regionsRes,
+        dataSourcesRes,
+        satelliteStatusRes,
+        satelliteAlertsRes
+      ] = await Promise.all([
         fetch('http://localhost:8000/statistics'),
         fetch('http://localhost:8000/system/diagnostics'),
         fetch('http://localhost:8000/research/sites?max_sites=50'),
         fetch('http://localhost:8000/agents/agents'),
-        fetch('http://localhost:8000/system/health')
+        fetch('http://localhost:8000/system/health'),
+        fetch('http://localhost:8000/research/regions'),
+        fetch('http://localhost:8000/system/data-sources'),
+        fetch('http://localhost:8000/satellite/status'),
+        fetch('http://localhost:8000/satellite/alerts')
       ])
 
-      const [statistics, diagnostics, sites, agents, systemHealth] = await Promise.all([
+      const [
+        statistics, 
+        diagnostics, 
+        sites, 
+        agents, 
+        systemHealth,
+        regions,
+        dataSources,
+        satelliteStatus,
+        satelliteAlerts
+      ] = await Promise.all([
         statisticsRes.ok ? statisticsRes.json() : null,
         diagnosticsRes.ok ? diagnosticsRes.json() : null,
         sitesRes.ok ? sitesRes.json() : [],
         agentsRes.ok ? agentsRes.json() : [],
-        healthRes.ok ? healthRes.json() : null
+        healthRes.ok ? healthRes.json() : null,
+        regionsRes.ok ? regionsRes.json() : null,
+        dataSourcesRes.ok ? dataSourcesRes.json() : null,
+        satelliteStatusRes.ok ? satelliteStatusRes.json() : null,
+        satelliteAlertsRes.ok ? satelliteAlertsRes.json() : null
       ])
 
       setData({
@@ -254,15 +329,22 @@ export function AnalyticsDashboard() {
         diagnostics,
         sites,
         agents,
-        systemHealth
+        systemHealth,
+        regions: regions?.data || [],
+        dataSources: dataSources?.data || [],
+        satelliteStatus,
+        satelliteAlerts: satelliteAlerts?.data || []
       })
 
       setLastRefresh(new Date())
-      console.log('✅ Analytics data loaded successfully:', {
+      console.log('✅ Enhanced analytics data loaded successfully:', {
         statistics: !!statistics,
         diagnostics: !!diagnostics,
         sites: sites?.length || 0,
-        agents: agents?.length || 0
+        agents: agents?.length || 0,
+        regions: regions?.data?.length || 0,
+        dataSources: dataSources?.data?.length || 0,
+        satelliteAlerts: satelliteAlerts?.data?.length || 0
       })
 
     } catch (error) {
@@ -274,42 +356,105 @@ export function AnalyticsDashboard() {
     }
   }
 
-  // Export functionality
-  const handleExport = async () => {
+  // Enhanced export functionality with multiple formats
+  const handleExport = async (format: 'json' | 'csv' | 'pdf' = 'json') => {
     if (!data) return
 
     try {
       const exportData = {
         exported_at: new Date().toISOString(),
+        system_info: {
+          backend_online: isBackendOnline,
+          last_refresh: lastRefresh.toISOString(),
+          data_freshness: data.statistics?.data_freshness || 'unknown'
+        },
         statistics: data.statistics,
         diagnostics: data.diagnostics,
         sites_summary: {
           total_sites: data.sites.length,
+          filtered_sites: filteredData?.sites.length || 0,
           sites_by_confidence: data.sites.reduce((acc, site) => {
             const range = site.confidence >= 0.9 ? '90-100%' : 
                          site.confidence >= 0.8 ? '80-90%' : 
                          site.confidence >= 0.7 ? '70-80%' : '60-70%'
             acc[range] = (acc[range] || 0) + 1
             return acc
-          }, {} as Record<string, number>)
+          }, {} as Record<string, number>),
+          sites_by_region: data.regions?.reduce((acc, region) => {
+            acc[region.name] = region.site_count
+            return acc
+          }, {} as Record<string, number>) || {}
         },
         agents_summary: {
           total_agents: data.agents.length,
-          average_accuracy: data.agents.reduce((sum, agent) => sum + agent.performance.accuracy, 0) / data.agents.length
+          average_accuracy: data.agents.length > 0 ? 
+            data.agents.reduce((sum, agent) => sum + agent.performance.accuracy, 0) / data.agents.length : 0,
+          agents_by_status: data.agents.reduce((acc, agent) => {
+            acc[agent.status] = (acc[agent.status] || 0) + 1
+            return acc
+          }, {} as Record<string, number>)
+        },
+        regional_analysis: {
+          total_regions: data.regions?.length || 0,
+          regions_by_priority: data.regions?.reduce((acc, region) => {
+            acc[region.priority_level] = (acc[region.priority_level] || 0) + 1
+            return acc
+          }, {} as Record<string, number>) || {},
+          cultural_groups_total: data.regions?.reduce((sum, region) => sum + region.cultural_groups.length, 0) || 0
+        },
+        data_sources_analysis: {
+          total_sources: data.dataSources?.length || 0,
+          active_sources: data.dataSources?.filter(source => source.status === 'active').length || 0,
+          average_accuracy: data.dataSources?.length > 0 ? 
+            data.dataSources.reduce((sum, source) => sum + source.accuracy_rate, 0) / data.dataSources.length : 0
+        },
+        satellite_monitoring: {
+          system_status: data.satelliteStatus?.system_status || 'unknown',
+          active_satellites: data.satelliteStatus?.active_satellites || 0,
+          total_alerts: data.satelliteAlerts?.length || 0,
+          alerts_by_severity: data.satelliteAlerts?.reduce((acc, alert) => {
+            acc[alert.severity] = (acc[alert.severity] || 0) + 1
+            return acc
+          }, {} as Record<string, number>) || {}
         }
       }
 
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `nis-analytics-${new Date().toISOString().split('T')[0]}.json`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
+      if (format === 'json') {
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `nis-analytics-comprehensive-${new Date().toISOString().split('T')[0]}.json`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      } else if (format === 'csv') {
+        // Create CSV export for key metrics
+        const csvData = [
+          ['Metric', 'Value', 'Category'],
+          ['Total Sites Discovered', data.statistics?.total_sites_discovered || 0, 'Sites'],
+          ['Success Rate', `${data.statistics?.analysis_metrics.success_rate || 0}%`, 'Performance'],
+          ['Average Confidence', `${((data.statistics?.analysis_metrics.avg_confidence || 0) * 100).toFixed(1)}%`, 'Performance'],
+          ['Active Agents', data.agents.length, 'Agents'],
+          ['Active Regions', data.regions?.length || 0, 'Geographic'],
+          ['Active Data Sources', data.dataSources?.filter(s => s.status === 'active').length || 0, 'Data Sources'],
+          ['Satellite Alerts', data.satelliteAlerts?.length || 0, 'Monitoring']
+        ]
+        
+        const csvContent = csvData.map(row => row.join(',')).join('\n')
+        const blob = new Blob([csvContent], { type: 'text/csv' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `nis-analytics-summary-${new Date().toISOString().split('T')[0]}.csv`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      }
 
-      console.log('📊 Analytics data exported successfully')
+      console.log(`📊 Analytics data exported successfully as ${format.toUpperCase()}`)
     } catch (error) {
       console.error('❌ Export failed:', error)
     }
@@ -471,9 +616,13 @@ export function AnalyticsDashboard() {
                 <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                 Refresh
               </Button>
-              <Button size="sm" variant="outline" onClick={handleExport} className="border-slate-600 text-slate-300 hover:bg-slate-700">
+              <Button size="sm" variant="outline" onClick={() => handleExport('json')} className="border-slate-600 text-slate-300 hover:bg-slate-700">
                 <Download className="h-4 w-4 mr-2" />
-                Export Data
+                Export JSON
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => handleExport('csv')} className="border-slate-600 text-slate-300 hover:bg-slate-700">
+                <Download className="h-4 w-4 mr-2" />
+                Export CSV
               </Button>
             </div>
           </div>
@@ -605,14 +754,16 @@ export function AnalyticsDashboard() {
         </Card>
       </div>
 
-      {/* Charts */}
+      {/* Enhanced Charts */}
       <Tabs defaultValue="site_types" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 bg-slate-800 border-slate-700">
+        <TabsList className="grid w-full grid-cols-7 bg-slate-800 border-slate-700">
           <TabsTrigger value="site_types" className="data-[state=active]:bg-emerald-600">Site Types</TabsTrigger>
           <TabsTrigger value="model_performance" className="data-[state=active]:bg-emerald-600">AI Models</TabsTrigger>
           <TabsTrigger value="data_sources" className="data-[state=active]:bg-emerald-600">Data Sources</TabsTrigger>
           <TabsTrigger value="geographic" className="data-[state=active]:bg-emerald-600">Geographic</TabsTrigger>
           <TabsTrigger value="system_health" className="data-[state=active]:bg-emerald-600">System Health</TabsTrigger>
+          <TabsTrigger value="regional_analysis" className="data-[state=active]:bg-emerald-600">Regional</TabsTrigger>
+          <TabsTrigger value="satellite_monitoring" className="data-[state=active]:bg-emerald-600">Satellite</TabsTrigger>
         </TabsList>
 
         <TabsContent value="site_types" className="space-y-4">
@@ -830,6 +981,224 @@ export function AnalyticsDashboard() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="regional_analysis" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-white">
+                  <MapPin className="h-5 w-5 text-emerald-400" />
+                  <span>Regional Distribution</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={filteredData?.regions?.map(region => ({
+                    name: region.name.replace(' ', '\n'),
+                    sites: region.site_count,
+                    discoveries: region.recent_discoveries,
+                    priority: region.priority_level === 'very_high' ? 4 : 
+                             region.priority_level === 'high' ? 3 : 
+                             region.priority_level === 'medium' ? 2 : 1
+                  })) || []}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                    <XAxis dataKey="name" stroke="#9CA3AF" />
+                    <YAxis stroke="#9CA3AF" />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
+                      labelStyle={{ color: '#F3F4F6' }}
+                    />
+                    <Legend />
+                    <Bar dataKey="sites" fill="#10B981" name="Total Sites" />
+                    <Bar dataKey="discoveries" fill="#3B82F6" name="Recent Discoveries" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-white">
+                  <Users className="h-5 w-5 text-emerald-400" />
+                  <span>Cultural Groups by Region</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4 max-h-80 overflow-y-auto">
+                  {filteredData?.regions?.map((region, index) => (
+                    <div key={region.id} className="border-b border-slate-700 pb-3">
+                      <div className="flex justify-between items-center mb-2">
+                        <h4 className="text-white font-medium">{region.name}</h4>
+                        <Badge 
+                          variant="outline" 
+                          className={`${
+                            region.priority_level === 'very_high' ? 'border-red-500 text-red-400' :
+                            region.priority_level === 'high' ? 'border-orange-500 text-orange-400' :
+                            'border-yellow-500 text-yellow-400'
+                          }`}
+                        >
+                          {region.priority_level.replace('_', ' ')}
+                        </Badge>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {region.cultural_groups.map((group, idx) => (
+                          <Badge key={idx} variant="secondary" className="text-xs bg-slate-700 text-slate-300">
+                            {group}
+                          </Badge>
+                        ))}
+                      </div>
+                      <p className="text-xs text-slate-400 mt-2">{region.description}</p>
+                    </div>
+                  )) || []}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="satellite_monitoring" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-white">
+                  <Activity className="h-5 w-5 text-emerald-400" />
+                  <span>Satellite System Status</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">System Status</span>
+                    <Badge 
+                      variant={filteredData?.satelliteStatus?.system_status === 'operational' ? 'default' : 'destructive'}
+                      className={filteredData?.satelliteStatus?.system_status === 'operational' ? 'bg-emerald-600' : 'bg-red-600'}
+                    >
+                      {filteredData?.satelliteStatus?.system_status || 'Unknown'}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">Active Satellites</span>
+                    <span className="text-white font-semibold">{filteredData?.satelliteStatus?.active_satellites || 0}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">Data Quality</span>
+                    <span className="text-emerald-400 font-semibold">{filteredData?.satelliteStatus?.data_quality || 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">Coverage</span>
+                    <span className="text-blue-400 font-semibold">{filteredData?.satelliteStatus?.coverage_percentage || 0}%</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-white">
+                  <AlertCircle className="h-5 w-5 text-yellow-400" />
+                  <span>Active Alerts</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {filteredData?.satelliteAlerts?.slice(0, 5).map((alert, index) => (
+                    <div key={alert.id} className="border border-slate-700 rounded-lg p-3">
+                      <div className="flex justify-between items-start mb-2">
+                        <Badge 
+                          variant="outline"
+                          className={`${
+                            alert.severity === 'high' ? 'border-red-500 text-red-400' :
+                            alert.severity === 'medium' ? 'border-yellow-500 text-yellow-400' :
+                            'border-blue-500 text-blue-400'
+                          }`}
+                        >
+                          {alert.severity}
+                        </Badge>
+                        <span className="text-xs text-slate-400">{alert.type}</span>
+                      </div>
+                      <p className="text-sm text-white mb-1">{alert.description}</p>
+                      <p className="text-xs text-slate-400">{alert.location}</p>
+                    </div>
+                  )) || []}
+                  {(!filteredData?.satelliteAlerts || filteredData.satelliteAlerts.length === 0) && (
+                    <p className="text-slate-400 text-center py-4">No active alerts</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-white">
+                  <Database className="h-5 w-5 text-emerald-400" />
+                  <span>Data Source Performance</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={filteredData?.dataSources?.map(source => ({
+                    name: source.name.split(' ')[0],
+                    accuracy: source.accuracy_rate,
+                    status: source.status === 'active' ? 100 : 0
+                  })) || []}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                    <XAxis dataKey="name" stroke="#9CA3AF" />
+                    <YAxis stroke="#9CA3AF" />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
+                      labelStyle={{ color: '#F3F4F6' }}
+                    />
+                    <Bar dataKey="accuracy" fill="#10B981" name="Accuracy %" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="bg-slate-800 border-slate-700">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2 text-white">
+                <Layers className="h-5 w-5 text-emerald-400" />
+                <span>Data Source Details</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-700">
+                      <th className="text-left py-2 text-slate-300">Data Source</th>
+                      <th className="text-left py-2 text-slate-300">Status</th>
+                      <th className="text-left py-2 text-slate-300">Accuracy</th>
+                      <th className="text-left py-2 text-slate-300">Processing Time</th>
+                      <th className="text-left py-2 text-slate-300">Coverage</th>
+                      <th className="text-left py-2 text-slate-300">Update Frequency</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredData?.dataSources?.map((source, index) => (
+                      <tr key={source.id} className="border-b border-slate-700/50">
+                        <td className="py-3 text-white font-medium">{source.name}</td>
+                        <td className="py-3">
+                          <Badge 
+                            variant={source.status === 'active' ? 'default' : 'destructive'}
+                            className={source.status === 'active' ? 'bg-emerald-600' : 'bg-red-600'}
+                          >
+                            {source.status}
+                          </Badge>
+                        </td>
+                        <td className="py-3 text-emerald-400">{source.accuracy_rate}%</td>
+                        <td className="py-3 text-slate-300">{source.processing_time}</td>
+                        <td className="py-3 text-slate-300">{source.coverage}</td>
+                        <td className="py-3 text-slate-300">{source.update_frequency}</td>
+                      </tr>
+                    )) || []}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
