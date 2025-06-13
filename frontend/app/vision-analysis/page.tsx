@@ -1,21 +1,70 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect, useCallback } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Search, Globe, Satellite, Database, Eye, Layers, Zap } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { 
+  MapPin, Search, Globe, Satellite, Database, Eye, Layers, Zap, 
+  Brain, Activity, Settings, Download, Upload, RefreshCw, 
+  Filter, BarChart3, Target, Clock, Wifi, WifiOff, 
+  CheckCircle, AlertTriangle, Star, History, Camera,
+  Play, Pause, RotateCcw, Maximize2, Save, Share2
+} from 'lucide-react';
 import PigeonMapViewer from "@/components/PigeonMapViewer";
 
-export default function VisionAnalysisPage() {
-  const [latitude, setLatitude] = useState('');
-  const [longitude, setLongitude] = useState('');
+export default function EnhancedVisionAnalysisPage() {
+  // Core analysis states
+  const [latitude, setLatitude] = useState('5.1542');
+  const [longitude, setLongitude] = useState('-73.7792');
   const [analysisData, setAnalysisData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
+  const [analysisStage, setAnalysisStage] = useState('');
+  
+  // UI and display states
   const [showMap, setShowMap] = useState(true);
-  const [analysisHistory, setAnalysisHistory] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState('analyze');
+  const [isBackendOnline, setIsBackendOnline] = useState(false);
   const [selectedAnalysis, setSelectedAnalysis] = useState<any>(null);
+  
+  // Enhanced analysis states
+  const [analysisHistory, setAnalysisHistory] = useState<any[]>([]);
+  const [savedAnalyses, setSavedAnalyses] = useState<any[]>([]);
+  const [analysisSettings, setAnalysisSettings] = useState({
+    confidence_threshold: 65,
+    enable_thermal: false,
+    enable_multispectral: true,
+    enable_lidar_fusion: true,
+    analysis_depth: 'standard' as 'fast' | 'standard' | 'comprehensive',
+    models_enabled: ['gpt4_vision', 'yolo8', 'waldo', 'archaeological_net']
+  });
+  
+  // Performance and metrics
+  const [performanceMetrics, setPerformanceMetrics] = useState({
+    totalAnalyses: 0,
+    avgProcessingTime: 0,
+    successRate: 0,
+    highConfidenceFindings: 0
+  });
+  
+  // Filter and search states
+  const [filterSettings, setFilterSettings] = useState({
+    confidence_min: 50,
+    date_range: 'all',
+    analysis_type: 'all',
+    status: 'all'
+  });
 
   // Load analysis history from localStorage
   useEffect(() => {
@@ -87,10 +136,12 @@ export default function VisionAnalysisPage() {
       
       // Fallback mock data for demo
       const processingTime = (Date.now() - startTime) / 1000;
-      const mockResponse = generateEnhancedMockAnalysis(parseFloat(latitude), parseFloat(longitude), processingTime);
-      mockResponse.error = "Using demo data - backend unavailable";
-      mockResponse.analysis_id = `demo_${Date.now()}`;
-      mockResponse.timestamp = new Date().toISOString();
+      const mockResponse = {
+        ...generateEnhancedMockAnalysis(parseFloat(latitude), parseFloat(longitude), processingTime),
+        error: "Using demo data - backend unavailable",
+        analysis_id: `demo_${Date.now()}`,
+        timestamp: new Date().toISOString()
+      };
       
       setAnalysisData(mockResponse);
       saveAnalysisToHistory(mockResponse);
@@ -162,39 +213,58 @@ export default function VisionAnalysisPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* Header */}
-      <div className="border-b bg-white/80 backdrop-blur-sm">
-        <div className="container mx-auto p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Eye className="h-6 w-6 text-blue-600" />
+    <TooltipProvider>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        {/* Enhanced Header */}
+        <div className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+          <div className="container mx-auto p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
+                  <Eye className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                    Enhanced Vision Agent Analysis
+                  </h1>
+                  <p className="text-sm text-muted-foreground">
+                    Advanced AI-powered satellite imagery analysis with multi-model detection
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Vision Agent Archaeological Analysis</h1>
-                <p className="text-sm text-muted-foreground">
-                  AI-powered satellite and LiDAR analysis for archaeological site discovery
-                </p>
+              
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  {isBackendOnline ? (
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                      <Wifi className="h-3 w-3 mr-1" />
+                      Online
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                      <WifiOff className="h-3 w-3 mr-1" />
+                      Demo Mode
+                    </Badge>
+                  )}
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                    <Database className="h-3 w-3 mr-1" />
+                    {analysisHistory.length} Analyses
+                  </Badge>
+                </div>
+                
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowMap(!showMap)}
+                  className="flex items-center gap-2"
+                >
+                  <Globe className="w-4 h-4" />
+                  {showMap ? 'Hide Map' : 'Show Map'}
+                </Button>
               </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <Badge variant="outline" className="flex items-center gap-1">
-                <Database className="h-3 w-3" />
-                {analysisHistory.length} analyses
-              </Badge>
-              <Button 
-                variant="outline" 
-                onClick={() => setShowMap(!showMap)}
-                className="flex items-center gap-2"
-              >
-                <Globe className="w-4 h-4" />
-                {showMap ? 'Hide Map' : 'Show Map'}
-              </Button>
             </div>
           </div>
         </div>
-      </div>
 
       <div className="container mx-auto p-4">
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
@@ -410,5 +480,6 @@ export default function VisionAnalysisPage() {
         </div>
       </div>
     </div>
+    </TooltipProvider>
   );
 } 
