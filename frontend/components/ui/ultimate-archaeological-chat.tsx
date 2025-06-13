@@ -65,11 +65,22 @@ interface Message {
   processing?: boolean;
 }
 
-interface Props {
-  onCoordinateSelect?: (coordinates: { lat: number; lng: number }) => void;
+interface SelectedArea {
+  id: string;
+  type: 'rectangle' | 'circle' | 'polygon';
+  bounds: any;
+  sites: any[];
+  timestamp: Date;
 }
 
-export default function UltimateArchaeologicalChat({ onCoordinateSelect }: Props) {
+interface Props {
+  onCoordinateSelect?: (coordinates: { lat: number; lng: number }) => void;
+  selectedAreas?: SelectedArea[];
+  mapSites?: any[];
+  onAreaAnalysis?: (analysis: any) => void;
+}
+
+export default function UltimateArchaeologicalChat({ onCoordinateSelect, selectedAreas = [], mapSites = [], onAreaAnalysis }: Props) {
   // State management
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -162,6 +173,21 @@ export default function UltimateArchaeologicalChat({ onCoordinateSelect }: Props
               include_analysis: true
             })
           });
+        } else if (selectedAreas.length > 0 && (inputValue.toLowerCase().includes('area') || inputValue.toLowerCase().includes('analyze'))) {
+          // Area analysis request
+          response = await fetch('http://localhost:8000/analyze/area', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              query: inputValue,
+              areas: selectedAreas.map(area => ({
+                type: area.type,
+                sites: area.sites,
+                siteCount: area.sites.length
+              })),
+              totalSites: mapSites.length
+            })
+          });
         } else {
           // General archaeological analysis
           response = await fetch('http://localhost:8000/analyze', {
@@ -202,14 +228,36 @@ export default function UltimateArchaeologicalChat({ onCoordinateSelect }: Props
         }
       } else {
         // Fallback to enhanced local responses
-        const enhancedResponse = await generateRealTimeResponse(inputValue);
+        let enhancedResponse = '';
+        let agent = 'NIS Protocol (Offline)';
+        let confidence = 0.75;
+
+        // Check if asking about selected areas
+        if (selectedAreas.length > 0 && (inputValue.toLowerCase().includes('area') || inputValue.toLowerCase().includes('analyze'))) {
+          enhancedResponse = generateLocalAreaAnalysis(selectedAreas, mapSites);
+          agent = 'Archaeological Spatial Analyst (Offline)';
+          confidence = 0.85;
+          
+          // Trigger callback if provided
+          if (onAreaAnalysis) {
+            onAreaAnalysis({
+              areas: selectedAreas,
+              analysisType: 'spatial',
+              confidence: confidence,
+              recommendations: generateAreaRecommendations(selectedAreas)
+            });
+          }
+        } else {
+          enhancedResponse = await generateRealTimeResponse(inputValue);
+        }
+
         const assistantMessage: Message = {
           id: `assistant_${Date.now()}`,
           content: enhancedResponse,
           role: 'assistant',
           timestamp: new Date(),
-          confidence: 0.75,
-          agent: 'NIS Protocol (Offline)'
+          confidence: confidence,
+          agent: agent
         };
 
         // Remove processing message and add fallback response
@@ -510,4 +558,61 @@ function parseCoordinates(coordString: string): { lat: number; lng: number } | n
     return { lat: parts[0], lng: parts[1] };
   }
   return null;
+}
+
+// Enhanced area analysis functions
+function generateLocalAreaAnalysis(selectedAreas: SelectedArea[], mapSites: any[]): string {
+  let analysis = `# 🗺️ Archaeological Area Analysis\n\n`;
+  
+  analysis += `**Analysis Overview:**\n`;
+  analysis += `- **Total Selected Areas:** ${selectedAreas.length}\n`;
+  analysis += `- **Total Sites Analyzed:** ${selectedAreas.reduce((sum, area) => sum + area.sites.length, 0)}\n`;
+  analysis += `- **Database Sites Available:** ${mapSites.length}\n\n`;
+
+  selectedAreas.forEach((area, index) => {
+    analysis += `## Area ${index + 1}: ${area.type.toUpperCase()} Selection\n\n`;
+    
+    // Site distribution
+    const siteTypes = area.sites.reduce((acc: any, site: any) => {
+      acc[site.type] = (acc[site.type] || 0) + 1;
+      return acc;
+    }, {});
+    
+    analysis += `**Site Distribution:**\n`;
+    Object.entries(siteTypes).forEach(([type, count]) => {
+      analysis += `- ${type}: ${count} sites\n`;
+    });
+    
+    // Confidence analysis
+    const avgConfidence = area.sites.reduce((sum: number, site: any) => sum + site.confidence, 0) / area.sites.length;
+    analysis += `\n**Quality Assessment:**\n`;
+    analysis += `- Average Confidence: ${(avgConfidence * 100).toFixed(1)}%\n`;
+    analysis += `- High Confidence Sites (>85%): ${area.sites.filter((s: any) => s.confidence > 0.85).length}\n`;
+    
+    // Temporal analysis
+    const periods = [...new Set(area.sites.map((s: any) => s.period))];
+    analysis += `\n**Temporal Range:**\n`;
+    analysis += `- Periods Represented: ${periods.join(', ')}\n`;
+    analysis += `- Chronological Span: ${periods.length > 1 ? 'Multi-period occupation' : 'Single-period focus'}\n`;
+    
+    analysis += `\n---\n\n`;
+  });
+
+  analysis += `## 🎯 Research Recommendations\n\n`;
+  const totalSites = selectedAreas.reduce((sum, area) => sum + area.sites.length, 0);
+  analysis += `**Immediate Actions:**\n`;
+  analysis += `1. Field validation of ${totalSites} identified sites\n`;
+  analysis += `2. Spatial cluster analysis\n`;
+  analysis += `3. Cultural pattern synthesis\n`;
+  
+  return analysis;
+}
+
+function generateAreaRecommendations(selectedAreas: SelectedArea[]): any[] {
+  return selectedAreas.map((area, index) => ({
+    areaId: area.id,
+    priority: 'HIGH',
+    type: 'analysis',
+    description: `Analyze ${area.sites.length} sites in ${area.type} area`
+  }));
 } 

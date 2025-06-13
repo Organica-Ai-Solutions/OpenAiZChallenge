@@ -129,6 +129,23 @@ export default function ArchaeologicalMapPage() {
     description: string
   }>>([])
 
+  // Map-Chat Integration state
+  const [selectedAreas, setSelectedAreas] = useState<Array<{
+    id: string
+    type: 'rectangle' | 'circle' | 'polygon'
+    bounds: any
+    sites: ArchaeologicalSite[]
+    timestamp: Date
+  }>>([])
+  const [mapDrawingMode, setMapDrawingMode] = useState<'selection' | 'analysis' | null>(null)
+  const [analysisResults, setAnalysisResults] = useState<Array<{
+    id: string
+    area: any
+    results: any
+    timestamp: Date
+  }>>([])
+  const [drawingManager, setDrawingManager] = useState<any>(null)
+
   // Check NIS Protocol backend status
   const checkBackend = useCallback(async () => {
     try {
@@ -306,6 +323,70 @@ export default function ArchaeologicalMapPage() {
 
       googleMapRef.current = new window.google.maps.Map(mapRef.current, mapOptions)
       console.log('✅ Google Maps initialized successfully')
+
+      // Initialize drawing manager for area selection
+      const newDrawingManager = new window.google.maps.drawing.DrawingManager({
+        drawingMode: null,
+        drawingControl: false,
+        rectangleOptions: {
+          fillColor: '#FF6B35',
+          fillOpacity: 0.2,
+          strokeWeight: 2,
+          strokeColor: '#FF6B35',
+          clickable: true,
+          editable: true,
+          draggable: true
+        },
+        circleOptions: {
+          fillColor: '#4ECDC4',
+          fillOpacity: 0.2,
+          strokeWeight: 2,
+          strokeColor: '#4ECDC4',
+          clickable: true,
+          editable: true,
+          draggable: true
+        },
+        polygonOptions: {
+          fillColor: '#45B7D1',
+          fillOpacity: 0.2,
+          strokeWeight: 2,
+          strokeColor: '#45B7D1',
+          clickable: true,
+          editable: true,
+          draggable: true
+        }
+      })
+
+      newDrawingManager.setMap(googleMapRef.current)
+      setDrawingManager(newDrawingManager)
+
+      // Handle area selection completion
+      newDrawingManager.addListener('overlaycomplete', (event: any) => {
+        const shape = event.overlay
+        const type = event.type
+        const bounds = getShapeBounds(shape, type)
+        const sitesInArea = findSitesInArea(bounds, type)
+        
+        const areaId = `area_${Date.now()}`
+        const newArea = {
+          id: areaId,
+          type: type as 'rectangle' | 'circle' | 'polygon',
+          bounds: bounds,
+          sites: sitesInArea,
+          timestamp: new Date()
+        }
+
+        setSelectedAreas(prev => [...prev, newArea])
+        
+        // Auto-send to chat for analysis
+        if (sitesInArea.length > 0) {
+          sendAreaToChat(newArea)
+        }
+
+        // Reset drawing mode
+        setMapDrawingMode(null)
+        newDrawingManager.setDrawingMode(null)
+      })
       
       // Plot all discoveries as markers
       plotAllDiscoveries()
@@ -715,6 +796,157 @@ export default function ArchaeologicalMapPage() {
     setSiteCorrelations(correlations)
     console.log('✅ Generated', correlations.length, 'site correlations')
   }, [sites])
+
+  // Helper functions for area analysis
+  const getShapeBounds = useCallback((shape: any, type: string) => {
+    switch (type) {
+      case 'rectangle':
+        return shape.getBounds()
+      case 'circle':
+        return {
+          center: shape.getCenter(),
+          radius: shape.getRadius()
+        }
+      case 'polygon':
+        return {
+          path: shape.getPath().getArray().map((latLng: any) => ({
+            lat: latLng.lat(),
+            lng: latLng.lng()
+          }))
+        }
+      default:
+        return null
+    }
+  }, [])
+
+  const findSitesInArea = useCallback((bounds: any, type: string) => {
+    return sites.filter(site => {
+      const [lat, lng] = site.coordinates.split(',').map(c => parseFloat(c.trim()))
+      const position = { lat, lng }
+
+      switch (type) {
+        case 'rectangle':
+          return bounds.contains(new window.google.maps.LatLng(lat, lng))
+        case 'circle':
+          const center = bounds.center
+          const distance = window.google.maps.geometry.spherical.computeDistanceBetween(
+            new window.google.maps.LatLng(lat, lng),
+            center
+          )
+          return distance <= bounds.radius
+        case 'polygon':
+          return window.google.maps.geometry.poly.containsLocation(
+            new window.google.maps.LatLng(lat, lng),
+            new window.google.maps.Polygon({ paths: bounds.path })
+          )
+        default:
+          return false
+      }
+    })
+  }, [sites])
+
+  // Send selected area to chat for analysis
+  const sendAreaToChat = useCallback(async (area: any) => {
+    if (!area.sites || area.sites.length === 0) return
+
+    const analysisPrompt = `🗺️ **Area Analysis Request**
+
+**Selected Area:** ${area.type} selection containing ${area.sites.length} archaeological sites
+
+**Sites in Area:**
+${area.sites.map((site: ArchaeologicalSite) => 
+  `• ${site.name} (${site.type}, ${site.period}) - ${(site.confidence * 100).toFixed(1)}% confidence`
+).join('\n')}
+
+**Analysis Needed:**
+1. Cultural patterns and connections between sites
+2. Temporal relationships and chronological sequence
+3. Spatial distribution analysis
+4. Trade route possibilities
+5. Defensive/strategic positioning
+6. Environmental factors and site placement
+
+Please provide detailed archaeological analysis of this area including cultural significance, historical context, and research recommendations.`
+
+    // Add analysis message to chat (if chat is open)
+    if (activeTab === 'chat') {
+      // This would trigger the chat component - we'll enhance this
+      console.log('📤 Sending area analysis to chat:', analysisPrompt)
+    }
+
+    // Store analysis request
+    const analysisId = `analysis_${Date.now()}`
+    const newAnalysis = {
+      id: analysisId,
+      area: area,
+      results: null,
+      timestamp: new Date()
+    }
+    setAnalysisResults(prev => [...prev, newAnalysis])
+
+  }, [activeTab])
+
+  // Toggle drawing mode
+  const toggleDrawingMode = useCallback((mode: 'rectangle' | 'circle' | 'polygon' | null) => {
+    if (!drawingManager) return
+
+    if (mode === mapDrawingMode) {
+      // Turn off drawing
+      setMapDrawingMode(null)
+      drawingManager.setDrawingMode(null)
+    } else {
+      // Turn on drawing
+      setMapDrawingMode(mode)
+      drawingManager.setDrawingMode(
+        mode === 'rectangle' ? window.google.maps.drawing.OverlayType.RECTANGLE :
+        mode === 'circle' ? window.google.maps.drawing.OverlayType.CIRCLE :
+        mode === 'polygon' ? window.google.maps.drawing.OverlayType.POLYGON :
+        null
+      )
+    }
+  }, [drawingManager, mapDrawingMode])
+
+  // Enhanced chat integration
+  const enhancedChatPlanningSelect = useCallback((coordinates: string, metadata?: any) => {
+    console.log('🧠 Enhanced NIS Protocol planning integration:', coordinates, metadata)
+    
+    if (metadata?.planning_action === 'analyze_area') {
+      // Create analysis area around coordinates
+      const [lat, lng] = coordinates.split(',').map(c => parseFloat(c.trim()))
+      // Auto-create circular analysis area
+      if (drawingManager && window.google) {
+        const circle = new window.google.maps.Circle({
+          center: { lat, lng },
+          radius: 5000, // 5km radius
+          fillColor: '#4ECDC4',
+          fillOpacity: 0.2,
+          strokeWeight: 2,
+          strokeColor: '#4ECDC4'
+        })
+        circle.setMap(googleMapRef.current)
+        
+        // Find sites in this area
+        const sitesInArea = findSitesInArea({ center: { lat, lng }, radius: 5000 }, 'circle')
+        sendAreaToChat({
+          id: `auto_${Date.now()}`,
+          type: 'circle',
+          bounds: { center: { lat, lng }, radius: 5000 },
+          sites: sitesInArea,
+          timestamp: new Date()
+        })
+      }
+    } else if (metadata?.planning_action === 'add_to_expedition') {
+      // Find site by coordinates and add to plan
+      const site = sites.find(s => s.coordinates === coordinates)
+      if (site) {
+        handleSiteSelection(site, true)
+      }
+    } else if (metadata?.planning_action === 'optimize_route') {
+      generateOptimalRoute()
+    } else if (metadata?.planning_action === 'cultural_analysis') {
+      generateSiteCorrelations()
+    }
+  }, [sites, handleSiteSelection, generateOptimalRoute, drawingManager, findSitesInArea, sendAreaToChat])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden pt-20">
@@ -1218,8 +1450,36 @@ export default function ArchaeologicalMapPage() {
                         </div>
                         
                         <div className="h-[500px]">
-                          <UltimateArchaeologicalChat onCoordinateSelect={handleChatPlanningSelect} />
+                          <UltimateArchaeologicalChat 
+                            onCoordinateSelect={enhancedChatPlanningSelect}
+                            selectedAreas={selectedAreas}
+                            mapSites={sites}
+                            onAreaAnalysis={(analysis) => {
+                              console.log('📊 Area analysis results:', analysis);
+                              // You can add more visualization logic here
+                            }}
+                          />
                         </div>
+
+                        {/* Selected Areas Summary */}
+                        {selectedAreas.length > 0 && (
+                          <div className="mt-4 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+                            <h5 className="font-medium text-emerald-300 mb-2">🗺️ Selected Areas for Analysis</h5>
+                            <div className="space-y-2">
+                              {selectedAreas.map((area, index) => (
+                                <div key={area.id} className="text-xs text-emerald-200 bg-emerald-900/30 rounded p-2">
+                                  <div className="flex items-center justify-between">
+                                    <span>#{index + 1} {area.type} - {area.sites.length} sites</span>
+                                    <span>{area.timestamp.toLocaleTimeString()}</span>
+                                  </div>
+                                  <div className="mt-1 text-emerald-300">
+                                    Sites: {area.sites.map(s => s.name).join(', ')}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                         
                         <div className="mt-4 p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
                           <h5 className="font-medium text-purple-300 mb-2">Enhanced Planning Commands</h5>
@@ -1260,6 +1520,53 @@ export default function ArchaeologicalMapPage() {
                 >
                   {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
                 </Button>
+
+                {/* Area Selection Tools */}
+                <div className="bg-white/[0.1] backdrop-blur-sm border border-white/[0.2] rounded-lg p-2">
+                  <div className="text-xs text-white/70 mb-2">Area Analysis</div>
+                  <div className="flex flex-col gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toggleDrawingMode('rectangle')}
+                      className={`h-8 px-2 ${mapDrawingMode === 'rectangle' ? 'bg-orange-500/30 border-orange-400' : 'bg-white/[0.1] border-white/[0.2]'} text-white hover:bg-white/[0.2] transition-all`}
+                    >
+                      📐 Rectangle
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toggleDrawingMode('circle')}
+                      className={`h-8 px-2 ${mapDrawingMode === 'circle' ? 'bg-teal-500/30 border-teal-400' : 'bg-white/[0.1] border-white/[0.2]'} text-white hover:bg-white/[0.2] transition-all`}
+                    >
+                      ⭕ Circle
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toggleDrawingMode('polygon')}
+                      className={`h-8 px-2 ${mapDrawingMode === 'polygon' ? 'bg-blue-500/30 border-blue-400' : 'bg-white/[0.1] border-white/[0.2]'} text-white hover:bg-white/[0.2] transition-all`}
+                    >
+                      🔸 Polygon
+                    </Button>
+                  </div>
+                  
+                  {selectedAreas.length > 0 && (
+                    <div className="mt-2 pt-2 border-t border-white/[0.1]">
+                      <div className="text-xs text-emerald-300">
+                        {selectedAreas.length} area{selectedAreas.length > 1 ? 's' : ''} selected
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedAreas([])}
+                        className="h-6 px-2 mt-1 bg-red-500/20 border-red-400/50 text-red-300 hover:bg-red-500/30 transition-all text-xs"
+                      >
+                        Clear All
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Map Status */}
