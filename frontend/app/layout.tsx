@@ -34,6 +34,8 @@ export default function RootLayout({
         {/* Preload critical resources */}
         <link rel="preload" href="/MainLogo.png" as="image" />
         <link rel="dns-prefetch" href="//localhost:8000" />
+        
+        {/* Google Maps will be loaded by GoogleMapsLoader component */}
       </head>
       <body className={inter.className} suppressHydrationWarning>
         <ClientProviders>

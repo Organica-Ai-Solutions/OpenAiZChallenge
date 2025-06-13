@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Eye, Camera, Satellite, Brain, Activity, MapPin, Target, Wifi, WifiOff, BarChart3, Sparkles, RefreshCw, Zap } from "lucide-react"
+import { Eye, Camera, Satellite, Brain, Activity, MapPin, Target, Wifi, WifiOff, BarChart3, Sparkles, RefreshCw, Zap, Clock, ArrowRight } from "lucide-react"
 
 export default function VisionAgentPage() {
   const [selectedCoordinates, setSelectedCoordinates] = useState("5.1542, -73.7792")
@@ -60,7 +60,7 @@ export default function VisionAgentPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 pt-20">
+    <div className="min-h-screen bg-slate-900 pt-20">
       <div className="container mx-auto px-6 py-8 space-y-8">
         
         <motion.div 
@@ -71,25 +71,25 @@ export default function VisionAgentPage() {
         >
           <div className="flex justify-center">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full blur-2xl opacity-20 animate-pulse"></div>
-              <div className="relative bg-gradient-to-r from-emerald-500 to-cyan-500 p-6 rounded-full">
+              <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl opacity-50"></div>
+              <div className="relative bg-emerald-600 p-6 rounded-full">
                 <Eye className="w-12 h-12 text-white" />
               </div>
             </div>
           </div>
           
           <div className="space-y-4">
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold text-white">
               🔍 Vision Agent
             </h1>
-            <p className="text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">
               Advanced AI-powered satellite imagery analysis for archaeological discovery. 
               Powered by GPT-4 Vision, YOLO8, and specialized archaeological detection models.
             </p>
           </div>
 
           <div className="flex justify-center">
-            <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+            <Card className="bg-slate-800/50 border-slate-700/50">
               <CardContent className="px-6 py-3">
                 <div className="flex items-center gap-6 text-sm">
                   <div className="flex items-center gap-2">
@@ -124,7 +124,7 @@ export default function VisionAgentPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.8 }}
         >
-          <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+          <Card className="bg-slate-800/50 border-slate-700/50">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <Target className="w-5 h-5 text-emerald-400" />
@@ -145,7 +145,7 @@ export default function VisionAgentPage() {
                   >
                     <Button
                       variant="outline"
-                      className="w-full justify-start bg-white/5 border-white/20 text-white hover:bg-white/10 transition-all h-auto p-3"
+                      className="w-full justify-start bg-slate-900/50 border-slate-600 text-white hover:bg-slate-700/50 transition-all h-auto p-3"
                       onClick={() => handleQuickSelect(site.coords)}
                     >
                       <div className="text-left">
@@ -167,12 +167,12 @@ export default function VisionAgentPage() {
                     value={selectedCoordinates}
                     onChange={(e) => setSelectedCoordinates(e.target.value)}
                     placeholder="e.g., 5.1542, -73.7792"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-slate-400"
+                    className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-400"
                   />
                 </div>
                 <Button 
                   onClick={() => setActiveMode("analyze")}
-                  className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white"
                 >
                   <MapPin className="w-4 h-4 mr-2" />
                   Analyze
@@ -188,19 +188,19 @@ export default function VisionAgentPage() {
           transition={{ delay: 0.6, duration: 0.8 }}
         >
           <Tabs value={activeMode} onValueChange={(value) => setActiveMode(value as any)} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 bg-white/10 backdrop-blur-sm">
-              <TabsTrigger value="analyze" className="data-[state=active]:bg-emerald-500 data-[state=active]:text-white">
+            <TabsList className="grid w-full grid-cols-2 bg-slate-800/50">
+              <TabsTrigger value="analyze" className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white">
                 <Camera className="w-4 h-4 mr-2" />
                 Vision Analysis
               </TabsTrigger>
-              <TabsTrigger value="results" className="data-[state=active]:bg-cyan-500 data-[state=active]:text-white">
+              <TabsTrigger value="results" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white">
                 <BarChart3 className="w-4 h-4 mr-2" />
                 Results
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="analyze" className="space-y-6">
-              <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+              <Card className="bg-slate-800/50 border-slate-700/50">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
                     <Eye className="w-6 h-6 text-emerald-400" />
@@ -231,7 +231,7 @@ export default function VisionAgentPage() {
 
             <TabsContent value="results" className="space-y-6">
               {visionResult ? (
-                <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+                <Card className="bg-slate-800/50 border-slate-700/50">
                   <CardHeader>
                     <CardTitle className="text-white flex items-center gap-2">
                       <Sparkles className="w-6 h-6 text-emerald-400" />
@@ -250,11 +250,11 @@ export default function VisionAgentPage() {
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            className="p-4 bg-gradient-to-r from-slate-800/50 to-slate-700/50 rounded-lg border border-slate-600/30"
+                            className="p-4 bg-slate-900/50 border border-slate-600/50 rounded-lg"
                           >
                             <div className="flex justify-between items-start mb-2">
-                              <span className="text-white font-medium">{detection.type}</span>
-                              <Badge variant="outline" className="text-xs">
+                              <h4 className="font-medium text-white">{detection.type}</h4>
+                              <Badge variant="secondary">
                                 {Math.round(detection.confidence * 100)}%
                               </Badge>
                             </div>
@@ -266,21 +266,12 @@ export default function VisionAgentPage() {
                   </CardContent>
                 </Card>
               ) : (
-                <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
-                  <CardContent className="pt-6">
-                    <div className="text-center py-12">
-                      <Eye className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold text-white mb-2">No Analysis Yet</h3>
-                      <p className="text-slate-400 mb-6">
-                        Run a vision analysis to see detailed results and detection data
-                      </p>
-                      <Button
-                        onClick={() => setActiveMode("analyze")}
-                        className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600"
-                      >
-                        <Camera className="w-4 h-4 mr-2" />
-                        Start Analysis
-                      </Button>
+                <Card className="bg-slate-800/50 border-slate-700/50">
+                  <CardContent className="p-8 text-center">
+                    <div className="text-slate-400 mb-4">
+                      <Eye className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                      <p>No analysis results yet</p>
+                      <p className="text-sm">Run an analysis to see results here</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -289,49 +280,54 @@ export default function VisionAgentPage() {
           </Tabs>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9, duration: 0.8 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6"
-        >
-          <Card className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 border-emerald-500/30">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <Brain className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-emerald-300 mb-2">AI Models</h3>
-                <p className="text-slate-300 text-sm">
-                  GPT-4 Vision, YOLO8, Archaeological Detection Networks
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border-cyan-500/30">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <Satellite className="w-12 h-12 text-cyan-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-cyan-300 mb-2">Satellite Data</h3>
-                <p className="text-slate-300 text-sm">
-                  High-resolution imagery with multispectral analysis
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/30">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <Zap className="w-12 h-12 text-purple-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-purple-300 mb-2">Real-time</h3>
-                <p className="text-slate-300 text-sm">
-                  Instant analysis with live backend processing
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
+        {/* Analysis History */}
+        {analysisHistory.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9, duration: 0.8 }}
+          >
+            <Card className="bg-slate-800/50 border-slate-700/50">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-emerald-400" />
+                  Recent Analysis History
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Your last {analysisHistory.length} vision analyses
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {analysisHistory.slice(0, 5).map((entry, index) => (
+                    <div
+                      key={entry.id}
+                      className="flex items-center justify-between p-3 bg-slate-900/50 border border-slate-600/30 rounded-lg hover:bg-slate-700/30 transition-colors cursor-pointer"
+                      onClick={() => {
+                        setSelectedCoordinates(entry.coordinates)
+                        setVisionResult(entry.results)
+                        setActiveMode("results")
+                      }}
+                    >
+                      <div>
+                        <p className="text-white font-medium">{entry.coordinates}</p>
+                        <p className="text-slate-400 text-sm">
+                          {new Date(entry.timestamp).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">
+                          {entry.results?.detection_results?.length || 0} features
+                        </Badge>
+                        <ArrowRight className="w-4 h-4 text-slate-400" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
       </div>
     </div>
   )

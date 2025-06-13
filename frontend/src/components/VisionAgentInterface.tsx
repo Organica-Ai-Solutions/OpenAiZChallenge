@@ -101,7 +101,7 @@ export default function VisionAgentInterface({
       formData.append('image', selectedFile)
       formData.append('analysis_type', 'archaeological')
 
-      const response = await fetch('/api/vision/analyze', {
+      const response = await fetch('http://localhost:8000/api/vision/analyze', {
         method: 'POST',
         body: formData
       })
