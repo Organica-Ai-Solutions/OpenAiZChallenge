@@ -158,6 +158,14 @@ export function VisionAgentVisualization({
     measurement_mode: false
   })
   
+  const [enhancedFeatures, setEnhancedFeatures] = useState({
+    auto_enhancement: true,
+    pattern_detection: true,
+    cultural_analysis: true,
+    temporal_comparison: false,
+    batch_processing: false
+  })
+  
   const [realTimeMode, setRealTimeMode] = useState(false)
   const [customImageFile, setCustomImageFile] = useState<File | null>(null)
   const [analysisHistory, setAnalysisHistory] = useState<any[]>([])
