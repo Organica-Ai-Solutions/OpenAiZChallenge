@@ -36,18 +36,19 @@ export default function GoogleMapsLoader() {
       return;
     }
 
-    // Load Google Maps script
+    // Create global callback function for Google Maps
+    (window as any).initGoogleMapsCallback = () => {
+      console.log('✅ Google Maps API loaded globally');
+      window.dispatchEvent(new CustomEvent('google-maps-loaded'));
+    };
+
+    // Load Google Maps script with proper async loading pattern
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry,drawing`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry,drawing&loading=async&callback=initGoogleMapsCallback`;
     script.async = true;
     script.defer = true;
     
     console.log('🗺️ Loading Google Maps with URL:', script.src);
-
-    script.onload = () => {
-      console.log('✅ Google Maps API loaded globally');
-      window.dispatchEvent(new CustomEvent('google-maps-loaded'));
-    };
 
     script.onerror = (error) => {
       console.error('❌ Google Maps API failed to load globally:', error);
@@ -65,6 +66,6 @@ export default function GoogleMapsLoader() {
 // Global type declaration
 declare global {
   interface Window {
-    google?: any;
+    initGoogleMapsCallback?: () => void;
   }
 } 

@@ -16,6 +16,11 @@ export const metadata: Metadata = {
   title: "NIS Protocol - Indigenous Knowledge Research Platform",
   description: "Advanced AI-powered archaeological site discovery and satellite monitoring system",
   keywords: "archaeological discovery, AI, satellite monitoring, indigenous knowledge",
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
 }
 
 export const viewport = {
@@ -34,6 +39,10 @@ export default function RootLayout({
         {/* Preload critical resources */}
         <link rel="preload" href="/MainLogo.png" as="image" />
         <link rel="dns-prefetch" href="//localhost:8000" />
+        
+        {/* Favicon */}
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
         
         {/* Google Maps will be loaded by GoogleMapsLoader component */}
       </head>
