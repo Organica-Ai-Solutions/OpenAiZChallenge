@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Maps API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        #map { height: 400px; width: 100%; margin: 20px 0; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <h1>🗺️ Google Maps API Test</h1>
+    
+    <div id="status" class="status info">
+        Testing API key: AIzaSyCCMYQ_eQdaKPV30JGFEv_556O8N-ZzV9E
+    </div>
+    
+    <div id="map"></div>
+    
+    <div id="details">
+        <h3>📊 Test Details:</h3>
+        <ul>
+            <li><strong>API Key:</strong> AIzaSyCCMYQ_eQdaKPV30JGFEv_556O8N-ZzV9E</li>
+            <li><strong>Required APIs:</strong> Maps JavaScript API</li>
+            <li><strong>Test Location:</strong> Amazon Basin (-3.4653, -62.2159)</li>
+        </ul>
+    </div>
+    
+    <script>
+        function initMap() {
+            document.getElementById('status').innerHTML = '✅ Google Maps API loaded successfully!';
+            document.getElementById('status').className = 'status success';
+            
+            const map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: -3.4653, lng: -62.2159 },
+                zoom: 6,
+                mapTypeId: 'satellite'
+            });
+            
+            // Add a test marker
+            new google.maps.Marker({
+                position: { lat: -3.4653, lng: -62.2159 },
+                map: map,
+                title: 'Test Archaeological Site'
+            });
+            
+            console.log('✅ Google Maps initialized successfully');
+        }
+        
+        function gm_authFailure() {
+            document.getElementById('status').innerHTML = '❌ Google Maps authentication failed. Check API key configuration.';
+            document.getElementById('status').className = 'status error';
+            console.error('❌ Google Maps authentication failed');
+        }
+        
+        window.gm_authFailure = gm_authFailure;
+        
+        // Handle script load errors
+        window.addEventListener('error', function(e) {
+            if (e.filename && e.filename.includes('maps.googleapis.com')) {
+                document.getElementById('status').innerHTML = '❌ Failed to load Google Maps script. Check network and API key.';
+                document.getElementById('status').className = 'status error';
+                console.error('❌ Google Maps script load error:', e);
+            }
+        });
+    </script>
+    
+    <script async defer 
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCCMYQ_eQdaKPV30JGFEv_556O8N-ZzV9E&callback=initMap&libraries=places">
+    </script>
+</body>
+</html> 

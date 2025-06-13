@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 
 // Import enhanced map component
 import PigeonMapViewer from '../../components/PigeonMapViewer';
+import EnvTest from '../../../components/EnvTest';
 
 // Import interfaces
 import type { SiteData } from '../../types/site-data';

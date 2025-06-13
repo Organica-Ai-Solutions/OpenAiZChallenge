@@ -7,7 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "clean": "rm -rf .next node_modules/.cache"
+    "clean": "rm -rf .next node_modules/.cache",
+    "dev:mac": "cd .. && ./start_frontend.sh",
+    "dev:windows": "cd .. && start_frontend.bat",
+    "dev:cross-platform": "npm run dev:windows",
+    "test:backend": "node ../test_backend.js",
+    "setup:env": "node ../setup_cross_platform.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

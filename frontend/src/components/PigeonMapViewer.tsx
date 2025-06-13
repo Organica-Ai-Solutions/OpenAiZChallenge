@@ -19,7 +19,7 @@ interface PigeonMapViewerProps {
 }
 
 // Google Maps configuration
-const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || ""
+const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || ""
 
 // Fallback Interactive Map Component
 function FallbackArchaeologicalMap({ 

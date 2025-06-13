@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Maps API Key Test</title>
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+        .log {
+            margin: 20px 0;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Google Maps API Key Test</h1>
+    <div id="log" class="log">Testing API key: AIzaSyCCMYQ_eQdaKPV30JGFEv_556O8N-ZzV9E</div>
+    <div id="map"></div>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            logDiv.textContent += '\n' + new Date().toLocaleTimeString() + ': ' + message;
+            console.log(message);
+        }
+
+        function initMap() {
+            log('✅ Google Maps API loaded successfully!');
+            log('Creating map...');
+            
+            try {
+                const map = new google.maps.Map(document.getElementById('map'), {
+                    center: { lat: -34.397, lng: 150.644 },
+                    zoom: 8,
+                });
+                
+                log('✅ Map created successfully!');
+                log('API key is working correctly.');
+                
+                // Add a marker to test further functionality
+                const marker = new google.maps.Marker({
+                    position: { lat: -34.397, lng: 150.644 },
+                    map: map,
+                    title: 'Test Marker'
+                });
+                
+                log('✅ Marker added successfully!');
+                
+            } catch (error) {
+                log('❌ Error creating map: ' + error.message);
+            }
+        }
+
+        function onApiError(error) {
+            log('❌ Google Maps API failed to load');
+            log('Error details: ' + error);
+        }
+
+        // Add error handling for script load failure
+        window.addEventListener('error', function(e) {
+            if (e.target.src && e.target.src.includes('maps.googleapis.com')) {
+                log('❌ Google Maps script failed to load: ' + e.message);
+            }
+        });
+
+        log('Loading Google Maps API...');
+    </script>
+
+    <!-- Load Google Maps API with your key -->
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCCMYQ_eQdaKPV30JGFEv_556O8N-ZzV9E&callback=initMap&libraries=places"
+        onerror="onApiError('Script load failed')">
+    </script>
+</body>
+</html> 

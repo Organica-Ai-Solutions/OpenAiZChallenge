@@ -37,7 +37,7 @@ import { Slider } from "../../components/ui/slider"
 import { Label } from "../../components/ui/label"
 import { Input } from "../../components/ui/input"
 import UltimateArchaeologicalChat from "../../components/ui/ultimate-archaeological-chat"
-import Script from "next/script"
+import GoogleMapsLoader from "../../components/GoogleMapsLoader"
 
 // Google Maps marker types
 declare global {
@@ -68,14 +68,6 @@ export default function ArchaeologicalMapPage() {
   const [selectedSite, setSelectedSite] = useState<ArchaeologicalSite | null>(null)
   const [mapCenter, setMapCenter] = useState<[number, number]>([-3.4653, -62.2159])
   const [mapZoom, setMapZoom] = useState(6)
-  const [filteredSites, setFilteredSites] = useState<ArchaeologicalSite[]>([])
-  const [mapStats, setMapStats] = useState({
-    totalSites: 0,
-    highConfidenceSites: 0,
-    averageConfidence: 0,
-    culturalDiversity: 0,
-    recentDiscoveries: 0
-  })
   
   // UI state
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -90,9 +82,6 @@ export default function ArchaeologicalMapPage() {
   const [confidenceFilter, setConfidenceFilter] = useState(70)
   const [typeFilter, setTypeFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
-  const [periodFilter, setPeriodFilter] = useState('all')
-  const [showHeatmap, setShowHeatmap] = useState(false)
-  const [showClusters, setShowClusters] = useState(true)
 
   // Refs
   const mapRef = useRef<HTMLDivElement>(null)
@@ -140,40 +129,13 @@ export default function ArchaeologicalMapPage() {
     description: string
   }>>([])
 
-  // Calculate map statistics
-  const calculateMapStats = useCallback((siteData: ArchaeologicalSite[]) => {
-    const totalSites = siteData.length
-    const highConfidenceSites = siteData.filter(site => site.confidence >= 0.85).length
-    const averageConfidence = siteData.length > 0 
-      ? siteData.reduce((sum, site) => sum + site.confidence, 0) / siteData.length 
-      : 0
-    
-    // Count unique periods for cultural diversity
-    const uniquePeriods = new Set(siteData.map(site => site.period)).size
-    
-    // Count recent discoveries (last 30 days)
-    const thirtyDaysAgo = new Date()
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-    const recentDiscoveries = siteData.filter(site => 
-      new Date(site.discovery_date) > thirtyDaysAgo
-    ).length
-
-    setMapStats({
-      totalSites,
-      highConfidenceSites,
-      averageConfidence,
-      culturalDiversity: uniquePeriods,
-      recentDiscoveries
-    })
-  }, [])
-
   // Check NIS Protocol backend status
   const checkBackend = useCallback(async () => {
     try {
       const response = await fetch('http://localhost:8000/system/health')
       setBackendOnline(response.ok)
       if (response.ok) {
-        console.log('✅ NIS Protocol backend online on port 8002')
+        console.log('✅ NIS Protocol backend online on port 8000')
       }
     } catch {
       setBackendOnline(false)
@@ -322,7 +284,7 @@ export default function ArchaeologicalMapPage() {
 
   // Initialize Google Maps
   const initializeMap = useCallback(() => {
-    if (!mapRef.current || !googleMapsLoaded || !window.google || !window.google.maps || !window.google.maps.Map) {
+    if (!mapRef.current || !window.google || !googleMapsLoaded) {
       console.log('🗺️ Waiting for Google Maps to load...')
       return
     }
@@ -350,7 +312,6 @@ export default function ArchaeologicalMapPage() {
     } catch (error) {
       console.error('❌ Failed to initialize Google Maps:', error)
       setMapError('Failed to initialize map')
-      console.log('📍 Google Maps not available - continuing with static interface')
     }
   }, [mapCenter, mapZoom, googleMapsLoaded])
 
@@ -498,22 +459,12 @@ export default function ArchaeologicalMapPage() {
   useEffect(() => {
     window.initGoogleMaps = () => {
       console.log('🗺️ Google Maps API loaded via callback')
-      // Add a small delay to ensure API is fully ready
-      setTimeout(() => {
-        if (window.google && window.google.maps && window.google.maps.Map) {
-          setGoogleMapsLoaded(true)
-        } else {
-          console.log('⏳ Google Maps API not fully ready, retrying...')
-          setTimeout(() => setGoogleMapsLoaded(true), 500)
-        }
-      }, 100)
+      setGoogleMapsLoaded(true)
     }
     
     // Cleanup
     return () => {
-      if (window.initGoogleMaps) {
-        delete window.initGoogleMaps
-      }
+      delete window.initGoogleMaps
     }
   }, [])
 
@@ -529,70 +480,92 @@ export default function ArchaeologicalMapPage() {
   const loadSites = useCallback(async () => {
     setLoading(true)
     try {
-      if (backendOnline) {
-        const response = await fetch('http://localhost:8000/research/sites?max_sites=148')
-        if (response.ok) {
-          const data = await response.json()
-          setSites(data)
-          calculateMapStats(data)
-          console.log('✅ NIS Protocol: Loaded', data.length, 'archaeological sites from 148 total discoveries')
-          
-          // Plot markers after sites are loaded
-          setTimeout(() => {
-            if (googleMapRef.current && window.google) {
-              plotAllDiscoveries()
-            }
-          }, 1000)
-        }
-      } else {
-        // Demo data
-        const demoSites: ArchaeologicalSite[] = [
-          {
-            id: 'demo_1',
-            name: 'Nazca Lines Complex',
-            coordinates: '-14.739, -75.13',
-            confidence: 0.92,
-            discovery_date: '2023-01-15',
-            cultural_significance: 'Ancient ceremonial geoglyphs with astronomical alignments',
-            data_sources: ['satellite', 'lidar'],
-            type: 'ceremonial',
-            period: 'Nazca (100-700 CE)',
-            size_hectares: 450
-          },
-          {
-            id: 'demo_2',
-            name: 'Amazon Settlement Platform',
-            coordinates: '-3.4653, -62.2159',
-            confidence: 0.87,
-            discovery_date: '2023-02-20',
-            cultural_significance: 'Pre-Columbian riverine settlement with raised platforms',
-            data_sources: ['satellite', 'lidar'],
-            type: 'settlement',
-            period: 'Late Pre-Columbian (1000-1500 CE)',
-            size_hectares: 85
-          },
-          {
-            id: 'demo_3',
-            name: 'Andean Terracing System',
-            coordinates: '-13.1631, -72.545',
-            confidence: 0.84,
-            discovery_date: '2023-03-10',
-            cultural_significance: 'Agricultural terracing with water management',
-            data_sources: ['satellite', 'terrain'],
-            type: 'agricultural',
-            period: 'Inca (1400-1533 CE)',
-            size_hectares: 230
+      // Always try to load real data first, regardless of backend status
+      const response = await fetch('http://localhost:8000/research/sites?max_sites=148')
+      if (response.ok) {
+        const rawData = await response.json()
+        
+        // Ensure each site has a unique ID
+        const data = rawData.map((site: any, index: number) => ({
+          ...site,
+          id: site.id || `site_${index}_${Date.now()}` // Generate unique ID if missing
+        }))
+        
+        // Validate for duplicate IDs
+        const ids = new Set()
+        const validatedData = data.map((site: any, index: number) => {
+          let uniqueId = site.id
+          let counter = 1
+          while (ids.has(uniqueId)) {
+            uniqueId = `${site.id}_${counter}`
+            counter++
           }
-        ]
-        setSites(demoSites)
-        console.log('✅ Loaded demo archaeological sites')
+          ids.add(uniqueId)
+          return { ...site, id: uniqueId }
+        })
+        
+        setSites(validatedData)
+        setBackendOnline(true)
+        console.log('✅ NIS Protocol: Loaded', validatedData.length, 'archaeological sites from 148 total discoveries')
+        
+        // Plot markers after sites are loaded
+        setTimeout(() => {
+          if (googleMapRef.current && window.google) {
+            plotAllDiscoveries()
+          }
+        }, 1000)
+      } else {
+        throw new Error('Backend not responding')
       }
     } catch (error) {
-      console.error('❌ Failed to load sites:', error)
+      console.log('⚠️ Backend not available, falling back to demo data')
+      setBackendOnline(false)
+      
+      // Demo data
+      const demoSites: ArchaeologicalSite[] = [
+        {
+          id: 'demo_1',
+          name: 'Nazca Lines Complex',
+          coordinates: '-14.739, -75.13',
+          confidence: 0.92,
+          discovery_date: '2023-01-15',
+          cultural_significance: 'Ancient ceremonial geoglyphs with astronomical alignments',
+          data_sources: ['satellite', 'lidar'],
+          type: 'ceremonial',
+          period: 'Nazca (100-700 CE)',
+          size_hectares: 450
+        },
+        {
+          id: 'demo_2',
+          name: 'Amazon Settlement Platform',
+          coordinates: '-3.4653, -62.2159',
+          confidence: 0.87,
+          discovery_date: '2023-02-20',
+          cultural_significance: 'Pre-Columbian riverine settlement with raised platforms',
+          data_sources: ['satellite', 'lidar'],
+          type: 'settlement',
+          period: 'Late Pre-Columbian (1000-1500 CE)',
+          size_hectares: 85
+        },
+        {
+          id: 'demo_3',
+          name: 'Andean Terracing System',
+          coordinates: '-13.1631, -72.545',
+          confidence: 0.84,
+          discovery_date: '2023-03-10',
+          cultural_significance: 'Agricultural terracing with water management',
+          data_sources: ['satellite', 'terrain'],
+          type: 'agricultural',
+          period: 'Inca (1400-1533 CE)',
+          size_hectares: 230
+        }
+      ]
+      setSites(demoSites)
+      console.log('✅ Loaded demo archaeological sites')
     } finally {
       setLoading(false)
     }
-  }, [backendOnline])
+  }, [])
 
   // Initialize effects
   useEffect(() => {
@@ -604,28 +577,6 @@ export default function ArchaeologicalMapPage() {
   useEffect(() => {
     loadSites()
   }, [loadSites])
-
-  // Filter sites based on current filters
-  useEffect(() => {
-    let filtered = sites.filter(site => {
-      // Confidence filter
-      if (site.confidence * 100 < confidenceFilter) return false
-      
-      // Type filter
-      if (typeFilter !== 'all' && site.type !== typeFilter) return false
-      
-      // Period filter
-      if (periodFilter !== 'all' && !site.period.toLowerCase().includes(periodFilter.toLowerCase())) return false
-      
-      // Search query
-      if (searchQuery && !site.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
-          !site.cultural_significance.toLowerCase().includes(searchQuery.toLowerCase())) return false
-      
-      return true
-    })
-    
-    setFilteredSites(filtered)
-  }, [sites, confidenceFilter, typeFilter, periodFilter, searchQuery])
 
   // Plot markers when sites change
   useEffect(() => {
@@ -658,11 +609,31 @@ export default function ArchaeologicalMapPage() {
     return () => clearTimeout(timer)
   }, [googleMapsLoaded])
 
-  // Check if Google Maps is already loaded
+  // Listen for Google Maps load events
   useEffect(() => {
+    const handleGoogleMapsLoaded = () => {
+      console.log('🗺️ Google Maps loaded via event')
+      setGoogleMapsLoaded(true)
+    }
+
+    const handleGoogleMapsError = (event: any) => {
+      console.error('❌ Google Maps load error:', event.detail)
+      setMapError('Google Maps failed to load')
+    }
+
+    // Add event listeners
+    window.addEventListener('google-maps-loaded', handleGoogleMapsLoaded)
+    window.addEventListener('google-maps-error', handleGoogleMapsError)
+
+    // Check if Google Maps is already loaded
     if (window.google && window.google.maps && !googleMapsLoaded) {
       console.log('🗺️ Google Maps already loaded, setting state...')
       setGoogleMapsLoaded(true)
+    }
+
+    return () => {
+      window.removeEventListener('google-maps-loaded', handleGoogleMapsLoaded)
+      window.removeEventListener('google-maps-error', handleGoogleMapsError)
     }
   }, [googleMapsLoaded])
 
@@ -747,28 +718,15 @@ export default function ArchaeologicalMapPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden pt-20">
-      {/* Google Maps Script */}
-      <Script
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC-eqKjOMYNw-FMabknw6Bnxf1fjo-EW2Y&callback=initGoogleMaps&libraries=places&loading=async"
-        strategy="afterInteractive"
-        onLoad={() => {
-          console.log('🗺️ Google Maps script loaded successfully')
-          if (window.google && window.google.maps) {
-            setGoogleMapsLoaded(true)
-          }
-        }}
-        onError={() => {
-          console.error('❌ Failed to load Google Maps script')
-          setMapError('Failed to load Google Maps. Please check your internet connection.')
-        }}
-      />
-      
+      <GoogleMapsLoader />
       {/* Animated Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-emerald-900/5 to-blue-900/10" />
       <div className="absolute inset-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
+
+                    {/* Google Maps loaded globally in layout.tsx */}
 
       <div className="relative z-10 pt-20">
         <div className="container mx-auto px-6 py-8">
@@ -854,16 +812,16 @@ export default function ArchaeologicalMapPage() {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.8 }}
-            className="flex h-[calc(100vh-400px)] gap-6"
+            className="flex h-[calc(100vh-280px)] gap-8"
           >
             {/* Sidebar */}
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.7, duration: 0.6 }}
-              className={`${sidebarOpen ? 'w-80' : 'w-0'} transition-all duration-300 overflow-hidden rounded-2xl bg-white/[0.02] backdrop-blur-sm border border-white/[0.08]`}
+              className={`${sidebarOpen ? 'w-96' : 'w-0'} transition-all duration-300 overflow-hidden rounded-2xl bg-white/[0.02] backdrop-blur-sm border border-white/[0.08]`}
             >
-              <div className="p-4 h-full overflow-y-auto">
+              <div className="p-6 h-full overflow-y-auto">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
                   <TabsList className="grid w-full grid-cols-4 bg-slate-800 border-slate-700">
                     <TabsTrigger value="sites" className="text-slate-300 data-[state=active]:text-white">
@@ -924,24 +882,6 @@ export default function ArchaeologicalMapPage() {
                             className="bg-slate-800"
                           />
                         </div>
-
-                        <div className="space-y-2">
-                          <Label className="text-slate-300">Historical Period</Label>
-                          <Select value={periodFilter} onValueChange={setPeriodFilter}>
-                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                              <SelectValue placeholder="Select period" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-slate-700">
-                              <SelectItem value="all">All Periods</SelectItem>
-                              <SelectItem value="pre-columbian">Pre-Columbian</SelectItem>
-                              <SelectItem value="inca">Inca</SelectItem>
-                              <SelectItem value="nazca">Nazca</SelectItem>
-                              <SelectItem value="moche">Moche</SelectItem>
-                              <SelectItem value="chimu">Chimú</SelectItem>
-                              <SelectItem value="colonial">Colonial</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
                       </div>
                       
                       {planningMode && (
@@ -963,16 +903,20 @@ export default function ArchaeologicalMapPage() {
                     </div>
 
                     {/* Sites list with planning integration */}
-                    <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                    <div className="space-y-3 max-h-[700px] overflow-y-auto">
                       {loading ? (
                         <div className="text-center py-8">
                           <RefreshCw className="h-6 w-6 animate-spin mx-auto text-slate-400" />
                           <p className="text-slate-400 mt-2">Loading archaeological sites...</p>
                         </div>
                       ) : (
-                        filteredSites.map((site, index) => (
+                        sites
+                          .filter(site => site.confidence * 100 >= confidenceFilter)
+                          .filter(site => typeFilter === 'all' || site.type === typeFilter)
+                          .filter(site => !searchQuery || site.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                          .map((site) => (
                             <Card 
-                              key={`${site.id}-${index}`} 
+                              key={site.id} 
                               className={`bg-slate-800/50 border-slate-700 cursor-pointer transition-all hover:bg-slate-800/70 ${
                                 selectedSite?.id === site.id ? 'ring-2 ring-emerald-500' : ''
                               } ${
@@ -1306,7 +1250,7 @@ export default function ArchaeologicalMapPage() {
               transition={{ delay: 0.8, duration: 0.6 }}
               className="flex-1 relative rounded-2xl bg-white/[0.02] backdrop-blur-sm border border-white/[0.08] overflow-hidden"
             >
-              {/* Enhanced Map Controls */}
+              {/* Map Controls */}
               <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
                 <Button
                   variant="outline"
@@ -1316,38 +1260,16 @@ export default function ArchaeologicalMapPage() {
                 >
                   {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
                 </Button>
-                
-                <div className="bg-white/[0.1] backdrop-blur-sm border border-white/[0.2] rounded-lg p-2 space-y-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowClusters(!showClusters)}
-                    className={`w-full justify-start text-xs ${showClusters ? 'text-emerald-400' : 'text-white/60'}`}
-                  >
-                    <Globe className="h-3 w-3 mr-1" />
-                    Clusters
-                  </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowHeatmap(!showHeatmap)}
-                    className={`w-full justify-start text-xs ${showHeatmap ? 'text-emerald-400' : 'text-white/60'}`}
-                  >
-                    <Satellite className="h-3 w-3 mr-1" />
-                    Heatmap
-                  </Button>
-                </div>
               </div>
 
-              {/* Enhanced Map Status */}
+              {/* Map Status */}
               <div className="absolute top-4 right-4 z-10">
                 <div className="bg-white/[0.1] backdrop-blur-sm border border-white/[0.2] rounded-lg p-3">
-                  <div className="flex items-center gap-2 text-xs mb-2">
+                  <div className="flex items-center gap-2 text-xs">
                     {backendOnline ? (
                       <>
                         <Wifi className="h-3 w-3 text-emerald-400" />
-                        <span className="text-emerald-400">NIS Protocol Live</span>
+                        <span className="text-emerald-400">Live Data</span>
                       </>
                     ) : (
                       <>
@@ -1356,23 +1278,8 @@ export default function ArchaeologicalMapPage() {
                       </>
                     )}
                   </div>
-                  <div className="space-y-1 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Total Sites:</span>
-                      <span className="text-white font-medium">{mapStats.totalSites}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">High Confidence:</span>
-                      <span className="text-emerald-400 font-medium">{mapStats.highConfidenceSites}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Avg Confidence:</span>
-                      <span className="text-blue-400 font-medium">{Math.round(mapStats.averageConfidence * 100)}%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Filtered:</span>
-                      <span className="text-yellow-400 font-medium">{filteredSites.length}</span>
-                    </div>
+                  <div className="text-xs text-slate-300 mt-1">
+                    {sites.length} sites
                   </div>
                 </div>
               </div>
