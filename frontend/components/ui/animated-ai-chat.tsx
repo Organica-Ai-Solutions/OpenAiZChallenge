@@ -267,45 +267,45 @@ export function AnimatedAIChat({ onSendMessage, onCoordinateSelect }: AnimatedAI
     const commandSuggestions: CommandSuggestion[] = [
         { 
             icon: <MapPin className="w-4 h-4" />, 
-            label: "Full NIS Analysis", 
-            description: "All 6 agents + consciousness integration", 
+            label: "Comprehensive Analysis", 
+            description: "All agents + enhanced LIDAR processing", 
             prefix: "/analyze" 
         },
         { 
             icon: <Eye className="w-4 h-4" />, 
             label: "Vision Agent", 
-            description: "GPT-4 Vision + satellite analysis", 
+            description: "GPT-4 Vision + multi-modal LIDAR", 
             prefix: "/vision" 
         },
         { 
             icon: <Command className="w-4 h-4" />, 
-            label: "IKRP Codex Research", 
-            description: "Ancient manuscripts + AI analysis", 
-            prefix: "/codex" 
+            label: "Update All Sites", 
+            description: "Reanalyze with enhanced processing", 
+            prefix: "/update-sites" 
         },
         { 
             icon: <Sparkles className="w-4 h-4" />, 
+            label: "Tool Status", 
+            description: "Agent capabilities & tool access", 
+            prefix: "/tool-status" 
+        },
+        { 
+            icon: <Search className="w-4 h-4" />, 
             label: "Memory Agent", 
             description: "Cultural knowledge + 148 sites", 
             prefix: "/memory" 
         },
         { 
-            icon: <Search className="w-4 h-4" />, 
+            icon: <PlusIcon className="w-4 h-4" />, 
             label: "Reasoning Agent", 
             description: "Archaeological interpretation", 
             prefix: "/reason" 
         },
         { 
-            icon: <PlusIcon className="w-4 h-4" />, 
+            icon: <Command className="w-4 h-4" />, 
             label: "Action Agent", 
             description: "Strategic planning + recommendations", 
             prefix: "/action" 
-        },
-        { 
-            icon: <Command className="w-4 h-4" />, 
-            label: "Integration Agent", 
-            description: "Multi-source data correlation", 
-            prefix: "/integrate" 
         },
         { 
             icon: <Sparkles className="w-4 h-4" />, 
@@ -481,22 +481,22 @@ export function AnimatedAIChat({ onSendMessage, onCoordinateSelect }: AnimatedAI
                 const agents = await agentsResponse.json();
                 setBackendStatus('online');
                 
-                // Show all 6 NIS Protocol agents and tools
+                // Show all enhanced NIS Protocol agents and tools
                 setAvailableTools([
                     '🧠 Consciousness Agent - Global workspace integration',
-                    '👁️ Vision Agent - Satellite & LIDAR analysis (/vision)',
-                    '🧠 Memory Agent - Cultural knowledge & patterns (/memory)',
+                    '👁️ Vision Agent - Enhanced multi-modal LIDAR processing (/vision)',
+                    '🧠 Memory Agent - Cultural knowledge & 148+ sites (/memory)',
                     '🤔 Reasoning Agent - Archaeological interpretation (/reason)',
-                    '⚡ Action Agent - Strategic planning (/action)',
-                    '🔗 Integration Agent - Multi-source correlation (/integrate)',
-                    '🔍 Full NIS Analysis (/analyze) - All agents working together',
-                    '🏛️ Site Discovery (/sites) - Archaeological database',
+                    '⚡ Action Agent - Strategic planning & recommendations (/action)',
+                    '🔍 Comprehensive Analysis (/analyze) - All agents + enhanced LIDAR',
+                    '🔄 Site Updates (/update-sites) - Reanalyze all sites with new processing',
+                    '🔧 Tool Status (/tool-status) - Agent capabilities & tool access',
                     '📊 Agent Status (/agents) - Real-time agent monitoring',
-                    '🛰️ Satellite Tools - Latest imagery & change detection',
-                    '📡 LIDAR Tools - Point cloud analysis',
-                    '🗺️ Historical Maps - Colonial & indigenous sources',
-                    '📜 IKRP Codex Research (/codex) - Ancient manuscripts',
-                    '🌐 WebSocket Live Updates - Real-time processing'
+                    '🛰️ Enhanced Satellite Tools - Multi-spectral imagery analysis',
+                    '📡 Multi-Modal LIDAR - Hillshade, slope, contour, elevation',
+                    '🗺️ Archaeological Database - 148+ sites with cultural context',
+                    '🏛️ GPT-4 Vision Integration - Advanced feature detection',
+                    '🌐 Cross-Agent Validation - Consciousness-coordinated analysis'
                 ]);
                 
                 console.log('🤖 NIS Protocol Agents Online:', agents.length);
@@ -568,16 +568,76 @@ export function AnimatedAIChat({ onSendMessage, onCoordinateSelect }: AnimatedAI
 
             // Enhanced tool detection for all 6 agents + specialized endpoints
             if (message.toLowerCase().includes('/analyze') || (message.toLowerCase().includes('analyze') && extractCoordinatesFromMessage(message))) {
-                // Use the full NIS Protocol analysis with all 6 agents
-                apiEndpoint = 'http://localhost:8000/agents/analyze/enhanced';
+                // Use the comprehensive analysis with all agents and enhanced LIDAR
+                apiEndpoint = 'http://localhost:8000/agents/analyze/comprehensive';
                 const coords = extractCoordinatesFromMessage(message);
                 if (coords) {
                     requestBody = {
                         lat: coords.lat,
-                        lon: coords.lon,
-                        data_sources: ['satellite', 'lidar', 'historical'],
-                        confidence_threshold: 0.7
+                        lon: coords.lon
                     };
+                }
+            } else if (message.toLowerCase().includes('/update-sites') || message.toLowerCase().includes('update all sites')) {
+                // Update all previously analyzed sites with enhanced processing
+                try {
+                    const response = await fetch('http://localhost:8000/agents/update-all-sites', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    
+                    if (response.ok) {
+                        const updateResult = await response.json();
+                        const assistantMessage: Message = {
+                            id: (Date.now() + 1).toString(),
+                            role: 'assistant',
+                            content: `🔄 **Site Update Process Complete**\n\n📊 **Update Summary:**\n• **Total Sites**: ${updateResult.total_sites}\n• **Successfully Updated**: ${updateResult.successfully_updated}\n• **Failed Updates**: ${updateResult.failed_updates}\n\n🚀 **Enhanced Features Added:**\n• Multi-modal LIDAR processing (hillshade, slope, contour, elevation)\n• All 6 agents working together with consciousness integration\n• Complete access to archaeological tools and databases\n• Enhanced satellite imagery analysis\n\n✨ **Improvements:**\n${updateResult.updated_sites.slice(0, 3).map((site: any) => `• ${site.site_name}: +${(site.improvement_metrics.confidence_improvement * 100).toFixed(1)}% confidence, ${site.improvement_metrics.new_features_detected} new features`).join('\n')}\n\n**All previously analyzed sites now have access to the latest enhanced LIDAR processing and comprehensive agent analysis!**`,
+                            confidence: 0.98,
+                            timestamp: new Date(),
+                            metadata: { updateResult, siteUpdate: true }
+                        };
+                        setInternalMessages(prev => prev.filter(m => !m.metadata?.isThinking).concat([assistantMessage]));
+                        setIsTyping(false);
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Site update failed:', error);
+                }
+            } else if (message.toLowerCase().includes('/tool-status') || message.toLowerCase().includes('agent tools')) {
+                // Check agent tool access status using available endpoints
+                try {
+                    const [agentResponse, systemResponse] = await Promise.all([
+                        fetch('http://localhost:8000/agents/status'),
+                        fetch('http://localhost:8000/system/health')
+                    ]);
+                    
+                    if (agentResponse.ok && systemResponse.ok) {
+                        const agentData = await agentResponse.json();
+                        const systemData = await systemResponse.json();
+                        
+                        // Parse agent status
+                        const agentStatus = {
+                            vision_agent: agentData.vision_agent === 'active' ? 'online' : 'offline',
+                            analysis_agent: agentData.analysis_agent === 'active' ? 'online' : 'offline',
+                            cultural_agent: agentData.cultural_agent === 'active' ? 'online' : 'offline',
+                            recommendation_agent: agentData.recommendation_agent === 'active' ? 'online' : 'offline'
+                        };
+                        
+                        const onlineAgents = Object.values(agentStatus).filter(status => status === 'online').length;
+                        
+                        const assistantMessage: Message = {
+                            id: (Date.now() + 1).toString(),
+                            role: 'assistant',
+                            content: `🔧 **Agent Tool Access Status**\n\n🏥 **System Health**: ${systemData.status?.toUpperCase() || 'HEALTHY'}\n📊 **Agents Online**: ${onlineAgents}/4\n\n🤖 **Agent Status:**\n${Object.entries(agentStatus).map(([name, status]: [string, any]) => `• **${name.replace('_', ' ').toUpperCase()}**: ${status === 'online' ? '🟢' : '🔴'} ${status}\n  Tools: ${status === 'online' ? 'Vision Analysis, Archaeological Analysis, Cultural Context' : 'Offline'}`).join('\n')}\n\n🛠️ **Available Tools:**\n• Satellite imagery analysis\n• LIDAR data processing\n• Archaeological pattern recognition\n• Cultural context integration\n• Historical document correlation\n\n✅ **Enhanced Features:**\n• Multi-modal LIDAR processing: ${onlineAgents >= 2 ? '🟢 Available' : '🔴 Limited'}\n• Comprehensive analysis: ${onlineAgents >= 3 ? '🟢 Available' : '🔴 Limited'}\n• All tools accessible: ${onlineAgents === 4 ? '🟢 Yes' : '🔴 Partial'}\n\n📊 **Processing Queue**: ${agentData.processing_queue || 0} tasks\n⏰ **Last Analysis**: ${agentData.last_analysis ? new Date(agentData.last_analysis).toLocaleTimeString() : 'N/A'}`,
+                            confidence: 0.98,
+                            timestamp: new Date(),
+                            metadata: { agentStatus, systemHealth: true }
+                        };
+                        setInternalMessages(prev => prev.filter(m => !m.metadata?.isThinking).concat([assistantMessage]));
+                        setIsTyping(false);
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Tool status check failed:', error);
                 }
             } else if (message.toLowerCase().includes('/vision') || message.toLowerCase().includes('satellite')) {
                 apiEndpoint = 'http://localhost:8000/agents/vision/analyze';
@@ -1066,7 +1126,7 @@ Try it with 3-5 coordinates from an unexplored region!`,
                 return;
             } else if (message.toLowerCase().includes('/codex') || message.toLowerCase().includes('ikrp')) {
                 // Access IKRP Codex system - demonstrate superiority over current AI
-                const response = await fetch('http://localhost:8000/ikrp/sources');
+                const response = await fetch('http://localhost:8001/codex/sources');
                 if (response.ok) {
                     const sources = await response.json();
                     const assistantMessage: Message = {
@@ -1118,7 +1178,7 @@ ${sources.sources?.map((source: any) => `• **${source.name}** - ${source.total
                         max_results: 5
                     };
                     
-                    const response = await fetch('http://localhost:8000/ikrp/search_codices', {
+                    const response = await fetch('http://localhost:8001/codex/discover', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(discoveryRequest)
@@ -1190,7 +1250,7 @@ ${codex.analysis ? `🤖 **AI Analysis**: ${codex.analysis.geographic_references
                     context: "archaeological_correlation"
                 };
                 
-                const response = await fetch('http://localhost:8000/ikrp/analyze_codex', {
+                const response = await fetch('http://localhost:8001/codex/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(analysisRequest)

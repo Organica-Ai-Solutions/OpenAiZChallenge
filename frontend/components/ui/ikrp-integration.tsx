@@ -62,7 +62,7 @@ export function IKRPIntegration({ onCoordinateAnalysis, onCodexAnalysis }: IKRPI
   useEffect(() => {
     const checkIKRPStatus = async () => {
       try {
-        const response = await fetch('http://localhost:8000/ikrp/sources');
+        const response = await fetch('http://localhost:8001/codex/sources');
         if (response.ok) {
           const data = await response.json();
           setSources(data.sources || [
@@ -133,7 +133,7 @@ export function IKRPIntegration({ onCoordinateAnalysis, onCodexAnalysis }: IKRPI
       const [lat, lon] = searchCoordinates.split(',').map(c => parseFloat(c.trim()));
       
       if (systemStatus === 'online') {
-        const response = await fetch('http://localhost:8000/ikrp/search_codices', {
+        const response = await fetch('http://localhost:8001/codex/discover', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -389,7 +389,7 @@ export function IKRPIntegration({ onCoordinateAnalysis, onCodexAnalysis }: IKRPI
             <Button
               variant="ghost"
               className="h-20 flex-col gap-2 bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.1]"
-              onClick={() => window.open('http://localhost:8000/ikrp/status', '_blank')}
+              onClick={() => window.open('http://localhost:8001/', '_blank')}
             >
               <ExternalLink className="h-6 w-6 text-yellow-400" />
               <span className="text-xs">IKRP Status</span>

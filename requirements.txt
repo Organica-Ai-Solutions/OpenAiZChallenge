@@ -57,10 +57,12 @@ pystac-client>=0.7.0
 # Scientific Computing
 scikit-learn>=1.0.2
 
-# Image processing
+# Image processing - Enhanced for LIDAR analysis
+Pillow>=9.0.0
+opencv-python>=4.5.0
+scipy>=1.10.1
 # scikit-image>=0.18.0  # Commented out - causing build issues
 rasterio>=1.2.0
-# opencv-python>=4.5.0  # Commented out - causing build issues
 
 # LIDAR processing
 # laspy>=2.0.0  # Commented out for now

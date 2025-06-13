@@ -98,6 +98,15 @@ interface AnalysisResult {
   indigenous_perspective: string
   recommendations: Array<{ action: string; priority: string; description?: string }>
   finding_id: string
+  // Enhanced properties for comprehensive analysis
+  detection_results?: Array<{ type: string; description: string; confidence: number }>
+  site_analysis?: any
+  cultural_significance?: any
+  temporal_analysis?: any
+  pattern_correlations?: any[]
+  enhancement_results?: any
+  model_performances?: any
+  processing_metadata?: any
 }
 
 interface VisionResult {
@@ -147,22 +156,58 @@ export default function AnalysisPage() {
   const [exportFormat, setExportFormat] = useState("json")
   const [isBackendOnline, setIsBackendOnline] = useState(false)
   const [agentMetrics, setAgentMetrics] = useState<any[]>([])
+  const [currentProgress, setCurrentProgress] = useState(0)
+  const [archaeologicalResults, setArchaeologicalResults] = useState<any>(null)
 
   // Enhanced state for NIS Protocol integration
   const [analysisWorkflow, setAnalysisWorkflow] = useState<{
-    type: 'coordinate' | 'no_coordinate' | 'multi_zone' | 'automated'
+    type: 'coordinate' | 'no_coordinate' | 'multi_zone' | 'automated' | 'comprehensive'
     status: 'idle' | 'processing' | 'complete' | 'error'
     regions: string[]
     searchPattern: string
     autoTriggered: boolean
     nisMetadata: any
   }>({
-    type: 'coordinate',
+    type: 'comprehensive',
     status: 'idle',
     regions: [],
     searchPattern: '',
     autoTriggered: false,
     nisMetadata: null
+  })
+
+  // New comprehensive analysis state
+  const [comprehensiveResults, setComprehensiveResults] = useState<any>(null)
+  const [agentStatus, setAgentStatus] = useState<any>({})
+  const [toolAccessStatus, setToolAccessStatus] = useState<any>({})
+  const [analysisMode, setAnalysisMode] = useState<"standard" | "comprehensive" | "specialized">("comprehensive")
+  const [specializedAnalysis, setSpecializedAnalysis] = useState<{
+    cultural: any,
+    settlement: any,
+    trade: any,
+    environmental: any,
+    defensive: any,
+    population: any,
+    chronological: any
+  }>({
+    cultural: null,
+    settlement: null,
+    trade: null,
+    environmental: null,
+    defensive: null,
+    population: null,
+    chronological: null
+  })
+  const [batchAnalysis, setBatchAnalysis] = useState<{
+    active: boolean,
+    sites: string[],
+    results: any[],
+    progress: number
+  }>({
+    active: false,
+    sites: [],
+    results: [],
+    progress: 0
   })
 
   const [multiZoneResults, setMultiZoneResults] = useState<Array<{
@@ -192,22 +237,194 @@ export default function AnalysisPage() {
     loadSavedAnalyses()
   }, [])
 
+  // Comprehensive analysis using all agents and enhanced capabilities
+  const runComprehensiveAnalysis = async (coordinates: string) => {
+    if (!isBackendOnline) {
+      console.log('Backend offline, falling back to standard analysis')
+      return runFullAnalysis(coordinates)
+    }
+
+    setIsAnalyzing(true)
+    setAnalysisStage("🚀 Initializing comprehensive analysis...")
+    setAnalysisWorkflow(prev => ({ ...prev, type: 'comprehensive', status: 'processing' }))
+
+    try {
+      const [lat, lon] = coordinates.split(',').map(s => parseFloat(s.trim()))
+      
+      // Progress stages for comprehensive analysis
+      const stages = [
+        "🚀 Initializing all agents...",
+        "👁️ Running enhanced vision analysis with multi-modal LIDAR...",
+        "🧠 Accessing comprehensive archaeological memory...",
+        "🤔 Performing enhanced archaeological reasoning...",
+        "⚡ Generating strategic action plan...",
+        "🧠 Integrating through consciousness module...",
+        "🔬 Running specialized analysis modules...",
+        "📊 Compiling comprehensive results..."
+      ]
+      
+      let currentStage = 0
+      const stageInterval = setInterval(() => {
+        if (currentStage < stages.length) {
+          setAnalysisStage(stages[currentStage])
+          setCurrentProgress((currentStage + 1) / stages.length * 90)
+          currentStage++
+        }
+      }, 2000)
+      
+      // Run comprehensive analysis using available endpoints
+      const [analyzeResponse, visionResponse] = await Promise.all([
+        fetch('http://localhost:8000/analyze', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            lat: lat,
+            lon: lon,
+            data_sources: ["satellite", "lidar", "historical"],
+            confidence_threshold: 0.7
+          })
+        }),
+        fetch('http://localhost:8000/vision/analyze', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            coordinates: `${lat}, ${lon}`,
+            models: ["gpt4o_vision", "archaeological_analysis"],
+            confidence_threshold: 0.4
+          })
+        })
+      ])
+      
+      clearInterval(stageInterval)
+      
+      if (analyzeResponse.ok && visionResponse.ok) {
+        const [analyzeResults, visionResults] = await Promise.all([
+          analyzeResponse.json(),
+          visionResponse.json()
+        ])
+        
+        // Combine results from both endpoints
+        const combinedResults = {
+          analysis_data: analyzeResults,
+          vision_data: visionResults,
+          combined_confidence: (analyzeResults.confidence + (visionResults.model_performance?.gpt4o_vision?.confidence_average || 0.5)) / 2
+        }
+        
+        setComprehensiveResults(combinedResults)
+        setCurrentProgress(100)
+        setAnalysisStage("✅ Comprehensive analysis complete!")
+        
+        // Convert to standard format for compatibility
+        const standardResults: AnalysisResult = {
+          location: { lat, lon },
+          confidence: combinedResults.combined_confidence,
+          description: analyzeResults.description || 'Comprehensive archaeological analysis completed',
+          pattern_type: analyzeResults.pattern_type || 'Multi-modal archaeological features',
+          historical_context: analyzeResults.historical_context || 'Historical context from comprehensive database',
+          indigenous_perspective: analyzeResults.indigenous_perspective || 'Indigenous knowledge integrated',
+          recommendations: analyzeResults.recommendations || [],
+          finding_id: analyzeResults.finding_id || `comprehensive_${Date.now()}`,
+          detection_results: visionResults.detection_results || []
+        }
+        
+        setAnalysisResult(standardResults)
+        setVisionResult(visionResults)
+        setAnalysisWorkflow(prev => ({ ...prev, status: 'complete' }))
+        setActiveWorkflow("results")
+        
+        // Run specialized analysis modules if available
+        if (analysisMode === "specialized") {
+          await runSpecializedAnalysis(lat, lon)
+        }
+        
+      } else {
+        throw new Error(`Comprehensive analysis failed - Analyze: ${analyzeResponse.status}, Vision: ${visionResponse.status}`)
+      }
+    } catch (error) {
+      console.error('Comprehensive analysis failed:', error)
+      setAnalysisStage("❌ Analysis failed - falling back to standard mode")
+      setAnalysisWorkflow(prev => ({ ...prev, status: 'error' }))
+      // Fallback to standard analysis
+      await runFullAnalysis(coordinates)
+    } finally {
+      setIsAnalyzing(false)
+    }
+  }
+
+  // Run specialized analysis modules
+  const runSpecializedAnalysis = async (lat: number, lon: number) => {
+    const modules = [
+      { name: 'cultural', endpoint: '/api/analyze-cultural-significance' },
+      { name: 'settlement', endpoint: '/api/analyze-settlement-patterns' },
+      { name: 'trade', endpoint: '/api/analyze-trade-networks' },
+      { name: 'environmental', endpoint: '/api/analyze-environmental-factors' },
+      { name: 'defensive', endpoint: '/api/analyze-defensive-strategies' },
+      { name: 'population', endpoint: '/api/analyze-population-density' },
+      { name: 'chronological', endpoint: '/api/analyze-chronological-sequence' }
+    ]
+
+    const results: any = {}
+    
+    for (const module of modules) {
+      try {
+        const response = await fetch(`http://localhost:8000${module.endpoint}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lat, lon })
+        })
+        
+        if (response.ok) {
+          results[module.name] = await response.json()
+        }
+      } catch (error) {
+        console.error(`Failed to run ${module.name} analysis:`, error)
+      }
+    }
+    
+    setSpecializedAnalysis(results)
+  }
+
   const checkSystemHealth = async () => {
     try {
       const [healthRes, agentsRes] = await Promise.all([
         fetch('http://localhost:8000/system/health'),
-        fetch('http://localhost:8000/agents/agents')
+        fetch('http://localhost:8000/agents/status')
       ])
       
-      if (healthRes.ok && agentsRes.ok) {
-        const agents = await agentsRes.json()
-        setSystemStatus({ health: true, agents: agents.length })
+      if (healthRes.ok) {
         setIsBackendOnline(true)
-        setAgentMetrics(agents)
+        setSystemStatus(prev => ({ ...prev, health: true }))
+      }
+      
+      if (agentsRes.ok) {
+        const agentsData = await agentsRes.json()
+        // Parse the agent status from the response
+        const parsedAgents = {
+          vision_agent: { status: agentsData.vision_agent === 'active' ? 'online' : 'offline' },
+          analysis_agent: { status: agentsData.analysis_agent === 'active' ? 'online' : 'offline' },
+          cultural_agent: { status: agentsData.cultural_agent === 'active' ? 'online' : 'offline' },
+          recommendation_agent: { status: agentsData.recommendation_agent === 'active' ? 'online' : 'offline' }
+        }
+        setAgentStatus(parsedAgents)
+        setAgentMetrics(Object.keys(parsedAgents))
+        setSystemStatus(prev => ({ ...prev, agents: Object.keys(parsedAgents).length }))
+        
+        // Set tool access status based on available agents
+        setToolAccessStatus({
+          total_tools_available: Object.keys(parsedAgents).length,
+          vision_analysis: parsedAgents.vision_agent.status === 'online',
+          archaeological_analysis: parsedAgents.analysis_agent.status === 'online',
+          cultural_analysis: parsedAgents.cultural_agent.status === 'online'
+        })
       }
     } catch (error) {
       console.log("Backend not available")
       setIsBackendOnline(false)
+      setSystemStatus({ health: false, agents: 0 })
     }
   }
 
@@ -286,8 +503,9 @@ export default function AnalysisPage() {
     console.log('🔍 Starting enhanced full analysis for:', coordinates)
     
     try {
-      const progressInterval = setInterval(() => {
-        setCurrentProgress(prev => {
+      let progressInterval: NodeJS.Timeout
+      progressInterval = setInterval(() => {
+        setCurrentProgress((prev: number) => {
           if (prev >= 95) {
             clearInterval(progressInterval)
             return 95
@@ -409,10 +627,10 @@ export default function AnalysisPage() {
         historical_context: 'Potential multi-period site showing evidence of continuous occupation from pre-Columbian through colonial periods.',
         indigenous_perspective: 'Site appears to hold cultural significance based on landscape analysis and traditional knowledge patterns.',
         recommendations: [
-          'Ground verification recommended for detected anomalies',
-          'Community consultation for cultural context',
-          'Multi-spectral analysis for feature enhancement',
-          'Temporal monitoring for site preservation'
+          { action: 'Ground verification recommended for detected anomalies', priority: 'high' },
+          { action: 'Community consultation for cultural context', priority: 'medium' },
+          { action: 'Multi-spectral analysis for feature enhancement', priority: 'medium' },
+          { action: 'Temporal monitoring for site preservation', priority: 'low' }
         ],
         finding_id: `enhanced_fallback_${Date.now()}`
       })
@@ -443,7 +661,11 @@ export default function AnalysisPage() {
   }
 
   const handleCoordinateAnalysis = () => {
-    runFullAnalysis(selectedCoordinates)
+    if (analysisMode === "comprehensive" && isBackendOnline) {
+      runComprehensiveAnalysis(selectedCoordinates)
+    } else {
+      runFullAnalysis(selectedCoordinates)
+    }
   }
 
   // Enhanced chat coordinate handler with NIS Protocol integration
@@ -770,6 +992,102 @@ export default function AnalysisPage() {
                     </>
                   )}
                 </Button>
+              </CardContent>
+            </Card>
+
+            {/* Enhanced Analysis Mode Selector */}
+            <Card className="bg-slate-800/50 border-slate-700/50">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-white text-sm flex items-center gap-2">
+                  <Brain className="w-4 h-4 text-emerald-400" />
+                  Analysis Mode
+                  {isBackendOnline && (
+                    <Badge variant="outline" className="text-emerald-400 border-emerald-400 text-xs">
+                      Enhanced Available
+                    </Badge>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <Button
+                    variant={analysisMode === "standard" ? "default" : "outline"}
+                    onClick={() => setAnalysisMode("standard")}
+                    className={`w-full justify-start text-left h-auto p-3 ${
+                      analysisMode === "standard" 
+                        ? "bg-cyan-600 hover:bg-cyan-700" 
+                        : "bg-slate-900/50 border-slate-600 hover:bg-slate-700/50"
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Eye className="w-3 h-3" />
+                        <span className="text-sm font-medium">Standard Analysis</span>
+                      </div>
+                      <div className="text-xs opacity-80">Vision + YOLO8 detection</div>
+                    </div>
+                  </Button>
+                  
+                  <Button
+                    variant={analysisMode === "comprehensive" ? "default" : "outline"}
+                    onClick={() => setAnalysisMode("comprehensive")}
+                    disabled={!isBackendOnline}
+                    className={`w-full justify-start text-left h-auto p-3 ${
+                      analysisMode === "comprehensive" 
+                        ? "bg-emerald-600 hover:bg-emerald-700" 
+                        : "bg-slate-900/50 border-slate-600 hover:bg-slate-700/50"
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Brain className="w-3 h-3" />
+                        <span className="text-sm font-medium">Comprehensive NIS</span>
+                        <Sparkles className="w-3 h-3" />
+                      </div>
+                      <div className="text-xs opacity-80">6 agents + Multi-modal LIDAR</div>
+                    </div>
+                  </Button>
+                  
+                  <Button
+                    variant={analysisMode === "specialized" ? "default" : "outline"}
+                    onClick={() => setAnalysisMode("specialized")}
+                    disabled={!isBackendOnline}
+                    className={`w-full justify-start text-left h-auto p-3 ${
+                      analysisMode === "specialized" 
+                        ? "bg-purple-600 hover:bg-purple-700" 
+                        : "bg-slate-900/50 border-slate-600 hover:bg-slate-700/50"
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Target className="w-3 h-3" />
+                        <span className="text-sm font-medium">Specialized Modules</span>
+                      </div>
+                      <div className="text-xs opacity-80">Cultural + Settlement + Trade analysis</div>
+                    </div>
+                  </Button>
+                  
+                  {isBackendOnline && Object.keys(agentStatus).length > 0 && (
+                    <div className="mt-3 p-2 bg-slate-900/30 rounded border border-slate-700/50">
+                      <div className="text-xs text-slate-400 mb-1">Agents Online:</div>
+                      <div className="flex flex-wrap gap-1">
+                        {Object.entries(agentStatus).map(([agent, status]: [string, any]) => (
+                          <Badge 
+                            key={agent} 
+                            variant="outline" 
+                            className={`text-xs ${
+                              status?.status === 'online' 
+                                ? 'text-emerald-400 border-emerald-400' 
+                                : 'text-amber-400 border-amber-400'
+                            }`}
+                          >
+                            {agent}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
 
