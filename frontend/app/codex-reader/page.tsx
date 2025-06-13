@@ -110,6 +110,8 @@ export default function CodexReaderPage() {
   const [searchProgress, setSearchProgress] = useState(0)
   const [activeTab, setActiveTab] = useState('workflow')
   const [availableSources, setAvailableSources] = useState<any[]>([])
+  const [error, setError] = useState<string | null>(null)
+  const [progress, setProgress] = useState(0)
   
   // Chat functionality
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
@@ -164,16 +166,16 @@ export default function CodexReaderPage() {
 
   const checkBackendStatus = async () => {
     try {
-      // Try main backend first
-      const response = await fetch('http://localhost:8000/health')
+      // Try IKRP service first (primary codex service)
+      const response = await fetch('http://localhost:8001/codex/sources')
       if (response.ok) {
         setIsBackendOnline(true)
         return
       }
     } catch {
-      // Try IKRP service as fallback
+      // Try main backend as fallback
       try {
-        const response = await fetch('http://localhost:8001/status')
+        const response = await fetch('http://localhost:8000/system/health')
         setIsBackendOnline(response.ok)
       } catch {
         setIsBackendOnline(false)
@@ -183,19 +185,17 @@ export default function CodexReaderPage() {
 
   const fetchAvailableSources = async () => {
     try {
-      // Try main backend first
-      let response = await fetch('http://localhost:8000/api/codex/sources')
-      if (!response.ok) {
-        // Fallback to IKRP service
-        response = await fetch('http://localhost:8001/codex/sources')
-      }
+      // Use IKRP service directly (primary codex service)
+      const response = await fetch('http://localhost:8001/codex/sources')
       if (response.ok) {
         const data = await response.json()
         setAvailableSources(data.sources)
+      } else {
+        throw new Error('Failed to fetch sources')
       }
     } catch (error) {
       console.error('Failed to fetch available sources:', error)
-      // Set default sources if both backends fail
+      // Set default sources if backend fails
       setAvailableSources([
         {id: "famsi", name: "Foundation for Ancient Mesoamerican Studies", total_codices: 8, status: "active"},
         {id: "world_digital_library", name: "World Digital Library", total_codices: 12, status: "active"},
@@ -246,38 +246,20 @@ export default function CodexReaderPage() {
         setSearchProgress(prev => Math.min(prev + 20, 90))
       }, 500)
 
-      // Try main backend first, fallback to IKRP service
-      let response
-      try {
-        response = await fetch('http://localhost:8000/api/codex/discover', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            coordinates: { lat, lng },
-            radius_km: radiusKm,
-            period: period,
-            sources: sources,
-            max_results: 20
-          }),
-        })
-      } catch (error) {
-        // Fallback to IKRP service
-        response = await fetch('http://localhost:8001/codex/discover', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            coordinates: { lat, lng },
-            radius_km: radiusKm,
-            period: period,
-            sources: sources,
-            max_results: 20
-          }),
-        })
-      }
+      // Use IKRP service directly (primary codex service)
+      const response = await fetch('http://localhost:8001/codex/discover', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          coordinates: { lat, lng },
+          radius_km: radiusKm,
+          period: period,
+          sources: sources,
+          max_results: 20
+        }),
+      })
 
       clearInterval(progressInterval)
       setSearchProgress(100)
@@ -306,70 +288,57 @@ export default function CodexReaderPage() {
   const handleAnalyzeCodex = async (codex: Codex) => {
     setSelectedCodex(codex)
     setIsAnalyzing(true)
-    updateWorkflowStep('analysis', false, true)
-    setActiveTab('analysis')
+    setError(null)
+    setProgress(0)
 
     try {
-      // Try main backend first, fallback to IKRP service
-      let response
-      try {
-        response = await fetch('http://localhost:8000/api/codex/analyze', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            codex_id: codex.id,
-            image_url: codex.image_url,
-            coordinates: coordinates ? (() => {
-              const [lat, lng] = coordinates.split(',').map(coord => parseFloat(coord.trim()))
-              return { lat, lng }
-            })() : null,
-            context: `Archaeological analysis for ${codex.title}`
-          }),
-        })
-      } catch (error) {
-        // Fallback to IKRP service
-        response = await fetch('http://localhost:8001/codex/analyze', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            codex_id: codex.id,
-            image_url: codex.image_url,
-            coordinates: coordinates ? (() => {
-              const [lat, lng] = coordinates.split(',').map(coord => parseFloat(coord.trim()))
-              return { lat, lng }
-            })() : null,
-            context: `Archaeological analysis for ${codex.title}`
-          }),
-        })
-      }
+      console.log(`🔍 Analyzing codex: ${codex.title}`)
+      setProgress(20)
+
+      // Use IKRP service for codex analysis
+      const response = await fetch('http://localhost:8001/codex/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          codex_id: codex.id,
+          image_url: codex.image_url,
+          coordinates: coordinates ? {
+            lat: parseFloat(coordinates.split(',')[0].trim()),
+            lng: parseFloat(coordinates.split(',')[1].trim())
+          } : undefined,
+          context: `Analyze this ${codex.content_type} from ${codex.period} period`
+        }),
+      })
+
+      setProgress(80)
 
       if (response.ok) {
-        const analysisData = await response.json()
-        setCodexAnalysis(analysisData.analysis)
-        updateWorkflowStep('analysis', true)
-        
+        const data = await response.json()
+        setProgress(100)
+
+        // Update the codex analysis state
+        setCodexAnalysis(data.analysis)
+
         // Add to analysis history
-        addToAnalysisHistory(codex, analysisData.analysis, analysisData.confidence)
+        addToAnalysisHistory(codex, data.analysis, data.confidence)
+
+        // Update workflow step
+        updateWorkflowStep('analysis', true)
+        setActiveTab('analysis')
         
-        console.log(`🔍 Analysis completed for ${codex.title} with ${analysisData.confidence} confidence`)
+        console.log(`✅ Analysis complete for: ${codex.title}`)
       } else {
         throw new Error('Analysis failed')
       }
     } catch (error) {
-      console.error('Codex analysis failed:', error)
-      // Use existing analysis if available
-      if (codex.analysis) {
-        setCodexAnalysis(codex.analysis)
-        updateWorkflowStep('analysis', true)
-      } else {
-        alert('Analysis failed. Please try again.')
-      }
+      console.error('Analysis failed:', error)
+      setError(error instanceof Error ? error.message : 'Analysis failed')
+      alert('Analysis failed. Please try again.')
     } finally {
       setIsAnalyzing(false)
+      setTimeout(() => setProgress(0), 1000)
     }
   }
 
