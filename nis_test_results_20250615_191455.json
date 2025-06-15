@@ -1,0 +1,42 @@
+{
+  "discovery_tests": [
+    {
+      "test_type": "coordinate_discovery",
+      "total_sites": 5,
+      "successful_analyses": 0,
+      "success_rate": 0.0,
+      "total_time": 5.103646516799927,
+      "avg_response_time": 0.0,
+      "results": [
+        {
+          "site": "Lake Guatavita (El Dorado)",
+          "success": false,
+          "error": "HTTP 404"
+        },
+        {
+          "site": "Acre Geoglyphs Complex",
+          "success": false,
+          "error": "HTTP 404"
+        },
+        {
+          "site": "Extended Nazca Geoglyphs",
+          "success": false,
+          "error": "HTTP 404"
+        },
+        {
+          "site": "Monte Roraima Structures",
+          "success": false,
+          "error": "HTTP 404"
+        },
+        {
+          "site": "Orinoco Petroglyphs Site",
+          "success": false,
+          "error": "HTTP 404"
+        }
+      ]
+    }
+  ],
+  "database_tests": [],
+  "performance_metrics": {},
+  "errors": []
+}
