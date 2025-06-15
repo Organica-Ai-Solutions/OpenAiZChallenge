@@ -34,6 +34,9 @@ import TemporalAnalysis from '@/components/temporal-analysis'
 import GeospatialAnalysis from '@/components/geospatial-analysis'
 import LandscapeArchaeology from '@/components/landscape-archaeology'
 import EnvironmentalReconstruction from '@/components/environmental-reconstruction'
+import Advanced3DVisualization from '@/components/advanced-3d-visualization'
+import PerformanceOptimization from '@/components/performance-optimization'
+import SystemIntegrationHub from '@/components/system-integration-hub'
 
 // Real Archaeological Sites Data
 const REAL_ARCHAEOLOGICAL_SITES = [
@@ -1948,6 +1951,13 @@ export default function AnalysisPage() {
                 <GeospatialAnalysis />
                 <LandscapeArchaeology />
                 <EnvironmentalReconstruction />
+              </div>
+              
+              {/* Day 13: Advanced Integration & Synthesis */}
+              <div className="grid grid-cols-1 gap-6 mt-8">
+                <Advanced3DVisualization />
+                <PerformanceOptimization />
+                <SystemIntegrationHub />
               </div>
             </div>
           </div>
