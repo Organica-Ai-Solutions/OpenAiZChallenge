@@ -31,6 +31,9 @@ import RealtimeMonitoring from '@/components/realtime-monitoring'
 import AgentCoordinator from '@/components/agent-coordinator'
 import SiteDiscovery from '@/components/site-discovery'
 import TemporalAnalysis from '@/components/temporal-analysis'
+import GeospatialAnalysis from '@/components/geospatial-analysis'
+import LandscapeArchaeology from '@/components/landscape-archaeology'
+import EnvironmentalReconstruction from '@/components/environmental-reconstruction'
 
 // Real Archaeological Sites Data
 const REAL_ARCHAEOLOGICAL_SITES = [
@@ -1939,6 +1942,13 @@ export default function AnalysisPage() {
                 }}
                 className="mt-6"
               />
+              
+              {/* Day 12: Advanced Geospatial Analysis & Landscape Archaeology */}
+              <div className="grid grid-cols-1 gap-6 mt-8">
+                <GeospatialAnalysis />
+                <LandscapeArchaeology />
+                <EnvironmentalReconstruction />
+              </div>
             </div>
           </div>
         </div>
