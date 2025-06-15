@@ -1,0 +1,62 @@
+{
+  "discovery_tests": [
+    {
+      "test_type": "coordinate_discovery",
+      "total_sites": 5,
+      "successful_analyses": 5,
+      "success_rate": 100.0,
+      "total_time": 5.081113815307617,
+      "avg_response_time": 0.0100174,
+      "results": [
+        {
+          "site": "Lake Guatavita (El Dorado)",
+          "coordinates": "5.1542, -73.7792",
+          "success": true,
+          "confidence": 0.7040510094830226,
+          "pattern_type": "Residential platform",
+          "cultural_significance": "Traditional ecological knowledge indicates this area was significant for settlement areas with rich archaeological deposits.\nLocal oral histories reference ancestral activities including ceremonial gatherings and seasonal settlements.\nTraditional place names suggest cultural importance for navigation and resource management.\nCommunity elders have shared stories of ancient pathways and gathering places in this region.\nEthnoarchaeological studies support the presence of indigenous land management practices.",
+          "response_time": 0.005521
+        },
+        {
+          "site": "Acre Geoglyphs Complex",
+          "coordinates": "-9.97474, -67.8096",
+          "success": true,
+          "confidence": 0.95,
+          "pattern_type": "Ceremonial complex",
+          "cultural_significance": "Traditional ecological knowledge indicates this area was significant for settlement areas with rich archaeological deposits.\nLocal oral histories reference ancestral activities including ceremonial gatherings and seasonal settlements.\nTraditional place names suggest cultural importance for navigation and resource management.\nCommunity elders have shared stories of ancient pathways and gathering places in this region.\nEthnoarchaeological studies support the presence of indigenous land management practices.",
+          "response_time": 0.017438
+        },
+        {
+          "site": "Extended Nazca Geoglyphs",
+          "coordinates": "-14.739, -75.13",
+          "success": true,
+          "confidence": 0.95,
+          "pattern_type": "Market plaza",
+          "cultural_significance": "Traditional ecological knowledge indicates this area was significant for indigenous river communities and ancient trade routes.\nLocal oral histories reference ancestral activities including ceremonial gatherings and seasonal settlements.\nTraditional place names suggest cultural importance for navigation and resource management.\nCommunity elders have shared stories of ancient pathways and gathering places in this region.\nEthnoarchaeological studies support the presence of indigenous land management practices.",
+          "response_time": 0.017537
+        },
+        {
+          "site": "Monte Roraima Structures",
+          "coordinates": "5.1431, -60.7619",
+          "success": true,
+          "confidence": 0.8209960269951265,
+          "pattern_type": "Agricultural terracing",
+          "cultural_significance": "Traditional ecological knowledge indicates this area was significant for settlement areas with rich archaeological deposits.\nLocal oral histories reference ancestral activities including ceremonial gatherings and seasonal settlements.\nTraditional place names suggest cultural importance for navigation and resource management.\nCommunity elders have shared stories of ancient pathways and gathering places in this region.\nEthnoarchaeological studies support the presence of indigenous land management practices.",
+          "response_time": 0.004218
+        },
+        {
+          "site": "Orinoco Petroglyphs Site",
+          "coordinates": "6.2518, -67.5673",
+          "success": true,
+          "confidence": 0.7050561307654528,
+          "pattern_type": "Ceremonial complex",
+          "cultural_significance": "Traditional ecological knowledge indicates this area was significant for settlement areas with rich archaeological deposits.\nLocal oral histories reference ancestral activities including ceremonial gatherings and seasonal settlements.\nTraditional place names suggest cultural importance for navigation and resource management.\nCommunity elders have shared stories of ancient pathways and gathering places in this region.\nEthnoarchaeological studies support the presence of indigenous land management practices.",
+          "response_time": 0.005373
+        }
+      ]
+    }
+  ],
+  "database_tests": [],
+  "performance_metrics": {},
+  "errors": []
+}
