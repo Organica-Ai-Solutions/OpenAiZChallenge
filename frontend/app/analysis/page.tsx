@@ -25,6 +25,10 @@ import {
   RefreshCw, Cpu, MonitorIcon
 } from "lucide-react"
 
+import { KANDashboard } from '@/components/kan-dashboard'
+import Recommendations from '@/components/recommendations'
+import RealtimeMonitoring from '@/components/realtime-monitoring'
+
 // Real Archaeological Sites Data
 const REAL_ARCHAEOLOGICAL_SITES = [
   {
@@ -1874,6 +1878,26 @@ export default function AnalysisPage() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Day 10: Advanced Visualizations & KAN Recommendation Engine */}
+            <div className="mt-8 space-y-6">
+              {/* KAN Recommendations */}
+              <Recommendations 
+                kanSettings={kanSettings}
+                analysisContext={{
+                  coordinates: selectedCoordinates,
+                  culturalReferences: analysisResult?.indigenous_perspective ? [analysisResult.indigenous_perspective] : [],
+                  confidence: analysisResult?.confidence
+                }}
+                className="mb-6"
+              />
+              
+              {/* Real-time KAN Monitoring */}
+              <RealtimeMonitoring 
+                kanSettings={kanSettings}
+                className="mb-6"
+              />
+            </div>
           </div>
         </div>
       </main>
