@@ -28,6 +28,9 @@ import {
 import { KANDashboard } from '@/components/kan-dashboard'
 import Recommendations from '@/components/recommendations'
 import RealtimeMonitoring from '@/components/realtime-monitoring'
+import AgentCoordinator from '@/components/agent-coordinator'
+import SiteDiscovery from '@/components/site-discovery'
+import TemporalAnalysis from '@/components/temporal-analysis'
 
 // Real Archaeological Sites Data
 const REAL_ARCHAEOLOGICAL_SITES = [
@@ -1896,6 +1899,45 @@ export default function AnalysisPage() {
               <RealtimeMonitoring 
                 kanSettings={kanSettings}
                 className="mb-6"
+              />
+              
+              {/* Day 11: Advanced Agent Coordination & Automated Discovery */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                {/* Multi-Agent Coordination */}
+                <AgentCoordinator 
+                  analysisContext={{
+                    coordinates: selectedCoordinates
+                  }}
+                  kanSettings={{
+                    enabled: kanSettings.enabled,
+                    coordinationMode: true
+                  }}
+                  className="h-fit"
+                />
+                
+                {/* Automated Site Discovery */}
+                <SiteDiscovery 
+                  discoverySettings={{
+                    enabled: kanSettings.enabled,
+                    sensitivity: 75,
+                    methods: ['satellite', 'lidar', 'multispectral']
+                  }}
+                  className="h-fit"
+                />
+              </div>
+              
+              {/* Temporal Correlation Analysis */}
+              <TemporalAnalysis 
+                analysisData={{
+                  coordinates: selectedCoordinates,
+                  culturalContext: analysisResult?.indigenous_perspective
+                }}
+                temporalSettings={{
+                  enabled: kanSettings.temporalReasoning,
+                  periodRange: 2000,
+                  correlationThreshold: 0.7
+                }}
+                className="mt-6"
               />
             </div>
           </div>
