@@ -1,10 +1,9 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import { ClientProviders } from "../components/client-providers"
-import OptimizedNavigation from "../components/shared/OptimizedNavigation"
-import PageLoader from "../components/ui/page-loader"
-import { Suspense } from "react"
+import { ThemeProvider } from "@/components/theme-provider"
+import { ClientProviders } from "@/components/client-providers"
+import { EnhancedNavigation } from "@/components/ui/enhanced-navigation"
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -13,8 +12,8 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "NIS Protocol - Indigenous Knowledge Research Platform",
-  description: "Advanced AI-powered archaeological site discovery and satellite monitoring system",
+  title: "NIS Protocol - Neural Intelligence System",
+  description: "Advanced Archaeological Discovery through AI",
   keywords: "archaeological discovery, AI, satellite monitoring, indigenous knowledge",
   icons: {
     icon: '/favicon.ico',
@@ -46,19 +45,33 @@ export default function RootLayout({
         
         {/* Google Maps will be loaded by GoogleMapsLoader component */}
       </head>
-      <body className={inter.className} suppressHydrationWarning>
-        <ClientProviders>
-          <OptimizedNavigation showBackendStatus={true} />
-          <PageLoader>
-            <Suspense fallback={
-              <div className="min-h-[60vh] flex items-center justify-center">
-                <div className="text-slate-400">Loading...</div>
-              </div>
-            }>
-              {children}
-            </Suspense>
-          </PageLoader>
-        </ClientProviders>
+      <body className={`${inter.className} bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 min-h-screen`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ClientProviders>
+            <div className="flex min-h-screen">
+              {/* Enhanced Navigation Sidebar */}
+              <EnhancedNavigation className="hidden lg:flex flex-col" />
+              
+              {/* Main Content Area */}
+              <main className="flex-1 lg:ml-0">
+                {/* Mobile Navigation */}
+                <div className="lg:hidden">
+                  <EnhancedNavigation />
+                </div>
+                
+                {/* Page Content */}
+                <div className="p-6 lg:p-8">
+                  {children}
+                </div>
+              </main>
+            </div>
+          </ClientProviders>
+        </ThemeProvider>
       </body>
     </html>
   )
