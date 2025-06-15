@@ -37,6 +37,7 @@ import EnvironmentalReconstruction from '@/components/environmental-reconstructi
 import Advanced3DVisualization from '@/components/advanced-3d-visualization'
 import PerformanceOptimization from '@/components/performance-optimization'
 import SystemIntegrationHub from '@/components/system-integration-hub'
+import FinalDeploymentDashboard from '@/components/final-deployment-dashboard'
 
 // Real Archaeological Sites Data
 const REAL_ARCHAEOLOGICAL_SITES = [
@@ -1958,6 +1959,11 @@ export default function AnalysisPage() {
                 <Advanced3DVisualization />
                 <PerformanceOptimization />
                 <SystemIntegrationHub />
+              </div>
+              
+              {/* Day 14: Final Deployment & Project Completion */}
+              <div className="mt-8">
+                <FinalDeploymentDashboard />
               </div>
             </div>
           </div>
