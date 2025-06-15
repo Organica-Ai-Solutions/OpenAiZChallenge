@@ -9,20 +9,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { 
   Network, 
   Database, 
-  Cloud, 
   Server, 
-  Wifi, 
   Activity, 
   CheckCircle, 
   AlertTriangle, 
   Clock,
-  Zap,
   Settings,
   RefreshCw,
   Play,
   Pause,
   ArrowRight,
-  ArrowLeft,
   BarChart3,
   TrendingUp,
   Globe,
@@ -32,56 +28,14 @@ import {
   Unlock,
   Eye,
   EyeOff,
-  Link,
-  Unlink,
   Upload,
   Download,
-  Sync,
   GitBranch,
-  Layers,
-  Box,
-  Cpu,
-  MemoryStick
+  Box
 } from 'lucide-react'
 
-interface Integration {
-  id: string
-  name: string
-  type: 'api' | 'database' | 'service' | 'storage' | 'analytics'
-  status: 'connected' | 'disconnected' | 'error' | 'syncing'
-  health: number
-  latency: number
-  throughput: number
-  lastSync: Date
-  endpoint: string
-  version: string
-  authentication: 'oauth' | 'api-key' | 'basic' | 'none'
-  dataFlow: 'bidirectional' | 'inbound' | 'outbound'
-}
-
-interface DataFlow {
-  id: string
-  source: string
-  destination: string
-  type: 'archaeological-data' | 'kan-models' | 'visualizations' | 'analytics' | 'user-data'
-  volume: number
-  rate: number
-  status: 'active' | 'paused' | 'error'
-  compression: number
-  encryption: boolean
-}
-
-interface SystemMetrics {
-  totalIntegrations: number
-  activeConnections: number
-  dataTransferred: number
-  averageLatency: number
-  uptime: number
-  errorRate: number
-}
-
 export default function SystemIntegrationHub() {
-  const [integrations, setIntegrations] = useState<Integration[]>([
+  const [integrations, setIntegrations] = useState([
     {
       id: 'int_001',
       name: 'Archaeological Database API',
@@ -154,7 +108,7 @@ export default function SystemIntegrationHub() {
     }
   ])
 
-  const [dataFlows, setDataFlows] = useState<DataFlow[]>([
+  const [dataFlows, setDataFlows] = useState([
     {
       id: 'flow_001',
       source: 'Archaeological Database',
@@ -201,7 +155,7 @@ export default function SystemIntegrationHub() {
     }
   ])
 
-  const [metrics, setMetrics] = useState<SystemMetrics>({
+  const [metrics, setMetrics] = useState({
     totalIntegrations: 5,
     activeConnections: 4,
     dataTransferred: 15.7,
@@ -214,7 +168,6 @@ export default function SystemIntegrationHub() {
   const [isMonitoring, setIsMonitoring] = useState(true)
   const [showSecrets, setShowSecrets] = useState(false)
 
-  // Simulate real-time updates
   useEffect(() => {
     if (!isMonitoring) return
 
@@ -259,7 +212,7 @@ export default function SystemIntegrationHub() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'connected': return <CheckCircle className="h-4 w-4 text-green-400" />
-      case 'syncing': return <Sync className="h-4 w-4 text-blue-400 animate-spin" />
+      case 'syncing': return <RefreshCw className="h-4 w-4 text-blue-400 animate-spin" />
       case 'error': return <AlertTriangle className="h-4 w-4 text-red-400" />
       default: return <Clock className="h-4 w-4 text-gray-400" />
     }
@@ -306,7 +259,6 @@ export default function SystemIntegrationHub() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <Card className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border-blue-500/30">
         <CardHeader>
           <CardTitle className="flex items-center text-white">
@@ -347,7 +299,6 @@ export default function SystemIntegrationHub() {
         </CardContent>
       </Card>
 
-      {/* Control Panel */}
       <div className="flex justify-between items-center">
         <div className="flex gap-2">
           <Button
@@ -383,7 +334,6 @@ export default function SystemIntegrationHub() {
         </div>
       </div>
 
-      {/* Main Dashboard */}
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -394,7 +344,6 @@ export default function SystemIntegrationHub() {
 
         <TabsContent value="overview" className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* System Health */}
             <Card className="bg-slate-800/50 border-slate-700">
               <CardHeader>
                 <CardTitle className="flex items-center text-white">
@@ -423,7 +372,6 @@ export default function SystemIntegrationHub() {
               </CardContent>
             </Card>
 
-            {/* Performance Metrics */}
             <Card className="bg-slate-800/50 border-slate-700">
               <CardHeader>
                 <CardTitle className="flex items-center text-white">
@@ -476,7 +424,6 @@ export default function SystemIntegrationHub() {
             </Card>
           </div>
 
-          {/* Active Data Flows */}
           <Card className="bg-slate-800/50 border-slate-700">
             <CardHeader>
               <CardTitle className="flex items-center text-white">
