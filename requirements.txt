@@ -18,12 +18,15 @@ pyproj
 
 # Optional dependencies for AI models
 openai==1.82.1
-# torch==2.2.0
+# torch>=2.0.0  # Required for KAN integration (optional)
 transformers==4.38.2
 # tf-keras
 # ultralytics==8.1.2  # For YOLOv8
 # spacy  # Commented out - causing build issues
 # langgraph  # Commented out - causing build issues
+
+# KAN (Kolmogorov-Arnold Networks) integration
+# efficient_kan>=0.1.0  # Not available in PyPI, using custom implementation
 
 # Data infrastructure
 redis==5.0.1

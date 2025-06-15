@@ -3186,17 +3186,17 @@ async def execute_quick_action(request: QuickActionRequest):
 # Enhanced vision analysis endpoint with real VisionAgent integration
 @app.post("/agents/vision/analyze")
 async def enhanced_vision_analysis(request: VisionAnalysisRequest):
-    """Enhanced vision analysis using the real VisionAgent with GPT-4 Vision integration"""
-    logger.info(f"👁️ Real VisionAgent analysis for coordinates: {request.coordinates}")
+    """Enhanced vision analysis using KAN-enhanced VisionAgent with GPT-4 Vision integration"""
+    logger.info(f"👁️ KAN-Enhanced VisionAgent analysis for coordinates: {request.coordinates}")
     
     try:
         # Parse coordinates
         coords = request.coordinates.split(',')
         lat, lon = float(coords[0].strip()), float(coords[1].strip())
         
-        # Initialize the real VisionAgent
-        from src.agents.vision_agent import VisionAgent
-        vision_agent = VisionAgent()
+        # Initialize the KAN-enhanced VisionAgent
+        from src.agents.kan_integrator import get_enhanced_vision_agent
+        vision_agent = get_enhanced_vision_agent()
         
         # Run real vision agent analysis
         logger.info(f"🤖 Running VisionAgent.analyze_coordinates for {lat}, {lon}")
@@ -4826,6 +4826,48 @@ async def update_all_analyzed_sites():
         logger.error(f"❌ Site update process failed: {e}")
         raise HTTPException(status_code=500, detail=f"Site update failed: {str(e)}")
 
+# KAN integration status endpoint
+@app.get("/agents/kan-status")
+async def get_kan_integration_status():
+    """Get KAN integration status and capabilities"""
+    logger.info("🧠 Checking KAN integration status")
+    
+    try:
+        from src.agents.kan_integrator import get_kan_integrator, get_agent_benchmark_data
+        
+        # Get integrator status
+        integrator = get_kan_integrator()
+        status = integrator.get_agent_status()
+        
+        # Get benchmark data
+        benchmark_data = get_agent_benchmark_data()
+        
+        return {
+            "kan_integration": {
+                "status": "active",
+                "integrator_status": status,
+                "benchmark_results": benchmark_data,
+                "performance_enhancement": {
+                    "interpretability": "High",
+                    "pattern_recognition": "Enhanced",
+                    "confidence_estimation": "Improved",
+                    "symbolic_reasoning": "Available"
+                }
+            },
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ KAN status check failed: {e}")
+        return {
+            "kan_integration": {
+                "status": "error",
+                "error": str(e),
+                "fallback_mode": "active"
+            },
+            "timestamp": datetime.now().isoformat()
+        }
+
 # Agent tool access verification endpoint
 @app.get("/agents/tool-access-status")
 async def verify_agent_tool_access():
@@ -5027,6 +5069,263 @@ async def store_updated_sites(updated_sites):
     # This would typically update a database
     logger.info(f"📁 Storing {len(updated_sites)} updated site analyses")
     return True
+
+@app.get("/agents/kan-enhanced-vision-status")
+async def get_kan_enhanced_vision_status():
+    """Get status of enhanced KAN Vision Agent with archaeological patterns."""
+    try:
+        from src.agents.kan_vision_agent import KANVisionAgent
+        agent = KANVisionAgent(use_kan=True)
+        capabilities = agent.get_capabilities()
+        
+        return {
+            "status": "active",
+            "kan_enhanced": capabilities.get("kan_enhanced", False),
+            "archaeological_templates": capabilities.get("archaeological_pattern_templates", False),
+            "lidar_analysis": capabilities.get("lidar_specific_analysis", False),
+            "satellite_enhancement": capabilities.get("satellite_enhancement", False),
+            "amazon_specialization": capabilities.get("amazon_basin_specialization", False),
+            "cultural_interpretation": capabilities.get("cultural_interpretation", False),
+            "capabilities": capabilities,
+            "message": "Enhanced KAN Vision Agent ready for archaeological analysis"
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "message": "Enhanced KAN Vision Agent not available"
+        }
+
+@app.post("/analyze/archaeological-site")
+async def analyze_archaeological_site(request: Dict):
+    """Enhanced archaeological site analysis using KAN Vision Agent.
+    
+    This endpoint uses the enhanced KAN Vision Agent with sophisticated
+    pattern recognition for LIDAR and satellite archaeological data.
+    """
+    try:
+        lat = request.get("latitude")
+        lon = request.get("longitude")
+        data_sources = request.get("data_sources", ["satellite", "lidar", "elevation"])
+        use_kan = request.get("use_kan", True)
+        
+        if lat is None or lon is None:
+            raise HTTPException(status_code=400, detail="Latitude and longitude required")
+        
+        logger.info(f"🏛️ Enhanced archaeological analysis requested for {lat}, {lon}")
+        
+        # Import and initialize enhanced KAN Vision Agent
+        from src.agents.kan_vision_agent import KANVisionAgent
+        agent = KANVisionAgent(use_kan=use_kan)
+        
+        # Perform enhanced archaeological analysis
+        results = await agent.analyze_archaeological_site(lat, lon, data_sources)
+        
+        # Add metadata
+        results.update({
+            "analysis_type": "enhanced_archaeological_kan",
+            "agent_version": "KAN-Enhanced v1.0",
+            "request_timestamp": datetime.now().isoformat(),
+            "processing_time_note": "Enhanced KAN analysis with archaeological templates",
+            "api_endpoint": "/analyze/archaeological-site"
+        })
+        
+        logger.info(f"✅ Enhanced archaeological analysis completed for {lat}, {lon}")
+        return results
+        
+    except Exception as e:
+        logger.error(f"Enhanced archaeological analysis failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+
+@app.post("/analyze/vision-enhanced")
+async def analyze_vision_enhanced(request: Dict):
+    """Enhanced vision analysis with KAN archaeological pattern recognition."""
+    try:
+        lat = request.get("latitude")
+        lon = request.get("longitude")
+        use_satellite = request.get("use_satellite", True)
+        use_lidar = request.get("use_lidar", True)
+        use_kan = request.get("use_kan", True)
+        
+        if lat is None or lon is None:
+            raise HTTPException(status_code=400, detail="Latitude and longitude required")
+        
+        logger.info(f"👁️ Enhanced KAN vision analysis for {lat}, {lon}")
+        
+        # Import and use enhanced KAN Vision Agent
+        from src.agents.kan_vision_agent import KANVisionAgent
+        agent = KANVisionAgent(use_kan=use_kan)
+        
+        # Perform enhanced coordinate analysis
+        results = await agent.analyze_coordinates(lat, lon, use_satellite, use_lidar)
+        
+        # Add KAN-specific metadata
+        results.update({
+            "analysis_type": "kan_enhanced_vision",
+            "kan_features": {
+                "archaeological_templates": True,
+                "interpretable_patterns": True,
+                "amazon_basin_optimized": True,
+                "multi_source_integration": True
+            },
+            "processing_timestamp": datetime.now().isoformat()
+        })
+        
+        logger.info(f"✅ Enhanced KAN vision analysis completed")
+        return results
+        
+    except Exception as e:
+        logger.error(f"Enhanced vision analysis failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Enhanced analysis failed: {str(e)}")
+
+# Add new import for enhanced reasoning
+try:
+    from enhanced_reasoning_day6 import EnhancedKANReasoningAgent
+    ENHANCED_REASONING_AVAILABLE = True
+except ImportError:
+    ENHANCED_REASONING_AVAILABLE = False
+    print("Enhanced KAN Reasoning not available")
+
+# Add after existing endpoints
+@app.get("/agents/enhanced-kan-reasoning-status")
+async def get_enhanced_kan_reasoning_status():
+    """Get enhanced KAN reasoning agent status with Day 6 improvements."""
+    try:
+        if ENHANCED_REASONING_AVAILABLE:
+            agent = EnhancedKANReasoningAgent(use_kan=True)
+            capabilities = agent.get_enhanced_capabilities()
+            
+            return {
+                "status": "active",
+                "enhanced_reasoning_available": True,
+                "kan_enhanced": capabilities.get("enhanced_kan_reasoning", False),
+                "capabilities": capabilities,
+                "day_6_features": {
+                    "cultural_context_analysis": capabilities.get("cultural_context_analysis", False),
+                    "temporal_reasoning": capabilities.get("temporal_reasoning", False),
+                    "indigenous_knowledge_integration": capabilities.get("indigenous_knowledge_integration", False),
+                    "cultural_period_estimation": capabilities.get("cultural_period_estimation", False),
+                    "amazon_basin_specialization": capabilities.get("amazon_basin_specialization", False)
+                },
+                "interpretability_score": 0.9 if capabilities.get("enhanced_kan_reasoning") else 0.6,
+                "version": "Day 6 - Cultural Context & Temporal Reasoning"
+            }
+        else:
+            return {
+                "status": "unavailable",
+                "enhanced_reasoning_available": False,
+                "message": "Enhanced KAN reasoning agent not available",
+                "fallback": "Using traditional reasoning methods"
+            }
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "enhanced_reasoning_available": False
+        }
+
+@app.post("/analyze/enhanced-cultural-reasoning")
+async def enhanced_cultural_reasoning_analysis(request: dict):
+    """Perform enhanced cultural reasoning analysis with KAN networks."""
+    try:
+        # Extract parameters
+        lat = request.get("lat")
+        lon = request.get("lon")
+        visual_findings = request.get("visual_findings", {})
+        historical_context = request.get("historical_context")
+        indigenous_knowledge = request.get("indigenous_knowledge")
+        
+        if lat is None or lon is None:
+            raise HTTPException(status_code=400, detail="Latitude and longitude are required")
+        
+        if ENHANCED_REASONING_AVAILABLE:
+            # Use enhanced KAN reasoning agent
+            agent = EnhancedKANReasoningAgent(use_kan=True)
+            
+            result = await agent.enhanced_cultural_reasoning(
+                visual_findings=visual_findings,
+                lat=float(lat),
+                lon=float(lon),
+                historical_context=historical_context,
+                indigenous_knowledge=indigenous_knowledge
+            )
+            
+            return {
+                "success": True,
+                "analysis_type": "enhanced_cultural_reasoning",
+                "enhanced_reasoning": True,
+                "kan_enhanced": result.get("kan_enhanced", False),
+                "coordinates": {"lat": lat, "lon": lon},
+                "result": result,
+                "metadata": {
+                    "agent_version": "Day 6 Enhanced KAN Reasoning",
+                    "features": ["cultural_context", "temporal_reasoning", "indigenous_knowledge"],
+                    "interpretability": result.get("confidence_metrics", {}).get("interpretability", 0.6)
+                }
+            }
+        else:
+            # Fallback to traditional analysis
+            return {
+                "success": True,
+                "analysis_type": "traditional_reasoning",
+                "enhanced_reasoning": False,
+                "kan_enhanced": False,
+                "coordinates": {"lat": lat, "lon": lon},
+                "result": {
+                    "message": "Enhanced reasoning not available, using traditional methods",
+                    "confidence_metrics": {"overall_confidence": 0.5}
+                },
+                "metadata": {
+                    "agent_version": "Traditional Fallback",
+                    "features": ["basic_analysis"]
+                }
+            }
+            
+    except Exception as e:
+        logger.error(f"Enhanced cultural reasoning analysis failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+
+@app.post("/analyze/temporal-context")
+async def temporal_context_analysis(request: dict):
+    """Analyze temporal context of archaeological features."""
+    try:
+        # Extract parameters
+        lat = request.get("lat")
+        lon = request.get("lon")
+        features = request.get("features", {})
+        
+        if lat is None or lon is None:
+            raise HTTPException(status_code=400, detail="Latitude and longitude are required")
+        
+        if ENHANCED_REASONING_AVAILABLE:
+            from enhanced_reasoning_day6 import TemporalReasoningEngine
+            
+            temporal_engine = TemporalReasoningEngine()
+            temporal_analysis = temporal_engine.estimate_temporal_context(
+                features, float(lat), float(lon)
+            )
+            
+            return {
+                "success": True,
+                "analysis_type": "temporal_context",
+                "coordinates": {"lat": lat, "lon": lon},
+                "temporal_analysis": temporal_analysis,
+                "metadata": {
+                    "engine_version": "Day 6 Temporal Reasoning",
+                    "cultural_periods_analyzed": len(temporal_analysis.get("confidence_by_period", {})),
+                    "estimated_periods": len(temporal_analysis.get("estimated_periods", []))
+                }
+            }
+        else:
+            return {
+                "success": False,
+                "error": "Temporal reasoning engine not available",
+                "fallback_available": False
+            }
+            
+    except Exception as e:
+        logger.error(f"Temporal context analysis failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

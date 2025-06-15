@@ -18,18 +18,18 @@ const nextConfig = {
     NEXT_PUBLIC_GOOGLE_MAPS_KEY: 'AIzaSyCCMYQ_eQdaKPV30JGFEv_556O8N-ZzV9E',
   },
   // Performance optimizations
-  swcMinify: true,
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-dialog'],
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
+  },
+  // Turbopack configuration (moved from experimental.turbo)
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
       },
     },
   },

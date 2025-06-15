@@ -181,6 +181,19 @@ export default function AnalysisPage() {
   const [agentStatus, setAgentStatus] = useState<any>({})
   const [toolAccessStatus, setToolAccessStatus] = useState<any>({})
   const [analysisMode, setAnalysisMode] = useState<"standard" | "comprehensive" | "specialized">("comprehensive")
+  const [kanSettings, setKanSettings] = useState<{
+    enabled: boolean
+    interpretabilityThreshold: number
+    culturalContext: boolean
+    temporalReasoning: boolean
+    indigenousKnowledge: boolean
+  }>({
+    enabled: true,
+    interpretabilityThreshold: 75,
+    culturalContext: true,
+    temporalReasoning: true,
+    indigenousKnowledge: true
+  })
   const [specializedAnalysis, setSpecializedAnalysis] = useState<{
     cultural: any,
     settlement: any,
@@ -1146,6 +1159,69 @@ export default function AnalysisPage() {
                       />
                     </div>
                   ))}
+                </div>
+                
+                <Separator className="bg-slate-700" />
+                
+                <div className="space-y-3">
+                  <Label className="text-slate-300 text-sm flex items-center gap-2">
+                    <Sparkles className="w-3 h-3 text-violet-400" />
+                    KAN Reasoning Engine
+                  </Label>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-400 text-sm">Enable KAN Networks</span>
+                    <Switch
+                      checked={kanSettings.enabled}
+                      onCheckedChange={(checked) => 
+                        setKanSettings(prev => ({ ...prev, enabled: checked }))
+                      }
+                    />
+                  </div>
+                  {kanSettings.enabled && (
+                    <>
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <Label className="text-slate-400 text-sm">Interpretability Threshold</Label>
+                          <span className="text-violet-400 text-sm font-medium">{kanSettings.interpretabilityThreshold}%</span>
+                        </div>
+                        <Slider
+                          value={[kanSettings.interpretabilityThreshold]}
+                          onValueChange={(value) => setKanSettings(prev => ({ ...prev, interpretabilityThreshold: value[0] }))}
+                          max={100}
+                          min={50}
+                          step={5}
+                          className="w-full"
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-400 text-sm">Cultural Context Analysis</span>
+                        <Switch
+                          checked={kanSettings.culturalContext}
+                          onCheckedChange={(checked) => 
+                            setKanSettings(prev => ({ ...prev, culturalContext: checked }))
+                          }
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-400 text-sm">Temporal Reasoning</span>
+                        <Switch
+                          checked={kanSettings.temporalReasoning}
+                          onCheckedChange={(checked) => 
+                            setKanSettings(prev => ({ ...prev, temporalReasoning: checked }))
+                          }
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-400 text-sm">Indigenous Knowledge Integration</span>
+                        <Switch
+                          checked={kanSettings.indigenousKnowledge}
+                          onCheckedChange={(checked) => 
+                            setKanSettings(prev => ({ ...prev, indigenousKnowledge: checked }))
+                          }
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>

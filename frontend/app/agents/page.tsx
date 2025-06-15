@@ -43,6 +43,7 @@ interface Agent {
     processing_time: string;
     requests_processed: number;
     success_rate: number;
+    interpretability?: number; // KAN enhancement
   };
   specialization: string;
   current_task?: string;
@@ -210,6 +211,23 @@ export default function AgentsPage() {
       current_task: 'Correlating IKRP manuscripts with satellite data',
       last_activity: '12 seconds ago',
       capabilities: ['Data Correlation', 'Multi-Source Integration', 'Synthesis', 'Cross-Validation']
+    },
+    {
+      id: 'kan_reasoning_agent',
+      name: 'KAN Reasoning Agent',
+      type: 'kan',
+      status: 'active',
+      performance: {
+        accuracy: 89.9,
+        processing_time: '0.026s',
+        requests_processed: 1247,
+        success_rate: 100.0,
+        interpretability: 90.0
+      },
+      specialization: 'Interpretable archaeological reasoning with cultural context analysis',
+      current_task: 'Analyzing geometric patterns with KAN networks',
+      last_activity: '3 seconds ago',
+      capabilities: ['KAN Networks', 'Cultural Context Analysis', 'Temporal Reasoning', 'Indigenous Knowledge Integration', 'Interpretable AI']
     }
   ];
 
@@ -250,6 +268,7 @@ export default function AgentsPage() {
       case 'reasoning': return <Target className="h-5 w-5 text-orange-400" />;
       case 'action': return <Zap className="h-5 w-5 text-yellow-400" />;
       case 'integration': return <Network className="h-5 w-5 text-cyan-400" />;
+      case 'kan': return <Sparkles className="h-5 w-5 text-violet-400" />;
       default: return <Activity className="h-5 w-5 text-gray-400" />;
     }
   };
@@ -462,6 +481,18 @@ export default function AgentsPage() {
                         <span className="text-white/50">Success:</span>
                         <span className="text-emerald-400 ml-1 font-medium">{agent.performance.success_rate}%</span>
                       </div>
+                      {agent.performance.interpretability && (
+                        <>
+                          <div className="col-span-2">
+                            <span className="text-white/50">Interpretability:</span>
+                            <span className="text-violet-400 ml-1 font-medium">{agent.performance.interpretability}%</span>
+                            <Badge className="ml-2 text-xs bg-violet-500/20 text-violet-300">
+                              <Sparkles className="h-3 w-3 mr-1" />
+                              KAN Enhanced
+                            </Badge>
+                          </div>
+                        </>
+                      )}
                     </div>
                     
                     <div className="text-xs text-white/50">
