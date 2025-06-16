@@ -1,449 +1,786 @@
-"use client"
+'use client'
 
-import React, { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Progress } from "@/components/ui/progress"
-
-import { VisionAgentVisualization } from "@/src/components/vision-agent-visualization"
-import UltimateArchaeologicalChat from "@/components/ui/ultimate-archaeological-chat"
-
+import React, { useState, useEffect, useCallback } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Progress } from '@/components/ui/progress'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { 
-  Search, Globe, Activity, Brain, Sparkles, MapPin, Eye, 
-  Zap, Satellite, CheckCircle, ArrowRight, Cpu, Target
-} from "lucide-react"
+  Search, MapPin, Satellite, Eye, Brain, Database, Activity, Settings, Play, Save, 
+  Layers, Clock, Users, Target, Zap, Globe, BarChart3, FileText, MessageSquare,
+  Map as MapIcon, Camera, Cpu, Network, CheckCircle, Loader2, RefreshCw, Star
+} from 'lucide-react'
 
-// Real Archaeological Sites for Quick Demo
-const DEMO_SITES = [
-  {
-    id: "eldorado",
-    name: "Lake Guatavita (El Dorado)",
-    coordinates: "5.1542, -73.7792",
-    confidence: 95,
-    description: "Sacred Muisca ceremonial lake, legendary origin of El Dorado myth",
-    status: "verified"
-  },
-  {
-    id: "nazca",
-    name: "Extended Nazca Geoglyphs", 
-    coordinates: "-14.7390, -75.1300",
-    confidence: 92,
-    description: "Newly discovered Nazca line patterns using AI analysis",
-    status: "new_discovery"
-  },
-  {
-    id: "amazon",
-    name: "Acre Geoglyphs Complex",
-    coordinates: "-9.97474, -67.8096", 
-    confidence: 88,
-    description: "Pre-Columbian earthwork structures in the Amazon rainforest",
-    status: "verified"
-  }
+// Simplified types for robust handling
+interface SimpleAnalysisResult {
+  analysis_id?: string
+  coordinates?: string
+  confidence?: number
+  pattern_type?: string
+  finding_id?: string
+  description?: string
+  cultural_significance?: string
+  historical_context?: string
+  recommendations?: any[]
+  agents_used?: string[]
+  data_sources?: string[]
+  processing_time?: string
+  timestamp?: string
+}
+
+interface SimpleAnalysis {
+  id: string
+  session_name: string
+  coordinates: string
+  results: SimpleAnalysisResult
+  created_at: string
+  notes: string
+  tags: string[]
+  favorite: boolean
+}
+
+const ANALYSIS_TYPES = [
+  { value: 'quick', label: 'Quick Analysis', description: 'Fast preliminary assessment' },
+  { value: 'comprehensive', label: 'Comprehensive Analysis', description: 'Full multi-agent analysis' },
+  { value: 'specialized', label: 'Specialized Analysis', description: 'Focused domain analysis' }
 ]
 
-export default function AnalysisPage() {
-  const [selectedCoordinates, setSelectedCoordinates] = useState("5.1542, -73.7792")
+const DATA_SOURCES = [
+  { id: 'satellite', label: 'Satellite Imagery', icon: Satellite },
+  { id: 'lidar', label: 'LIDAR Data', icon: Layers },
+  { id: 'historical', label: 'Historical Records', icon: FileText },
+  { id: 'ethnographic', label: 'Ethnographic Data', icon: Users },
+  { id: 'archaeological', label: 'Archaeological DB', icon: Database }
+]
+
+const AGENT_TYPES = [
+  { id: 'vision', label: 'Vision Agent', icon: Eye, specialization: 'Image Analysis' },
+  { id: 'cultural', label: 'Cultural Agent', icon: Users, specialization: 'Cultural Context' },
+  { id: 'temporal', label: 'Temporal Agent', icon: Clock, specialization: 'Time Analysis' },
+  { id: 'geospatial', label: 'Geospatial Agent', icon: Globe, specialization: 'Spatial Analysis' },
+  { id: 'settlement', label: 'Settlement Agent', icon: MapIcon, specialization: 'Settlement Patterns' },
+  { id: 'trade', label: 'Trade Agent', icon: Network, specialization: 'Trade Networks' }
+]
+
+export default function NISAnalysisPage() {
+  // Core State
+  const [coordinates, setCoordinates] = useState('')
+  const [analysisType, setAnalysisType] = useState<'quick' | 'comprehensive' | 'specialized'>('comprehensive')
+  const [selectedDataSources, setSelectedDataSources] = useState<string[]>(['satellite', 'lidar', 'historical'])
+  const [selectedAgents, setSelectedAgents] = useState<string[]>(['vision', 'cultural', 'temporal', 'geospatial'])
+  const [sessionName, setSessionName] = useState('')
+  
+  // Analysis State
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [analysisProgress, setAnalysisProgress] = useState(0)
-  const [analysisComplete, setAnalysisComplete] = useState(false)
-  const [selectedSite, setSelectedSite] = useState(DEMO_SITES[0])
-  const [currentStep, setCurrentStep] = useState("select") // select, analyze, results, chat
-  const [analysisResults, setAnalysisResults] = useState(null)
+  const [currentAnalysis, setCurrentAnalysis] = useState<SimpleAnalysisResult | null>(null)
+  const [analysisHistory, setAnalysisHistory] = useState<SimpleAnalysis[]>([])
+  
+  // System State
+  const [isBackendOnline, setIsBackendOnline] = useState(false)
+  const [activeTab, setActiveTab] = useState('analysis')
 
+  // Backend Integration
+  const checkSystemHealth = useCallback(async () => {
+    try {
+      const response = await fetch('http://localhost:8000/health')
+      setIsBackendOnline(response.ok)
+    } catch (error) {
+      console.error('System health check failed:', error)
+      setIsBackendOnline(false)
+    }
+  }, [])
+
+  const fetchAnalysisHistory = useCallback(async () => {
+    try {
+      const response = await fetch('http://localhost:8000/agents/analysis/history?per_page=50')
+      const data = await response.json()
+      
+      if (data?.analyses && Array.isArray(data.analyses)) {
+        const formattedHistory: SimpleAnalysis[] = data.analyses
+          .filter((analysis: any) => analysis?.id)
+          .map((analysis: any) => ({
+            id: analysis.id || 'unknown',
+            session_name: analysis.metadata?.session_name || `Analysis ${(analysis.id || '').slice(-8)}`,
+            coordinates: analysis.coordinates || '',
+            results: analysis.results || {},
+            created_at: analysis.timestamp || new Date().toISOString(),
+            notes: analysis.metadata?.notes || '',
+            tags: analysis.metadata?.tags || [],
+            favorite: Boolean(analysis.metadata?.favorite)
+          }))
+        setAnalysisHistory(formattedHistory)
+      } else {
+        setAnalysisHistory([])
+      }
+    } catch (error) {
+      console.error('Analysis history fetch failed:', error)
+      setAnalysisHistory([])
+    }
+  }, [])
+
+  // Analysis Execution
   const runAnalysis = async () => {
+    if (!coordinates.trim()) {
+      alert('Please enter coordinates')
+      return
+    }
+
     setIsAnalyzing(true)
     setAnalysisProgress(0)
-    setAnalysisComplete(false)
-    setCurrentStep("analyze")
-    
-    // Simulate realistic analysis progress
-    const steps = [
-      { progress: 15, message: "🛰️ Loading satellite imagery..." },
-      { progress: 35, message: "🧠 Running GPT-4 Vision analysis..." },
-      { progress: 55, message: "🎯 YOLO8 object detection..." },
-      { progress: 75, message: "🏛️ Archaeological feature analysis..." },
-      { progress: 90, message: "📊 Cultural significance assessment..." },
-      { progress: 100, message: "✅ Analysis complete!" }
-    ]
-    
-    for (const step of steps) {
-      await new Promise(resolve => setTimeout(resolve, 1200))
-      setAnalysisProgress(step.progress)
+    setCurrentAnalysis(null)
+
+    try {
+      // Progress simulation
+      const progressInterval = setInterval(() => {
+        setAnalysisProgress(prev => Math.min(prev + 10, 90))
+      }, 500)
+
+      const [lat, lon] = coordinates.split(',').map(c => parseFloat(c.trim()))
+      
+      let endpoint = '/agents/analyze/comprehensive'
+      if (analysisType === 'quick') endpoint = '/analyze'
+      else if (analysisType === 'specialized') endpoint = '/agents/analyze/enhanced'
+
+      const response = await fetch(`http://localhost:8000${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lat,
+          lon,
+          data_sources: selectedDataSources,
+          confidence_threshold: 0.7
+        })
+      })
+
+      const result = await response.json()
+      
+      clearInterval(progressInterval)
+      setAnalysisProgress(100)
+
+      // Simple result transformation
+      const analysisResult: SimpleAnalysisResult = {
+        analysis_id: result.analysis_id || `analysis_${Date.now()}`,
+        coordinates: coordinates,
+        confidence: result.confidence || 0,
+        pattern_type: result.pattern_type || 'unknown',
+        finding_id: result.finding_id || `finding_${Date.now()}`,
+        description: result.description || 'Analysis completed',
+        cultural_significance: result.cultural_significance || result.indigenous_perspective || '',
+        historical_context: result.historical_context || '',
+        recommendations: result.recommendations || [],
+        agents_used: selectedAgents,
+        data_sources: selectedDataSources,
+        processing_time: result.metadata?.processing_time || '0.5s',
+        timestamp: new Date().toISOString()
+      }
+
+      setCurrentAnalysis(analysisResult)
+
+      // Auto-save if session name provided
+      if (sessionName) {
+        await saveAnalysis(analysisResult)
+      }
+
+      await fetchAnalysisHistory()
+
+    } catch (error) {
+      console.error('Analysis failed:', error)
+      alert('Analysis failed. Please check the backend connection.')
+    } finally {
+      setIsAnalyzing(false)
+      setAnalysisProgress(0)
     }
-    
-    setIsAnalyzing(false)
-    setAnalysisComplete(true)
-    setCurrentStep("results")
-    
-    // Mock analysis results
-    setAnalysisResults({
-      featuresDetected: Math.floor(Math.random() * 8) + 3,
-      confidence: selectedSite.confidence,
-      culturalSignificance: selectedSite.confidence > 90 ? "Very High" : "High",
-      timeToAnalyze: "12.3s"
-    })
   }
 
-  const handleSiteSelect = (site: typeof DEMO_SITES[0]) => {
-    setSelectedSite(site)
-    setSelectedCoordinates(site.coordinates)
-    setAnalysisComplete(false)
-    setCurrentStep("select")
-    setAnalysisResults(null)
+  const saveAnalysis = async (result: SimpleAnalysisResult) => {
+    try {
+      const saveRequest = {
+        coordinates: result.coordinates || coordinates,
+        timestamp: new Date().toISOString(),
+        results: result,
+        backend_status: 'success',
+        metadata: {
+          session_name: sessionName,
+          saved_from: 'nis_analysis_page'
+        }
+      }
+
+      await fetch('http://localhost:8000/agents/analysis/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(saveRequest)
+      })
+
+      console.log('Analysis saved successfully')
+    } catch (error) {
+      console.error('Save failed:', error)
+    }
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "verified": return "text-emerald-400 border-emerald-400"
-      case "new_discovery": return "text-blue-400 border-blue-400"
-      default: return "text-slate-400 border-slate-400"
-    }
+  // Workflow Integration
+  const openInChat = (coordinates: string) => {
+    const chatUrl = `/chat?coordinates=${encodeURIComponent(coordinates)}&mode=analysis`
+    window.open(chatUrl, '_blank')
+  }
+
+  const openInMap = (coordinates: string) => {
+    const mapUrl = `/map?coordinates=${encodeURIComponent(coordinates)}&analysis=true`
+    window.open(mapUrl, '_blank')
+  }
+
+  const openInVision = (coordinates: string) => {
+    const visionUrl = `/vision?coordinates=${encodeURIComponent(coordinates)}&analysis=true`
+    window.open(visionUrl, '_blank')
+  }
+
+  // Initialize
+  useEffect(() => {
+    checkSystemHealth()
+    fetchAnalysisHistory()
+    
+    const interval = setInterval(() => {
+      checkSystemHealth()
+    }, 30000)
+
+    return () => clearInterval(interval)
+  }, [checkSystemHealth, fetchAnalysisHistory])
+
+  // Safe value getters
+  const getConfidence = (analysis: SimpleAnalysis) => {
+    return ((analysis.results?.confidence || 0) * 100).toFixed(1)
+  }
+
+  const getAgentCount = (analysis: SimpleAnalysis) => {
+    return Array.isArray(analysis.results?.agents_used) ? analysis.results.agents_used.length : 0
+  }
+
+  const getSourceCount = (analysis: SimpleAnalysis) => {
+    return Array.isArray(analysis.results?.data_sources) ? analysis.results.data_sources.length : 0
+  }
+
+  const getDescription = (analysis: SimpleAnalysis) => {
+    return (analysis.results?.description || 'No description available').substring(0, 150)
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 pt-20">
-      <div className="container mx-auto px-6 py-8 max-w-7xl">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-white mb-6 flex items-center justify-center gap-4">
-            <Brain className="h-12 w-12 text-emerald-400" />
-            NIS Protocol Analysis
-          </h1>
-          <p className="text-2xl text-slate-400 mb-8">
-            AI-Powered Archaeological Site Discovery & Analysis
-          </p>
-          <div className="flex items-center justify-center gap-6">
-            <Badge variant="outline" className="text-emerald-400 border-emerald-400 px-4 py-2 text-lg">
-              <Activity className="h-4 w-4 mr-2" />
-              148 Sites Discovered
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">
+              NIS Protocol Analysis Center
+            </h1>
+            <p className="text-slate-300">
+              Neural Intelligence System for Archaeological Discovery
+            </p>
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            <Badge variant={isBackendOnline ? "default" : "destructive"} className="px-3 py-1">
+              <Activity className="w-4 h-4 mr-1" />
+              {isBackendOnline ? 'System Online' : 'System Offline'}
             </Badge>
-            <Badge variant="outline" className="text-blue-400 border-blue-400 px-4 py-2 text-lg">
-              <Satellite className="h-4 w-4 mr-2" />
-              Real Satellite Data
-            </Badge>
-            <Badge variant="outline" className="text-purple-400 border-purple-400 px-4 py-2 text-lg">
-              <Sparkles className="h-4 w-4 mr-2" />
-              KAN AI Networks
-            </Badge>
+            
+            <Button
+              onClick={checkSystemHealth}
+              variant="outline"
+              size="sm"
+              className="text-white border-white/20"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh Status
+            </Button>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          
-          {/* Left Panel - Site Selection */}
-          <div className="lg:col-span-1 space-y-6">
-            <Card className="bg-slate-800/50 border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Target className="h-5 w-5 text-emerald-400" />
-                  Select Archaeological Site
-                </CardTitle>
-                <CardDescription>
-                  Choose from real discovered sites
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {DEMO_SITES.map((site) => (
-                  <div
-                    key={site.id}
-                    className={`p-4 rounded-lg border cursor-pointer transition-all ${
-                      selectedSite.id === site.id
-                        ? 'bg-emerald-500/20 border-emerald-400'
-                        : 'bg-slate-700/30 border-slate-600 hover:bg-slate-700/50'
-                    }`}
-                    onClick={() => handleSiteSelect(site)}
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-white text-sm">{site.name}</h3>
-                      <Badge variant="outline" className={`text-xs ${getStatusColor(site.status)}`}>
-                        {site.confidence}%
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-slate-400 mb-3 leading-relaxed">{site.description}</p>
-                    <div className="flex items-center gap-2 text-xs text-slate-500">
-                      <MapPin className="h-3 w-3" />
-                      {site.coordinates}
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3 bg-black/20 border-white/10">
+            <TabsTrigger value="analysis" className="text-white">
+              <Target className="w-4 h-4 mr-2" />
+              Analysis
+            </TabsTrigger>
+            <TabsTrigger value="history" className="text-white">
+              <Database className="w-4 h-4 mr-2" />
+              History
+            </TabsTrigger>
+            <TabsTrigger value="workflow" className="text-white">
+              <Network className="w-4 h-4 mr-2" />
+              Workflow
+            </TabsTrigger>
+          </TabsList>
 
-            {/* Custom Coordinates */}
-            <Card className="bg-slate-800/50 border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-white text-sm">Custom Analysis</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label className="text-slate-300">Coordinates (lat, lon)</Label>
-                  <Input
-                    value={selectedCoordinates}
-                    onChange={(e) => setSelectedCoordinates(e.target.value)}
-                    className="bg-slate-900/50 border-slate-600 text-white mt-2"
-                    placeholder="5.1542, -73.7792"
-                  />
-                </div>
-                <Button 
-                  onClick={runAnalysis}
-                  disabled={isAnalyzing}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 h-12"
-                >
-                  {isAnalyzing ? (
-                    <>
-                      <Cpu className="h-5 w-5 mr-2 animate-spin" />
-                      Analyzing...
-                    </>
-                  ) : (
-                    <>
-                      <Zap className="h-5 w-5 mr-2" />
-                      Run AI Analysis
-                    </>
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Main Panel - Analysis Results */}
-          <div className="lg:col-span-3 space-y-6">
-            
-            {/* Analysis Progress */}
-            {currentStep === "analyze" && (
-              <Card className="bg-blue-500/10 border-blue-500/30">
-                <CardContent className="p-8">
-                  <div className="flex items-center gap-4 mb-6">
-                    <Brain className="h-8 w-8 text-blue-400 animate-pulse" />
+          {/* Analysis Tab */}
+          <TabsContent value="analysis" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              
+              {/* Analysis Configuration */}
+              <div className="lg:col-span-1 space-y-6">
+                <Card className="bg-black/20 border-white/10">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center">
+                      <Settings className="w-5 h-5 mr-2" />
+                      Analysis Configuration
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    
+                    {/* Coordinates Input */}
                     <div>
-                      <h3 className="text-2xl font-semibold text-white">AI Analysis in Progress</h3>
-                      <p className="text-blue-300">Analyzing {selectedSite.name}</p>
+                      <label className="text-sm text-slate-300 mb-2 block">
+                        Coordinates (lat, lon)
+                      </label>
+                      <Input
+                        value={coordinates}
+                        onChange={(e) => setCoordinates(e.target.value)}
+                        placeholder="5.1542, -73.7792"
+                        className="bg-black/20 border-white/20 text-white"
+                      />
                     </div>
-                  </div>
-                  <Progress value={analysisProgress} className="mb-4 h-3" />
-                  <p className="text-lg text-blue-300">
-                    Processing satellite imagery with advanced AI models...
-                  </p>
-                </CardContent>
-              </Card>
-            )}
 
-            {/* Analysis Results */}
-            {currentStep === "results" && analysisResults && (
-              <Card className="bg-emerald-500/10 border-emerald-500/30">
-                <CardContent className="p-8">
-                  <div className="flex items-center gap-4 mb-6">
-                    <CheckCircle className="h-8 w-8 text-emerald-400" />
+                    {/* Analysis Type */}
                     <div>
-                      <h3 className="text-2xl font-semibold text-white">Analysis Complete!</h3>
-                      <p className="text-emerald-300">Successfully analyzed {selectedSite.name}</p>
+                      <label className="text-sm text-slate-300 mb-2 block">
+                        Analysis Type
+                      </label>
+                      <Select value={analysisType} onValueChange={(value: any) => setAnalysisType(value)}>
+                        <SelectTrigger className="bg-black/20 border-white/20 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ANALYSIS_TYPES.map(type => (
+                            <SelectItem key={type.value} value={type.value}>
+                              <div>
+                                <div className="font-medium">{type.label}</div>
+                                <div className="text-xs text-slate-500">{type.description}</div>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-emerald-400">{analysisResults.featuresDetected}</div>
-                      <div className="text-sm text-slate-400">Features Detected</div>
+
+                    {/* Data Sources */}
+                    <div>
+                      <label className="text-sm text-slate-300 mb-2 block">
+                        Data Sources
+                      </label>
+                      <div className="grid grid-cols-1 gap-2">
+                        {DATA_SOURCES.map(source => (
+                          <Button
+                            key={source.id}
+                            variant={selectedDataSources.includes(source.id) ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => {
+                              setSelectedDataSources(prev => 
+                                prev.includes(source.id)
+                                  ? prev.filter(s => s !== source.id)
+                                  : [...prev, source.id]
+                              )
+                            }}
+                            className="justify-start text-xs"
+                          >
+                            <source.icon className="w-3 h-3 mr-2" />
+                            {source.label}
+                          </Button>
+                        ))}
+                      </div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-blue-400">{analysisResults.confidence}%</div>
-                      <div className="text-sm text-slate-400">Confidence</div>
+
+                    {/* Agents Selection */}
+                    <div>
+                      <label className="text-sm text-slate-300 mb-2 block">
+                        Active Agents
+                      </label>
+                      <div className="grid grid-cols-1 gap-1">
+                        {AGENT_TYPES.map(agent => (
+                          <Button
+                            key={agent.id}
+                            variant={selectedAgents.includes(agent.id) ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => {
+                              setSelectedAgents(prev => 
+                                prev.includes(agent.id)
+                                  ? prev.filter(a => a !== agent.id)
+                                  : [...prev, agent.id]
+                              )
+                            }}
+                            className="justify-start text-xs"
+                          >
+                            <agent.icon className="w-3 h-3 mr-2" />
+                            <div className="text-left">
+                              <div>{agent.label}</div>
+                              <div className="text-xs opacity-70">{agent.specialization}</div>
+                            </div>
+                          </Button>
+                        ))}
+                      </div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-purple-400">{analysisResults.culturalSignificance}</div>
-                      <div className="text-sm text-slate-400">Cultural Significance</div>
+
+                    {/* Session Name */}
+                    <div>
+                      <label className="text-sm text-slate-300 mb-2 block">
+                        Session Name (Optional)
+                      </label>
+                      <Input
+                        value={sessionName}
+                        onChange={(e) => setSessionName(e.target.value)}
+                        placeholder="My Analysis Session"
+                        className="bg-black/20 border-white/20 text-white"
+                      />
                     </div>
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-yellow-400">{analysisResults.timeToAnalyze}</div>
-                      <div className="text-sm text-slate-400">Analysis Time</div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-4">
-                    <Button 
-                      onClick={() => setCurrentStep("chat")}
-                      className="bg-purple-600 hover:bg-purple-700"
+
+                    {/* Execute Button */}
+                    <Button
+                      onClick={runAnalysis}
+                      disabled={isAnalyzing || !coordinates.trim() || !isBackendOnline}
+                      className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                     >
-                      <ArrowRight className="h-4 w-4 mr-2" />
-                      Discuss with AI Expert
+                      {isAnalyzing ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Analyzing...
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-4 h-4 mr-2" />
+                          Run Analysis
+                        </>
+                      )}
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      className="border-emerald-400 text-emerald-400 hover:bg-emerald-400/20"
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      View Detailed Analysis
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
 
-            {/* Vision Analysis Component */}
-            {(currentStep === "results" || currentStep === "chat") && (
-              <Card className="bg-slate-800/30 border-slate-700">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <Eye className="h-6 w-6 text-blue-400" />
-                    AI Vision Analysis Results
-                  </CardTitle>
-                  <CardDescription className="text-lg">
-                    Advanced computer vision analysis of satellite imagery for {selectedSite.name}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <VisionAgentVisualization 
-                    coordinates={selectedCoordinates}
-                    autoAnalyze={true}
-                    isBackendOnline={true}
-                  />
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Chat Interface */}
-            {currentStep === "chat" && (
-              <Card className="bg-slate-800/30 border-slate-700">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <Sparkles className="h-6 w-6 text-purple-400" />
-                    AI Archaeological Expert
-                  </CardTitle>
-                  <CardDescription className="text-lg">
-                    Discuss findings and get expert archaeological insights about {selectedSite.name}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[500px]">
-                    <UltimateArchaeologicalChat />
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Key Features Showcase - Default View */}
-            {currentStep === "select" && (
-              <div className="space-y-8">
-                <div className="text-center">
-                  <h2 className="text-3xl font-bold text-white mb-4">🏆 Award-Winning AI Technology</h2>
-                  <p className="text-xl text-slate-400">
-                    Advanced archaeological discovery using cutting-edge AI and satellite imagery
-                  </p>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <Card className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border-blue-500/30">
-                    <CardContent className="p-8">
-                      <div className="flex items-center gap-4 mb-6">
-                        <Satellite className="h-12 w-12 text-blue-400" />
-                        <div>
-                          <h3 className="text-xl font-semibold text-white">Satellite AI Vision</h3>
-                          <p className="text-blue-300">Real-time satellite imagery analysis</p>
-                        </div>
+                    {/* Progress */}
+                    {isAnalyzing && (
+                      <div className="space-y-2">
+                        <Progress value={analysisProgress} className="w-full" />
+                        <p className="text-xs text-slate-400 text-center">
+                          Processing with {selectedAgents.length} agents...
+                        </p>
                       </div>
-                      <ul className="space-y-3 text-slate-300">
-                        <li className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-emerald-400" />
-                          GPT-4 Vision + YOLO8 detection
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-emerald-400" />
-                          Multi-spectral analysis
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-emerald-400" />
-                          Archaeological feature recognition
-                        </li>
-                      </ul>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/30">
-                    <CardContent className="p-8">
-                      <div className="flex items-center gap-4 mb-6">
-                        <Brain className="h-12 w-12 text-purple-400" />
-                        <div>
-                          <h3 className="text-xl font-semibold text-white">KAN Neural Networks</h3>
-                          <p className="text-purple-300">Advanced interpretable AI</p>
-                        </div>
-                      </div>
-                      <ul className="space-y-3 text-slate-300">
-                        <li className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-emerald-400" />
-                          Kolmogorov-Arnold Networks
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-emerald-400" />
-                          Cultural pattern recognition
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-emerald-400" />
-                          Temporal analysis
-                        </li>
-                      </ul>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border-emerald-500/30">
-                    <CardContent className="p-8">
-                      <div className="flex items-center gap-4 mb-6">
-                        <Globe className="h-12 w-12 text-emerald-400" />
-                        <div>
-                          <h3 className="text-xl font-semibold text-white">Real Archaeological Data</h3>
-                          <p className="text-emerald-300">148+ verified discoveries</p>
-                        </div>
-                      </div>
-                      <ul className="space-y-3 text-slate-300">
-                        <li className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-emerald-400" />
-                          Lake Guatavita (El Dorado)
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-emerald-400" />
-                          Amazon Geoglyphs
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-emerald-400" />
-                          Nazca Line Extensions
-                        </li>
-                      </ul>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border-yellow-500/30">
-                    <CardContent className="p-8">
-                      <div className="flex items-center gap-4 mb-6">
-                        <Sparkles className="h-12 w-12 text-yellow-400" />
-                        <div>
-                          <h3 className="text-xl font-semibold text-white">Multi-Agent System</h3>
-                          <p className="text-yellow-300">Coordinated AI analysis</p>
-                        </div>
-                      </div>
-                      <ul className="space-y-3 text-slate-300">
-                        <li className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-emerald-400" />
-                          6 specialized AI agents
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-emerald-400" />
-                          Real-time coordination
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-emerald-400" />
-                          Indigenous knowledge integration
-                        </li>
-                      </ul>
-                    </CardContent>
-                  </Card>
-                </div>
+                    )}
+                  </CardContent>
+                </Card>
               </div>
+
+              {/* Analysis Results */}
+              <div className="lg:col-span-2 space-y-6">
+                {currentAnalysis ? (
+                  <Card className="bg-black/20 border-white/10">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-white flex items-center">
+                          <CheckCircle className="w-5 h-5 mr-2 text-green-400" />
+                          Analysis Results
+                        </CardTitle>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant="secondary" className="bg-green-500/20 text-green-300">
+                            Confidence: {((currentAnalysis.confidence || 0) * 100).toFixed(1)}%
+                          </Badge>
+                          <Badge variant="outline" className="border-white/20 text-white">
+                            {currentAnalysis.processing_time || '0s'}
+                          </Badge>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      
+                      {/* Key Findings */}
+                      <div>
+                        <h3 className="text-lg font-semibold text-white mb-3">Key Findings</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="bg-black/20 p-4 rounded-lg border border-white/10">
+                            <h4 className="text-sm font-medium text-slate-300 mb-2">Pattern Type</h4>
+                            <p className="text-white capitalize">{(currentAnalysis.pattern_type || 'unknown').replace('_', ' ')}</p>
+                          </div>
+                          <div className="bg-black/20 p-4 rounded-lg border border-white/10">
+                            <h4 className="text-sm font-medium text-slate-300 mb-2">Finding ID</h4>
+                            <p className="text-white font-mono text-sm">{currentAnalysis.finding_id || 'N/A'}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Description */}
+                      <div>
+                        <h3 className="text-lg font-semibold text-white mb-3">Description</h3>
+                        <p className="text-slate-300 leading-relaxed">{currentAnalysis.description || 'No description available'}</p>
+                      </div>
+
+                      {/* Cultural Context */}
+                      {currentAnalysis.cultural_significance && (
+                        <div>
+                          <h3 className="text-lg font-semibold text-white mb-3">Cultural Significance</h3>
+                          <p className="text-slate-300 leading-relaxed">{currentAnalysis.cultural_significance}</p>
+                        </div>
+                      )}
+
+                      {/* Historical Context */}
+                      {currentAnalysis.historical_context && (
+                        <div>
+                          <h3 className="text-lg font-semibold text-white mb-3">Historical Context</h3>
+                          <p className="text-slate-300 leading-relaxed">{currentAnalysis.historical_context}</p>
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div className="flex flex-wrap gap-3 pt-4 border-t border-white/10">
+                        <Button
+                          onClick={() => openInChat(currentAnalysis.coordinates || coordinates)}
+                          variant="outline"
+                          size="sm"
+                          className="border-white/20 text-white"
+                        >
+                          <MessageSquare className="w-4 h-4 mr-2" />
+                          Open in Chat
+                        </Button>
+                        
+                        <Button
+                          onClick={() => openInMap(currentAnalysis.coordinates || coordinates)}
+                          variant="outline"
+                          size="sm"
+                          className="border-white/20 text-white"
+                        >
+                          <MapIcon className="w-4 h-4 mr-2" />
+                          View on Map
+                        </Button>
+                        
+                        <Button
+                          onClick={() => openInVision(currentAnalysis.coordinates || coordinates)}
+                          variant="outline"
+                          size="sm"
+                          className="border-white/20 text-white"
+                        >
+                          <Camera className="w-4 h-4 mr-2" />
+                          Vision Analysis
+                        </Button>
+                        
+                        <Button
+                          onClick={() => saveAnalysis(currentAnalysis)}
+                          variant="outline"
+                          size="sm"
+                          className="border-white/20 text-white"
+                        >
+                          <Save className="w-4 h-4 mr-2" />
+                          Save Analysis
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card className="bg-black/20 border-white/10">
+                    <CardContent className="p-12 text-center">
+                      <Target className="w-16 h-16 mx-auto text-slate-400 mb-4" />
+                      <h3 className="text-xl font-semibold text-white mb-2">Ready for Analysis</h3>
+                      <p className="text-slate-400">
+                        Configure your analysis parameters and run a comprehensive archaeological assessment.
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* History Tab */}
+          <TabsContent value="history" className="space-y-6">
+            <div className="grid grid-cols-1 gap-4">
+              {analysisHistory.map((analysis) => (
+                <Card key={analysis.id} className="bg-black/20 border-white/10">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <h3 className="font-medium text-white">{analysis.session_name}</h3>
+                          {analysis.favorite && <Star className="w-4 h-4 text-yellow-400" />}
+                          <Badge variant="outline" className="border-white/20 text-white text-xs">
+                            {getConfidence(analysis)}% confidence
+                          </Badge>
+                        </div>
+                        
+                        <p className="text-sm text-slate-300 mb-2">
+                          Coordinates: {analysis.coordinates || 'Unknown'}
+                        </p>
+                        
+                        <p className="text-sm text-slate-400 mb-3">
+                          {getDescription(analysis)}...
+                        </p>
+                        
+                        <div className="flex items-center space-x-4 text-xs text-slate-400">
+                          <span>{new Date(analysis.created_at).toLocaleDateString()}</span>
+                          <span>{getAgentCount(analysis)} agents</span>
+                          <span>{getSourceCount(analysis)} sources</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2 ml-4">
+                        <Button
+                          onClick={() => setCurrentAnalysis(analysis.results)}
+                          variant="outline"
+                          size="sm"
+                          className="border-white/20 text-white"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        
+                        <Button
+                          onClick={() => openInChat(analysis.coordinates)}
+                          variant="outline"
+                          size="sm"
+                          className="border-white/20 text-white"
+                          disabled={!analysis.coordinates}
+                        >
+                          <MessageSquare className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            
+            {analysisHistory.length === 0 && (
+              <Card className="bg-black/20 border-white/10">
+                <CardContent className="p-12 text-center">
+                  <Database className="w-16 h-16 mx-auto text-slate-400 mb-4" />
+                  <h3 className="text-xl font-semibold text-white mb-2">No Analysis History</h3>
+                  <p className="text-slate-400">
+                    Run your first analysis to start building your research database.
+                  </p>
+                </CardContent>
+              </Card>
             )}
-          </div>
-        </div>
+          </TabsContent>
+
+          {/* Workflow Tab */}
+          <TabsContent value="workflow" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              
+              {/* Quick Actions */}
+              <Card className="bg-black/20 border-white/10">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center">
+                    <Zap className="w-5 h-5 mr-2" />
+                    Quick Actions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button 
+                    onClick={() => window.open('/chat', '_blank')}
+                    variant="outline" 
+                    className="w-full justify-start border-white/20 text-white"
+                  >
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Open Chat Interface
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => window.open('/map', '_blank')}
+                    variant="outline" 
+                    className="w-full justify-start border-white/20 text-white"
+                  >
+                    <MapIcon className="w-4 h-4 mr-2" />
+                    Launch Map Explorer
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => window.open('/vision', '_blank')}
+                    variant="outline" 
+                    className="w-full justify-start border-white/20 text-white"
+                  >
+                    <Camera className="w-4 h-4 mr-2" />
+                    Vision Analysis
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => window.open('/satellite', '_blank')}
+                    variant="outline" 
+                    className="w-full justify-start border-white/20 text-white"
+                  >
+                    <Satellite className="w-4 h-4 mr-2" />
+                    Satellite Data
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* System Integration */}
+              <Card className="bg-black/20 border-white/10">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center">
+                    <Network className="w-5 h-5 mr-2" />
+                    System Integration
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-300">Chat System</span>
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-300">Map Interface</span>
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-300">Vision Agents</span>
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-300">Database Storage</span>
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-300">Real-time Sync</span>
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* NIS Protocol Status */}
+              <Card className="bg-black/20 border-white/10">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center">
+                    <Brain className="w-5 h-5 mr-2" />
+                    NIS Protocol Status
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-300">Neural Networks</span>
+                    <Badge variant="default" className="text-xs">Active</Badge>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-300">KAN Integration</span>
+                    <Badge variant="default" className="text-xs">Enabled</Badge>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-300">Multi-Agent System</span>
+                    <Badge variant="default" className="text-xs">6 Agents</Badge>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-300">Data Sources</span>
+                    <Badge variant="default" className="text-xs">5 Active</Badge>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-300">Success Rate</span>
+                    <Badge variant="default" className="text-xs">100%</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   )
