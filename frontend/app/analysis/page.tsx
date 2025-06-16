@@ -485,39 +485,146 @@ export default function AnalysisPage() {
     }
   }
 
-  const saveAnalysis = () => {
+  const saveAnalysis = async () => {
     if (analysisResult || visionResult) {
-      const analysis = {
-        id: Date.now(),
-        coordinates: selectedCoordinates,
-        timestamp: new Date().toISOString(),
-        analysisResult,
-        visionResult,
-        notes: analysisNotes,
-        settings: analysisSettings
+      try {
+        const sessionName = `Analysis_${selectedCoordinates.replace(/[^0-9.-]/g, '_')}_${Date.now()}`
+        
+        const saveRequest = {
+          session_name: sessionName,
+          coordinates: selectedCoordinates,
+          results: {
+            analysis: analysisResult,
+            vision: visionResult,
+            archaeological: archaeologicalResults
+          },
+          settings: {
+            ...analysisSettings,
+            confidence_threshold: confidenceThreshold,
+            data_sources: selectedDataSources
+          },
+          notes: analysisNotes
+        }
+        
+        const response = await fetch('http://localhost:8000/analysis/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(saveRequest)
+        })
+        
+        if (response.ok) {
+          const result = await response.json()
+          console.log('✅ Analysis saved successfully:', result.session_id)
+          
+          // Also save locally as backup
+          const analysis = {
+            id: Date.now(),
+            session_id: result.session_id,
+            coordinates: selectedCoordinates,
+            timestamp: new Date().toISOString(),
+            analysisResult,
+            visionResult,
+            notes: analysisNotes,
+            settings: analysisSettings
+          }
+          const updated = [...savedAnalyses, analysis]
+          setSavedAnalyses(updated)
+          localStorage.setItem('savedAnalyses', JSON.stringify(updated))
+          
+          // Show success feedback
+          alert(`Analysis saved successfully as "${sessionName}"`)
+        } else {
+          throw new Error('Failed to save analysis')
+        }
+      } catch (error) {
+        console.error('❌ Save failed:', error)
+        // Fallback to local storage only
+        const analysis = {
+          id: Date.now(),
+          coordinates: selectedCoordinates,
+          timestamp: new Date().toISOString(),
+          analysisResult,
+          visionResult,
+          notes: analysisNotes,
+          settings: analysisSettings
+        }
+        const updated = [...savedAnalyses, analysis]
+        setSavedAnalyses(updated)
+        localStorage.setItem('savedAnalyses', JSON.stringify(updated))
+        alert('Analysis saved locally (server unavailable)')
       }
-      const updated = [...savedAnalyses, analysis]
-      setSavedAnalyses(updated)
-      localStorage.setItem('savedAnalyses', JSON.stringify(updated))
     }
   }
 
-  const exportAnalysis = () => {
-    const data = {
-      coordinates: selectedCoordinates,
-      analysis: analysisResult,
-      vision: visionResult,
-      notes: analysisNotes,
-      timestamp: new Date().toISOString()
+  const exportAnalysis = async () => {
+    try {
+      const exportData = {
+        results: [
+          {
+            coordinates: selectedCoordinates,
+            confidence: analysisResult?.confidence || 0,
+            pattern_type: analysisResult?.pattern_type || '',
+            cultural_significance: analysisResult?.cultural_significance || '',
+            timestamp: new Date().toISOString()
+          }
+        ],
+        metadata: {
+          analysis: analysisResult,
+          vision: visionResult,
+          notes: analysisNotes,
+          settings: analysisSettings
+        }
+      }
+      
+      const filename = `analysis_${selectedCoordinates.replace(/[^0-9.-]/g, '_')}_${Date.now()}`
+      
+      const response = await fetch('http://localhost:8000/analysis/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          format: exportFormat,
+          data: exportData,
+          filename: filename
+        })
+      })
+      
+      if (response.ok) {
+        const result = await response.json()
+        console.log('✅ Export successful:', result.filename)
+        
+        // Download the exported file
+        const blob = new Blob([result.export_data], { type: result.content_type })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = result.filename
+        a.click()
+        URL.revokeObjectURL(url)
+        
+        alert(`Analysis exported successfully as ${result.filename}`)
+      } else {
+        throw new Error('Export failed')
+      }
+    } catch (error) {
+      console.error('❌ Export failed:', error)
+      // Fallback to local export
+      const data = {
+        coordinates: selectedCoordinates,
+        analysis: analysisResult,
+        vision: visionResult,
+        notes: analysisNotes,
+        timestamp: new Date().toISOString()
+      }
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `analysis_${selectedCoordinates.replace(/[^0-9.-]/g, '_')}_${Date.now()}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+      alert('Analysis exported locally (server unavailable)')
     }
-    
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `analysis_${selectedCoordinates.replace(/[^0-9.-]/g, '_')}_${Date.now()}.${exportFormat}`
-    a.click()
-    URL.revokeObjectURL(url)
   }
 
   // Enhanced Vision Analysis with comprehensive results
@@ -530,11 +637,11 @@ export default function AnalysisPage() {
     console.log('🔍 Starting enhanced full analysis for:', coordinates)
     
     try {
-      let progressInterval: NodeJS.Timeout
+      let progressInterval: NodeJS.Timeout | null = null
       progressInterval = setInterval(() => {
         setCurrentProgress((prev: number) => {
           if (prev >= 95) {
-            clearInterval(progressInterval)
+            if (progressInterval) clearInterval(progressInterval)
             return 95
           }
           return prev + Math.random() * 10
@@ -626,7 +733,7 @@ export default function AnalysisPage() {
           enhancement_details: visionData.enhancement_results || {}
         })
         
-        clearInterval(progressInterval)
+        if (progressInterval) clearInterval(progressInterval)
         setCurrentProgress(100)
         
         // Auto-switch to results tab
@@ -640,7 +747,6 @@ export default function AnalysisPage() {
       
     } catch (error) {
       console.error('❌ Enhanced analysis failed:', error)
-      clearInterval(progressInterval)
       
       // Fallback enhanced results
       setAnalysisResult({
@@ -677,7 +783,6 @@ export default function AnalysisPage() {
       })
       
       setCurrentProgress(100)
-      setTimeout(() => setActiveWorkflow("results"), 1000)
     } finally {
       setIsAnalyzing(false)
     }
@@ -901,6 +1006,114 @@ export default function AnalysisPage() {
       }
     }
   }, [analysisWorkflow, selectedCoordinates, handleMultiZoneAnalysis, handleNoCoordinateAnalysis])
+
+  // New specialized analysis functions
+  const runCulturalSignificanceAnalysis = async (coordinates: string) => {
+    if (!coordinates) return
+    
+    setIsAnalyzing(true)
+    setAnalysisStage("Analyzing cultural significance...")
+    
+    try {
+      const response = await fetch('http://localhost:8000/analysis/cultural-significance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ coordinates })
+      })
+      
+      if (response.ok) {
+        const result = await response.json()
+        console.log('✅ Cultural significance analysis complete:', result)
+        
+        // Update analysis result with cultural data
+        setAnalysisResult(prev => ({
+          ...prev,
+          cultural_significance: result.analysis,
+          confidence: result.confidence,
+          description: `Cultural significance analysis for ${result.region} region: ${result.analysis.primary_cultural_affiliation}`,
+          pattern_type: result.analysis.archaeological_features?.join(', ') || 'Cultural features',
+          historical_context: `Estimated occupation: ${result.analysis.estimated_occupation_period}. Preservation status: ${result.analysis.preservation_status}`,
+          indigenous_perspective: `Cultural practices include: ${result.analysis.cultural_practices?.join(', ')}`,
+          recommendations: [
+            { action: `Research priority: ${result.analysis.research_priority}`, priority: result.analysis.research_priority.toLowerCase() },
+            { action: 'Cultural consultation recommended', priority: 'high' }
+          ],
+          finding_id: `cultural_${Date.now()}`
+        }))
+        
+        setAnalysisStage("Cultural significance analysis complete")
+      } else {
+        throw new Error('Cultural analysis failed')
+      }
+    } catch (error) {
+      console.error('❌ Cultural significance analysis failed:', error)
+      setAnalysisStage("Cultural analysis failed - using fallback")
+    } finally {
+      setIsAnalyzing(false)
+    }
+  }
+  
+  const runSettlementPatternAnalysis = async (coordinates: string) => {
+    if (!coordinates) return
+    
+    setIsAnalyzing(true)
+    setAnalysisStage("Analyzing settlement patterns...")
+    
+    try {
+      const response = await fetch('http://localhost:8000/analysis/settlement-patterns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ coordinates })
+      })
+      
+      if (response.ok) {
+        const result = await response.json()
+        console.log('✅ Settlement pattern analysis complete:', result)
+        
+        // Update analysis result with settlement data
+        setAnalysisResult(prev => ({
+          ...prev,
+          settlement_analysis: result.settlement_analysis,
+          confidence: result.confidence,
+          description: `Settlement analysis: ${result.settlement_analysis.settlement_type} with estimated population of ${result.settlement_analysis.population_estimate}`,
+          pattern_type: `${result.settlement_analysis.site_hierarchy} - ${result.settlement_analysis.settlement_type}`,
+          historical_context: `Temporal sequence: ${result.settlement_analysis.temporal_sequence.map(p => `${p.period} (${p.dates})`).join(', ')}`,
+          indigenous_perspective: `Settlement connectivity: ${result.settlement_analysis.connectivity.trade_route_access} trade access, ${result.settlement_analysis.connectivity.river_access} river access`,
+          recommendations: [
+            { action: 'Settlement survey recommended', priority: 'high' },
+            { action: `Abandonment factor: ${result.settlement_analysis.abandonment_factors}`, priority: 'medium' }
+          ],
+          finding_id: `settlement_${Date.now()}`
+        }))
+        
+        setAnalysisStage("Settlement pattern analysis complete")
+      } else {
+        throw new Error('Settlement analysis failed')
+      }
+    } catch (error) {
+      console.error('❌ Settlement pattern analysis failed:', error)
+      setAnalysisStage("Settlement analysis failed - using fallback")
+    } finally {
+      setIsAnalyzing(false)
+    }
+  }
+  
+  const loadSavedSessions = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/analysis/sessions')
+      if (response.ok) {
+        const result = await response.json()
+        console.log('✅ Loaded saved sessions:', result.sessions)
+        setSavedAnalyses(result.sessions)
+      } else {
+        throw new Error('Failed to load sessions')
+      }
+    } catch (error) {
+      console.error('❌ Failed to load saved sessions:', error)
+      // Fallback to local storage
+      loadSavedAnalyses()
+    }
+  }
 
   return (
     <div className="min-h-screen bg-slate-900 flex flex-col pt-20">
@@ -1271,6 +1484,56 @@ export default function AnalysisPage() {
               </CardContent>
             </Card>
 
+            {/* Specialized Analysis Tools */}
+            {analysisMode === "specialized" && (
+              <Card className="bg-slate-800/50 border-slate-700/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-white text-sm flex items-center gap-2">
+                    <Target className="w-4 h-4 text-purple-400" />
+                    Specialized Analysis Tools
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button
+                    onClick={() => runCulturalSignificanceAnalysis(selectedCoordinates)}
+                    disabled={isAnalyzing || !selectedCoordinates}
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                    size="sm"
+                  >
+                    {isAnalyzing ? (
+                      <RefreshCw className="w-3 h-3 mr-2 animate-spin" />
+                    ) : (
+                      <Globe className="w-3 h-3 mr-2" />
+                    )}
+                    Cultural Significance
+                  </Button>
+                  
+                  <Button
+                    onClick={() => runSettlementPatternAnalysis(selectedCoordinates)}
+                    disabled={isAnalyzing || !selectedCoordinates}
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                    size="sm"
+                  >
+                    {isAnalyzing ? (
+                      <RefreshCw className="w-3 h-3 mr-2 animate-spin" />
+                    ) : (
+                      <Users className="w-3 h-3 mr-2" />
+                    )}
+                    Settlement Patterns
+                  </Button>
+                  
+                  <Button
+                    onClick={() => loadSavedSessions()}
+                    className="w-full bg-slate-600 hover:bg-slate-700 text-white"
+                    size="sm"
+                  >
+                    <Database className="w-3 h-3 mr-2" />
+                    Load Saved Sessions
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Analysis Notes */}
             <Card className="bg-slate-800/50 border-slate-700/50">
               <CardHeader className="pb-3">
@@ -1307,6 +1570,28 @@ export default function AnalysisPage() {
                     <Download className="w-3 h-3 mr-1" />
                     Export
                   </Button>
+                </div>
+                
+                {/* Export Format Selector */}
+                <div className="mt-3 pt-3 border-t border-slate-700">
+                  <Label className="text-slate-300 text-xs">Export Format</Label>
+                  <div className="flex gap-1 mt-1">
+                    {['json', 'csv', 'geojson'].map((format) => (
+                      <Button
+                        key={format}
+                        size="sm"
+                        variant={exportFormat === format ? "default" : "outline"}
+                        onClick={() => setExportFormat(format)}
+                        className={`text-xs px-2 py-1 ${
+                          exportFormat === format 
+                            ? "bg-emerald-600 hover:bg-emerald-700" 
+                            : "border-slate-600 text-slate-400 hover:bg-slate-700"
+                        }`}
+                      >
+                        {format.toUpperCase()}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               </CardContent>
             </Card>
