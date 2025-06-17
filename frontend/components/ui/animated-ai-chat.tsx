@@ -145,9 +145,10 @@ import { ChatMessage } from '@/lib/api/chat-service';
 interface AnimatedAIChatProps {
   onSendMessage?: (message: string, attachments?: string[]) => void;
   onCoordinateSelect?: (coordinates: { lat: number; lon: number }) => void;
+  messages?: ChatMessage[];
 }
 
-export function AnimatedAIChat({ onSendMessage, onCoordinateSelect }: AnimatedAIChatProps) {
+export function AnimatedAIChat({ onSendMessage, onCoordinateSelect, messages: externalMessages }: AnimatedAIChatProps) {
     const [value, setValue] = useState("");
     const [attachments, setAttachments] = useState<string[]>([]);
     const [isTyping, setIsTyping] = useState(false);
@@ -176,12 +177,24 @@ export function AnimatedAIChat({ onSendMessage, onCoordinateSelect }: AnimatedAI
       const [selectedCoordinates, setSelectedCoordinates] = useState<{ lat: number; lon: number } | null>(null);
       const [internalMessages, setInternalMessages] = useState<Message[]>([]);
     
-    // Just use internal messages - keep it simple
-    const messages = internalMessages;
+    // Use external messages if provided, otherwise use internal messages
+    const messages = externalMessages ? externalMessages.map(msg => ({
+        ...msg,
+        role: msg.role as 'user' | 'assistant' | 'system'
+    })) : internalMessages;
     
-    // Initialize with welcome message showcasing NIS Protocol superiority
+    // Minimal debug logging - only log significant events
     useEffect(() => {
         if (messages.length === 0) {
+            console.log('📨 AnimatedAIChat initialized');
+        }
+    }, []); // Only run once on mount
+    
+    // Removed excessive debug logging to prevent performance issues
+    
+    // Initialize with welcome message showcasing NIS Protocol superiority (only if no external messages)
+    useEffect(() => {
+        if (!externalMessages && messages.length === 0) {
             const welcomeMessage: Message = {
                 id: 'welcome',
                 role: 'assistant',
@@ -231,35 +244,103 @@ export function AnimatedAIChat({ onSendMessage, onCoordinateSelect }: AnimatedAI
             };
             setInternalMessages([welcomeMessage]);
         }
-    }, []);
+    }, [externalMessages, messages.length]);
     
-    // Auto-scroll functionality
+    // Auto-scroll functionality - COMPLETELY REDESIGNED
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const [showScrollButton, setShowScrollButton] = useState(false);
+    const [isUserScrolling, setIsUserScrolling] = useState(false);
+    const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
+    const lastScrollTop = useRef(0);
+    const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
     
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
-    
-    const handleScroll = () => {
-        if (messagesContainerRef.current) {
-            const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
-            const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
-            setShowScrollButton(!isNearBottom);
+    // Simple, reliable scroll to bottom function
+    const scrollToBottom = useCallback((force = false) => {
+        if (!messagesContainerRef.current) return;
+        
+        const container = messagesContainerRef.current;
+        
+        // Force scroll or auto-scroll when enabled
+        if (force || shouldAutoScroll) {
+            container.scrollTo({
+                top: container.scrollHeight,
+                behavior: force ? 'smooth' : 'auto'
+            });
+            
+            if (force) {
+                setShouldAutoScroll(true);
+                setIsUserScrolling(false);
+            }
         }
-    };
+    }, [shouldAutoScroll]);
     
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+    // Handle scroll events with debouncing
+    const handleScroll = useCallback(() => {
+        if (!messagesContainerRef.current) return;
+        
+        const container = messagesContainerRef.current;
+        const { scrollTop, scrollHeight, clientHeight } = container;
+        const isAtBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 10;
+        const scrolledUp = scrollTop < lastScrollTop.current;
+        
+        // Update last scroll position
+        lastScrollTop.current = scrollTop;
+        
+        // Show/hide scroll button
+        setShowScrollButton(!isAtBottom && scrollHeight > clientHeight);
+        
+        // Detect user scrolling up
+        if (scrolledUp && !isAtBottom) {
+            setIsUserScrolling(true);
+            setShouldAutoScroll(false);
+        }
+        
+        // Re-enable auto-scroll when user scrolls back to bottom
+        if (isAtBottom) {
+            setIsUserScrolling(false);
+            setShouldAutoScroll(true);
+        }
+        
+        // Clear any pending scroll timeout
+        if (scrollTimeout.current) {
+            clearTimeout(scrollTimeout.current);
+        }
+        
+        // Set a timeout to reset scrolling state
+        scrollTimeout.current = setTimeout(() => {
+            setIsUserScrolling(false);
+        }, 1000);
+        
+    }, []);
     
-    // Also scroll when typing starts/stops for smooth UX
+    // Auto-scroll on new messages (only when enabled)
     useEffect(() => {
-        if (isTyping) {
+        if (messages.length > 0 && shouldAutoScroll && !isUserScrolling) {
+            // Small delay to ensure DOM is updated
+            const timeoutId = setTimeout(() => {
+                scrollToBottom();
+            }, 50);
+            
+            return () => clearTimeout(timeoutId);
+        }
+    }, [messages.length, shouldAutoScroll, isUserScrolling, scrollToBottom]);
+    
+    // Auto-scroll when typing starts (only if enabled)
+    useEffect(() => {
+        if (isTyping && shouldAutoScroll && !isUserScrolling) {
             scrollToBottom();
         }
-    }, [isTyping]);
+    }, [isTyping, shouldAutoScroll, isUserScrolling, scrollToBottom]);
+    
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (scrollTimeout.current) {
+                clearTimeout(scrollTimeout.current);
+            }
+        };
+    }, []);
       const [backendStatus, setBackendStatus] = useState<'online' | 'offline'>('offline');
       const [availableTools, setAvailableTools] = useState<string[]>([]);
       const [mounted, setMounted] = useState(true);
@@ -445,7 +526,29 @@ export function AnimatedAIChat({ onSendMessage, onCoordinateSelect }: AnimatedAI
         } else if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
             if (value.trim()) {
-                handleSendMessage(value, attachments);
+                console.log('⌨️ Enter key pressed with message:', value);
+                console.log('🔄 Hybrid system: Using both internal + external');
+                
+                // HYBRID SYSTEM: Use both systems for maximum power
+                if (externalMessages && onSendMessage) {
+                    // 1. First call external system (chat service) for integration
+                    console.log('📤 Calling external onSendMessage (Enter - chat service)');
+                    onSendMessage(value, attachments);
+                    
+                    // 2. Clear input immediately for better UX
+                    setValue("");
+                    setAttachments([]);
+                    adjustHeight(true);
+                    
+                    // 3. Also call internal system for rich NIS Protocol features
+                    console.log('📤 Also calling internal handleSendMessage (Enter - NIS features)');
+                    // Skip UI reset since we already did it
+                    handleSendMessage(value, attachments, true);
+                } else {
+                    // Fallback to internal system only
+                    console.log('📤 Using internal handleSendMessage only (Enter)');
+                    handleSendMessage(value, attachments);
+                }
             }
         }
     };
@@ -499,7 +602,7 @@ export function AnimatedAIChat({ onSendMessage, onCoordinateSelect }: AnimatedAI
                     '🌐 Cross-Agent Validation - Consciousness-coordinated analysis'
                 ]);
                 
-                console.log('🤖 NIS Protocol Agents Online:', agents.length);
+                // Reduced logging frequency for better performance
             } else {
                 setBackendStatus('offline');
             }
@@ -524,34 +627,42 @@ export function AnimatedAIChat({ onSendMessage, onCoordinateSelect }: AnimatedAI
     }, [checkBackendHealth]);
 
          // Enhanced message sending with full NIS Protocol agent integration (Cursor-style)
-     const handleSendMessage = useCallback(async (message: string, attachmentsList?: string[]) => {
+     const handleSendMessage = useCallback(async (message: string, attachmentsList?: string[], skipUIReset = false) => {
          if (!mounted || !message.trim()) return;
          
-         // Reset UI immediately
-         setValue("");
-         setAttachments([]);
-         adjustHeight(true);
+         // Only reset UI if not called from hybrid system
+         if (!skipUIReset) {
+             setValue("");
+             setAttachments([]);
+             adjustHeight(true);
+         }
          
-         const userMessage: Message = {
-             id: Date.now().toString(),
-             role: 'user',
-             content: message,
-             timestamp: new Date(),
-             coordinates: selectedCoordinates || undefined
-         };
+         // Only add user message if using internal messages (not external)
+         if (!externalMessages) {
+             const userMessage: Message = {
+                 id: Date.now().toString(),
+                 role: 'user',
+                 content: message,
+                 timestamp: new Date(),
+                 coordinates: selectedCoordinates || undefined
+             };
 
-         setInternalMessages(prev => [...prev, userMessage]);
+             setInternalMessages(prev => [...prev, userMessage]);
+         }
+         
          setIsTyping(true);
 
-         // Show thinking process like Cursor IDE
-         const thinkingMessage: Message = {
-             id: (Date.now() + 0.5).toString(),
-             role: 'system',
-             content: `🧠 **NIS Protocol Thinking...**\n\n**Analyzing**: "${message}"\n**Agents Coordinating**: Vision → Memory → Reasoning → Action → Consciousness\n**Processing**: Multi-agent workflow initiated...`,
-             timestamp: new Date(),
-             metadata: { isThinking: true }
-         };
-         setInternalMessages(prev => [...prev, thinkingMessage]);
+         // Show thinking process like Cursor IDE (only for internal messages)
+         if (!externalMessages) {
+             const thinkingMessage: Message = {
+                 id: (Date.now() + 0.5).toString(),
+                 role: 'system',
+                 content: `🧠 **NIS Protocol Thinking...**\n\n**Analyzing**: "${message}"\n**Agents Coordinating**: Vision → Memory → Reasoning → Action → Consciousness\n**Processing**: Multi-agent workflow initiated...`,
+                 timestamp: new Date(),
+                 metadata: { isThinking: true }
+             };
+             setInternalMessages(prev => [...prev, thinkingMessage]);
+         }
 
         try {
             let apiEndpoint = 'http://localhost:8000/agents/chat';
@@ -1799,8 +1910,14 @@ The NIS Protocol has successfully processed your request.
                                         initial={{ opacity: 0, scale: 0.8 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         exit={{ opacity: 0, scale: 0.8 }}
-                                        onClick={scrollToBottom}
-                                        className="absolute bottom-4 right-4 z-10 w-10 h-10 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-full flex items-center justify-center border border-emerald-500/30 backdrop-blur-sm transition-colors"
+                                        onClick={() => scrollToBottom(true)}
+                                        className={cn(
+                                            "absolute bottom-4 right-4 z-10 w-10 h-10 rounded-full flex items-center justify-center border backdrop-blur-sm transition-colors",
+                                            isUserScrolling 
+                                                ? "bg-emerald-500/30 hover:bg-emerald-500/40 text-emerald-300 border-emerald-400/50" 
+                                                : "bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border-emerald-500/30"
+                                        )}
+                                        title={isUserScrolling ? "New messages below - click to scroll down" : "Scroll to bottom"}
                                     >
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
@@ -1995,7 +2112,31 @@ The NIS Protocol has successfully processed your request.
                             
                             <motion.button
                                 type="button"
-                                onClick={() => handleSendMessage(value, attachments)}
+                                onClick={() => {
+                                    console.log('🔘 Send button clicked with message:', value);
+                                    console.log('🔄 Hybrid system: Using both internal + external');
+                                    
+                                    // HYBRID SYSTEM: Use both systems for maximum power
+                                    if (externalMessages && onSendMessage) {
+                                        // 1. First call external system (chat service) for integration
+                                        console.log('📤 Calling external onSendMessage (Send button - chat service)');
+                                        onSendMessage(value, attachments);
+                                        
+                                        // 2. Clear input immediately for better UX
+                                        setValue("");
+                                        setAttachments([]);
+                                        adjustHeight(true);
+                                        
+                                        // 3. Also call internal system for rich NIS Protocol features
+                                        console.log('📤 Also calling internal handleSendMessage (Send button - NIS features)');
+                                        // Skip UI reset since we already did it
+                                        handleSendMessage(value, attachments, true);
+                                    } else {
+                                        // Fallback to internal system only
+                                        console.log('📤 Using internal handleSendMessage only');
+                                        handleSendMessage(value, attachments);
+                                    }
+                                }}
                                 whileHover={{ scale: 1.01 }}
                                 whileTap={{ scale: 0.98 }}
                                 disabled={isTyping || !value.trim()}
