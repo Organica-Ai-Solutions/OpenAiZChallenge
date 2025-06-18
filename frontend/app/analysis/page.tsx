@@ -8,10 +8,11 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import Link from 'next/link'
 import { 
   Search, MapPin, Satellite, Eye, Brain, Database, Activity, Settings, Play, Save, 
   Layers, Clock, Users, Target, Zap, Globe, BarChart3, FileText, MessageSquare,
-  Map as MapIcon, Camera, Cpu, Network, CheckCircle, Loader2, RefreshCw, Star
+  Map as MapIcon, Camera, Cpu, Network, CheckCircle, Loader2, RefreshCw, Star, ArrowLeft
 } from 'lucide-react'
 
 // Simplified types for robust handling
@@ -300,9 +301,16 @@ export default function NISAnalysisPage() {
           
           <div className="relative z-10 flex items-center justify-between">
             <div className="flex items-center space-x-6">
-              <div className="relative">
-                <Brain className="h-16 w-16 text-emerald-400 animate-pulse" />
-                <div className="absolute -top-1 -right-1 h-4 w-4 bg-emerald-400 rounded-full animate-pulse" />
+              <div className="flex items-center gap-4">
+                <Link href="/" className="flex items-center gap-2 text-slate-300 hover:text-white transition-colors">
+                  <ArrowLeft className="w-5 h-5" />
+                  <span className="text-sm">Back to Hub</span>
+                </Link>
+                <div className="w-px h-6 bg-slate-600" />
+                <div className="relative">
+                  <Brain className="h-16 w-16 text-emerald-400 animate-pulse" />
+                  <div className="absolute -top-1 -right-1 h-4 w-4 bg-emerald-400 rounded-full animate-pulse" />
+                </div>
               </div>
               
               <div>

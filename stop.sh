@@ -44,5 +44,10 @@ else
     exit 1
 fi
 
+# Also stop any standalone fallback backend processes
+log "Stopping any standalone fallback backend processes..."
+pkill -f "python fallback_backend.py" 2>/dev/null || true
+pkill -f "python minimal_backend.py" 2>/dev/null || true
+
 log "NIS Protocol shutdown complete."
 echo "All NIS services have been requested to stop via Docker Compose." 

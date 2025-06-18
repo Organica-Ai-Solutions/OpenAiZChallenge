@@ -24,10 +24,23 @@ check_docker() {
     return 0
 }
 
+# Function to detect OS and use appropriate timeout
+detect_timeout() {
+    if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "win32" ]]; then
+        # Windows Git Bash - no timeout command, just run directly
+        "$@"
+    else
+        # Linux/Mac - use timeout
+        timeout "$1" "${@:2}"
+    fi
+}
+
 # Stop any running processes
 echo -e "${YELLOW}📛 Stopping existing processes...${NC}"
 pkill -f "python run_api.py" 2>/dev/null || true
 pkill -f "python simple_backend.py" 2>/dev/null || true
+pkill -f "python fallback_backend.py" 2>/dev/null || true
+pkill -f "python minimal_backend.py" 2>/dev/null || true
 pkill -f "npm run dev" 2>/dev/null || true
 pkill -f "next dev" 2>/dev/null || true
 pkill -f "uvicorn" 2>/dev/null || true
@@ -42,8 +55,10 @@ if check_docker; then
     docker stop nis-zookeeper 2>/dev/null || true
     docker rm nis-zookeeper 2>/dev/null || true
     
-    # Clean up any other NIS containers
+    # Clean up any other NIS containers including fallback backend
     docker ps -a | grep nis | awk '{print $1}' | xargs -r docker rm -f 2>/dev/null || true
+    docker stop nis-fallback-backend 2>/dev/null || true
+    docker rm nis-fallback-backend 2>/dev/null || true
 else
     echo -e "${YELLOW}🐳 Skipping Docker cleanup (Docker not available)${NC}"
 fi
@@ -75,11 +90,11 @@ if [ -d "frontend/node_modules/.pnpm" ]; then
         echo -e "${YELLOW}⚠️ Using alternative removal method...${NC}"
         
         # Use timeout to prevent hanging on large directories
-        timeout 30 find frontend/node_modules/.pnpm -type f -exec rm -f {} \; 2>/dev/null || {
+        detect_timeout 30 find frontend/node_modules/.pnpm -type f -exec rm -f {} \; 2>/dev/null || {
             echo -e "${YELLOW}⚠️ File removal timed out or failed, trying directory removal...${NC}"
         }
         
-        timeout 15 find frontend/node_modules/.pnpm -type d -empty -delete 2>/dev/null || {
+        detect_timeout 15 find frontend/node_modules/.pnpm -type d -empty -delete 2>/dev/null || {
             echo -e "${YELLOW}⚠️ Some cache directories couldn't be removed. Continuing anyway...${NC}"
         }
         
@@ -119,18 +134,28 @@ fi
 
 echo -e "${BLUE}⏳ Installing dependencies (this may take a few minutes)...${NC}"
 
+# Function to get npm command (Windows uses npm.cmd)
+get_npm_cmd() {
+    if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "win32" ]]; then
+        echo "npm.cmd"
+    else
+        echo "npm"
+    fi
+}
+
 # Install dependencies with proper error handling
+NPM_CMD=$(get_npm_cmd)
 if command -v pnpm &> /dev/null; then
     echo -e "${BLUE}📦 Using pnpm...${NC}"
-    timeout 300 pnpm install --force 2>/dev/null || {
+    detect_timeout 300 pnpm install --force 2>/dev/null || {
         echo -e "${YELLOW}⚠️  pnpm install failed or timed out, trying npm...${NC}"
-        timeout 300 npm install --force || {
+        detect_timeout 300 $NPM_CMD install --force || {
             echo -e "${RED}❌ Both pnpm and npm failed. Continuing with existing dependencies...${NC}"
         }
     }
-elif command -v npm &> /dev/null; then
+elif command -v $NPM_CMD &> /dev/null; then
     echo -e "${BLUE}📦 Using npm...${NC}"
-    timeout 300 npm install --force || {
+    detect_timeout 300 $NPM_CMD install --force || {
         echo -e "${RED}❌ npm install failed or timed out. Continuing with existing dependencies...${NC}"
     }
 else
@@ -167,8 +192,8 @@ else
     echo -e "${YELLOW}⚠️  Skipping Redis startup (Docker not available)${NC}"
 fi
 
-# Start backend
-echo -e "${GREEN}🚀 Starting backend...${NC}"
+# Start fallback backend (reliable LIDAR & IKRP support)
+echo -e "${GREEN}🚀 Starting NIS Protocol Fallback Backend...${NC}"
 export REDIS_HOST=localhost
 cd "$(dirname "$0")"
 
@@ -180,30 +205,42 @@ else
     echo -e "${YELLOW}⚠️  Virtual environment not found. Using system Python.${NC}"
 fi
 
-python simple_backend.py &
-BACKEND_PID=$!
+# Check if fallback_backend.py exists, fallback to simple_backend.py if not
+if [ -f "fallback_backend.py" ]; then
+    echo -e "${BLUE}🛡️  Starting reliable fallback backend with LIDAR & Real IKRP...${NC}"
+    python fallback_backend.py &
+    BACKEND_PID=$!
+    BACKEND_PORT=8003
+    BACKEND_TYPE="Fallback Backend"
+else
+    echo -e "${YELLOW}⚠️  fallback_backend.py not found, using simple_backend.py...${NC}"
+    python simple_backend.py &
+    BACKEND_PID=$!
+    BACKEND_PORT=8000
+    BACKEND_TYPE="Simple Backend"
+fi
 
 # Wait for backend to start
-echo -e "${BLUE}⏳ Waiting for backend to start...${NC}"
+echo -e "${BLUE}⏳ Waiting for ${BACKEND_TYPE} to start...${NC}"
 sleep 5
 
 # Test backend health with timeout and retries
-echo -e "${BLUE}🔍 Testing backend health...${NC}"
+echo -e "${BLUE}🔍 Testing ${BACKEND_TYPE} health...${NC}"
 backend_ready=false
 for i in {1..6}; do
-    if timeout 5 curl -s http://localhost:8000/system/health > /dev/null; then
-        echo -e "${GREEN}✅ Backend is healthy${NC}"
+    if curl -s --connect-timeout 5 http://localhost:${BACKEND_PORT}/system/health > /dev/null; then
+        echo -e "${GREEN}✅ ${BACKEND_TYPE} is healthy${NC}"
         backend_ready=true
         break
     else
-        echo -e "${YELLOW}⏳ Backend not ready yet, attempt $i/6...${NC}"
+        echo -e "${YELLOW}⏳ ${BACKEND_TYPE} not ready yet, attempt $i/6...${NC}"
         sleep 5
     fi
 done
 
 if [ "$backend_ready" = false ]; then
-    echo -e "${YELLOW}⚠️  Backend health check failed or timed out after 30 seconds${NC}"
-    echo -e "${BLUE}💡 Backend may still be starting up. Check http://localhost:8000/docs manually${NC}"
+    echo -e "${YELLOW}⚠️  ${BACKEND_TYPE} health check failed or timed out after 30 seconds${NC}"
+    echo -e "${BLUE}💡 Backend may still be starting up. Check http://localhost:${BACKEND_PORT}/docs manually${NC}"
 fi
 
 # Start frontend
@@ -212,7 +249,8 @@ cd frontend
 
 # Use the correct port (3000 to match docker-compose.yml)
 export PORT=3000
-npm run dev &
+NPM_CMD=$(get_npm_cmd)
+$NPM_CMD run dev &
 FRONTEND_PID=$!
 
 # Wait for frontend to start
@@ -221,7 +259,7 @@ sleep 10
 
 # Test frontend with timeout
 echo -e "${BLUE}🔍 Testing frontend...${NC}"
-if timeout 10 curl -s http://localhost:3000 > /dev/null; then
+if curl -s --connect-timeout 10 http://localhost:3000 > /dev/null; then
     echo -e "${GREEN}✅ Frontend is running${NC}"
 else
     echo -e "${YELLOW}⚠️  Frontend health check failed or timed out${NC}"
@@ -233,12 +271,15 @@ echo ""
 echo -e "${GREEN}🎉 NIS System Reset Complete!${NC}"
 echo ""
 echo -e "${BLUE}📊 System Status:${NC}"
-echo -e "   Backend:  ${GREEN}http://localhost:8000${NC}"
-echo -e "   Frontend: ${GREEN}http://localhost:3000${NC}"
+echo -e "   ${BACKEND_TYPE}: ${GREEN}http://localhost:${BACKEND_PORT}${NC}"
+if [ "$BACKEND_TYPE" = "Fallback Backend" ]; then
+    echo -e "   Features:     ${GREEN}✅ LIDAR Processing ✅ Real IKRP ✅ Archaeological Analysis${NC}"
+fi
+echo -e "   Frontend:     ${GREEN}http://localhost:3000${NC}"
 if check_docker; then
-    echo -e "   Redis:    ${GREEN}localhost:6379${NC}"
+    echo -e "   Redis:        ${GREEN}localhost:6379${NC}"
 else
-    echo -e "   Redis:    ${YELLOW}Not started (Docker unavailable)${NC}"
+    echo -e "   Redis:        ${YELLOW}Not started (Docker unavailable)${NC}"
 fi
 echo ""
 echo -e "${BLUE}🔧 Process IDs:${NC}"
@@ -250,4 +291,9 @@ echo -e "   ${YELLOW}kill $BACKEND_PID $FRONTEND_PID${NC}"
 if check_docker; then
     echo -e "   ${YELLOW}docker stop nis-redis-simple${NC}"
 fi
+echo ""
+echo -e "${BLUE}🛡️  System Architecture:${NC}"
+echo -e "   • Fallback Backend provides reliable LIDAR processing and Real IKRP integration"
+echo -e "   • Frontend automatically detects and uses available backend services"
+echo -e "   • Full Docker deployment available via: ${YELLOW}./start.sh${NC}"
 echo "" 

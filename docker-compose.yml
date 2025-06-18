@@ -85,6 +85,31 @@ services:
     depends_on:
       - redis
 
+  # Fallback Backend Service (runs on host)
+  fallback-backend:
+    image: python:3.11-slim
+    container_name: nis-fallback-backend
+    restart: unless-stopped
+    ports:
+      - "8003:8003"
+    environment:
+      - ENVIRONMENT=development
+      - LOG_LEVEL=info
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: >
+      sh -c "
+        pip install --no-cache-dir -r requirements.simple.txt &&
+        python fallback_backend.py
+      "
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/system/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   # Frontend (Next.js)
   frontend:
     build:
@@ -97,6 +122,7 @@ services:
     environment:
       - NODE_ENV=development
       - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_FALLBACK_API_URL=http://localhost:8003
       - NEXT_PUBLIC_GOOGLE_MAPS_KEY=AIzaSyCCMYQ_eQdaKPV30JGFEv_556O8N-ZzV9E
     volumes:
       - ./frontend:/app
@@ -104,6 +130,7 @@ services:
     depends_on:
       - backend
       - ikrp
+      - fallback-backend
 
 volumes:
   redis_data:

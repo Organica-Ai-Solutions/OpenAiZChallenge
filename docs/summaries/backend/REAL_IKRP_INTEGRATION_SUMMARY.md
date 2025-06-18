@@ -109,7 +109,7 @@ curl -X POST http://localhost:8003/ikrp/search/web \
 ## 📁 Files Modified
 
 ### Backend
-- `minimal_backend.py` - Real IKRP service with native integration
+- `fallback_backend.py` - Real IKRP service with native integration (serves as fallback when Docker backend is unavailable)
 - Deleted: `mock_backend.py`, `real_ikrp_service.py`, `simple_real_ikrp.py`
 
 ### Frontend

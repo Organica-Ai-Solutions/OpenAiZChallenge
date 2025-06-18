@@ -237,7 +237,7 @@ export const API_CONFIG = {
 cd /path/to/NIS_Protocol
 
 # Start the Real IKRP integrated backend
-venv/Scripts/python.exe minimal_backend.py
+venv/Scripts/python.exe fallback_backend.py
 ```
 
 ### 2. Verify Service Status

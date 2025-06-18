@@ -17,7 +17,7 @@ COPY requirements.simple.txt .
 RUN pip install --no-cache-dir -r requirements.simple.txt
 
 # Copy IKRP service files
-COPY mock_ikrp_service.py .
+COPY scripts/utilities/mock_ikrp_service.py .
 COPY src/ ./src/
 COPY api/ ./api/
 
