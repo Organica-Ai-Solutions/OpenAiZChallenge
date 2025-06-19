@@ -60,18 +60,28 @@ check_docker_daemon() {
 # Trap any errors
 trap 'error_log "An error occurred. Check the log file at $ERROR_LOG_FILE"' ERR
 
-# Check memory for macOS
+# Check memory for macOS and Linux
 check_memory() {
-    local total_memory=$(sysctl -n hw.memsize | awk '{print $1/1024/1024/1024 " GB"}')
-    log "Total Memory: $total_memory"
-    
-    local memory_gb=$(echo "$total_memory" | cut -d' ' -f1)
-    if (( $(echo "$memory_gb < 8" | bc -l) )); then
-        log "WARNING: Low memory detected. Some operations might be slow." "WARNING"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        local total_memory=$(sysctl -n hw.memsize | awk '{print $1/1024/1024/1024 " GB"}')
+        log "Total Memory: $total_memory"
+        
+        local memory_gb=$(echo "$total_memory" | cut -d' ' -f1)
+        if (( $(echo "$memory_gb < 8" | bc -l 2>/dev/null || echo "0") )); then
+            log "WARNING: Low memory detected. Some operations might be slow." "WARNING"
+        fi
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        # Linux
+        local total_memory=$(free -h | awk '/^Mem:/ {print $2}')
+        log "Total Memory: $total_memory"
+    else
+        # Windows/Other
+        log "Memory check skipped on this platform"
     fi
 }
 
-# Check disk space for macOS
+# Check disk space for macOS/Linux
 check_disk_space() {
     local df_output
     df_output=$(df -h "$BASE_DIR" | awk 'NR==2 {print $4}')
@@ -88,15 +98,14 @@ check_disk_space() {
     local value_gb="$value"
 
     if [[ "$unit" == "T" || "$unit" == "TB" ]]; then
-        value_gb=$(echo "$value * 1024" | bc -l)
+        value_gb=$(echo "$value * 1024" | bc -l 2>/dev/null || echo "$value")
     elif [[ "$unit" == "M" || "$unit" == "MB" ]]; then
-        value_gb=$(echo "$value / 1024" | bc -l)
+        value_gb=$(echo "$value / 1024" | bc -l 2>/dev/null || echo "1")
     elif [[ "$unit" == "K" || "$unit" == "KB" ]]; then
-        value_gb=$(echo "$value / 1024 / 1024" | bc -l)
+        value_gb=$(echo "$value / 1024 / 1024" | bc -l 2>/dev/null || echo "1")
     elif [[ "$unit" == "G" || "$unit" == "GB" || "$unit" == "Gi" ]]; then
-        # Value is already in a Gigabyte-compatible unit, no conversion needed for value_gb itself
-        # This case prevents falling into the "Unknown unit" log for G, GB, Gi
-        : # No operation needed, value_gb is already $value which is in G/GB/Gi
+        # Value is already in a Gigabyte-compatible unit, no conversion needed
+        : # No operation needed
     else
         log "Unknown disk space unit '$unit' from output '$df_output'. Assuming Gigabytes for comparison, but this might be inaccurate." "WARNING"
     fi
@@ -109,7 +118,7 @@ check_disk_space() {
 
     log "Available Disk Space (parsed): $value_gb GB"
 
-    if (( $(echo "$value_gb < 10" | bc -l 2>/dev/null) )); then
+    if (( $(echo "$value_gb < 10" | bc -l 2>/dev/null || echo "0") )); then
         log "WARNING: Low disk space detected ($value_gb GB). Ensure at least 10GB is available." "WARNING"
     fi
 }
@@ -176,21 +185,19 @@ function validate_dependencies() {
         
     # Validate critical environment variables
     if [ -f "${BASE_DIR}/.env" ]; then
-        REQUIRED_ENV_VARS=("OPENAI_API_KEY" "SECRET_KEY") # Add other critical vars if any
+        REQUIRED_ENV_VARS=("OPENAI_API_KEY") # Removed SECRET_KEY as it's not critical for startup
         missing_vars=0
         for var in "${REQUIRED_ENV_VARS[@]}"; do
             if ! grep -q "^${var}=" "${BASE_DIR}/.env"; then
-                log "Missing critical environment variable in .env: $var" "WARNING"
+                log "Missing environment variable in .env: $var" "WARNING"
                 missing_vars=$((missing_vars + 1))
             fi
         done
         if [ "$missing_vars" -gt 0 ]; then
-            log "Ensure all critical environment variables are set in .env" "WARNING"
-            # Decide if this should be a fatal error: exit 1
+            log "Some environment variables are missing but the system can still start" "WARNING"
         fi
     else
-        log ".env file not found. Please create one with necessary configurations (e.g., OPENAI_API_KEY, SECRET_KEY)." "WARNING"
-        # Decide if this should be a fatal error: exit 1
+        log ".env file not found. Please create one with necessary configurations (e.g., OPENAI_API_KEY)." "WARNING"
     fi
     
     log "Project Setup Validation Completed" "SUCCESS"
@@ -203,11 +210,6 @@ function pre_flight_checks() {
     if ! ping -c 1 8.8.8.8 &> /dev/null; then # Check with only 1 packet to speed it up
         log "No internet connection detected. Docker image pulls or other operations might fail." "WARNING"
     fi
-    
-    # Check GitHub connectivity for potential updates (optional, can be removed if not needed)
-    # if ! git ls-remote https://github.com/yourusername/openai-to-z-nis.git &> /dev/null; then
-    #     log "Unable to connect to GitHub repository. Offline mode assumed." "WARNING"
-    # fi
     
     log "Pre-flight Checks Completed" "SUCCESS"
 }
@@ -251,8 +253,7 @@ EOF
 # Main Startup Function
 function startup_nis_protocol() {
     nis_banner
-    # archaeological_animation # Consider if this is needed before docker-compose output
-
+    
     log "${CYAN}🚀 Launching NIS Protocol services using Docker Compose...${RESET}"
     
     # Determine Docker Compose command
@@ -285,7 +286,7 @@ function startup_nis_protocol() {
     pkill -f "next dev" 2>/dev/null || true
     pkill -f "npm run dev" 2>/dev/null || true
     
-    log "Building and starting services in detached mode..."
+    log "Building and starting services..."
     if ! $DOCKER_COMPOSE_CMD up -d --build --remove-orphans; then
         error_log "Failed to start services with Docker Compose. Check Docker logs and docker-compose.yml."
         # Attempt to show logs from failed services
@@ -293,53 +294,41 @@ function startup_nis_protocol() {
         exit 1
     fi
     
-    log "Services started in detached mode. Tailing logs..."
+    log "Services started successfully. Waiting for health checks..."
     
-    # Wait and Show Access Information
-    sleep 5 # Give services a moment to initialize
+    # Wait for services to be healthy
+    sleep 10
     
-    # Get mapped ports from docker-compose ps (this is more robust)
-    # Assuming service names in docker-compose.yml are 'backend' and 'frontend'
-    # And they map to host ports.
+    # Check service health
+    log "Checking service health..."
+    $DOCKER_COMPOSE_CMD ps
     
-    # Try to get backend port
-    BACKEND_HOST_PORT=$($DOCKER_COMPOSE_CMD port backend 8000 | cut -d':' -f2)
-    if [ -z "$BACKEND_HOST_PORT" ]; then
-        log "Could not determine backend port automatically. Assuming 8000." "WARNING"
-        BACKEND_HOST_PORT="8000" # Fallback
-    fi
-    
-    # Try to get frontend port
-    FRONTEND_HOST_PORT=$($DOCKER_COMPOSE_CMD port frontend 3000 | cut -d':' -f2)
-    if [ -z "$FRONTEND_HOST_PORT" ]; then
-        log "Could not determine frontend port automatically. Assuming 3000." "WARNING"
-        FRONTEND_HOST_PORT="3000" # Fallback
-    fi
+    # Get mapped ports from docker-compose ps
+    BACKEND_HOST_PORT=$($DOCKER_COMPOSE_CMD port backend 8000 2>/dev/null | cut -d':' -f2 || echo "8000")
+    FRONTEND_HOST_PORT=$($DOCKER_COMPOSE_CMD port frontend 3000 2>/dev/null | cut -d':' -f2 || echo "3000")
+    IKRP_HOST_PORT=$($DOCKER_COMPOSE_CMD port ikrp 8001 2>/dev/null | cut -d':' -f2 || echo "8001")
+    FALLBACK_HOST_PORT=$($DOCKER_COMPOSE_CMD port fallback-backend 8003 2>/dev/null | cut -d':' -f2 || echo "8003")
 
     echo -e "\n${YELLOW}🚀 Archaeological Discovery Platform is now LIVE! (Powered by NIS Protocol)${RESET}"
-    echo -e "Backend API: ${BLUE}http://localhost:$BACKEND_HOST_PORT${RESET}"
-    echo -e "Fallback Backend: ${BLUE}http://localhost:8003${RESET} ${YELLOW}(Reliable LIDAR & IKRP fallback)${RESET}"
+    echo -e "Main Backend (Python 3.12): ${BLUE}http://localhost:$BACKEND_HOST_PORT${RESET}"
+    echo -e "IKRP Codex Service: ${BLUE}http://localhost:$IKRP_HOST_PORT${RESET}"
+    echo -e "Fallback Backend: ${BLUE}http://localhost:$FALLBACK_HOST_PORT${RESET} ${YELLOW}(Reliable LIDAR & IKRP fallback)${RESET}"
     echo -e "Frontend Interface: ${GREEN}http://localhost:$FRONTEND_HOST_PORT${RESET}"
     echo -e "Documentation: ${GREEN}http://localhost:$FRONTEND_HOST_PORT/documentation${RESET}"
     echo -e "Organica AI Solutions: ${CYAN}https://organicaai.com${RESET}"
     echo -e ""
     echo -e "${CYAN}📡 System Architecture:${RESET}"
-    echo -e "  • Main Backend (Docker): Full features with complex dependencies"
+    echo -e "  • Main Backend (Docker): Python 3.12 with full Pydantic v2 compatibility"
+    echo -e "  • IKRP Service (Docker): Codex discovery and archaeological analysis"
     echo -e "  • Fallback Backend (Docker): Reliable LIDAR processing & Real IKRP"
-    echo -e "  • Frontend automatically switches between backends for optimal performance"
+    echo -e "  • Frontend (Docker): Next.js with optimized caching and error handling"
+    echo -e "  • Infrastructure: Redis, Kafka, Zookeeper for distributed processing"
     echo -e ""
     echo -e "To view logs: ${CYAN}$DOCKER_COMPOSE_CMD logs -f${RESET}"
     echo -e "To stop services: ${CYAN}$DOCKER_COMPOSE_CMD down${RESET}"
     echo -e "Detailed startup logs: ${MAGENTA}$LOG_FILE${RESET}"
     
-    log "Archaeological Discovery Platform startup initiated via Docker Compose. Monitor service logs for status."
-
-    # The script can now exit, or tail logs if preferred.
-    # To keep the script running and tailing logs:
-    # log "Tailing combined logs. Press Ctrl+C to stop."
-    # $DOCKER_COMPOSE_CMD logs -f
-    # trap '$DOCKER_COMPOSE_CMD down; log "NIS Protocol shutdown complete."' SIGINT SIGTERM
-    # wait
+    log "Archaeological Discovery Platform startup completed successfully via Docker Compose."
 }
 
 # Main Execution

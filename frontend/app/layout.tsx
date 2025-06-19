@@ -5,6 +5,7 @@ import { ClientProviders } from "../components/client-providers"
 import OptimizedNavigation from "../components/shared/OptimizedNavigation"
 import PageLoader from "../components/ui/page-loader"
 import { Suspense } from "react"
+import CacheCleaner from "../components/CacheCleaner"
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -47,6 +48,7 @@ export default function RootLayout({
         {/* Google Maps will be loaded by GoogleMapsLoader component */}
       </head>
       <body className={inter.className} suppressHydrationWarning>
+        <CacheCleaner />
         <ClientProviders>
           <OptimizedNavigation showBackendStatus={true} />
           <PageLoader>

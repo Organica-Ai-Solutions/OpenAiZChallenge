@@ -12,6 +12,11 @@ services:
     volumes:
       - zookeeper_data:/var/lib/zookeeper/data
       - zookeeper_logs:/var/lib/zookeeper/log
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # Kafka for event streaming
   kafka:
@@ -35,7 +40,14 @@ services:
     volumes:
       - kafka_data:/var/lib/kafka/data
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # Redis for caching and session management
   redis:
@@ -46,12 +58,17 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  # Simplified Backend API (without complex GDAL dependencies)
+  # Main Backend API (Python 3.12 for Pydantic compatibility)
   backend:
     build:
       context: .
-      dockerfile: Dockerfile.simple
+      dockerfile: Dockerfile
     container_name: nis-backend
     restart: unless-stopped
     ports:
@@ -62,11 +79,22 @@ services:
       - REDIS_URL=redis://redis:6379
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - KAFKA_CLIENT_ID=nis-protocol
+      - PYTHONPATH=/app
     volumes:
       - ./logs:/app/logs
+      - ./data:/app/data
+      - ./outputs:/app/outputs
     depends_on:
-      - redis
-      - kafka
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   # IKRP Codex Discovery Service
   ikrp:
@@ -80,14 +108,24 @@ services:
     environment:
       - ENVIRONMENT=development
       - LOG_LEVEL=info
+      - PYTHONPATH=/app
     volumes:
       - ./logs:/app/logs
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
-  # Fallback Backend Service (runs on host)
+  # Fallback Backend Service
   fallback-backend:
-    image: python:3.11-slim
+    build:
+      context: .
+      dockerfile: Dockerfile.fallback
     container_name: nis-fallback-backend
     restart: unless-stopped
     ports:
@@ -95,14 +133,13 @@ services:
     environment:
       - ENVIRONMENT=development
       - LOG_LEVEL=info
+      - PYTHONPATH=/app
     volumes:
-      - .:/app
-    working_dir: /app
-    command: >
-      sh -c "
-        pip install --no-cache-dir -r requirements.simple.txt &&
-        python fallback_backend.py
-      "
+      - ./logs:/app/logs
+      - ./data:/app/data
+    depends_on:
+      redis:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8003/system/health"]
       interval: 30s
@@ -123,17 +160,29 @@ services:
       - NODE_ENV=development
       - NEXT_PUBLIC_API_URL=http://localhost:8000
       - NEXT_PUBLIC_FALLBACK_API_URL=http://localhost:8003
+      - NEXT_PUBLIC_IKRP_API_URL=http://localhost:8001
       - NEXT_PUBLIC_GOOGLE_MAPS_KEY=AIzaSyCCMYQ_eQdaKPV30JGFEv_556O8N-ZzV9E
+      - NEXT_TELEMETRY_DISABLED=1
     volumes:
       - ./frontend:/app
-      - /app/node_modules
+      - frontend_node_modules:/app/node_modules
     depends_on:
-      - backend
-      - ikrp
-      - fallback-backend
+      backend:
+        condition: service_healthy
+      ikrp:
+        condition: service_healthy
+      fallback-backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
 volumes:
   redis_data:
   kafka_data:
   zookeeper_data:
   zookeeper_logs:
+  frontend_node_modules:

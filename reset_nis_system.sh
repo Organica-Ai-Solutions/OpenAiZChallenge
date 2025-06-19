@@ -24,14 +24,24 @@ check_docker() {
     return 0
 }
 
-# Function to detect OS and use appropriate timeout
+# Function to detect OS and use appropriate timeout or alternative
 detect_timeout() {
+    local timeout_duration="$1"
+    shift
+    
     if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "win32" ]]; then
-        # Windows Git Bash - no timeout command, just run directly
-        "$@"
+        # Windows Git Bash - run with background timeout using sleep and kill
+        "$@" &
+        local pid=$!
+        (sleep "$timeout_duration" && kill $pid 2>/dev/null) &
+        local killer_pid=$!
+        wait $pid 2>/dev/null
+        local exit_code=$?
+        kill $killer_pid 2>/dev/null
+        return $exit_code
     else
-        # Linux/Mac - use timeout
-        timeout "$1" "${@:2}"
+        # Linux/Mac - use timeout command
+        timeout "$timeout_duration" "$@"
     fi
 }
 
