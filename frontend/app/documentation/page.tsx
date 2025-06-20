@@ -134,15 +134,15 @@ export default function DocumentationPage() {
         </div>
 
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-8 mb-8 bg-slate-800 border-slate-700">
-            <TabsTrigger value="overview" className="text-slate-300 data-[state=active]:text-white">Overview</TabsTrigger>
-            <TabsTrigger value="kan" className="text-slate-300 data-[state=active]:text-white">KAN Integration</TabsTrigger>
-            <TabsTrigger value="quickstart" className="text-slate-300 data-[state=active]:text-white">Quick Start</TabsTrigger>
-            <TabsTrigger value="architecture" className="text-slate-300 data-[state=active]:text-white">Architecture</TabsTrigger>
-            <TabsTrigger value="api" className="text-slate-300 data-[state=active]:text-white">API Guide</TabsTrigger>
-            <TabsTrigger value="deployment" className="text-slate-300 data-[state=active]:text-white">Deployment</TabsTrigger>
-            <TabsTrigger value="examples" className="text-slate-300 data-[state=active]:text-white">Examples</TabsTrigger>
-            <TabsTrigger value="roadmap" className="text-slate-300 data-[state=active]:text-white">Roadmap</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-8 mb-8 bg-slate-800/80 border-slate-600 backdrop-blur-sm">
+            <TabsTrigger value="overview" className="text-slate-400 hover:text-slate-200 data-[state=active]:text-emerald-300 data-[state=active]:bg-emerald-900/30 data-[state=active]:border-emerald-500/50 transition-all duration-200">Overview</TabsTrigger>
+            <TabsTrigger value="kan" className="text-slate-400 hover:text-slate-200 data-[state=active]:text-cyan-300 data-[state=active]:bg-cyan-900/30 data-[state=active]:border-cyan-500/50 transition-all duration-200">KAN Integration</TabsTrigger>
+            <TabsTrigger value="quickstart" className="text-slate-400 hover:text-slate-200 data-[state=active]:text-blue-300 data-[state=active]:bg-blue-900/30 data-[state=active]:border-blue-500/50 transition-all duration-200">Quick Start</TabsTrigger>
+            <TabsTrigger value="architecture" className="text-slate-400 hover:text-slate-200 data-[state=active]:text-purple-300 data-[state=active]:bg-purple-900/30 data-[state=active]:border-purple-500/50 transition-all duration-200">Architecture</TabsTrigger>
+            <TabsTrigger value="api" className="text-slate-400 hover:text-slate-200 data-[state=active]:text-orange-300 data-[state=active]:bg-orange-900/30 data-[state=active]:border-orange-500/50 transition-all duration-200">API Guide</TabsTrigger>
+            <TabsTrigger value="deployment" className="text-slate-400 hover:text-slate-200 data-[state=active]:text-green-300 data-[state=active]:bg-green-900/30 data-[state=active]:border-green-500/50 transition-all duration-200">Deployment</TabsTrigger>
+            <TabsTrigger value="examples" className="text-slate-400 hover:text-slate-200 data-[state=active]:text-yellow-300 data-[state=active]:bg-yellow-900/30 data-[state=active]:border-yellow-500/50 transition-all duration-200">Examples</TabsTrigger>
+            <TabsTrigger value="roadmap" className="text-slate-400 hover:text-slate-200 data-[state=active]:text-pink-300 data-[state=active]:bg-pink-900/30 data-[state=active]:border-pink-500/50 transition-all duration-200">Roadmap</TabsTrigger>
           </TabsList>
 
           {/* OVERVIEW TAB */}
@@ -917,7 +917,7 @@ export default function DocumentationPage() {
                       </div>
                       <div className="bg-green-50 dark:bg-green-950 p-2 rounded">
                         <strong>Backend:</strong><br />
-                        FastAPI, Python 3.10+, Uvicorn
+                        FastAPI, Python 3.12, Uvicorn, Storage System
                         </div>
                       <div className="bg-purple-50 dark:bg-purple-950 p-2 rounded">
                         <strong>Database:</strong><br />
@@ -963,11 +963,14 @@ export default function DocumentationPage() {
                         <div><strong>Container:</strong> nis-backend</div>
                         <div><strong>Features:</strong></div>
                         <ul className="list-disc list-inside space-y-1 ml-2">
-                          <li>FastAPI framework</li>
-                          <li>OpenAI GPT-4.1 Vision integration</li>
+                          <li>FastAPI framework (Python 3.12)</li>
+                          <li>OpenAI GPT-4o Vision integration</li>
                           <li>Archaeological analysis pipeline</li>
                           <li>Satellite imagery processing</li>
                           <li>Agent management system</li>
+                          <li>💾 Persistent storage system</li>
+                          <li>🧠 AI learning & predictions</li>
+                          <li>📊 Auto-save high-confidence discoveries</li>
                         </ul>
                       </CardContent>
                     </Card>
@@ -1022,6 +1025,24 @@ export default function DocumentationPage() {
                           <li>API response caching</li>
                           <li>Real-time data storage</li>
                           <li>Performance optimization</li>
+                        </ul>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-yellow-200 dark:border-yellow-800">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm text-yellow-600 dark:text-yellow-400">Fallback Backend</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-2 text-xs">
+                        <div><strong>Port:</strong> 8003</div>
+                        <div><strong>Container:</strong> nis-fallback-backend</div>
+                        <div><strong>Features:</strong></div>
+                        <ul className="list-disc list-inside space-y-1 ml-2">
+                          <li>🛡️ Reliable LIDAR processing</li>
+                          <li>🔬 Real IKRP integration</li>
+                          <li>⚡ High availability backup</li>
+                          <li>📊 Independent analysis pipeline</li>
+                          <li>🔄 Automatic failover support</li>
                         </ul>
                       </CardContent>
                     </Card>
@@ -1128,7 +1149,7 @@ export default function DocumentationPage() {
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                   <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">30+</div>
+                    <div className="text-2xl font-bold text-blue-600">35+</div>
                     <div className="text-sm text-blue-700 dark:text-blue-300">Total Endpoints</div>
                   </div>
                   <div className="bg-green-50 dark:bg-green-950 p-3 rounded-lg">
@@ -1240,6 +1261,49 @@ export default function DocumentationPage() {
                         </div>
                       </CardContent>
                     </Card>
+
+                      <Card className="border-emerald-200 dark:border-emerald-800">
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-sm text-emerald-600 dark:text-emerald-400">💾 Persistent Storage System</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3 text-xs">
+                          <div className="grid grid-cols-3 gap-2 font-semibold border-b pb-2">
+                            <div>Method & Endpoint</div>
+                            <div>Description</div>
+                            <div>Parameters</div>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
+                            <div><span className="bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded text-blue-800 dark:text-blue-200">POST</span> /api/storage/discovery/save</div>
+                            <div>Save archaeological discovery</div>
+                            <div>discovery_data, confidence</div>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
+                            <div><span className="bg-green-100 dark:bg-green-900 px-2 py-1 rounded text-green-800 dark:text-green-200">GET</span> /api/storage/sites</div>
+                            <div>Get archaeological sites</div>
+                            <div>min_confidence, limit</div>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
+                            <div><span className="bg-green-100 dark:bg-green-900 px-2 py-1 rounded text-green-800 dark:text-green-200">GET</span> /api/storage/analyses</div>
+                            <div>Get analysis sessions</div>
+                            <div>limit, researcher_id</div>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
+                            <div><span className="bg-green-100 dark:bg-green-900 px-2 py-1 rounded text-green-800 dark:text-green-200">GET</span> /api/storage/stats</div>
+                            <div>Storage system statistics</div>
+                            <div>None</div>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
+                            <div><span className="bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded text-blue-800 dark:text-blue-200">POST</span> /api/learning/predict</div>
+                            <div>AI prediction for coordinates</div>
+                            <div>lat, lon, radius</div>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
+                            <div><span className="bg-green-100 dark:bg-green-900 px-2 py-1 rounded text-green-800 dark:text-green-200">GET</span> /api/storage/status</div>
+                            <div>Complete storage system status</div>
+                            <div>None</div>
+                          </div>
+                        </CardContent>
+                      </Card>
 
                       <Card className="border-red-200 dark:border-red-800">
                         <CardHeader className="pb-3">
