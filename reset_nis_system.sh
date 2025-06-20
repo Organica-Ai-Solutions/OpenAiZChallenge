@@ -189,6 +189,50 @@ if [ -d "logs" ]; then
     rm -rf logs/*
 fi
 
+# Handle storage directory
+echo -e "${YELLOW}💾 Handling archaeological storage...${NC}"
+if [ -d "storage" ] && [ -n "$(ls -A storage 2>/dev/null)" ]; then
+    echo -e "${BLUE}📊 Found existing archaeological discoveries in storage/...${NC}"
+    
+    # Count existing discoveries
+    sites_count=0
+    analyses_count=0
+    patterns_count=0
+    
+    if [ -f "storage/archaeological_sites.json" ]; then
+        sites_count=$(python3 -c "import json; print(len(json.load(open('storage/archaeological_sites.json', 'r'))))" 2>/dev/null || echo "0")
+    fi
+    
+    if [ -f "storage/analysis_sessions.json" ]; then
+        analyses_count=$(python3 -c "import json; print(len(json.load(open('storage/analysis_sessions.json', 'r'))))" 2>/dev/null || echo "0")
+    fi
+    
+    if [ -f "storage/learning_patterns.json" ]; then
+        patterns_count=$(python3 -c "import json; print(len(json.load(open('storage/learning_patterns.json', 'r'))))" 2>/dev/null || echo "0")
+    fi
+    
+    echo -e "${GREEN}  📍 Archaeological Sites: ${sites_count}${NC}"
+    echo -e "${GREEN}  📋 Analysis Sessions: ${analyses_count}${NC}"
+    echo -e "${GREEN}  🧠 Learning Patterns: ${patterns_count}${NC}"
+    echo -e ""
+    echo -e "${YELLOW}⚠️  Do you want to preserve your archaeological discoveries? (y/N)${NC}"
+    read -p "   Preserve storage? " -n 1 -r
+    echo
+    
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${GREEN}✅ Preserving archaeological storage${NC}"
+        echo -e "${BLUE}💡 Your discoveries will be available after restart${NC}"
+    else
+        echo -e "${YELLOW}🗑️  Clearing archaeological storage...${NC}"
+        rm -rf storage/* 2>/dev/null || true
+        echo -e "${GREEN}✅ Archaeological storage cleared${NC}"
+    fi
+else
+    echo -e "${BLUE}📁 Creating fresh storage directory...${NC}"
+    mkdir -p storage
+    echo -e "${GREEN}✅ Storage directory ready${NC}"
+fi
+
 # Start services
 if check_docker; then
     # Start Redis
@@ -291,6 +335,7 @@ if check_docker; then
 else
     echo -e "   Redis:        ${YELLOW}Not started (Docker unavailable)${NC}"
 fi
+echo -e "   Storage:      ${GREEN}./storage/ (persistent discoveries)${NC}"
 echo ""
 echo -e "${BLUE}🔧 Process IDs:${NC}"
 echo -e "   Backend PID:  ${YELLOW}$BACKEND_PID${NC}"
@@ -305,5 +350,6 @@ echo ""
 echo -e "${BLUE}🛡️  System Architecture:${NC}"
 echo -e "   • Fallback Backend provides reliable LIDAR processing and Real IKRP integration"
 echo -e "   • Frontend automatically detects and uses available backend services"
+echo -e "   • Persistent storage preserves archaeological discoveries across restarts"
 echo -e "   • Full Docker deployment available via: ${YELLOW}./start.sh${NC}"
 echo "" 

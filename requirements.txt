@@ -46,6 +46,11 @@ aiosqlite==0.19.0
 sqlalchemy==2.0.15
 alembic==1.10.4
 
+# File-based storage (already included in Python standard library)
+# pathlib - built-in
+# json - built-in
+# datetime - built-in
+
 # Settings management
 pydantic-settings>=2.0.0
 

@@ -84,6 +84,7 @@ services:
       - ./logs:/app/logs
       - ./data:/app/data
       - ./outputs:/app/outputs
+      - ./storage:/app/storage
     depends_on:
       redis:
         condition: service_healthy

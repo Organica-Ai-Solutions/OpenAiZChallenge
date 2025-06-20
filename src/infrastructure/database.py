@@ -24,7 +24,8 @@ from src.config import (
     DatabaseConfig, # The actual Pydantic model for database settings
     Environment as AppEnvironment
 )
-from ..models.user import Base # Assuming this relative import is correct
+from ..models.user import Base as UserBase
+from ..models.storage_models import Base as StorageBase
 
 logger = logging.getLogger(__name__)
 
@@ -66,15 +67,12 @@ class DatabaseManager:
         DatabaseManager._config_used_for_init = self.config # Track it
 
         logger.info(f"DBM: Using ConfigManager instance ID: {id(self.config)}")
-        # print(f"DEBUG DBM: self.config in _initialize - ID: {id(self.config)}, Type: {type(self.config)}")
-        # print(f"DEBUG DBM: Attributes of self.config: {dir(self.config)}")
+        
         has_get_config_method = hasattr(self.config, 'get_config') and callable(getattr(self.config, 'get_config'))
-        # print(f"DEBUG DBM: hasattr(self.config, 'get_config') and is callable: {has_get_config_method}")
 
         if not has_get_config_method:
             logger.error("ERROR DBM: self.config does NOT have a callable get_config method!")
             self._initialized = False
-            # This is a critical failure, ideally raise an exception or prevent app startup
             raise RuntimeError("DatabaseManager: ConfigManager instance is missing get_config method.")
 
         db_config_model = self.config.get_config("database")
@@ -88,31 +86,44 @@ class DatabaseManager:
         db_user = db_config_model.db_user or os.getenv('POSTGRES_USER', 'user')
         db_password = db_config_model.db_password or os.getenv('POSTGRES_PASSWORD', 'password')
         db_name = db_config_model.db_name or os.getenv('POSTGRES_DB', 'nis')
-        db_host = db_config_model.db_host or os.getenv('POSTGRES_HOST', 'db')
+        db_host = db_config_model.db_host or os.getenv('POSTGRES_HOST', 'localhost')  # Changed from 'db' to 'localhost'
         db_port = db_config_model.db_port or 5432
 
-        self.db_url = f"postgresql+asyncpg://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+        # For development, use SQLite if PostgreSQL is not available
+        if os.getenv('USE_SQLITE', 'false').lower() == 'true':
+            self.db_url = "sqlite+aiosqlite:///./nis_protocol.db"
+            logger.info("DBM: Using SQLite database for development")
+        else:
+            self.db_url = f"postgresql+asyncpg://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
         
-        current_env = self.config.current_environment # Get environment from ConfigManager
-        logger.info(f"DBM: Database URL for env '{current_env.value if current_env else 'UNKNOWN'}': {self.db_url[:self.db_url.find(':')+3]}") # Slightly more of URL for context
+        current_env = self.config.current_environment
+        logger.info(f"DBM: Database URL for env '{current_env.value if current_env else 'UNKNOWN'}'")
 
         self._engine: AsyncEngine = create_async_engine(
             self.db_url,
             poolclass=NullPool,
-            echo=False # Set to True for verbose SQLAlchemy logging, e.g., if current_env == AppEnvironment.LOCAL
+            echo=False
         )
         self._session_factory = async_sessionmaker(self._engine, expire_on_commit=False, class_=AsyncSession)
         logger.info("DBM: DatabaseManager initialized successfully with full config.")
         self._initialized = True
     
     async def create_tables(self):
-        """Create all database tables."""
+        """Create all database tables including storage models."""
         if not self._initialized or not self._engine:
             logger.error("DBM: Cannot create tables, DatabaseManager not initialized.")
             return
-        async with self._engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-        logger.info("Database tables created successfully")
+        
+        try:
+            async with self._engine.begin() as conn:
+                # Create user tables
+                await conn.run_sync(UserBase.metadata.create_all)
+                # Create storage tables
+                await conn.run_sync(StorageBase.metadata.create_all)
+            logger.info("✅ Database tables created successfully (User + Storage)")
+        except Exception as e:
+            logger.error(f"❌ Failed to create database tables: {e}")
+            raise
     
     async def drop_tables(self):
         """Drop all database tables (use with caution)."""
@@ -120,7 +131,8 @@ class DatabaseManager:
             logger.error("DBM: Cannot drop tables, DatabaseManager not initialized.")
             return
         async with self._engine.begin() as conn:
-            await conn.run_sync(Base.metadata.drop_all)
+            await conn.run_sync(UserBase.metadata.drop_all)
+            await conn.run_sync(StorageBase.metadata.drop_all)
         logger.warning("All database tables dropped")
     
     async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
