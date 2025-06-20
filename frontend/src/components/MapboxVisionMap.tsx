@@ -70,6 +70,21 @@ interface LidarVisualization {
   }
 }
 
+// Archaeological site interface for storage integration
+interface ArchaeologicalSite {
+  site_id: string
+  latitude: number
+  longitude: number
+  confidence: number
+  pattern_type: string
+  cultural_significance: string
+  validated: boolean
+  discovery_date: string
+  database_stored: boolean
+  name?: string
+  type?: string
+}
+
 export function MapboxVisionMap({
   coordinates = { lat: 5.1542, lng: -73.7792 }, // Lake Guatavita default
   onCoordinateChange,
@@ -84,6 +99,12 @@ export function MapboxVisionMap({
   const [mapLoaded, setMapLoaded] = useState(false)
   const [mapError, setMapError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  
+  // Archaeological sites state
+  const [archaeologicalSites, setArchaeologicalSites] = useState<ArchaeologicalSite[]>([])
+  const [sitesLoading, setSitesLoading] = useState(false)
+  const [selectedSite, setSelectedSite] = useState<ArchaeologicalSite | null>(null)
+  const [siteMarkers, setSiteMarkers] = useState<any[]>([])
   
   // Layer management
   const [activeLayers, setActiveLayers] = useState<LayerConfig[]>([
@@ -148,6 +169,284 @@ export function MapboxVisionMap({
 
   // Mapbox token - using the provided token
   const MAPBOX_TOKEN = 'pk.eyJ1IjoicGVudGl1czAwIiwiYSI6ImNtYXRtZXpmZTB4djgya29mNWZ0dG5pZDUifQ.dmsZjiJKZ7dxGs5KHVEK2g'
+  
+  // Fetch archaeological sites from storage system
+  const fetchArchaeologicalSites = useCallback(async () => {
+    setSitesLoading(true)
+    try {
+      console.log('🏛️ MapboxVisionMap: Fetching archaeological sites from storage...')
+      
+      // Try multiple endpoints to get sites
+      const endpoints = [
+        'http://localhost:8000/research/all-discoveries?max_sites=100',
+        'http://localhost:8000/research/sites?max_sites=100&min_confidence=0.3',
+        'http://localhost:8000/api/sites'
+      ]
+      
+      let sites: ArchaeologicalSite[] = []
+      
+      for (const endpoint of endpoints) {
+        try {
+          const response = await fetch(endpoint, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+            mode: 'cors'
+          })
+          
+          if (response.ok) {
+            const data = await response.json()
+            console.log(`✅ MapboxVisionMap: Loaded ${data.length} sites from ${endpoint}`)
+            
+            // Transform data to our format
+            sites = data.map((site: any, index: number) => ({
+              site_id: site.site_id || site.id || `site_${index}_${Date.now()}`,
+              latitude: typeof site.latitude === 'number' ? site.latitude : 
+                       site.coordinates ? parseFloat(site.coordinates.split(',')[0]) : 0,
+              longitude: typeof site.longitude === 'number' ? site.longitude : 
+                        site.coordinates ? parseFloat(site.coordinates.split(',')[1]) : 0,
+              confidence: site.confidence || site.confidence_score || 0.5,
+              pattern_type: site.pattern_type || site.type || 'settlement',
+              cultural_significance: site.cultural_significance || site.description || 'Archaeological site',
+              validated: site.validated || true,
+              discovery_date: site.discovery_date || new Date().toISOString(),
+              database_stored: site.database_stored || true,
+              name: site.name || `Site ${index + 1}`,
+              type: site.type || site.pattern_type || 'settlement'
+            }))
+            break // Use first successful endpoint
+          }
+        } catch (err) {
+          console.warn(`⚠️ Failed to fetch from ${endpoint}:`, err)
+          continue
+        }
+      }
+      
+      // Fallback to local storage if no backend data
+      if (sites.length === 0) {
+        console.log('📁 MapboxVisionMap: Trying local storage fallback...')
+        try {
+          const storageData = localStorage.getItem('archaeological_sites')
+          if (storageData) {
+            const localSites = JSON.parse(storageData)
+            sites = Array.isArray(localSites) ? localSites : []
+            console.log(`✅ MapboxVisionMap: Loaded ${sites.length} sites from local storage`)
+          }
+        } catch (err) {
+          console.warn('⚠️ Failed to load from local storage:', err)
+        }
+      }
+      
+      setArchaeologicalSites(sites)
+      console.log(`🗺️ MapboxVisionMap: Total sites loaded: ${sites.length}`)
+      
+    } catch (error) {
+      console.error('❌ MapboxVisionMap: Failed to fetch archaeological sites:', error)
+      setMapError('Failed to load archaeological sites')
+    } finally {
+      setSitesLoading(false)
+    }
+  }, [])
+  
+  // Create site markers on the map
+  const createSiteMarkers = useCallback(() => {
+    if (!map.current || !mapLoaded || archaeologicalSites.length === 0) {
+      return
+    }
+    
+    console.log('📍 MapboxVisionMap: Creating site markers...', archaeologicalSites.length)
+    
+    // Clear existing markers
+    siteMarkers.forEach(marker => {
+      if (marker && marker.remove) {
+        marker.remove()
+      }
+    })
+    setSiteMarkers([])
+    
+    const newMarkers: any[] = []
+    
+    archaeologicalSites.forEach((site, index) => {
+      try {
+        if (!site.latitude || !site.longitude) {
+          console.warn('⚠️ Site missing coordinates:', site.site_id)
+          return
+        }
+        
+        // Determine marker color based on confidence
+        const getMarkerColor = (confidence: number) => {
+          if (confidence >= 0.85) return '#10B981' // Green for high confidence
+          if (confidence >= 0.70) return '#F59E0B' // Yellow for medium confidence
+          return '#EF4444' // Red for lower confidence
+        }
+        
+        const markerColor = getMarkerColor(site.confidence)
+        
+        // Create marker element
+        const markerElement = document.createElement('div')
+        markerElement.className = 'archaeological-site-marker'
+        markerElement.style.cssText = `
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background-color: ${markerColor};
+          border: 2px solid white;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+          cursor: pointer;
+          transition: transform 0.2s;
+        `
+        
+        // Add hover effect
+        markerElement.addEventListener('mouseenter', () => {
+          markerElement.style.transform = 'scale(1.2)'
+        })
+        markerElement.addEventListener('mouseleave', () => {
+          markerElement.style.transform = 'scale(1)'
+        })
+        
+                 // Import mapbox-gl dynamically
+         const createMarker = async () => {
+           const mapboxgl = await import('mapbox-gl')
+           
+           // Create marker
+           const marker = new mapboxgl.default.Marker(markerElement)
+             .setLngLat([site.longitude, site.latitude])
+             .addTo(map.current)
+           
+           // Create popup
+           const popup = new mapboxgl.default.Popup({
+            offset: 25,
+            closeButton: true,
+            closeOnClick: false
+          }).setHTML(`
+            <div style="max-width: 300px; padding: 12px; font-family: system-ui, -apple-system, sans-serif;">
+              <div style="border-bottom: 2px solid ${markerColor}; padding-bottom: 8px; margin-bottom: 12px;">
+                <h3 style="margin: 0; color: #1F2937; font-size: 16px; font-weight: 600;">
+                  ${site.name || `Archaeological Site ${index + 1}`}
+                </h3>
+                <div style="display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;">
+                  <span style="background: ${markerColor}; color: white; padding: 2px 6px; border-radius: 10px; font-size: 11px; font-weight: 500;">
+                    ${Math.round(site.confidence * 100)}% confidence
+                  </span>
+                  <span style="background: #E5E7EB; color: #374151; padding: 2px 6px; border-radius: 10px; 
+                               font-size: 11px; font-weight: 500; text-transform: capitalize;">
+                    ${site.pattern_type}
+                  </span>
+                  ${site.validated ? `
+                    <span style="background: #10B981; color: white; padding: 2px 6px; border-radius: 10px; 
+                                 font-size: 11px; font-weight: 500;">
+                      ✓ Validated
+                    </span>
+                  ` : ''}
+                </div>
+              </div>
+              
+              <div style="space-y: 8px;">
+                <p style="margin: 6px 0; font-size: 13px; color: #374151; line-height: 1.4;">
+                  <strong>Cultural Significance:</strong><br/>
+                  ${site.cultural_significance}
+                </p>
+                <p style="margin: 6px 0; font-size: 13px; color: #374151;">
+                  <strong>Coordinates:</strong> ${site.latitude.toFixed(4)}, ${site.longitude.toFixed(4)}
+                </p>
+                <p style="margin: 6px 0; font-size: 13px; color: #374151;">
+                  <strong>Discovery Date:</strong> ${new Date(site.discovery_date).toLocaleDateString()}
+                </p>
+                ${site.database_stored ? `
+                  <p style="margin: 6px 0; font-size: 13px; color: #10B981;">
+                    <strong>Status:</strong> ✅ Stored in Database
+                  </p>
+                ` : ''}
+              </div>
+              
+              <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #E5E7EB; 
+                          display: flex; gap: 6px; flex-wrap: wrap;">
+                <button onclick="window.selectVisionSite('${site.site_id}')" 
+                        style="background: #3B82F6; color: white; border: none; padding: 6px 12px; 
+                               border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 500;
+                               transition: background-color 0.2s;">
+                  📍 Select Site
+                </button>
+                <button onclick="window.analyzeVisionSite('${site.site_id}')" 
+                        style="background: #8B5CF6; color: white; border: none; padding: 6px 12px; 
+                               border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 500;
+                               transition: background-color 0.2s;">
+                  🔬 Analyze
+                </button>
+                <button onclick="window.centerOnVisionSite(${site.latitude}, ${site.longitude})" 
+                        style="background: #10B981; color: white; border: none; padding: 6px 12px; 
+                               border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 500;
+                               transition: background-color 0.2s;">
+                  🎯 Center
+                </button>
+              </div>
+            </div>
+          `)
+          
+          // Add click event to marker
+          markerElement.addEventListener('click', () => {
+            popup.addTo(map.current)
+            setSelectedSite(site)
+          })
+          
+          return marker
+        }
+        
+        createMarker().then(marker => {
+          newMarkers.push(marker)
+        }).catch(err => {
+          console.warn('Failed to create marker for site:', site.site_id, err)
+        })
+        
+      } catch (error) {
+        console.warn('Failed to create marker for site:', site.site_id, error)
+      }
+    })
+    
+    setSiteMarkers(newMarkers)
+    console.log(`✅ MapboxVisionMap: Created ${newMarkers.length} site markers`)
+  }, [mapLoaded, archaeologicalSites, siteMarkers])
+  
+  // Window functions for marker interactions
+  useEffect(() => {
+    (window as any).selectVisionSite = (siteId: string) => {
+      const site = archaeologicalSites.find(s => s.site_id === siteId)
+      if (site) {
+        setSelectedSite(site)
+        console.log('✅ Vision site selected:', site.name || site.site_id)
+      }
+    }
+    
+    (window as any).analyzeVisionSite = (siteId: string) => {
+      const site = archaeologicalSites.find(s => s.site_id === siteId)
+      if (site) {
+        console.log('🔬 Starting vision site analysis:', site.name || site.site_id)
+        // Trigger coordinate change to analyze this site
+        if (onCoordinateChange) {
+          onCoordinateChange({ lat: site.latitude, lng: site.longitude })
+        }
+      }
+    }
+    
+    (window as any).centerOnVisionSite = (lat: number, lng: number) => {
+      if (map.current) {
+        map.current.flyTo({
+          center: [lng, lat],
+          zoom: 14,
+          duration: 1000
+        })
+        console.log('🎯 Centered on vision site:', lat, lng)
+      }
+    }
+    
+    return () => {
+      delete (window as any).selectVisionSite
+      delete (window as any).analyzeVisionSite
+      delete (window as any).centerOnVisionSite
+    }
+  }, [archaeologicalSites, onCoordinateChange])
   
   // Optimized LIDAR data fetching with caching
   const fetchLidarData = useCallback(async (coords: { lat: number; lng: number }) => {
@@ -256,91 +555,88 @@ export function MapboxVisionMap({
   useEffect(() => {
     if (!mapContainer.current) return
 
-    const initializeMap = async () => {
+    const loadMapbox = async () => {
       try {
-        // Load Mapbox GL JS dynamically
+        setIsLoading(true)
         const mapboxgl = await import('mapbox-gl')
         
-        // Verify Mapbox GL JS is properly loaded
-        if (!mapboxgl.default || !mapboxgl.default.Map) {
-          throw new Error('Mapbox GL JS failed to load properly')
+        if (!MAPBOX_TOKEN) {
+          throw new Error('Mapbox token not provided')
         }
-        
-        // Set access token
+
+        // @ts-ignore - Mapbox GL JS access token assignment
         mapboxgl.default.accessToken = MAPBOX_TOKEN
         
-        // Performance optimizations for Mapbox
-        const mapOptions = {
+        // Initialize map
+        const mapInstance = new mapboxgl.default.Map({
           container: mapContainer.current!,
-          style: 'mapbox://styles/pentius00/cmc32tqj601xj01s27vfa415t',
-          center: [coordinates.lng, coordinates.lat] as [number, number],
-          zoom: 16,
-          pitch: viewMode === '3d' ? 45 : 0,
-          bearing: bearing,
-          antialias: true,
-          // Performance optimizations
-          preserveDrawingBuffer: false,
-          failIfMajorPerformanceCaveat: false,
-          fadeDuration: 300,
-          crossSourceCollisions: false,
-          // Reduce unnecessary repaints
-          maxBounds: [
-            [coordinates.lng - 0.1, coordinates.lat - 0.1],
-            [coordinates.lng + 0.1, coordinates.lat + 0.1]
-          ] as [[number, number], [number, number]]
-        }
-        
-        // Create map instance with optimized options
-        const mapInstance = new mapboxgl.default.Map(mapOptions)
+          style: `mapbox://styles/mapbox/${mapStyle}`,
+          center: [coordinates.lng, coordinates.lat],
+          zoom: 12,
+          pitch: pitch,
+          bearing: bearing
+        })
 
         map.current = mapInstance
 
-        // Wait for map to load
-        mapInstance.on('load', async () => {
+        mapInstance.on('load', () => {
+          console.log('✅ MapboxVisionMap: Map loaded successfully')
           setMapLoaded(true)
+          setMapError(null)
           setIsLoading(false)
-          initializeMapLayers()
-          
-          // Add controls with error handling
-          try {
-            await addMapControls()
-          } catch (error) {
-            console.warn('Failed to add map controls, continuing without them:', error)
-          }
         })
 
-        // Handle map errors
         mapInstance.on('error', (e) => {
-          console.error('Mapbox error:', e)
-          setMapError('Failed to load map. Please check your internet connection.')
+          console.error('❌ MapboxVisionMap: Map error:', e)
+          setMapError('Failed to load map')
           setIsLoading(false)
         })
 
-        // Handle click events
         mapInstance.on('click', (e) => {
-          const newCoords = {
-            lat: e.lngLat.lat,
-            lng: e.lngLat.lng
+          const { lng, lat } = e.lngLat
+          if (onCoordinateChange) {
+            onCoordinateChange({ lat, lng })
           }
-          onCoordinateChange?.(newCoords)
-          updateAnalysisPoint(newCoords)
         })
 
       } catch (error) {
-        console.error('Error initializing Mapbox:', error)
-        setMapError('Failed to initialize map. Mapbox GL JS not available.')
+        console.error('❌ MapboxVisionMap: Failed to initialize map:', error)
+        setMapError('Failed to initialize map')
         setIsLoading(false)
       }
     }
 
-    initializeMap()
+    loadMapbox()
 
     return () => {
       if (map.current) {
         map.current.remove()
       }
     }
-  }, [])
+  }, [coordinates, mapStyle, pitch, bearing, onCoordinateChange])
+
+  // Fetch archaeological sites when component mounts
+  useEffect(() => {
+    fetchArchaeologicalSites()
+  }, [fetchArchaeologicalSites])
+
+  // Create site markers when map loads or sites change
+  useEffect(() => {
+    if (mapLoaded && archaeologicalSites.length > 0) {
+      console.log('🗺️ MapboxVisionMap: Map loaded and sites available, creating markers...')
+      createSiteMarkers()
+    }
+  }, [mapLoaded, archaeologicalSites, createSiteMarkers])
+
+  // Update map center when coordinates change
+  useEffect(() => {
+    if (map.current && mapLoaded) {
+      map.current.flyTo({
+        center: [coordinates.lng, coordinates.lat],
+        duration: 1000
+      })
+    }
+  }, [coordinates, mapLoaded])
 
   // Initialize map layers
   const initializeMapLayers = useCallback(() => {
@@ -1665,6 +1961,19 @@ export function MapboxVisionMap({
             <Eye className="w-3 h-3 mr-1" />
             {analysisResults ? 'Live Analysis' : 'No Analysis'}
           </Badge>
+        </div>
+        
+        {/* Archaeological Sites Info */}
+        <div className="flex items-center gap-2 text-xs mt-1">
+          <Badge variant="secondary" className={`text-xs ${archaeologicalSites.length > 0 ? 'border-blue-400 text-blue-300' : 'border-gray-400 text-gray-300'}`}>
+            <MapPin className="w-3 h-3 mr-1" />
+            {sitesLoading ? 'Loading Sites...' : `${archaeologicalSites.length} Archaeological Sites`}
+          </Badge>
+          {selectedSite && (
+            <Badge variant="secondary" className="text-xs border-yellow-400 text-yellow-300">
+              Selected: {selectedSite.name || selectedSite.site_id}
+            </Badge>
+          )}
         </div>
         
         {/* Performance Metrics */}

@@ -20,6 +20,7 @@ import {
 } from "lucide-react"
 import dynamic from 'next/dynamic'
 
+const MapboxVisionMap = dynamic(() => import('../../src/components/MapboxVisionMap').then(mod => ({ default: mod.MapboxVisionMap })), { ssr: false })
 const SatelliteLidarMap = dynamic(() => import('../../src/components/SatelliteLidarMap'), { ssr: false })
 
 export default function VisionAgentPage() {
@@ -787,11 +788,50 @@ export default function VisionAgentPage() {
                           autoAnalyze={false}
                         />
                         <div className="mt-6">
-                          <SatelliteLidarMap 
-                            satelliteData={[]} 
-                            coordinates={{ lat: 5.1542, lng: -73.7792 }} 
-                            onCoordinateChange={() => {}} 
-                          />
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Enhanced Mapbox Vision Map with Archaeological Sites */}
+                            <div className="space-y-2">
+                              <h3 className="text-lg font-medium text-white flex items-center gap-2">
+                                <MapPin className="w-5 h-5 text-emerald-400" />
+                                Enhanced Vision Map with Archaeological Sites
+                              </h3>
+                              <p className="text-sm text-slate-400">
+                                Interactive map showing archaeological sites from storage system
+                              </p>
+                              <MapboxVisionMap 
+                                coordinates={{
+                                  lat: parseFloat(selectedCoordinates.split(',')[0]?.trim() || '5.1542'),
+                                  lng: parseFloat(selectedCoordinates.split(',')[1]?.trim() || '-73.7792')
+                                }}
+                                onCoordinateChange={(coords) => {
+                                  setSelectedCoordinates(`${coords.lat}, ${coords.lng}`)
+                                }}
+                                height="400px"
+                                className="rounded-lg border border-slate-600"
+                              />
+                            </div>
+                            
+                            {/* Original Satellite/LIDAR Map */}
+                            <div className="space-y-2">
+                              <h3 className="text-lg font-medium text-white flex items-center gap-2">
+                                <Satellite className="w-5 h-5 text-blue-400" />
+                                Satellite & LIDAR Analysis
+                              </h3>
+                              <p className="text-sm text-slate-400">
+                                Multi-modal satellite and LIDAR visualization
+                              </p>
+                              <SatelliteLidarMap 
+                                satelliteData={[]} 
+                                coordinates={{
+                                  lat: parseFloat(selectedCoordinates.split(',')[0]?.trim() || '5.1542'),
+                                  lng: parseFloat(selectedCoordinates.split(',')[1]?.trim() || '-73.7792')
+                                }}
+                                onCoordinateChange={(coords) => {
+                                  setSelectedCoordinates(`${coords.lat}, ${coords.lng}`)
+                                }}
+                              />
+                            </div>
+                          </div>
                         </div>
                       </>
                     ) : (
