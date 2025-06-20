@@ -1,0 +1,35 @@
+[
+  {
+    "site_id": "site_test_1750449881",
+    "latitude": -3.4653,
+    "longitude": -62.2159,
+    "confidence": 0.85,
+    "pattern_type": "ancient_settlement",
+    "cultural_significance": "Test archaeological site for storage verification",
+    "validated": true,
+    "discovery_date": "2025-06-20T16:04:41.769246",
+    "database_stored": true
+  },
+  {
+    "site_id": "site_test_endpoint_001",
+    "latitude": -15.7801,
+    "longitude": -47.9292,
+    "confidence": 0.92,
+    "pattern_type": "ceremonial_complex",
+    "cultural_significance": "Test discovery via endpoint",
+    "validated": true,
+    "discovery_date": "2025-06-20T16:06:48.472274",
+    "database_stored": true
+  },
+  {
+    "site_id": "site_nis_5154_73779_1750450660",
+    "latitude": 5.1542,
+    "longitude": -73.7792,
+    "confidence": 0.8308441344209593,
+    "pattern_type": "Residential platform",
+    "cultural_significance": "settlement areas with rich archaeological deposits",
+    "validated": true,
+    "discovery_date": "2025-06-20T16:17:40.257460",
+    "database_stored": true
+  }
+]

@@ -1,0 +1,86 @@
+[
+  {
+    "analysis_id": "test_1750449881",
+    "session_name": "Test Discovery Session",
+    "researcher_id": "test_user",
+    "analysis_type": "comprehensive",
+    "status": "completed",
+    "results": {
+      "description": "Test site with high archaeological potential",
+      "recommendations": [
+        "Ground survey recommended",
+        "Further analysis needed"
+      ]
+    },
+    "processing_time": "2.5s",
+    "timestamp": "2025-06-20T16:04:41.768247",
+    "lat": -3.4653,
+    "lon": -62.2159,
+    "confidence": 0.85,
+    "pattern_type": "ancient_settlement",
+    "cultural_significance": "Test archaeological site for storage verification"
+  },
+  {
+    "analysis_id": "test_endpoint_001",
+    "session_name": "Endpoint Test Session",
+    "researcher_id": "test_user",
+    "analysis_type": "comprehensive",
+    "status": "completed",
+    "results": {
+      "description": "Test ceremonial complex with high confidence",
+      "recommendations": [
+        "Immediate ground survey",
+        "Cultural consultation"
+      ]
+    },
+    "processing_time": "3.2s",
+    "timestamp": "2025-06-20T16:06:48.471275",
+    "lat": -15.7801,
+    "lon": -47.9292,
+    "confidence": 0.92,
+    "pattern_type": "ceremonial_complex",
+    "cultural_significance": "Test discovery via endpoint"
+  },
+  {
+    "analysis_id": "nis_5154_73779_1750450660",
+    "lat": 5.1542,
+    "lon": -73.7792,
+    "confidence": 0.8308441344209593,
+    "pattern_type": "Residential platform",
+    "cultural_significance": "settlement areas with rich archaeological deposits",
+    "results": {
+      "location": {
+        "lat": 5.1542,
+        "lon": -73.7792
+      },
+      "confidence": 0.8308441344209593,
+      "description": "Archaeological analysis completed for coordinates 5.1542, -73.7792. Residential platform identified with 83.1% confidence in valley cultural region.",
+      "sources": [
+        "satellite",
+        "lidar",
+        "historical"
+      ],
+      "historical_context": "Archaeological analysis of valley region reveals evidence of settlement areas with rich archaeological deposits. \nHistorical records from colonial and pre-colonial periods indicate significant human activity in this area.\nSatellite imagery analysis shows geometric patterns consistent with residential platform.\nRegional archaeological surveys have documented similar features within 50km radius.\nCarbon dating from nearby sites suggests occupation spanning 800-1500 CE.",
+      "indigenous_perspective": "Traditional ecological knowledge indicates this area was significant for settlement areas with rich archaeological deposits.\nLocal oral histories reference ancestral activities including ceremonial gatherings and seasonal settlements.\nTraditional place names suggest cultural importance for navigation and resource management.\nCommunity elders have shared stories of ancient pathways and gathering places in this region.\nEthnoarchaeological studies support the presence of indigenous land management practices.",
+      "pattern_type": "Residential platform",
+      "finding_id": "nis_5154_73779_1750450660",
+      "recommendations": [
+        {
+          "action": "Immediate Site Investigation",
+          "description": "High confidence residential platform requires field verification",
+          "priority": "High"
+        },
+        {
+          "action": "Community Consultation",
+          "description": "Engage with local indigenous communities for traditional knowledge about valley areas",
+          "priority": "High"
+        }
+      ]
+    },
+    "session_name": "Backend Analysis",
+    "researcher_id": "backend_system",
+    "processing_time": "2.5s",
+    "timestamp": "2025-06-20T16:17:40.255460",
+    "status": "completed"
+  }
+]
