@@ -627,24 +627,48 @@ class KANVisionAgent(VisionAgent):
                            use_satellite: bool = True, 
                            use_lidar: bool = True) -> Dict:
         """Enhanced coordinate analysis with KAN-based feature detection."""
-        # Get base analysis from parent class
-        base_result = await super().analyze_coordinates(lat, lon, use_satellite, use_lidar)
+        logger.info(f"🔍 KAN Vision Agent analyze_coordinates called for {lat}, {lon}")
         
-        # Enhance with KAN-based analysis if we have data
-        if hasattr(self, '_last_processed_data') and self._last_processed_data is not None:
-            enhanced_features = self.enhanced_feature_detection(self._last_processed_data)
+        try:
+            # Get base analysis from parent class (includes real GPT-4 Vision analysis)
+            logger.info("📞 Calling parent VisionAgent.analyze_coordinates()")
+            base_result = await super().analyze_coordinates(lat, lon, use_satellite, use_lidar)
             
-            # Merge enhanced features with base results
-            base_result['enhanced_features'] = enhanced_features
-            base_result['kan_analysis'] = {
-                'enabled': self.use_kan,
-                'enhanced_feature_count': len(enhanced_features),
-                'analysis_method': 'KAN-Enhanced' if self.use_kan else 'MLP-Enhanced',
-                'pattern_templates_applied': True,
-                'amazon_basin_optimized': True
-            }
-        
-        return base_result
+            # DEBUG: Log what we got from parent
+            logger.info(f"✅ Parent returned structure with keys: {list(base_result.keys())}")
+            if 'satellite_findings' in base_result:
+                sat_keys = list(base_result['satellite_findings'].keys())
+                logger.info(f"📡 Satellite findings keys: {sat_keys}")
+                has_raw_gpt = 'raw_gpt_response' in base_result['satellite_findings']
+                logger.info(f"🤖 Has raw_gpt_response: {has_raw_gpt}")
+            
+            # CRITICAL: Preserve the raw_gpt_response from parent class for GPT-4 Vision functionality
+            # The parent VisionAgent.analyze_coordinates() includes real GPT-4 Vision analysis
+            # We must preserve this structure to enable full GPT-4 Vision capabilities
+            
+            # Enhance with KAN-based analysis if we have data
+            if hasattr(self, '_last_processed_data') and self._last_processed_data is not None:
+                enhanced_features = self.enhanced_feature_detection(self._last_processed_data)
+                
+                # Merge enhanced features with base results while preserving GPT structure
+                base_result['enhanced_features'] = enhanced_features
+                base_result['kan_analysis'] = {
+                    'enabled': self.use_kan,
+                    'enhanced_feature_count': len(enhanced_features),
+                    'analysis_method': 'KAN-Enhanced' if self.use_kan else 'MLP-Enhanced',
+                    'pattern_templates_applied': True,
+                    'amazon_basin_optimized': True
+                }
+            
+            logger.info("🎯 Returning enhanced result with parent data preserved")
+            # Ensure we return the complete parent result with GPT-4 Vision data intact
+            return base_result
+            
+        except Exception as e:
+            logger.error(f"❌ Error in KAN Vision Agent analyze_coordinates: {e}")
+            logger.error(f"📍 Falling back to analyze_archaeological_site method")
+            # Fallback to archaeological site analysis if parent fails
+            return await self.analyze_archaeological_site(lat, lon)
     
     def get_capabilities(self) -> Dict:
         """Get enhanced agent capabilities."""

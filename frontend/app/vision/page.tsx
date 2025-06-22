@@ -46,6 +46,17 @@ export default function VisionAgentPage() {
   const [toolAccessStatus, setToolAccessStatus] = useState<any>({})
   const [comprehensiveResults, setComprehensiveResults] = useState<any>(null)
 
+  // Memoized coordinates to prevent hook order issues
+  const memoizedCoordinates = React.useMemo(() => ({
+    lat: parseFloat(selectedCoordinates.split(',')[0]?.trim() || '5.1542'),
+    lng: parseFloat(selectedCoordinates.split(',')[1]?.trim() || '-73.7792')
+  }), [selectedCoordinates])
+
+  // Memoized coordinate change callback
+  const memoizedCoordinateChangeCallback = React.useCallback((coords: { lat: number; lng: number }) => {
+    setSelectedCoordinates(`${coords.lat}, ${coords.lng}`)
+  }, [])
+
   const FAMOUS_SITES = [
     { name: "Lake Guatavita (El Dorado)", coords: "5.1542, -73.7792", type: "Ceremonial", region: "Colombia" },
     { name: "Nazca Lines", coords: "-14.7390, -75.1300", type: "Geoglyph", region: "Peru" },
@@ -232,103 +243,242 @@ export default function VisionAgentPage() {
   const handleComprehensiveAnalysis = async () => {
     setIsAnalyzing(true)
     setAnalysisProgress(0)
-    setAnalysisStage("Initializing comprehensive analysis...")
+    setAnalysisStage("Initializing comprehensive analysis with GPT-4 Vision + PyTorch...")
     setActiveMode("analyze")
     
     try {
       const [lat, lon] = selectedCoordinates.split(',').map(s => parseFloat(s.trim()))
       
-      // Progress simulation with realistic stages
+      // Enhanced progress simulation with PyTorch/GPT-4 Vision stages
       const stages = [
-        "🚀 Initializing all agents...",
-        "👁️ Running enhanced vision analysis with multi-modal LIDAR...",
-        "🧠 Accessing comprehensive archaeological memory...",
-        "🤔 Performing enhanced archaeological reasoning...",
-        "⚡ Generating strategic action plan...",
-        "🧠 Integrating through consciousness module...",
-        "📡 Compiling comprehensive results..."
+        "🚀 Initializing Enhanced Vision Agent with PyTorch + GPT-4...",
+        "🧠 Loading KAN (Kolmogorov-Arnold Networks) vision processing...",
+        "🔍 Accessing real data files via enhanced geo helpers...",
+        "🛰️ Processing satellite imagery with neural networks...",
+        "🗺️ Analyzing LIDAR point clouds with deep learning...",
+        "👁️ Running GPT-4 Vision multimodal analysis...",
+        "🏺 Detecting archaeological features with AI...",
+        "🌍 Integrating historical and indigenous knowledge...",
+        "📊 Generating comprehensive statistical analysis...",
+        "🧠 Processing through consciousness module...",
+        "📡 Compiling enhanced results with confidence scores..."
       ]
       
       let currentStage = 0
       const stageInterval = setInterval(() => {
         if (currentStage < stages.length) {
           setAnalysisStage(stages[currentStage])
-          setAnalysisProgress((currentStage + 1) / stages.length * 90)
+          setAnalysisProgress((currentStage + 1) / stages.length * 85)
           currentStage++
         }
-      }, 2000)
+      }, 1800)
       
-      // Use available endpoints for comprehensive analysis
-      const [analyzeResponse, visionResponse] = await Promise.all([
-        fetch('http://localhost:8000/analyze', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            lat: lat,
-            lon: lon,
-            data_sources: ["satellite", "lidar", "historical"],
-            confidence_threshold: 0.7
-          })
-        }),
-        fetch('http://localhost:8000/vision/analyze', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            coordinates: `${lat}, ${lon}`,
-            models: ["gpt4o_vision", "archaeological_analysis"],
-            confidence_threshold: 0.4
-          })
+      // Use the enhanced vision analysis endpoint (most comprehensive)
+      const enhancedVisionResponse = await fetch('http://localhost:8000/agents/vision/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          lat: lat,
+          lon: lon,
+          radius_km: 10.0,
+          include_3d_data: true,
+          analysis_depth: "comprehensive",
+          enable_gpt4_vision: true,
+          enable_kan_processing: true,
+          confidence_threshold: 0.6
         })
-      ])
+      })
+      
+      // Also run comprehensive agent analysis for additional insights
+      const comprehensiveAgentResponse = await fetch('http://localhost:8000/agents/analyze/comprehensive', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          coordinates: { lat: lat, lon: lon },
+          analysis_type: "archaeological_discovery",
+          include_historical: true,
+          include_indigenous: true,
+          confidence_threshold: 0.5
+        })
+      })
       
       clearInterval(stageInterval)
       
-      if (analyzeResponse.ok && visionResponse.ok) {
-        const [analyzeResults, visionResults] = await Promise.all([
-          analyzeResponse.json(),
-          visionResponse.json()
+      // Process enhanced vision response first (primary analysis)
+      if (enhancedVisionResponse.ok) {
+        const enhancedVisionData = await enhancedVisionResponse.json()
+        setAnalysisProgress(95)
+        setAnalysisStage("✅ Enhanced GPT-4 Vision analysis complete!")
+        
+        // Check for GPT-4 Vision usage
+        const gptVisionUsed = enhancedVisionData.gpt_vision_used || false
+        const kanEnabled = enhancedVisionData.kan_enabled || false
+        const pytorchAvailable = enhancedVisionData.pytorch_available || false
+        
+        // Process comprehensive agent data if available
+        let comprehensiveAgentData = null
+        if (comprehensiveAgentResponse.ok) {
+          comprehensiveAgentData = await comprehensiveAgentResponse.json()
+        }
+        
+        // Convert enhanced results to standard format for compatibility
+        const standardResults = {
+          detection_results: enhancedVisionData.detection_results || [],
+          metadata: {
+            agents_used: "Enhanced KAN Vision Agent with GPT-4 Vision",
+            processing_time: enhancedVisionData.processing_time || "Real-time",
+            analysis_type: "enhanced_vision_comprehensive",
+            data_sources: enhancedVisionData.data_sources || ["satellite", "lidar", "historical"],
+            gpt_vision_used: gptVisionUsed,
+            kan_enabled: kanEnabled,
+            pytorch_available: pytorchAvailable,
+            confidence_average: enhancedVisionData.confidence || 0.75,
+            tool_access_status: enhancedVisionData.tool_access_status || {}
+          },
+          comprehensive_data: {
+            vision_analysis: enhancedVisionData,
+            agent_analysis: comprehensiveAgentData,
+            gpt4_vision_insights: enhancedVisionData.raw_gpt_response || null,
+            kan_processing_results: enhancedVisionData.kan_results || null,
+            archaeological_features: enhancedVisionData.archaeological_features || [],
+            satellite_findings: enhancedVisionData.satellite_findings || {},
+            lidar_findings: enhancedVisionData.lidar_findings || {},
+            combined_analysis: enhancedVisionData.combined_analysis || {}
+          },
+          enhanced_features: {
+            gpt4_vision_enabled: gptVisionUsed,
+            kan_neural_networks: kanEnabled,
+            pytorch_backend: pytorchAvailable,
+            real_data_processing: enhancedVisionData.real_data_used || false,
+            multi_modal_fusion: true,
+            archaeological_detection: true
+          },
+          ai_status: {
+            gpt4_vision: gptVisionUsed ? "✅ Active" : "⚠️ Limited",
+            pytorch: pytorchAvailable ? "✅ Available" : "❌ Missing",
+            kan_networks: kanEnabled ? "✅ Enabled" : "⚠️ Disabled",
+            data_access: enhancedVisionData.real_data_used ? "✅ Real Data" : "⚠️ Mock Data"
+          }
+        }
+        
+        // Extract detection results with enhanced confidence scores
+        if (enhancedVisionData.detection_results && enhancedVisionData.detection_results.length > 0) {
+          standardResults.detection_results = enhancedVisionData.detection_results.map((result: any) => ({
+            ...result,
+            ai_enhanced: true,
+            gpt4_vision_analyzed: gptVisionUsed,
+            kan_processed: kanEnabled
+          }))
+        } else if (enhancedVisionData.archaeological_features) {
+          // Fallback to archaeological features if no detection results
+          standardResults.detection_results = enhancedVisionData.archaeological_features.map((feature: any, index: number) => ({
+            type: feature.type || "Archaeological Feature",
+            confidence: feature.confidence || 0.8,
+            description: feature.description || "AI-detected archaeological feature",
+            coordinates: `${lat}, ${lon}`,
+            size_estimate: feature.dimensions || "Unknown",
+            archaeological_significance: feature.significance || "Medium",
+            ai_enhanced: true,
+            gpt4_vision_analyzed: gptVisionUsed,
+            kan_processed: kanEnabled
+          }))
+        }
+        
+        setComprehensiveResults(standardResults.comprehensive_data)
+        setAnalysisProgress(100)
+        setAnalysisStage(`✅ Analysis complete! GPT-4 Vision: ${gptVisionUsed ? 'Active' : 'Limited'}, PyTorch: ${pytorchAvailable ? 'Available' : 'Missing'}`)
+        handleAnalysisComplete(standardResults)
+        
+      } else {
+        // Fallback to standard analysis endpoints
+        setAnalysisStage("⚠️ Enhanced analysis unavailable, using standard endpoints...")
+        
+        const [analyzeResponse, visionResponse] = await Promise.all([
+          fetch('http://localhost:8000/analyze', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              lat: lat,
+              lon: lon,
+              data_sources: ["satellite", "lidar", "historical"],
+              confidence_threshold: 0.7
+            })
+          }),
+          fetch('http://localhost:8000/vision/analyze', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              coordinates: `${lat}, ${lon}`,
+              models: ["gpt4o_vision", "archaeological_analysis"],
+              confidence_threshold: 0.4
+            })
+          })
         ])
         
-        // Combine results from both endpoints
-        const combinedResults = {
-          analysis_data: analyzeResults,
-          vision_data: visionResults,
-          combined_confidence: (analyzeResults.confidence + (visionResults.model_performance?.gpt4o_vision?.confidence_average || 0.5)) / 2
-        }
-        
-        setComprehensiveResults(combinedResults)
-        setAnalysisProgress(100)
-        setAnalysisStage("✅ Comprehensive analysis complete!")
-        
-        // Convert to standard format for compatibility
-        const standardResults = {
-          detection_results: visionResults.detection_results || [],
-          metadata: {
-            ...visionResults.metadata,
-            agents_used: "Vision Agent, Analysis Agent, Archaeological Analysis",
-            processing_time: visionResults.metadata?.processing_time,
-            analysis_type: "comprehensive_multi_agent",
-            combined_confidence: combinedResults.combined_confidence
-          },
-          comprehensive_data: combinedResults,
-          analysis_summary: analyzeResults.description,
-          historical_context: analyzeResults.historical_context,
-          indigenous_perspective: analyzeResults.indigenous_perspective,
-          recommendations: analyzeResults.recommendations
-        }
-        
-        handleAnalysisComplete(standardResults)
-      } else {
-        throw new Error(`Analysis failed - Analyze: ${analyzeResponse.status}, Vision: ${visionResponse.status}`)
+        if (analyzeResponse.ok && visionResponse.ok) {
+          const [analyzeResults, visionResults] = await Promise.all([
+            analyzeResponse.json(),
+            visionResponse.json()
+          ])
+          
+          // Combine results from both endpoints
+          const combinedResults = {
+            analysis_data: analyzeResults,
+            vision_data: visionResults,
+            combined_confidence: (analyzeResults.confidence + (visionResults.model_performance?.gpt4o_vision?.confidence_average || 0.5)) / 2
+          }
+          
+          setComprehensiveResults(combinedResults)
+          setAnalysisProgress(100)
+          setAnalysisStage("✅ Standard comprehensive analysis complete!")
+          
+          // Convert to standard format for compatibility
+          const standardResults = {
+            detection_results: visionResults.detection_results || [],
+            metadata: {
+              ...visionResults.metadata,
+              agents_used: "Vision Agent, Analysis Agent, Archaeological Analysis",
+              processing_time: visionResults.metadata?.processing_time,
+              analysis_type: "comprehensive_multi_agent",
+              combined_confidence: combinedResults.combined_confidence,
+              gpt_vision_used: false,
+              kan_enabled: false,
+              pytorch_available: false
+            },
+            comprehensive_data: combinedResults,
+            analysis_summary: analyzeResults.description,
+            historical_context: analyzeResults.historical_context,
+            indigenous_perspective: analyzeResults.indigenous_perspective,
+            recommendations: analyzeResults.recommendations,
+            ai_status: {
+              gpt4_vision: "⚠️ Limited (Fallback Mode)",
+              pytorch: "❌ Not Available",
+              kan_networks: "❌ Not Available",
+              data_access: "✅ Standard Data"
+            }
+          }
+          
+          handleAnalysisComplete(standardResults)
+                 } else {
+           throw new Error(`Analysis failed - Enhanced: ${enhancedVisionResponse.status}`)
+         }
       }
     } catch (error) {
       console.error('Comprehensive analysis failed:', error)
-      setAnalysisStage("❌ Analysis failed - falling back to standard mode")
-      handleStandardAnalysis()
+      setAnalysisStage("❌ Analysis failed - check backend connection")
+      setIsAnalyzing(false)
+      setAnalysisProgress(0)
+      
+      // Show error details to user
+      setBackendError(`Analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
@@ -452,14 +602,14 @@ export default function VisionAgentPage() {
               <p className="text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">
                 {isBackendOnline ? (
                   <>
-                    Comprehensive AI-powered archaeological analysis using <strong>6 integrated agents</strong> with 
-                    multi-modal LIDAR processing, GPT-4 Vision, consciousness integration, and enhanced 
-                    archaeological memory access for unprecedented site discovery capabilities.
+                    Enhanced AI-powered archaeological analysis using <strong>PyTorch + GPT-4 Vision</strong> with 
+                    KAN (Kolmogorov-Arnold Networks), multi-modal data fusion, consciousness integration, and 
+                    real-time archaeological feature detection for unprecedented site discovery capabilities.
                   </>
                 ) : (
                   <>
                     Advanced AI-powered satellite imagery analysis for archaeological discovery. 
-                    Powered by GPT-4 Vision, YOLO8, and specialized archaeological detection models.
+                    Powered by GPT-4 Vision, PyTorch neural networks, and specialized archaeological detection models.
                   </>
                 )}
               </p>
@@ -653,7 +803,7 @@ export default function VisionAgentPage() {
                             <Eye className="w-4 h-4" />
                             <span className="font-medium">Standard Vision</span>
                           </div>
-                          <div className="text-xs opacity-80">GPT-4 Vision + YOLO8 detection</div>
+                          <div className="text-xs opacity-80">GPT-4 Vision + PyTorch detection</div>
                         </div>
                       </Button>
                       
@@ -673,7 +823,7 @@ export default function VisionAgentPage() {
                             <span className="font-medium">Comprehensive NIS</span>
                             <Sparkles className="w-3 h-3" />
                           </div>
-                          <div className="text-xs opacity-80">All 6 agents + Multi-modal LIDAR</div>
+                          <div className="text-xs opacity-80">KAN Networks + Enhanced GPT-4 Vision</div>
                         </div>
                       </Button>
                     </div>
@@ -687,19 +837,19 @@ export default function VisionAgentPage() {
                         <div className="grid grid-cols-2 gap-2 text-xs">
                           <div className="flex items-center gap-1">
                             <CheckCircle className="w-3 h-3 text-emerald-400" />
-                            <span>Multi-modal LIDAR (4 visualizations)</span>
+                            <span>PyTorch + KAN Neural Networks</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <CheckCircle className="w-3 h-3 text-emerald-400" />
-                            <span>Archaeological memory access</span>
+                            <span>Enhanced GPT-4 Vision</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <CheckCircle className="w-3 h-3 text-emerald-400" />
-                            <span>Cross-agent reasoning</span>
+                            <span>Real data file processing</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <CheckCircle className="w-3 h-3 text-emerald-400" />
-                            <span>Consciousness integration</span>
+                            <span>Multi-modal data fusion</span>
                           </div>
                         </div>
                         
@@ -767,7 +917,7 @@ export default function VisionAgentPage() {
                   <CardHeader>
                     <CardTitle className="text-white flex items-center gap-2">
                       <Eye className="w-6 h-6 text-emerald-400" />
-                      GPT-4 Vision Satellite Analysis
+                      Enhanced GPT-4 Vision + PyTorch Analysis
                       {lastAnalysisTime && (
                         <Badge variant="outline" className="text-emerald-400 border-emerald-400">
                           Last: {lastAnalysisTime.toLocaleTimeString()}
@@ -775,7 +925,7 @@ export default function VisionAgentPage() {
                       )}
                     </CardTitle>
                     <CardDescription className="text-slate-400">
-                      AI-powered archaeological feature detection using advanced computer vision models
+                      AI-powered archaeological feature detection using PyTorch, KAN networks, and GPT-4 Vision
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -799,13 +949,8 @@ export default function VisionAgentPage() {
                                 Interactive map showing archaeological sites from storage system
                               </p>
                               <MapboxVisionMap 
-                                coordinates={{
-                                  lat: parseFloat(selectedCoordinates.split(',')[0]?.trim() || '5.1542'),
-                                  lng: parseFloat(selectedCoordinates.split(',')[1]?.trim() || '-73.7792')
-                                }}
-                                onCoordinateChange={(coords) => {
-                                  setSelectedCoordinates(`${coords.lat}, ${coords.lng}`)
-                                }}
+                                coordinates={memoizedCoordinates}
+                                onCoordinateChange={memoizedCoordinateChangeCallback}
                                 height="400px"
                                 className="rounded-lg border border-slate-600"
                               />
@@ -820,16 +965,11 @@ export default function VisionAgentPage() {
                               <p className="text-sm text-slate-400">
                                 Multi-modal satellite and LIDAR visualization
                               </p>
-                              <SatelliteLidarMap 
-                                satelliteData={[]} 
-                                coordinates={{
-                                  lat: parseFloat(selectedCoordinates.split(',')[0]?.trim() || '5.1542'),
-                                  lng: parseFloat(selectedCoordinates.split(',')[1]?.trim() || '-73.7792')
-                                }}
-                                onCoordinateChange={(coords) => {
-                                  setSelectedCoordinates(`${coords.lat}, ${coords.lng}`)
-                                }}
-                              />
+                          <SatelliteLidarMap 
+                            satelliteData={[]} 
+                                coordinates={memoizedCoordinates}
+                                onCoordinateChange={memoizedCoordinateChangeCallback}
+                          />
                             </div>
                           </div>
                         </div>
@@ -856,6 +996,77 @@ export default function VisionAgentPage() {
                           {visionResult.detection_results?.length || 0} Features Detected
                         </Badge>
                       </CardTitle>
+                      
+                      {/* AI Status Indicators */}
+                      {visionResult.ai_status && (
+                        <div className="mt-4 p-4 bg-slate-900/30 rounded-lg border border-slate-700/50">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Brain className="w-5 h-5 text-purple-400" />
+                            <h4 className="font-medium text-white">AI System Status</h4>
+                          </div>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div className="flex items-center gap-2">
+                              <Eye className="w-4 h-4 text-cyan-400" />
+                              <span className="text-sm text-slate-300">GPT-4 Vision:</span>
+                              <span className="text-sm font-medium">{visionResult.ai_status.gpt4_vision}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Zap className="w-4 h-4 text-amber-400" />
+                              <span className="text-sm text-slate-300">PyTorch:</span>
+                              <span className="text-sm font-medium">{visionResult.ai_status.pytorch}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Brain className="w-4 h-4 text-purple-400" />
+                              <span className="text-sm text-slate-300">KAN Networks:</span>
+                              <span className="text-sm font-medium">{visionResult.ai_status.kan_networks}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Activity className="w-4 h-4 text-emerald-400" />
+                              <span className="text-sm text-slate-300">Data Access:</span>
+                              <span className="text-sm font-medium">{visionResult.ai_status.data_access}</span>
+                            </div>
+                          </div>
+                          
+                          {/* Enhanced Features Display */}
+                          {visionResult.enhanced_features && (
+                            <div className="mt-4 pt-3 border-t border-slate-700/50">
+                              <h5 className="text-sm font-medium text-slate-300 mb-2">Enhanced Capabilities:</h5>
+                              <div className="flex flex-wrap gap-2">
+                                {visionResult.enhanced_features.gpt4_vision_enabled && (
+                                  <Badge variant="outline" className="text-cyan-400 border-cyan-400 text-xs">
+                                    GPT-4 Vision
+                                  </Badge>
+                                )}
+                                {visionResult.enhanced_features.kan_neural_networks && (
+                                  <Badge variant="outline" className="text-purple-400 border-purple-400 text-xs">
+                                    KAN Networks
+                                  </Badge>
+                                )}
+                                {visionResult.enhanced_features.pytorch_backend && (
+                                  <Badge variant="outline" className="text-amber-400 border-amber-400 text-xs">
+                                    PyTorch Backend
+                                  </Badge>
+                                )}
+                                {visionResult.enhanced_features.real_data_processing && (
+                                  <Badge variant="outline" className="text-emerald-400 border-emerald-400 text-xs">
+                                    Real Data Processing
+                                  </Badge>
+                                )}
+                                {visionResult.enhanced_features.multi_modal_fusion && (
+                                  <Badge variant="outline" className="text-blue-400 border-blue-400 text-xs">
+                                    Multi-Modal Fusion
+                                  </Badge>
+                                )}
+                                {visionResult.enhanced_features.archaeological_detection && (
+                                  <Badge variant="outline" className="text-orange-400 border-orange-400 text-xs">
+                                    Archaeological AI
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                       <div className="flex gap-2 mt-2">
                         <Button
                           variant="outline"

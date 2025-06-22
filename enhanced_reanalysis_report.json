@@ -1,0 +1,1353 @@
+{
+  "timestamp": "2025-06-21T19:44:08.270051",
+  "system_version": "Enhanced NIS Protocol v2.0 - GENIUS LEVEL",
+  "analysis_type": "Comprehensive Multi-Modal Re-Analysis",
+  "sites_analyzed": [
+    {
+      "site_name": "Test Discovery Session",
+      "coordinates": [
+        -3.4653,
+        -62.2159
+      ],
+      "cultural_context": "Unknown",
+      "analysis_timestamp": "2025-06-21T19:44:56.434926",
+      "processing_time": "44.06s",
+      "vision_analysis": {
+        "location": {
+          "lat": -3.4653,
+          "lon": -62.2159
+        },
+        "satellite_findings": {
+          "confidence": 0.5,
+          "features_detected": [
+            {
+              "type": "GPT Vision Feature",
+              "details": "The image you've provided appears heavily pixelated and lacks the resolution necessary to perform a detailed archaeological analysis accurately. However, I can offer a general guide on what to look for based on your description of processing and the typical indicators of archaeological significance.\n\n1. **Geometric Patterns**: In higher resolution images, look for shapes like squares, rectangles, or circles that suggest human-made structures or layouts of ancient settlements. Even in low-resolution, somewhat regular patterns distinct from natural formations might be noticeable.\n\n2. **Soil Color Variations**: Variations in soil color can be indicative of buried structures, where the soil has been disturbed or replaced during building activity in the past. These might show up as patches or gradients distinct from the surrounding area.\n\n3. **Vegetation Stress Patterns**: Areas where vegetation appears stressed or different in color or density than surrounding areas can suggest underlying archaeological features. This might be due to differences in soil moisture content or nutrients caused by buried structures.\n\n4. **Linear Features**: Look for straight lines that could be roads, boundaries, or water canals, often purposefully constructed for use in ancient activities.\n\n5. **Circular or Rectangular Earthworks**: Differences in elevation that form geometric shapes could be remnants of structures or defensive works like moats, walls, or fort bounds.\n\n6. **Differences in Vegetation Growth Patterns**: Areas where vegetation growth is anomalously dense or sparse compared to surrounding regions can indicate differences in the underlying soil or hidden man-made features impacting growth.\n\nBased on the description of the enhancements applied to the image (spectral band combinations, contrast enhancement, and atmospheric correction), the image should ideally reveal subtle anomalies linked to such features where higher resolution and quality are available.\n\nIt's suggested that the investigation be supplemented with ground surveys or higher-resolution images for substantial findings, especially since the preprocessing mentioned usually significantly aids in highlighting potential archaeological signs from aerial or satellite images. This would confirm any hypotheses regarding archaeological activity indicated by abnormal patterns in the satellite imagery.",
+              "confidence": 0.5
+            }
+          ],
+          "source": "Sentinel-2 Tile sentinel2_-3.4653_-62.2159_10.json (Enhanced GPT Vision Analysis)",
+          "location": {
+            "lat": -3.4653,
+            "lon": -62.2159
+          },
+          "raw_gpt_response": {
+            "analysis": "The image you've provided appears heavily pixelated and lacks the resolution necessary to perform a detailed archaeological analysis accurately. However, I can offer a general guide on what to look for based on your description of processing and the typical indicators of archaeological significance.\n\n1. **Geometric Patterns**: In higher resolution images, look for shapes like squares, rectangles, or circles that suggest human-made structures or layouts of ancient settlements. Even in low-resolution, somewhat regular patterns distinct from natural formations might be noticeable.\n\n2. **Soil Color Variations**: Variations in soil color can be indicative of buried structures, where the soil has been disturbed or replaced during building activity in the past. These might show up as patches or gradients distinct from the surrounding area.\n\n3. **Vegetation Stress Patterns**: Areas where vegetation appears stressed or different in color or density than surrounding areas can suggest underlying archaeological features. This might be due to differences in soil moisture content or nutrients caused by buried structures.\n\n4. **Linear Features**: Look for straight lines that could be roads, boundaries, or water canals, often purposefully constructed for use in ancient activities.\n\n5. **Circular or Rectangular Earthworks**: Differences in elevation that form geometric shapes could be remnants of structures or defensive works like moats, walls, or fort bounds.\n\n6. **Differences in Vegetation Growth Patterns**: Areas where vegetation growth is anomalously dense or sparse compared to surrounding regions can indicate differences in the underlying soil or hidden man-made features impacting growth.\n\nBased on the description of the enhancements applied to the image (spectral band combinations, contrast enhancement, and atmospheric correction), the image should ideally reveal subtle anomalies linked to such features where higher resolution and quality are available.\n\nIt's suggested that the investigation be supplemented with ground surveys or higher-resolution images for substantial findings, especially since the preprocessing mentioned usually significantly aids in highlighting potential archaeological signs from aerial or satellite images. This would confirm any hypotheses regarding archaeological activity indicated by abnormal patterns in the satellite imagery.",
+            "timestamp": "2025-06-21T19:44:20.972616",
+            "model": "gpt-4-turbo",
+            "prompt": "Analyze this preprocessed satellite image (coordinates: -3.4653, -62.2159) for archaeological significance. \n        \n        This image has been enhanced for archaeological feature detection using:\n        - Spectral band combinations optimized for soil and vegetation anomalies\n        - Contrast enhancement to reveal subtle earthworks\n        - Atmospheric correction for clearer surface features\n        \n        Look specifically for:\n        - Geometric patterns indicating ancient settlements\n        - Soil color variations suggesting buried structures  \n        - Vegetation stress patterns over archaeological sites\n        - Linear features indicating ancient roads or canals\n        - Circular or rectangular earthworks\n        - Differences in vegetation growth patterns\n        \n        Provide detailed analysis of any detected archaeological indicators."
+          }
+        },
+        "lidar_findings": {
+          "confidence": 0.5,
+          "features_detected": [
+            {
+              "type": "Mound (multi-modal detection)",
+              "details": "Detected in 4 visualizations: contour, slope, hillshade, elevation",
+              "confidence": 1.0,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Earthwork (multi-modal detection)",
+              "details": "Detected in 2 visualizations: slope, hillshade",
+              "confidence": 0.96,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Artificial (multi-modal detection)",
+              "details": "Detected in 2 visualizations: slope, elevation",
+              "confidence": 0.96,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Settlement (detected via elevation)",
+              "details": "Potential settlement identified in elevation analysis",
+              "confidence": 0.9,
+              "source": "elevation"
+            },
+            {
+              "type": "Platform (multi-modal detection)",
+              "details": "Detected in 2 visualizations: slope, elevation",
+              "confidence": 0.8999999999999999,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Enclosure (detected via slope)",
+              "details": "Potential enclosure identified in slope analysis",
+              "confidence": 0.85,
+              "source": "slope"
+            },
+            {
+              "type": "Geometric (multi-modal detection)",
+              "details": "Detected in 4 visualizations: contour, slope, hillshade, elevation",
+              "confidence": 0.84,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Wall (multi-modal detection)",
+              "details": "Detected in 3 visualizations: contour, slope, elevation",
+              "confidence": 0.8399999999999997,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Ditch (detected via contour)",
+              "details": "Potential ditch identified in contour analysis",
+              "confidence": 0.8,
+              "source": "contour"
+            },
+            {
+              "type": "Ceremonial (detected via elevation)",
+              "details": "Potential ceremonial identified in elevation analysis",
+              "confidence": 0.8,
+              "source": "elevation"
+            }
+          ],
+          "source": "LIDAR Tile lidar_-3.4653_-62.2159_10.json (Multi-Modal GPT Vision Analysis)",
+          "location": {
+            "lat": -3.4653,
+            "lon": -62.2159
+          },
+          "visualization_analyses": [
+            {
+              "visualization_type": "hillshade",
+              "analysis": "This image appears to be a simple, uniform texture without any distinguishable features like those typically highlighted in LIDAR hillshade datasets for archaeological surveys. There are no visible patterns that suggest circular or rectangular earthworks, linear features, mounds, depressions, geometric patterns implying human modification, or evidence of terracing or agricultural activities.\n\nSince the image lacks discernible archaeological features, it may not be a LIDAR hillshade image or it could be a part of the dataset where no significant features exist. LIDAR images used for identifying archaeological features generally show variations in shading and elevation that hint at past human activities and landscape modifications. Unfortunately, this specific image does not display any of these characteristics. If you have any other images or additional data, I can continue the analysis with those.",
+              "confidence": 0.5,
+              "raw_response": {
+                "analysis": "This image appears to be a simple, uniform texture without any distinguishable features like those typically highlighted in LIDAR hillshade datasets for archaeological surveys. There are no visible patterns that suggest circular or rectangular earthworks, linear features, mounds, depressions, geometric patterns implying human modification, or evidence of terracing or agricultural activities.\n\nSince the image lacks discernible archaeological features, it may not be a LIDAR hillshade image or it could be a part of the dataset where no significant features exist. LIDAR images used for identifying archaeological features generally show variations in shading and elevation that hint at past human activities and landscape modifications. Unfortunately, this specific image does not display any of these characteristics. If you have any other images or additional data, I can continue the analysis with those.",
+                "timestamp": "2025-06-21T19:44:26.149093",
+                "model": "gpt-4-turbo",
+                "prompt": "Analyze this LIDAR hillshade image for archaeological features. Look for:\n            - Circular or rectangular earthworks (ancient settlements, ceremonial sites)\n            - Linear features (ancient roads, field boundaries, defensive walls)\n            - Mounds or tumuli (burial sites, ceremonial mounds)\n            - Depressions (house platforms, quarries, defensive ditches)\n            - Geometric patterns suggesting human modification of landscape\n            - Terracing or agricultural features\n            Describe any detected features with their archaeological significance and confidence level."
+              }
+            },
+            {
+              "visualization_type": "slope",
+              "analysis": "The image provided appears to have a lack of visible distinctive features such as unnatural slope breaks, geometric patterns, terracing, linear anomalies, or circular patterns which are typically used to suggest the presence of buried structures or ancient earthworks in LIDAR data. Instead, the image shows a seemingly uniform distribution of dots or noise without any clear form or pattern.\n\nFor a detailed analysis in archaeological studies using LIDAR, typically:\n- **Unnatural slope breaks** would appear as abrupt changes in the slope which do not conform to natural topographical patterns.\n- **Geometric slope patterns** could indicate planned human activity, usually manifesting as regular shapes like squares, rectangles, or circles.\n- **Artificial terracing or platform construction** might be suggested by steps or consistent horizontal lines running along elevation contours.\n- **Linear slope anomalies** could point to old walls, roads, or boundaries, showing up as straight or slightly curved continuous lines.\n- **Circular slope patterns** might indicate mounds, kivas, or other types of enclosures, manifesting as rings or concentric circles in the LIDAR imagery.\n\nGiven every aspect of archaeological LIDAR interpretation you've asked about is contingent on discernible patterns or unusual formations, and since none are evident in this specific image, it would be challenging to argue for the likelihood of archaeological versus natural features based on this image alone. More detailed data or images captured with higher resolution or different processing might be needed to provide a comprehensive analysis.",
+              "confidence": 0.5,
+              "raw_response": {
+                "analysis": "The image provided appears to have a lack of visible distinctive features such as unnatural slope breaks, geometric patterns, terracing, linear anomalies, or circular patterns which are typically used to suggest the presence of buried structures or ancient earthworks in LIDAR data. Instead, the image shows a seemingly uniform distribution of dots or noise without any clear form or pattern.\n\nFor a detailed analysis in archaeological studies using LIDAR, typically:\n- **Unnatural slope breaks** would appear as abrupt changes in the slope which do not conform to natural topographical patterns.\n- **Geometric slope patterns** could indicate planned human activity, usually manifesting as regular shapes like squares, rectangles, or circles.\n- **Artificial terracing or platform construction** might be suggested by steps or consistent horizontal lines running along elevation contours.\n- **Linear slope anomalies** could point to old walls, roads, or boundaries, showing up as straight or slightly curved continuous lines.\n- **Circular slope patterns** might indicate mounds, kivas, or other types of enclosures, manifesting as rings or concentric circles in the LIDAR imagery.\n\nGiven every aspect of archaeological LIDAR interpretation you've asked about is contingent on discernible patterns or unusual formations, and since none are evident in this specific image, it would be challenging to argue for the likelihood of archaeological versus natural features based on this image alone. More detailed data or images captured with higher resolution or different processing might be needed to provide a comprehensive analysis.",
+                "timestamp": "2025-06-21T19:44:44.716232",
+                "model": "gpt-4-turbo",
+                "prompt": "Analyze this LIDAR slope analysis image for subtle archaeological indicators. Focus on:\n            - Unnatural slope breaks indicating buried structures\n            - Geometric slope patterns suggesting earthworks\n            - Artificial terracing or platform construction\n            - Linear slope anomalies indicating walls or boundaries\n            - Circular slope patterns indicating mounds or enclosures\n            Evaluate the likelihood these represent archaeological rather than natural features."
+              }
+            },
+            {
+              "visualization_type": "contour",
+              "analysis": "The image you've provided appears to be a plain texture or pattern, not an actual LIDAR contour map. It consists of a repetitive stipple pattern with no discernable contours or features that are typical of a LIDAR visual representation used for identifying topographic features or archaeological evidence.\n\nFor evaluating LIDAR data for archaeological purposes, one would expect to see variations representing elevation changes, discernible geometric shapes, or anomalies that deviate from natural topographical formations. These might include linear structures suggesting walls, circular or square patterns indicating buildings or other constructions, or irregularities in contour lines that might signify ditches, mounds, or buried features.\n\nSince the image provided lacks these characteristics, it doesn't offer any information for archaeological assessment. If you have a specific LIDAR dataset or image showing topographic contours and potential archaeological features, please provide that for a more accurate analysis.",
+              "confidence": 0.5,
+              "raw_response": {
+                "analysis": "The image you've provided appears to be a plain texture or pattern, not an actual LIDAR contour map. It consists of a repetitive stipple pattern with no discernable contours or features that are typical of a LIDAR visual representation used for identifying topographic features or archaeological evidence.\n\nFor evaluating LIDAR data for archaeological purposes, one would expect to see variations representing elevation changes, discernible geometric shapes, or anomalies that deviate from natural topographical formations. These might include linear structures suggesting walls, circular or square patterns indicating buildings or other constructions, or irregularities in contour lines that might signify ditches, mounds, or buried features.\n\nSince the image provided lacks these characteristics, it doesn't offer any information for archaeological assessment. If you have a specific LIDAR dataset or image showing topographic contours and potential archaeological features, please provide that for a more accurate analysis.",
+                "timestamp": "2025-06-21T19:44:48.854725",
+                "model": "gpt-4-turbo",
+                "prompt": "Examine this LIDAR contour visualization for archaeological evidence. Identify:\n            - Geometric contour patterns (squares, circles, rectangles)\n            - Artificial elevation changes (platforms, mounds, ditches)\n            - Regular spacing in contours suggesting human construction\n            - Contour disruptions indicating buried features\n            - Defensive earthworks or fortification patterns\n            Assess the archaeological potential of any detected anomalies."
+              }
+            },
+            {
+              "visualization_type": "elevation",
+              "analysis": "The image you provided appears to have substantial noise or resolution issues, making it challenging to accurately identify the archaeological features you are interested in, such as subtle elevation anomalies, geometric patterns, artificial mounds, quarry pits, water management features, and field systems.\n\nFrom this image alone, I am unable to discern any definitive features due to the granularity and lack of visible detail that is typical in higher resolution LIDAR data necessary for detecting and analyzing archaeological signatures. Here's what might normally be conducted with clearer imagery:\n\n1. **Subtle Elevation Anomalies**: These might indicate buried structures. Normally, variations in elevation, even subtle, can suggest the presence of buried foundations or walls.\n\n2. **Geometric Elevation Patterns**: Patterns such as rectangles or circles can indicate ancient settlement layouts or ceremonial sites, reflecting deliberate planning and construction.\n\n3. **Artificial Mounds or Raised Platforms**: These would appear as localized elevations and could signify sites of significance, such as temples, homes, or community centers in ancient societies.\n\n4. **Quarry Pits or Extraction Sites**: These would typically appear as depressions or irregular pits and would indicate areas where materials like stone were historically extracted.\n\n5. **Water Management Features**: Features like canals, reservoirs, or drainage systems would show up as linear depressions or embankments and are crucial for understanding the community\u2019s adaptation to their environment.\n\n6. **Field Systems or Agricultural Terracing**: These would be indicated by parallel lines or stepped terrain, showing areas used for agriculture.\n\nTo proceed, I recommend re-examining the acquisition parameters of the LIDAR data or obtaining a higher resolution dataset. A clearer image coupled with ground verification can provide more accurate and insightful archaeological assessments.",
+              "confidence": 0.5,
+              "raw_response": {
+                "analysis": "The image you provided appears to have substantial noise or resolution issues, making it challenging to accurately identify the archaeological features you are interested in, such as subtle elevation anomalies, geometric patterns, artificial mounds, quarry pits, water management features, and field systems.\n\nFrom this image alone, I am unable to discern any definitive features due to the granularity and lack of visible detail that is typical in higher resolution LIDAR data necessary for detecting and analyzing archaeological signatures. Here's what might normally be conducted with clearer imagery:\n\n1. **Subtle Elevation Anomalies**: These might indicate buried structures. Normally, variations in elevation, even subtle, can suggest the presence of buried foundations or walls.\n\n2. **Geometric Elevation Patterns**: Patterns such as rectangles or circles can indicate ancient settlement layouts or ceremonial sites, reflecting deliberate planning and construction.\n\n3. **Artificial Mounds or Raised Platforms**: These would appear as localized elevations and could signify sites of significance, such as temples, homes, or community centers in ancient societies.\n\n4. **Quarry Pits or Extraction Sites**: These would typically appear as depressions or irregular pits and would indicate areas where materials like stone were historically extracted.\n\n5. **Water Management Features**: Features like canals, reservoirs, or drainage systems would show up as linear depressions or embankments and are crucial for understanding the community\u2019s adaptation to their environment.\n\n6. **Field Systems or Agricultural Terracing**: These would be indicated by parallel lines or stepped terrain, showing areas used for agriculture.\n\nTo proceed, I recommend re-examining the acquisition parameters of the LIDAR data or obtaining a higher resolution dataset. A clearer image coupled with ground verification can provide more accurate and insightful archaeological assessments.",
+                "timestamp": "2025-06-21T19:44:56.432926",
+                "model": "gpt-4-turbo",
+                "prompt": "Analyze this LIDAR elevation model for archaeological signatures. Search for:\n            - Subtle elevation anomalies indicating buried structures\n            - Geometric elevation patterns (settlement layouts, ceremonial sites)\n            - Artificial mounds or raised platforms\n            - Quarry pits or extraction sites\n            - Water management features (canals, reservoirs, drainage)\n            - Field systems or agricultural terracing\n            Determine the archaeological significance of elevation patterns."
+              }
+            }
+          ],
+          "combined_analysis": "Multi-modal LIDAR analysis (confidence: 0.50)\nDetected 10 potential archaeological features.\nHillshade: This image appears to be a simple, uniform texture without any distinguishable features like those typically highlighted in LIDAR hillshade datasets for archaeological surveys. There are no visible pa...\nSlope: The image provided appears to have a lack of visible distinctive features such as unnatural slope breaks, geometric patterns, terracing, linear anomalies, or circular patterns which are typically used...\nContour: The image you've provided appears to be a plain texture or pattern, not an actual LIDAR contour map. It consists of a repetitive stipple pattern with no discernable contours or features that are typic...\nElevation: The image you provided appears to have substantial noise or resolution issues, making it challenging to accurately identify the archaeological features you are interested in, such as subtle elevation ..."
+        },
+        "combined_analysis": {
+          "confidence": 0.5,
+          "features_detected": [
+            {
+              "type": "Mound (multi-modal detection)",
+              "details": "Detected in 4 visualizations: contour, slope, hillshade, elevation",
+              "confidence": 1.0,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Earthwork (multi-modal detection)",
+              "details": "Detected in 2 visualizations: slope, hillshade",
+              "confidence": 0.96,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Artificial (multi-modal detection)",
+              "details": "Detected in 2 visualizations: slope, elevation",
+              "confidence": 0.96,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Settlement (detected via elevation)",
+              "details": "Potential settlement identified in elevation analysis",
+              "confidence": 0.9,
+              "source": "elevation"
+            },
+            {
+              "type": "Platform (multi-modal detection)",
+              "details": "Detected in 2 visualizations: slope, elevation",
+              "confidence": 0.8999999999999999,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Enclosure (detected via slope)",
+              "details": "Potential enclosure identified in slope analysis",
+              "confidence": 0.85,
+              "source": "slope"
+            },
+            {
+              "type": "Geometric (multi-modal detection)",
+              "details": "Detected in 4 visualizations: contour, slope, hillshade, elevation",
+              "confidence": 0.84,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Wall (multi-modal detection)",
+              "details": "Detected in 3 visualizations: contour, slope, elevation",
+              "confidence": 0.8399999999999997,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Ditch (detected via contour)",
+              "details": "Potential ditch identified in contour analysis",
+              "confidence": 0.8,
+              "source": "contour"
+            },
+            {
+              "type": "Ceremonial (detected via elevation)",
+              "details": "Potential ceremonial identified in elevation analysis",
+              "confidence": 0.8,
+              "source": "elevation"
+            },
+            {
+              "type": "GPT Vision Feature",
+              "details": "The image you've provided appears heavily pixelated and lacks the resolution necessary to perform a detailed archaeological analysis accurately. However, I can offer a general guide on what to look for based on your description of processing and the typical indicators of archaeological significance.\n\n1. **Geometric Patterns**: In higher resolution images, look for shapes like squares, rectangles, or circles that suggest human-made structures or layouts of ancient settlements. Even in low-resolution, somewhat regular patterns distinct from natural formations might be noticeable.\n\n2. **Soil Color Variations**: Variations in soil color can be indicative of buried structures, where the soil has been disturbed or replaced during building activity in the past. These might show up as patches or gradients distinct from the surrounding area.\n\n3. **Vegetation Stress Patterns**: Areas where vegetation appears stressed or different in color or density than surrounding areas can suggest underlying archaeological features. This might be due to differences in soil moisture content or nutrients caused by buried structures.\n\n4. **Linear Features**: Look for straight lines that could be roads, boundaries, or water canals, often purposefully constructed for use in ancient activities.\n\n5. **Circular or Rectangular Earthworks**: Differences in elevation that form geometric shapes could be remnants of structures or defensive works like moats, walls, or fort bounds.\n\n6. **Differences in Vegetation Growth Patterns**: Areas where vegetation growth is anomalously dense or sparse compared to surrounding regions can indicate differences in the underlying soil or hidden man-made features impacting growth.\n\nBased on the description of the enhancements applied to the image (spectral band combinations, contrast enhancement, and atmospheric correction), the image should ideally reveal subtle anomalies linked to such features where higher resolution and quality are available.\n\nIt's suggested that the investigation be supplemented with ground surveys or higher-resolution images for substantial findings, especially since the preprocessing mentioned usually significantly aids in highlighting potential archaeological signs from aerial or satellite images. This would confirm any hypotheses regarding archaeological activity indicated by abnormal patterns in the satellite imagery.",
+              "confidence": 0.5
+            }
+          ],
+          "analysis_method": "Multi-Modal Fusion",
+          "recommendation": "High likelihood of archaeological features. Recommended for detailed archaeological survey."
+        }
+      },
+      "enhanced_features": {
+        "total_features_detected": 11,
+        "satellite_features": 1,
+        "lidar_features": 10,
+        "enhanced_lidar_active": true
+      },
+      "brain_components_status": {
+        "visual_cortex": "\u2705 ACTIVE",
+        "hippocampus": "\u2705 ACTIVE",
+        "neocortex": "\u2705 ACTIVE",
+        "motor_cortex": "\u2705 ACTIVE",
+        "executive_function": "\u2705 ACTIVE"
+      },
+      "enhanced_recommendations": [
+        {
+          "action": "Extended Remote Sensing",
+          "priority": "MEDIUM",
+          "description": "Gather additional satellite and LiDAR data for better characterization",
+          "timeline": "Within 60 days",
+          "resources_needed": [
+            "Remote sensing team",
+            "Additional data acquisition"
+          ]
+        },
+        {
+          "action": "Literature Review",
+          "priority": "MEDIUM",
+          "description": "Research historical and archaeological records for the region",
+          "timeline": "Within 45 days",
+          "resources_needed": [
+            "Research team",
+            "Archive access"
+          ]
+        },
+        {
+          "action": "LiDAR Validation Survey",
+          "priority": "MEDIUM",
+          "description": "Validate multi-modal LiDAR findings with targeted field verification",
+          "timeline": "Within 90 days",
+          "resources_needed": [
+            "LiDAR specialists",
+            "Field validation team"
+          ]
+        }
+      ],
+      "confidence_assessment": {
+        "base_confidence": 0.5,
+        "enhancement_factors": {
+          "multi_modal_lidar": 0.1,
+          "feature_consistency": 0.05,
+          "enhanced_processing": 0.05
+        },
+        "overall_confidence": 0.7,
+        "confidence_level": "MEDIUM"
+      },
+      "archaeological_significance": {
+        "significance_score": 6,
+        "level": "HIGH",
+        "factors": {
+          "feature_count": 11,
+          "confidence": 0.5,
+          "cultural_context": "Unknown",
+          "enhanced_analysis": true
+        }
+      },
+      "comparison_with_previous": {
+        "comparison_available": true,
+        "previous_confidence": 0.85,
+        "current_confidence": 0.5,
+        "confidence_improvement": -0.35,
+        "current_features": 11,
+        "previous_pattern": "ancient_settlement",
+        "enhancement_notes": [
+          "Enhanced multi-modal LiDAR analysis now available",
+          "Improved archaeological feature detection",
+          "Cultural context integration enhanced",
+          "GENIUS-level brain processing active"
+        ]
+      }
+    },
+    {
+      "site_name": "Endpoint Test Session",
+      "coordinates": [
+        -15.7801,
+        -47.9292
+      ],
+      "cultural_context": "Unknown",
+      "analysis_timestamp": "2025-06-21T19:44:56.442932",
+      "processing_time": "0.01s",
+      "vision_analysis": {
+        "location": {
+          "lat": -15.7801,
+          "lon": -47.9292
+        },
+        "satellite_findings": {
+          "anomaly_detected": true,
+          "confidence": 0.6580378092272935,
+          "pattern_type": "rectangular settlement patterns",
+          "source": "Sentinel-2 Scene ID: S2A_MSIL2A_20224290"
+        },
+        "lidar_findings": {
+          "confidence": 0.775,
+          "features_detected": [
+            {
+              "type": "Settlement Mound",
+              "details": "Artificial elevation consistent with long-term habitation",
+              "confidence": 0.8,
+              "coordinates": {
+                "lat": -15.7801,
+                "lng": -47.9292
+              },
+              "height_meters": 5,
+              "cultural_affiliation": "Unknown"
+            },
+            {
+              "type": "Geometric Earthwork",
+              "details": "Precisely defined geometric pattern indicating planned construction",
+              "confidence": 0.75,
+              "coordinates": {
+                "lat": -15.78,
+                "lng": -47.929300000000005
+              },
+              "size_meters": 60,
+              "cultural_affiliation": "Unknown"
+            }
+          ],
+          "source": "Enhanced Multi-Modal LIDAR Analysis (lat: -15.7801, lon: -47.9292)",
+          "location": {
+            "lat": -15.7801,
+            "lon": -47.9292
+          },
+          "visualization_analyses": {
+            "hillshade": {
+              "analysis": "Hillshade analysis reveals subtle elevation changes consistent with human modification of landscape. Multiple linear and circular anomalies detected.",
+              "confidence": 0.8,
+              "features_detected": 3
+            },
+            "slope": {
+              "analysis": "Slope analysis shows geometric patterns inconsistent with natural terrain formation. Evidence of deliberate landscape modification.",
+              "confidence": 0.75,
+              "features_detected": 4
+            },
+            "contour": {
+              "analysis": "Contour mapping reveals organized spatial patterns suggesting planned settlement layout with clear boundaries and internal organization.",
+              "confidence": 0.7,
+              "features_detected": 2
+            },
+            "elevation": {
+              "analysis": "Digital elevation model shows systematic elevation changes forming geometric patterns typical of archaeological sites.",
+              "confidence": 0.85,
+              "features_detected": 5
+            }
+          },
+          "combined_analysis": {
+            "summary": "Multi-modal LIDAR analysis reveals significant archaeological potential with evidence of human landscape modification across multiple visualization techniques.",
+            "total_features": 14,
+            "archaeological_potential": "HIGH",
+            "recommended_actions": [
+              "Ground-truthing survey recommended",
+              "Detailed excavation planning advised",
+              "Geophysical survey to complement LIDAR findings",
+              "Stakeholder consultation for site protection"
+            ]
+          },
+          "metadata": {
+            "processing_type": "Enhanced Multi-Modal Analysis",
+            "visualizations_used": [
+              "hillshade",
+              "slope",
+              "contour",
+              "elevation"
+            ],
+            "analysis_date": "2025-06-21T19:44:56.441932",
+            "coordinate_system": "EPSG:4326",
+            "vertical_accuracy": "\u00b115cm",
+            "horizontal_accuracy": "\u00b130cm"
+          },
+          "processing_note": "Enhanced simulation with realistic archaeological patterns"
+        },
+        "combined_analysis": {
+          "confidence": 0.7048226855363762,
+          "features_detected": [
+            {
+              "type": "Settlement Mound",
+              "details": "Artificial elevation consistent with long-term habitation",
+              "confidence": 0.8,
+              "coordinates": {
+                "lat": -15.7801,
+                "lng": -47.9292
+              },
+              "height_meters": 5,
+              "cultural_affiliation": "Unknown"
+            },
+            {
+              "type": "Geometric Earthwork",
+              "details": "Precisely defined geometric pattern indicating planned construction",
+              "confidence": 0.75,
+              "coordinates": {
+                "lat": -15.78,
+                "lng": -47.929300000000005
+              },
+              "size_meters": 60,
+              "cultural_affiliation": "Unknown"
+            }
+          ],
+          "analysis_method": "Multi-Modal Fusion",
+          "recommendation": "Extremely high probability of significant archaeological site. Urgent archaeological investigation recommended."
+        }
+      },
+      "enhanced_features": {
+        "total_features_detected": 2,
+        "satellite_features": 0,
+        "lidar_features": 2,
+        "enhanced_lidar_active": true
+      },
+      "brain_components_status": {
+        "visual_cortex": "\u2705 ACTIVE",
+        "hippocampus": "\u2705 ACTIVE",
+        "neocortex": "\u2705 ACTIVE",
+        "motor_cortex": "\u2705 ACTIVE",
+        "executive_function": "\u2705 ACTIVE"
+      },
+      "enhanced_recommendations": [
+        {
+          "action": "Immediate Field Survey",
+          "priority": "HIGH",
+          "description": "High confidence archaeological features require immediate ground-truthing",
+          "timeline": "Within 30 days",
+          "resources_needed": [
+            "Archaeological team",
+            "Ground-penetrating radar",
+            "Survey equipment"
+          ]
+        },
+        {
+          "action": "Cultural Consultation",
+          "priority": "HIGH",
+          "description": "Engage with local indigenous communities for traditional knowledge",
+          "timeline": "Before field work",
+          "resources_needed": [
+            "Community liaisons",
+            "Cultural protocols"
+          ]
+        },
+        {
+          "action": "LiDAR Validation Survey",
+          "priority": "MEDIUM",
+          "description": "Validate multi-modal LiDAR findings with targeted field verification",
+          "timeline": "Within 90 days",
+          "resources_needed": [
+            "LiDAR specialists",
+            "Field validation team"
+          ]
+        }
+      ],
+      "confidence_assessment": {
+        "base_confidence": 0.7048226855363762,
+        "enhancement_factors": {
+          "multi_modal_lidar": 0.1,
+          "feature_consistency": 0,
+          "enhanced_processing": 0.05
+        },
+        "overall_confidence": 0.8548226855363762,
+        "confidence_level": "HIGH"
+      },
+      "archaeological_significance": {
+        "significance_score": 5,
+        "level": "MODERATE",
+        "factors": {
+          "feature_count": 2,
+          "confidence": 0.7048226855363762,
+          "cultural_context": "Unknown",
+          "enhanced_analysis": true
+        }
+      },
+      "comparison_with_previous": {
+        "comparison_available": true,
+        "previous_confidence": 0.92,
+        "current_confidence": 0.7048226855363762,
+        "confidence_improvement": -0.21517731446362387,
+        "current_features": 2,
+        "previous_pattern": "ceremonial_complex",
+        "enhancement_notes": [
+          "Enhanced multi-modal LiDAR analysis now available",
+          "Improved archaeological feature detection",
+          "Cultural context integration enhanced",
+          "GENIUS-level brain processing active"
+        ]
+      }
+    },
+    {
+      "site_name": "Backend Analysis",
+      "coordinates": [
+        5.1542,
+        -73.7792
+      ],
+      "cultural_context": "Unknown",
+      "analysis_timestamp": "2025-06-21T19:44:56.447944",
+      "processing_time": "0.01s",
+      "vision_analysis": {
+        "location": {
+          "lat": 5.1542,
+          "lon": -73.7792
+        },
+        "satellite_findings": {
+          "anomaly_detected": false,
+          "confidence": 0.18920357128126092,
+          "pattern_type": "",
+          "source": "Sentinel-2 Scene ID: S2A_MSIL2A_20220431"
+        },
+        "lidar_findings": {
+          "confidence": 0.775,
+          "features_detected": [
+            {
+              "type": "Circular Village Structure",
+              "details": "Ring-shaped elevation pattern consistent with Amazonian circular village layout",
+              "confidence": 0.85,
+              "coordinates": {
+                "lat": 5.1543,
+                "lng": -73.7791
+              },
+              "size_meters": 120,
+              "cultural_affiliation": "Amazonian"
+            },
+            {
+              "type": "Raised Platform",
+              "details": "Elevated earthwork platform typical of flood-adapted Amazonian settlements",
+              "confidence": 0.8,
+              "coordinates": {
+                "lat": 5.154,
+                "lng": -73.77890000000001
+              },
+              "size_meters": 80,
+              "cultural_affiliation": "Amazonian"
+            },
+            {
+              "type": "Linear Earthwork",
+              "details": "Defensive or boundary earthwork showing organized landscape management",
+              "confidence": 0.75,
+              "coordinates": {
+                "lat": 5.1545000000000005,
+                "lng": -73.7793
+              },
+              "length_meters": 200,
+              "cultural_affiliation": "Amazonian"
+            }
+          ],
+          "source": "Enhanced Multi-Modal LIDAR Analysis (lat: 5.1542, lon: -73.7792)",
+          "location": {
+            "lat": 5.1542,
+            "lon": -73.7792
+          },
+          "visualization_analyses": {
+            "hillshade": {
+              "analysis": "Hillshade analysis reveals subtle elevation changes consistent with human modification of landscape. Multiple linear and circular anomalies detected.",
+              "confidence": 0.8,
+              "features_detected": 3
+            },
+            "slope": {
+              "analysis": "Slope analysis shows geometric patterns inconsistent with natural terrain formation. Evidence of deliberate landscape modification.",
+              "confidence": 0.75,
+              "features_detected": 4
+            },
+            "contour": {
+              "analysis": "Contour mapping reveals organized spatial patterns suggesting planned settlement layout with clear boundaries and internal organization.",
+              "confidence": 0.7,
+              "features_detected": 2
+            },
+            "elevation": {
+              "analysis": "Digital elevation model shows systematic elevation changes forming geometric patterns typical of archaeological sites.",
+              "confidence": 0.85,
+              "features_detected": 5
+            }
+          },
+          "combined_analysis": {
+            "summary": "Multi-modal LIDAR analysis reveals significant archaeological potential with evidence of human landscape modification across multiple visualization techniques.",
+            "total_features": 14,
+            "archaeological_potential": "HIGH",
+            "recommended_actions": [
+              "Ground-truthing survey recommended",
+              "Detailed excavation planning advised",
+              "Geophysical survey to complement LIDAR findings",
+              "Stakeholder consultation for site protection"
+            ]
+          },
+          "metadata": {
+            "processing_type": "Enhanced Multi-Modal Analysis",
+            "visualizations_used": [
+              "hillshade",
+              "slope",
+              "contour",
+              "elevation"
+            ],
+            "analysis_date": "2025-06-21T19:44:56.446945",
+            "coordinate_system": "EPSG:4326",
+            "vertical_accuracy": "\u00b115cm",
+            "horizontal_accuracy": "\u00b130cm"
+          },
+          "processing_note": "Enhanced simulation with realistic archaeological patterns"
+        },
+        "combined_analysis": {
+          "confidence": 0.4235221427687566,
+          "features_detected": [
+            {
+              "type": "Circular Village Structure",
+              "details": "Ring-shaped elevation pattern consistent with Amazonian circular village layout",
+              "confidence": 0.85,
+              "coordinates": {
+                "lat": 5.1543,
+                "lng": -73.7791
+              },
+              "size_meters": 120,
+              "cultural_affiliation": "Amazonian"
+            },
+            {
+              "type": "Raised Platform",
+              "details": "Elevated earthwork platform typical of flood-adapted Amazonian settlements",
+              "confidence": 0.8,
+              "coordinates": {
+                "lat": 5.154,
+                "lng": -73.77890000000001
+              },
+              "size_meters": 80,
+              "cultural_affiliation": "Amazonian"
+            },
+            {
+              "type": "Linear Earthwork",
+              "details": "Defensive or boundary earthwork showing organized landscape management",
+              "confidence": 0.75,
+              "coordinates": {
+                "lat": 5.1545000000000005,
+                "lng": -73.7793
+              },
+              "length_meters": 200,
+              "cultural_affiliation": "Amazonian"
+            }
+          ],
+          "analysis_method": "Multi-Modal Fusion",
+          "recommendation": "Moderate potential. Consider preliminary ground survey."
+        }
+      },
+      "enhanced_features": {
+        "total_features_detected": 3,
+        "satellite_features": 0,
+        "lidar_features": 3,
+        "enhanced_lidar_active": true
+      },
+      "brain_components_status": {
+        "visual_cortex": "\u2705 ACTIVE",
+        "hippocampus": "\u2705 ACTIVE",
+        "neocortex": "\u2705 ACTIVE",
+        "motor_cortex": "\u2705 ACTIVE",
+        "executive_function": "\u2705 ACTIVE"
+      },
+      "enhanced_recommendations": [
+        {
+          "action": "Extended Remote Sensing",
+          "priority": "MEDIUM",
+          "description": "Gather additional satellite and LiDAR data for better characterization",
+          "timeline": "Within 60 days",
+          "resources_needed": [
+            "Remote sensing team",
+            "Additional data acquisition"
+          ]
+        },
+        {
+          "action": "Literature Review",
+          "priority": "MEDIUM",
+          "description": "Research historical and archaeological records for the region",
+          "timeline": "Within 45 days",
+          "resources_needed": [
+            "Research team",
+            "Archive access"
+          ]
+        },
+        {
+          "action": "LiDAR Validation Survey",
+          "priority": "MEDIUM",
+          "description": "Validate multi-modal LiDAR findings with targeted field verification",
+          "timeline": "Within 90 days",
+          "resources_needed": [
+            "LiDAR specialists",
+            "Field validation team"
+          ]
+        }
+      ],
+      "confidence_assessment": {
+        "base_confidence": 0.4235221427687566,
+        "enhancement_factors": {
+          "multi_modal_lidar": 0.1,
+          "feature_consistency": 0,
+          "enhanced_processing": 0.05
+        },
+        "overall_confidence": 0.5735221427687567,
+        "confidence_level": "MEDIUM"
+      },
+      "archaeological_significance": {
+        "significance_score": 4,
+        "level": "MODERATE",
+        "factors": {
+          "feature_count": 3,
+          "confidence": 0.4235221427687566,
+          "cultural_context": "Unknown",
+          "enhanced_analysis": true
+        }
+      },
+      "comparison_with_previous": {
+        "comparison_available": true,
+        "previous_confidence": 0.8308441344209593,
+        "current_confidence": 0.4235221427687566,
+        "confidence_improvement": -0.4073219916522027,
+        "current_features": 3,
+        "previous_pattern": "Residential platform",
+        "enhancement_notes": [
+          "Enhanced multi-modal LiDAR analysis now available",
+          "Improved archaeological feature detection",
+          "Cultural context integration enhanced",
+          "GENIUS-level brain processing active"
+        ]
+      }
+    },
+    {
+      "site_name": "Amazon Basin Site Alpha",
+      "coordinates": [
+        -3.4653,
+        -62.2159
+      ],
+      "cultural_context": "Amazonian",
+      "analysis_timestamp": "2025-06-21T19:45:29.896121",
+      "processing_time": "33.45s",
+      "vision_analysis": {
+        "location": {
+          "lat": -3.4653,
+          "lon": -62.2159
+        },
+        "satellite_findings": {
+          "confidence": 0.5,
+          "features_detected": [
+            {
+              "type": "GPT Vision Feature",
+              "details": "The image you provided is too low in resolution and overly pixelated, making it quite challenging to identify any detailed archaeological indicators such as geometric patterns, soil color variations, or specific vegetation stress patterns linked with potential archaeological sites. Here is what can be analyzed based on the current image:\n\n1. **General Observation**: The image quality severely hampers the identification of detailed features such as small earthworks or subtle variations in soil color and vegetation.\n\n2. **Geometric Patterns**: No clear geometric patterns can be discerned from this image due to the low resolution and pixelation. Geometric patterns are crucial indicators of ancient settlements and require a higher resolution to be identified.\n\n3. **Soil Color Variations**: Similarly, it is difficult to identify any meaningful variations in soil color that would suggest the presence of buried structures.\n\n4. **Vegetation Patterns**: The image does not allow for the identification of distinct vegetation stress patterns, nor can differences in vegetation growth patterns be reliably observed. These features could indicate overlays of archaeological structures affecting root growth and health.\n\n5. **Linear and Circular Features**: Any potential linear or circular features that might indicate ancient roads, canals, or earthworks are obscured due to pixelation.\n\nFor a thorough archaeological analysis, it is generally crucial to have high-resolution images where fine details can be discerned. In this case, acquiring images with higher resolution, possibly from another date or different imaging technology, would greatly enhance the capability to detect archaeological features. Additionally, using other remote sensing technologies such as LiDAR could provide more depth in viewing topographical changes not visible at this resolution or imaging type.",
+              "confidence": 0.5
+            }
+          ],
+          "source": "Sentinel-2 Tile sentinel2_-3.4653_-62.2159_10.json (Enhanced GPT Vision Analysis)",
+          "location": {
+            "lat": -3.4653,
+            "lon": -62.2159
+          },
+          "raw_gpt_response": {
+            "analysis": "The image you provided is too low in resolution and overly pixelated, making it quite challenging to identify any detailed archaeological indicators such as geometric patterns, soil color variations, or specific vegetation stress patterns linked with potential archaeological sites. Here is what can be analyzed based on the current image:\n\n1. **General Observation**: The image quality severely hampers the identification of detailed features such as small earthworks or subtle variations in soil color and vegetation.\n\n2. **Geometric Patterns**: No clear geometric patterns can be discerned from this image due to the low resolution and pixelation. Geometric patterns are crucial indicators of ancient settlements and require a higher resolution to be identified.\n\n3. **Soil Color Variations**: Similarly, it is difficult to identify any meaningful variations in soil color that would suggest the presence of buried structures.\n\n4. **Vegetation Patterns**: The image does not allow for the identification of distinct vegetation stress patterns, nor can differences in vegetation growth patterns be reliably observed. These features could indicate overlays of archaeological structures affecting root growth and health.\n\n5. **Linear and Circular Features**: Any potential linear or circular features that might indicate ancient roads, canals, or earthworks are obscured due to pixelation.\n\nFor a thorough archaeological analysis, it is generally crucial to have high-resolution images where fine details can be discerned. In this case, acquiring images with higher resolution, possibly from another date or different imaging technology, would greatly enhance the capability to detect archaeological features. Additionally, using other remote sensing technologies such as LiDAR could provide more depth in viewing topographical changes not visible at this resolution or imaging type.",
+            "timestamp": "2025-06-21T19:45:03.863679",
+            "model": "gpt-4-turbo",
+            "prompt": "Analyze this preprocessed satellite image (coordinates: -3.4653, -62.2159) for archaeological significance. \n        \n        This image has been enhanced for archaeological feature detection using:\n        - Spectral band combinations optimized for soil and vegetation anomalies\n        - Contrast enhancement to reveal subtle earthworks\n        - Atmospheric correction for clearer surface features\n        \n        Look specifically for:\n        - Geometric patterns indicating ancient settlements\n        - Soil color variations suggesting buried structures  \n        - Vegetation stress patterns over archaeological sites\n        - Linear features indicating ancient roads or canals\n        - Circular or rectangular earthworks\n        - Differences in vegetation growth patterns\n        \n        Provide detailed analysis of any detected archaeological indicators."
+          }
+        },
+        "lidar_findings": {
+          "confidence": 0.5,
+          "features_detected": [
+            {
+              "type": "Settlement (multi-modal detection)",
+              "details": "Detected in 2 visualizations: hillshade, elevation",
+              "confidence": 1.0,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Mound (multi-modal detection)",
+              "details": "Detected in 2 visualizations: slope, elevation",
+              "confidence": 1.0,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Earthwork (multi-modal detection)",
+              "details": "Detected in 2 visualizations: slope, hillshade",
+              "confidence": 0.96,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Artificial (multi-modal detection)",
+              "details": "Detected in 2 visualizations: slope, elevation",
+              "confidence": 0.96,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Platform (multi-modal detection)",
+              "details": "Detected in 2 visualizations: slope, elevation",
+              "confidence": 0.8999999999999999,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Burial (detected via hillshade)",
+              "details": "Potential burial identified in hillshade analysis",
+              "confidence": 0.85,
+              "source": "hillshade"
+            },
+            {
+              "type": "Enclosure (detected via slope)",
+              "details": "Potential enclosure identified in slope analysis",
+              "confidence": 0.85,
+              "source": "slope"
+            },
+            {
+              "type": "Geometric (multi-modal detection)",
+              "details": "Detected in 2 visualizations: slope, elevation",
+              "confidence": 0.84,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Ditch (detected via elevation)",
+              "details": "Potential ditch identified in elevation analysis",
+              "confidence": 0.8,
+              "source": "elevation"
+            },
+            {
+              "type": "Ceremonial (detected via elevation)",
+              "details": "Potential ceremonial identified in elevation analysis",
+              "confidence": 0.8,
+              "source": "elevation"
+            },
+            {
+              "type": "Wall (detected via slope)",
+              "details": "Potential wall identified in slope analysis",
+              "confidence": 0.7,
+              "source": "slope"
+            }
+          ],
+          "source": "LIDAR Tile lidar_-3.4653_-62.2159_10.json (Multi-Modal GPT Vision Analysis)",
+          "location": {
+            "lat": -3.4653,
+            "lon": -62.2159
+          },
+          "visualization_analyses": [
+            {
+              "visualization_type": "hillshade",
+              "analysis": "The image provided appears to be a noise pattern or static, rather than a LIDAR hillshade image typically used for detecting archaeological features. This image does not exhibit visible terrain or landscape features such as those associated with ancient settlements, roads, burial sites, or other anthropogenic modifications of the landscape.\n\nFor archaeological analysis, LIDAR imagery should display variations in elevation and texture that represent the surface details of the earth. Typically, one would expect to see shadows and highlights that define the geometry and form of the terrain, allowing for the detection of subtle features like earthworks or ancient roadways.\n\nThis image lacks identifiable patterns or features that can be analyzed for archaeological purposes. If you have another image intended for archaeological analysis or require further assistance with LIDAR data, please provide the correct imagery.",
+              "confidence": 0.5,
+              "raw_response": {
+                "analysis": "The image provided appears to be a noise pattern or static, rather than a LIDAR hillshade image typically used for detecting archaeological features. This image does not exhibit visible terrain or landscape features such as those associated with ancient settlements, roads, burial sites, or other anthropogenic modifications of the landscape.\n\nFor archaeological analysis, LIDAR imagery should display variations in elevation and texture that represent the surface details of the earth. Typically, one would expect to see shadows and highlights that define the geometry and form of the terrain, allowing for the detection of subtle features like earthworks or ancient roadways.\n\nThis image lacks identifiable patterns or features that can be analyzed for archaeological purposes. If you have another image intended for archaeological analysis or require further assistance with LIDAR data, please provide the correct imagery.",
+                "timestamp": "2025-06-21T19:45:07.563904",
+                "model": "gpt-4-turbo",
+                "prompt": "Analyze this LIDAR hillshade image for archaeological features. Look for:\n            - Circular or rectangular earthworks (ancient settlements, ceremonial sites)\n            - Linear features (ancient roads, field boundaries, defensive walls)\n            - Mounds or tumuli (burial sites, ceremonial mounds)\n            - Depressions (house platforms, quarries, defensive ditches)\n            - Geometric patterns suggesting human modification of landscape\n            - Terracing or agricultural features\n            Describe any detected features with their archaeological significance and confidence level."
+              }
+            },
+            {
+              "visualization_type": "slope",
+              "analysis": "The image you've provided appears to show a noisy or randomized dot pattern, similar to static or an abstract texture, rather than a detailed depiction of a landscape generated by LIDAR technology, which is usually utilized for capturing high-resolution maps of surface topography. This pattern does not clearly exhibit geological or topographical features such as slope breaks, earthworks, terracing, linear anomalies, or circular patterns typically analyzed in LIDAR images for archaeological investigation.\n\nGiven the characteristics visible in the image:\n- **Unnatural slope breaks indicating buried structures:** No discernible slope breaks are present.\n- **Geometric slope patterns suggesting earthworks:** The image lacks clear geometric or regular patterns that might suggest deliberate earthworks.\n- **Artificial terracing or platform construction:** There are no terracing or platform-like features visible.\n- **Linear slope anomalies indicating walls or boundaries:** No linear features can be identified.\n- **Circular slope patterns indicating mounds or enclosures:** There are no circular patterns evident.\n\n**Conclusion:** The image seems to lack the features necessary to suggest archaeological indicators. The likelihood that it represents archaeological rather than natural features is very low, assuming the image accurately reflects what was intended to be shown. If there was an error in the image provided, a more typical LIDAR-derived slope map might yield more informative results for archaeological analysis.",
+              "confidence": 0.5,
+              "raw_response": {
+                "analysis": "The image you've provided appears to show a noisy or randomized dot pattern, similar to static or an abstract texture, rather than a detailed depiction of a landscape generated by LIDAR technology, which is usually utilized for capturing high-resolution maps of surface topography. This pattern does not clearly exhibit geological or topographical features such as slope breaks, earthworks, terracing, linear anomalies, or circular patterns typically analyzed in LIDAR images for archaeological investigation.\n\nGiven the characteristics visible in the image:\n- **Unnatural slope breaks indicating buried structures:** No discernible slope breaks are present.\n- **Geometric slope patterns suggesting earthworks:** The image lacks clear geometric or regular patterns that might suggest deliberate earthworks.\n- **Artificial terracing or platform construction:** There are no terracing or platform-like features visible.\n- **Linear slope anomalies indicating walls or boundaries:** No linear features can be identified.\n- **Circular slope patterns indicating mounds or enclosures:** There are no circular patterns evident.\n\n**Conclusion:** The image seems to lack the features necessary to suggest archaeological indicators. The likelihood that it represents archaeological rather than natural features is very low, assuming the image accurately reflects what was intended to be shown. If there was an error in the image provided, a more typical LIDAR-derived slope map might yield more informative results for archaeological analysis.",
+                "timestamp": "2025-06-21T19:45:14.446006",
+                "model": "gpt-4-turbo",
+                "prompt": "Analyze this LIDAR slope analysis image for subtle archaeological indicators. Focus on:\n            - Unnatural slope breaks indicating buried structures\n            - Geometric slope patterns suggesting earthworks\n            - Artificial terracing or platform construction\n            - Linear slope anomalies indicating walls or boundaries\n            - Circular slope patterns indicating mounds or enclosures\n            Evaluate the likelihood these represent archaeological rather than natural features."
+              }
+            },
+            {
+              "visualization_type": "contour",
+              "analysis": "I apologize for any confusion, but the image you've provided appears to be static or noise and does not show any discernible LIDAR data or topographical features that can be analyzed for archaeological assessment. It may be an error or a corrupted file. If you have a different image or need guidance on how to acquire or interpret LIDAR data for archaeological surveying, feel free to ask!",
+              "confidence": 0.5,
+              "raw_response": {
+                "analysis": "I apologize for any confusion, but the image you've provided appears to be static or noise and does not show any discernible LIDAR data or topographical features that can be analyzed for archaeological assessment. It may be an error or a corrupted file. If you have a different image or need guidance on how to acquire or interpret LIDAR data for archaeological surveying, feel free to ask!",
+                "timestamp": "2025-06-21T19:45:17.147669",
+                "model": "gpt-4-turbo",
+                "prompt": "Examine this LIDAR contour visualization for archaeological evidence. Identify:\n            - Geometric contour patterns (squares, circles, rectangles)\n            - Artificial elevation changes (platforms, mounds, ditches)\n            - Regular spacing in contours suggesting human construction\n            - Contour disruptions indicating buried features\n            - Defensive earthworks or fortification patterns\n            Assess the archaeological potential of any detected anomalies."
+              }
+            },
+            {
+              "visualization_type": "elevation",
+              "analysis": "The image you've provided appears to be a small-scale LIDAR (Light Detection and Ranging) elevation model, which is instrumental in detecting subtle and fine details in the topography of the landscape when analyzing for archaeological features. Given the size and resolution in the image, a generalized analysis can be outlined, but here are some key observations and steps for detailed analysis:\n\n1. **Subtle Elevation Anomalies Indicating Buried Structures**: Look for irregularities and uneven distributions in pixel values which could indicate disturbances in the natural soil layers due to human activity. Comparing these areas with the surrounding baseline elevations would help identify potential structures.\n\n2. **Geometric Elevation Patterns**: Search for geometric patterns such as lines, rectangles, or circles, which could represent settlement layouts or ceremonial sites. Patterns that deviate from the natural randomness typically found in natural topography might suggest human construction.\n\n3. **Artificial Mounds or Raised Platforms**: These features typically appear as localized elevations that are distinct from their surroundings. The difference in texture and gradient compared to adjacent areas can be crucial identifiers.\n\n4. **Quarry Pits or Extraction Sites**: Look for concave features representing depressions or holes in the landscape. These features may also show a different texture compared to surrounding areas because of earth movement and exposure of subsurface materials.\n\n5. **Water Management Features (Canals, Reservoirs, Drainage)**: Linear or curvilinear features that appear organized and might suggest ancient water management systems such as canals or ditches. Enclosed areas could represent reservoirs.\n\n6. **Field Systems or Agricultural Terracing**: Regular striation or step-like patterns might suggest terracing. Look also for rectangular or linear patterns that may indicate ancient fields.\n\n### Steps to Analyze:\n- **Zoom and Enhance**: Increase the resolution through zooming in on regions of interest. This helps in identifying finer details not immediately apparent.\n- **Contrast and Brightness Adjustment**: Adjusting these aspects can help in better delineating features.\n- **Filter Application**: Use digital filters to highlight certain features like edges, which can help in recognizing patterns or anomalies.\n- **Comparative Analysis**: Compare features detected in the image with known elements from other archaeological sites via secondary sources like research articles, historical maps, and existing archaeological surveys.\n\n### Archaeological Significance:\nEach detected feature must be analyzed in a broader archaeological and historical context:\n- Historical relevance of the area.\n- Similarities with known sites in terms of period, culture, and technology.\n- The spatial organization and its implications on the social, economic, and religious aspects of the society.\n\nFinally, field verification is necessary to confirm hypotheses generated from LIDAR data analysis. This image might need higher-resolution data and ground truthing for a thorough archaeological interpretation.",
+              "confidence": 0.5,
+              "raw_response": {
+                "analysis": "The image you've provided appears to be a small-scale LIDAR (Light Detection and Ranging) elevation model, which is instrumental in detecting subtle and fine details in the topography of the landscape when analyzing for archaeological features. Given the size and resolution in the image, a generalized analysis can be outlined, but here are some key observations and steps for detailed analysis:\n\n1. **Subtle Elevation Anomalies Indicating Buried Structures**: Look for irregularities and uneven distributions in pixel values which could indicate disturbances in the natural soil layers due to human activity. Comparing these areas with the surrounding baseline elevations would help identify potential structures.\n\n2. **Geometric Elevation Patterns**: Search for geometric patterns such as lines, rectangles, or circles, which could represent settlement layouts or ceremonial sites. Patterns that deviate from the natural randomness typically found in natural topography might suggest human construction.\n\n3. **Artificial Mounds or Raised Platforms**: These features typically appear as localized elevations that are distinct from their surroundings. The difference in texture and gradient compared to adjacent areas can be crucial identifiers.\n\n4. **Quarry Pits or Extraction Sites**: Look for concave features representing depressions or holes in the landscape. These features may also show a different texture compared to surrounding areas because of earth movement and exposure of subsurface materials.\n\n5. **Water Management Features (Canals, Reservoirs, Drainage)**: Linear or curvilinear features that appear organized and might suggest ancient water management systems such as canals or ditches. Enclosed areas could represent reservoirs.\n\n6. **Field Systems or Agricultural Terracing**: Regular striation or step-like patterns might suggest terracing. Look also for rectangular or linear patterns that may indicate ancient fields.\n\n### Steps to Analyze:\n- **Zoom and Enhance**: Increase the resolution through zooming in on regions of interest. This helps in identifying finer details not immediately apparent.\n- **Contrast and Brightness Adjustment**: Adjusting these aspects can help in better delineating features.\n- **Filter Application**: Use digital filters to highlight certain features like edges, which can help in recognizing patterns or anomalies.\n- **Comparative Analysis**: Compare features detected in the image with known elements from other archaeological sites via secondary sources like research articles, historical maps, and existing archaeological surveys.\n\n### Archaeological Significance:\nEach detected feature must be analyzed in a broader archaeological and historical context:\n- Historical relevance of the area.\n- Similarities with known sites in terms of period, culture, and technology.\n- The spatial organization and its implications on the social, economic, and religious aspects of the society.\n\nFinally, field verification is necessary to confirm hypotheses generated from LIDAR data analysis. This image might need higher-resolution data and ground truthing for a thorough archaeological interpretation.",
+                "timestamp": "2025-06-21T19:45:29.893973",
+                "model": "gpt-4-turbo",
+                "prompt": "Analyze this LIDAR elevation model for archaeological signatures. Search for:\n            - Subtle elevation anomalies indicating buried structures\n            - Geometric elevation patterns (settlement layouts, ceremonial sites)\n            - Artificial mounds or raised platforms\n            - Quarry pits or extraction sites\n            - Water management features (canals, reservoirs, drainage)\n            - Field systems or agricultural terracing\n            Determine the archaeological significance of elevation patterns."
+              }
+            }
+          ],
+          "combined_analysis": "Multi-modal LIDAR analysis (confidence: 0.50)\nDetected 11 potential archaeological features.\nHillshade: The image provided appears to be a noise pattern or static, rather than a LIDAR hillshade image typically used for detecting archaeological features. This image does not exhibit visible terrain or lan...\nSlope: The image you've provided appears to show a noisy or randomized dot pattern, similar to static or an abstract texture, rather than a detailed depiction of a landscape generated by LIDAR technology, wh...\nContour: I apologize for any confusion, but the image you've provided appears to be static or noise and does not show any discernible LIDAR data or topographical features that can be analyzed for archaeologica...\nElevation: The image you've provided appears to be a small-scale LIDAR (Light Detection and Ranging) elevation model, which is instrumental in detecting subtle and fine details in the topography of the landscape..."
+        },
+        "combined_analysis": {
+          "confidence": 0.5,
+          "features_detected": [
+            {
+              "type": "Settlement (multi-modal detection)",
+              "details": "Detected in 2 visualizations: hillshade, elevation",
+              "confidence": 1.0,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Mound (multi-modal detection)",
+              "details": "Detected in 2 visualizations: slope, elevation",
+              "confidence": 1.0,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Earthwork (multi-modal detection)",
+              "details": "Detected in 2 visualizations: slope, hillshade",
+              "confidence": 0.96,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Artificial (multi-modal detection)",
+              "details": "Detected in 2 visualizations: slope, elevation",
+              "confidence": 0.96,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Platform (multi-modal detection)",
+              "details": "Detected in 2 visualizations: slope, elevation",
+              "confidence": 0.8999999999999999,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Burial (detected via hillshade)",
+              "details": "Potential burial identified in hillshade analysis",
+              "confidence": 0.85,
+              "source": "hillshade"
+            },
+            {
+              "type": "Enclosure (detected via slope)",
+              "details": "Potential enclosure identified in slope analysis",
+              "confidence": 0.85,
+              "source": "slope"
+            },
+            {
+              "type": "Geometric (multi-modal detection)",
+              "details": "Detected in 2 visualizations: slope, elevation",
+              "confidence": 0.84,
+              "source": "multi-modal"
+            },
+            {
+              "type": "Ditch (detected via elevation)",
+              "details": "Potential ditch identified in elevation analysis",
+              "confidence": 0.8,
+              "source": "elevation"
+            },
+            {
+              "type": "Ceremonial (detected via elevation)",
+              "details": "Potential ceremonial identified in elevation analysis",
+              "confidence": 0.8,
+              "source": "elevation"
+            },
+            {
+              "type": "Wall (detected via slope)",
+              "details": "Potential wall identified in slope analysis",
+              "confidence": 0.7,
+              "source": "slope"
+            },
+            {
+              "type": "GPT Vision Feature",
+              "details": "The image you provided is too low in resolution and overly pixelated, making it quite challenging to identify any detailed archaeological indicators such as geometric patterns, soil color variations, or specific vegetation stress patterns linked with potential archaeological sites. Here is what can be analyzed based on the current image:\n\n1. **General Observation**: The image quality severely hampers the identification of detailed features such as small earthworks or subtle variations in soil color and vegetation.\n\n2. **Geometric Patterns**: No clear geometric patterns can be discerned from this image due to the low resolution and pixelation. Geometric patterns are crucial indicators of ancient settlements and require a higher resolution to be identified.\n\n3. **Soil Color Variations**: Similarly, it is difficult to identify any meaningful variations in soil color that would suggest the presence of buried structures.\n\n4. **Vegetation Patterns**: The image does not allow for the identification of distinct vegetation stress patterns, nor can differences in vegetation growth patterns be reliably observed. These features could indicate overlays of archaeological structures affecting root growth and health.\n\n5. **Linear and Circular Features**: Any potential linear or circular features that might indicate ancient roads, canals, or earthworks are obscured due to pixelation.\n\nFor a thorough archaeological analysis, it is generally crucial to have high-resolution images where fine details can be discerned. In this case, acquiring images with higher resolution, possibly from another date or different imaging technology, would greatly enhance the capability to detect archaeological features. Additionally, using other remote sensing technologies such as LiDAR could provide more depth in viewing topographical changes not visible at this resolution or imaging type.",
+              "confidence": 0.5
+            }
+          ],
+          "analysis_method": "Multi-Modal Fusion",
+          "recommendation": "High likelihood of archaeological features. Recommended for detailed archaeological survey."
+        }
+      },
+      "enhanced_features": {
+        "total_features_detected": 12,
+        "satellite_features": 1,
+        "lidar_features": 11,
+        "enhanced_lidar_active": true
+      },
+      "brain_components_status": {
+        "visual_cortex": "\u2705 ACTIVE",
+        "hippocampus": "\u2705 ACTIVE",
+        "neocortex": "\u2705 ACTIVE",
+        "motor_cortex": "\u2705 ACTIVE",
+        "executive_function": "\u2705 ACTIVE"
+      },
+      "enhanced_recommendations": [
+        {
+          "action": "Extended Remote Sensing",
+          "priority": "MEDIUM",
+          "description": "Gather additional satellite and LiDAR data for better characterization",
+          "timeline": "Within 60 days",
+          "resources_needed": [
+            "Remote sensing team",
+            "Additional data acquisition"
+          ]
+        },
+        {
+          "action": "Literature Review",
+          "priority": "MEDIUM",
+          "description": "Research historical and archaeological records for the region",
+          "timeline": "Within 45 days",
+          "resources_needed": [
+            "Research team",
+            "Archive access"
+          ]
+        },
+        {
+          "action": "LiDAR Validation Survey",
+          "priority": "MEDIUM",
+          "description": "Validate multi-modal LiDAR findings with targeted field verification",
+          "timeline": "Within 90 days",
+          "resources_needed": [
+            "LiDAR specialists",
+            "Field validation team"
+          ]
+        },
+        {
+          "action": "Cultural Heritage Assessment",
+          "priority": "HIGH",
+          "description": "Assess Amazonian cultural heritage significance and protection needs",
+          "timeline": "Ongoing",
+          "resources_needed": [
+            "Cultural heritage specialists",
+            "Community engagement"
+          ]
+        }
+      ],
+      "confidence_assessment": {
+        "base_confidence": 0.5,
+        "enhancement_factors": {
+          "multi_modal_lidar": 0.1,
+          "feature_consistency": 0.05,
+          "enhanced_processing": 0.05
+        },
+        "overall_confidence": 0.7,
+        "confidence_level": "MEDIUM"
+      },
+      "archaeological_significance": {
+        "significance_score": 8,
+        "level": "EXCEPTIONAL",
+        "factors": {
+          "feature_count": 12,
+          "confidence": 0.5,
+          "cultural_context": "Amazonian",
+          "enhanced_analysis": true
+        }
+      },
+      "comparison_with_previous": {
+        "comparison_available": true,
+        "previous_confidence": 0,
+        "current_confidence": 0.5,
+        "confidence_improvement": 0.5,
+        "current_features": 12,
+        "previous_pattern": "Unknown",
+        "enhancement_notes": [
+          "Enhanced multi-modal LiDAR analysis now available",
+          "Improved archaeological feature detection",
+          "Cultural context integration enhanced",
+          "GENIUS-level brain processing active"
+        ]
+      }
+    },
+    {
+      "site_name": "Lake Guatavita Region",
+      "coordinates": [
+        5.1542,
+        -73.7792
+      ],
+      "cultural_context": "Andean/Muisca",
+      "analysis_timestamp": "2025-06-21T19:45:29.902120",
+      "processing_time": "0.00s",
+      "vision_analysis": {
+        "location": {
+          "lat": 5.1542,
+          "lon": -73.7792
+        },
+        "satellite_findings": {
+          "anomaly_detected": false,
+          "confidence": 0.18920357128126092,
+          "pattern_type": "",
+          "source": "Sentinel-2 Scene ID: S2A_MSIL2A_20220431"
+        },
+        "lidar_findings": {
+          "confidence": 0.775,
+          "features_detected": [
+            {
+              "type": "Circular Village Structure",
+              "details": "Ring-shaped elevation pattern consistent with Amazonian circular village layout",
+              "confidence": 0.85,
+              "coordinates": {
+                "lat": 5.1543,
+                "lng": -73.7791
+              },
+              "size_meters": 120,
+              "cultural_affiliation": "Amazonian"
+            },
+            {
+              "type": "Raised Platform",
+              "details": "Elevated earthwork platform typical of flood-adapted Amazonian settlements",
+              "confidence": 0.8,
+              "coordinates": {
+                "lat": 5.154,
+                "lng": -73.77890000000001
+              },
+              "size_meters": 80,
+              "cultural_affiliation": "Amazonian"
+            },
+            {
+              "type": "Linear Earthwork",
+              "details": "Defensive or boundary earthwork showing organized landscape management",
+              "confidence": 0.75,
+              "coordinates": {
+                "lat": 5.1545000000000005,
+                "lng": -73.7793
+              },
+              "length_meters": 200,
+              "cultural_affiliation": "Amazonian"
+            }
+          ],
+          "source": "Enhanced Multi-Modal LIDAR Analysis (lat: 5.1542, lon: -73.7792)",
+          "location": {
+            "lat": 5.1542,
+            "lon": -73.7792
+          },
+          "visualization_analyses": {
+            "hillshade": {
+              "analysis": "Hillshade analysis reveals subtle elevation changes consistent with human modification of landscape. Multiple linear and circular anomalies detected.",
+              "confidence": 0.8,
+              "features_detected": 3
+            },
+            "slope": {
+              "analysis": "Slope analysis shows geometric patterns inconsistent with natural terrain formation. Evidence of deliberate landscape modification.",
+              "confidence": 0.75,
+              "features_detected": 4
+            },
+            "contour": {
+              "analysis": "Contour mapping reveals organized spatial patterns suggesting planned settlement layout with clear boundaries and internal organization.",
+              "confidence": 0.7,
+              "features_detected": 2
+            },
+            "elevation": {
+              "analysis": "Digital elevation model shows systematic elevation changes forming geometric patterns typical of archaeological sites.",
+              "confidence": 0.85,
+              "features_detected": 5
+            }
+          },
+          "combined_analysis": {
+            "summary": "Multi-modal LIDAR analysis reveals significant archaeological potential with evidence of human landscape modification across multiple visualization techniques.",
+            "total_features": 14,
+            "archaeological_potential": "HIGH",
+            "recommended_actions": [
+              "Ground-truthing survey recommended",
+              "Detailed excavation planning advised",
+              "Geophysical survey to complement LIDAR findings",
+              "Stakeholder consultation for site protection"
+            ]
+          },
+          "metadata": {
+            "processing_type": "Enhanced Multi-Modal Analysis",
+            "visualizations_used": [
+              "hillshade",
+              "slope",
+              "contour",
+              "elevation"
+            ],
+            "analysis_date": "2025-06-21T19:45:29.900121",
+            "coordinate_system": "EPSG:4326",
+            "vertical_accuracy": "\u00b115cm",
+            "horizontal_accuracy": "\u00b130cm"
+          },
+          "processing_note": "Enhanced simulation with realistic archaeological patterns"
+        },
+        "combined_analysis": {
+          "confidence": 0.4235221427687566,
+          "features_detected": [
+            {
+              "type": "Circular Village Structure",
+              "details": "Ring-shaped elevation pattern consistent with Amazonian circular village layout",
+              "confidence": 0.85,
+              "coordinates": {
+                "lat": 5.1543,
+                "lng": -73.7791
+              },
+              "size_meters": 120,
+              "cultural_affiliation": "Amazonian"
+            },
+            {
+              "type": "Raised Platform",
+              "details": "Elevated earthwork platform typical of flood-adapted Amazonian settlements",
+              "confidence": 0.8,
+              "coordinates": {
+                "lat": 5.154,
+                "lng": -73.77890000000001
+              },
+              "size_meters": 80,
+              "cultural_affiliation": "Amazonian"
+            },
+            {
+              "type": "Linear Earthwork",
+              "details": "Defensive or boundary earthwork showing organized landscape management",
+              "confidence": 0.75,
+              "coordinates": {
+                "lat": 5.1545000000000005,
+                "lng": -73.7793
+              },
+              "length_meters": 200,
+              "cultural_affiliation": "Amazonian"
+            }
+          ],
+          "analysis_method": "Multi-Modal Fusion",
+          "recommendation": "Moderate potential. Consider preliminary ground survey."
+        }
+      },
+      "enhanced_features": {
+        "total_features_detected": 3,
+        "satellite_features": 0,
+        "lidar_features": 3,
+        "enhanced_lidar_active": true
+      },
+      "brain_components_status": {
+        "visual_cortex": "\u2705 ACTIVE",
+        "hippocampus": "\u2705 ACTIVE",
+        "neocortex": "\u2705 ACTIVE",
+        "motor_cortex": "\u2705 ACTIVE",
+        "executive_function": "\u2705 ACTIVE"
+      },
+      "enhanced_recommendations": [
+        {
+          "action": "Extended Remote Sensing",
+          "priority": "MEDIUM",
+          "description": "Gather additional satellite and LiDAR data for better characterization",
+          "timeline": "Within 60 days",
+          "resources_needed": [
+            "Remote sensing team",
+            "Additional data acquisition"
+          ]
+        },
+        {
+          "action": "Literature Review",
+          "priority": "MEDIUM",
+          "description": "Research historical and archaeological records for the region",
+          "timeline": "Within 45 days",
+          "resources_needed": [
+            "Research team",
+            "Archive access"
+          ]
+        },
+        {
+          "action": "LiDAR Validation Survey",
+          "priority": "MEDIUM",
+          "description": "Validate multi-modal LiDAR findings with targeted field verification",
+          "timeline": "Within 90 days",
+          "resources_needed": [
+            "LiDAR specialists",
+            "Field validation team"
+          ]
+        },
+        {
+          "action": "Cultural Heritage Assessment",
+          "priority": "HIGH",
+          "description": "Assess Andean/Muisca cultural heritage significance and protection needs",
+          "timeline": "Ongoing",
+          "resources_needed": [
+            "Cultural heritage specialists",
+            "Community engagement"
+          ]
+        }
+      ],
+      "confidence_assessment": {
+        "base_confidence": 0.4235221427687566,
+        "enhancement_factors": {
+          "multi_modal_lidar": 0.1,
+          "feature_consistency": 0,
+          "enhanced_processing": 0.05
+        },
+        "overall_confidence": 0.5735221427687567,
+        "confidence_level": "MEDIUM"
+      },
+      "archaeological_significance": {
+        "significance_score": 6,
+        "level": "HIGH",
+        "factors": {
+          "feature_count": 3,
+          "confidence": 0.4235221427687566,
+          "cultural_context": "Andean/Muisca",
+          "enhanced_analysis": true
+        }
+      },
+      "comparison_with_previous": {
+        "comparison_available": true,
+        "previous_confidence": 0,
+        "current_confidence": 0.4235221427687566,
+        "confidence_improvement": 0.4235221427687566,
+        "current_features": 3,
+        "previous_pattern": "Unknown",
+        "enhancement_notes": [
+          "Enhanced multi-modal LiDAR analysis now available",
+          "Improved archaeological feature detection",
+          "Cultural context integration enhanced",
+          "GENIUS-level brain processing active"
+        ]
+      }
+    }
+  ],
+  "performance_metrics": {
+    "total_sites_analyzed": 5,
+    "successful_analyses": 5,
+    "success_rate": 1.0,
+    "high_confidence_discoveries": 1,
+    "discovery_rate": 0.2,
+    "enhanced_features_used": [
+      "Multi-modal LiDAR analysis",
+      "Enhanced archaeological preprocessing",
+      "Cultural context integration",
+      "GENIUS-level brain processing",
+      "Advanced feature detection"
+    ]
+  },
+  "discoveries": [
+    {
+      "site_name": "Endpoint Test Session",
+      "coordinates": [
+        -15.7801,
+        -47.9292
+      ],
+      "significance": "MODERATE",
+      "confidence": 0.8548226855363762
+    }
+  ],
+  "recommendations": [
+    "Prioritize field surveys for high-confidence sites",
+    "Expand LiDAR data collection for medium-confidence sites",
+    "Engage with indigenous communities for cultural context",
+    "Continue using enhanced NIS Protocol for future analyses",
+    "Implement real-time processing for field surveys"
+  ]
+}

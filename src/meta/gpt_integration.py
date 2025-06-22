@@ -91,7 +91,7 @@ class GPTIntegration:
             logger.error(f"OpenAI connection test failed: {str(e)}")
             raise
     
-    def vision_analysis(
+    async def vision_analysis(
         self,
         image_path: Union[str, Path],
         prompt: Optional[str] = None,

@@ -1449,6 +1449,15 @@ function LidarTab({ data, coordinates, isLoading }: {
               <option value="2d">2D View</option>
               <option value="3d">3D View</option>
             </select>
+            <select
+              value={analysisMode}
+              onChange={(e) => setAnalysisMode(e.target.value as 'elevation' | 'intensity' | 'classification')}
+              className="px-3 py-1 bg-slate-700 text-white rounded text-sm border border-slate-600"
+            >
+              <option value="elevation">Elevation</option>
+              <option value="intensity">Intensity</option>
+              <option value="classification">Classification</option>
+            </select>
           </div>
         </div>
         
@@ -1464,8 +1473,9 @@ function LidarTab({ data, coordinates, isLoading }: {
             <p className="text-slate-400">No LIDAR data available for current coordinates</p>
             <button
               onClick={loadRealLidarData}
-              className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition-colors"
+              className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition-colors flex items-center gap-2 mx-auto"
             >
+              <Radar className="w-4 h-4" />
               Load LIDAR Data
             </button>
           </div>

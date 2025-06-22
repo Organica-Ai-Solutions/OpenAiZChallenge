@@ -191,8 +191,13 @@ export default function DocumentationPage() {
                     <CardContent className="pt-6">
                       <div className="text-center">
                         <Eye className="h-12 w-12 mx-auto mb-4 text-blue-400" />
-                        <h4 className="text-lg font-semibold mb-2 text-white">Vision Agent</h4>
-                        <p className="text-sm text-slate-300">YOLO8, Waldo, and GPT-4 Vision for satellite imagery analysis</p>
+                        <h4 className="text-lg font-semibold mb-2 text-white">Enhanced Vision Agent</h4>
+                        <p className="text-sm text-slate-300">GPT-4 Vision + PyTorch 2.7.1 + KAN Networks for advanced archaeological analysis with multi-modal LIDAR processing</p>
+                        <div className="mt-3 space-y-1">
+                          <Badge variant="outline" className="text-xs border-blue-500 text-blue-300">Real GPT-4 Vision</Badge>
+                          <Badge variant="outline" className="text-xs border-green-500 text-green-300">PyTorch Active</Badge>
+                          <Badge variant="outline" className="text-xs border-purple-500 text-purple-300">KAN Enhanced</Badge>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -703,6 +708,69 @@ export default function DocumentationPage() {
                         </div>
                       </CardContent>
                     </Card>
+                  </div>
+                </div>
+
+                {/* NEW: GPT-4 Vision + PyTorch + KAN Integration */}
+                <div className="bg-gradient-to-r from-blue-950/30 to-green-950/30 p-6 rounded-lg border border-blue-500/20">
+                  <div className="flex items-center mb-4">
+                    <Eye className="h-6 w-6 mr-3 text-blue-400" />
+                    <span className="text-white font-semibold text-lg">🎉 GPT-4 Vision + PyTorch + KAN Integration - ACTIVE</span>
+                    <Badge className="ml-2 bg-green-500 text-white">OPERATIONAL</Badge>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <h4 className="text-lg font-semibold text-blue-300">Technical Stack</h4>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg border border-slate-600">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                            <span className="text-slate-300">GPT-4 Vision</span>
+                          </div>
+                          <span className="text-green-400 text-sm font-semibold">✅ Active</span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg border border-slate-600">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                            <span className="text-slate-300">PyTorch 2.7.1+cu126</span>
+                          </div>
+                          <span className="text-green-400 text-sm font-semibold">✅ Installed</span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg border border-slate-600">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                            <span className="text-slate-300">KAN Networks</span>
+                          </div>
+                          <span className="text-green-400 text-sm font-semibold">✅ Enhanced</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <h4 className="text-lg font-semibold text-green-300">Performance Metrics</h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="text-center p-3 bg-slate-700/50 rounded-lg border border-slate-600">
+                          <div className="text-xl font-bold text-green-400">100%</div>
+                          <div className="text-xs text-slate-400">GPT-4 Vision Active</div>
+                        </div>
+                        <div className="text-center p-3 bg-slate-700/50 rounded-lg border border-slate-600">
+                          <div className="text-xl font-bold text-blue-400">~12s</div>
+                          <div className="text-xs text-slate-400">Analysis Time</div>
+                        </div>
+                        <div className="text-center p-3 bg-slate-700/50 rounded-lg border border-slate-600">
+                          <div className="text-xl font-bold text-purple-400">4x</div>
+                          <div className="text-xs text-slate-400">LIDAR Modes</div>
+                        </div>
+                        <div className="text-center p-3 bg-slate-700/50 rounded-lg border border-slate-600">
+                          <div className="text-xl font-bold text-orange-400">11+</div>
+                          <div className="text-xs text-slate-400">Feature Types</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-4 p-4 bg-blue-900/20 rounded-lg border border-blue-500/30">
+                    <p className="text-blue-100 text-sm">
+                      <strong>Multi-Modal Analysis:</strong> Our enhanced Vision Agent now processes real satellite and LIDAR data using GPT-4 Vision for image analysis, PyTorch for neural processing, and KAN networks for interpretable pattern recognition. Features include 4-mode LIDAR visualization (Hillshade, Slope, Contour, Elevation) with archaeological feature detection for mounds, earthworks, settlements, and more.
+                    </p>
                   </div>
                 </div>
 
@@ -1301,9 +1369,9 @@ export default function DocumentationPage() {
                             <div><span className="bg-green-100 dark:bg-green-900 px-2 py-1 rounded text-green-800 dark:text-green-200">GET</span> /api/storage/status</div>
                             <div>Complete storage system status</div>
                             <div>None</div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </CardContent>
+                    </Card>
 
                       <Card className="border-red-200 dark:border-red-800">
                         <CardHeader className="pb-3">

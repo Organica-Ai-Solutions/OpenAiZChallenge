@@ -115,7 +115,7 @@ export function MapboxVisionMap({
     { id: 'terrain-analysis', name: 'Terrain Analysis', type: 'terrain', visible: false, opacity: 0.5, color: '#0066ff' }
   ])
   
-  // LiDAR visualization settings
+  // LiDAR visualization settings with error boundary
   const [lidarViz, setLidarViz] = useState<LidarVisualization>({
     mode: 'elevation',
     colorScheme: 'viridis',
@@ -137,6 +137,15 @@ export function MapboxVisionMap({
       temporalComparison: false
     }
   })
+
+  // Safe state updater for lidarViz to prevent infinite loops
+  const updateLidarViz = useCallback((updater: (prev: LidarVisualization) => LidarVisualization) => {
+    try {
+      setLidarViz(updater)
+    } catch (error) {
+      console.warn('Error updating LiDAR visualization:', error)
+    }
+  }, [])
   
   // Analysis overlay settings
   const [showAnalysisOverlay, setShowAnalysisOverlay] = useState(true)
@@ -1134,25 +1143,36 @@ export function MapboxVisionMap({
     }
   }, [])
 
-  // Update layer visibility
+  // Update layer visibility - simplified to avoid any dependency issues
   const toggleLayer = useCallback((layerId: string) => {
-    setActiveLayers(prev => prev.map(layer => 
-      layer.id === layerId 
-        ? { ...layer, visible: !layer.visible }
-        : layer
-    ))
-
-    if (map.current) {
-      const layer = activeLayers.find(l => l.id === layerId)
-      if (layer) {
-        const visibility = layer.visible ? 'none' : 'visible'
-        const mapLayerId = `${layerId}-layer`
-        if (map.current.getLayer(mapLayerId)) {
-          map.current.setLayoutProperty(mapLayerId, 'visibility', visibility)
+    setActiveLayers(prev => {
+      const updatedLayers = prev.map(layer => 
+        layer.id === layerId 
+          ? { ...layer, visible: !layer.visible }
+          : layer
+      )
+      
+      // Handle map layer visibility update separately to avoid stale closures
+      setTimeout(() => {
+        if (map.current) {
+          const layer = updatedLayers.find(l => l.id === layerId)
+          if (layer) {
+            const visibility = layer.visible ? 'visible' : 'none'
+            const mapLayerId = `${layerId}-layer`
+            try {
+              if (map.current.getLayer(mapLayerId)) {
+                map.current.setLayoutProperty(mapLayerId, 'visibility', visibility)
+              }
+            } catch (error) {
+              console.warn('Could not update layer visibility:', error)
+            }
+          }
         }
-      }
-    }
-  }, [activeLayers])
+      }, 0)
+      
+      return updatedLayers
+    })
+  }, [])
 
   // Update layer opacity
   const updateLayerOpacity = useCallback((layerId: string, opacity: number) => {
@@ -1846,7 +1866,7 @@ export function MapboxVisionMap({
                       id="edge-detection"
                       checked={lidarViz.advanced.edgeDetection}
                       onCheckedChange={(checked) => 
-                        setLidarViz(prev => ({ 
+                        updateLidarViz(prev => ({ 
                           ...prev, 
                           advanced: { ...prev.advanced, edgeDetection: checked }
                         }))
@@ -1860,7 +1880,7 @@ export function MapboxVisionMap({
                       id="anomaly-detection"
                       checked={lidarViz.advanced.anomalyDetection}
                       onCheckedChange={(checked) => 
-                        setLidarViz(prev => ({ 
+                        updateLidarViz(prev => ({ 
                           ...prev, 
                           advanced: { ...prev.advanced, anomalyDetection: checked }
                         }))
@@ -1874,7 +1894,7 @@ export function MapboxVisionMap({
                       id="spectral-analysis"
                       checked={lidarViz.advanced.spectralAnalysis}
                       onCheckedChange={(checked) => 
-                        setLidarViz(prev => ({ 
+                        updateLidarViz(prev => ({ 
                           ...prev, 
                           advanced: { ...prev.advanced, spectralAnalysis: checked }
                         }))
@@ -1888,7 +1908,7 @@ export function MapboxVisionMap({
                       id="terrain-roughness"
                       checked={lidarViz.advanced.terrainRoughness}
                       onCheckedChange={(checked) => 
-                        setLidarViz(prev => ({ 
+                        updateLidarViz(prev => ({ 
                           ...prev, 
                           advanced: { ...prev.advanced, terrainRoughness: checked }
                         }))
