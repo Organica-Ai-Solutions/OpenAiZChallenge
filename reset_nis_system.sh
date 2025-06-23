@@ -7,7 +7,9 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}🔄 Resetting NIS System...${NC}"
+echo -e "${CYAN}🔄 NIS Protocol - System Reset${NC}"
+echo -e "${BLUE}Resetting Archaeological Discovery Platform for clean startup...${NC}"
+echo ""
 
 # Function to check if Docker is available
 check_docker() {

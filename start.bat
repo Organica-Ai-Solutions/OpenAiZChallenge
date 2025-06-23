@@ -118,21 +118,19 @@ if %errorlevel% neq 0 (
     fi
 )
 
-REM --- Choose startup mode ---
+REM --- Auto-start Docker mode for judges ---
 echo.
-echo %BLUE%Available startup modes:%RESET%
-echo %CYAN%1. Docker Mode (Recommended)%RESET% - Full containerized environment
-echo %CYAN%2. Local Development Mode%RESET% - Run services directly on your machine
-echo %CYAN%3. Frontend Only Mode%RESET% - Start only the frontend (for development)
+echo %GREEN%🚀 Starting complete Docker environment for judges...%RESET%
+echo %BLUE%Building and launching all NIS Protocol services...%RESET%
 echo.
 
 if "%DOCKER_AVAILABLE%"=="true" (
-    echo %GREEN%Docker is available. Recommended mode: Docker Mode%RESET%
-    set /p "MODE=Enter your choice (1-3, default 1): "
-    if "!MODE!"=="" set "MODE=1"
+    echo %GREEN%Docker is available. Starting full containerized environment...%RESET%
+    set "MODE=1"
 ) else (
-    echo %YELLOW%Docker not available. Using Local Development Mode.%RESET%
-    set "MODE=2"
+    echo %RED%❌ Docker is required for the complete NIS Protocol system.%RESET%
+    echo %YELLOW%Please install Docker Desktop and restart this script.%RESET%
+    goto :show_requirements
 )
 
 REM --- Navigate to base directory ---
@@ -151,35 +149,63 @@ REM Stop any existing services
 call :log_message INFO "Stopping any existing services..."
 docker-compose down --remove-orphans >> "%START_LOG_FILE%" 2>> "%ERROR_LOG_FILE%"
 
-REM Build and start services
-call :log_message INFO "Building and starting services with Docker Compose..."
-docker-compose up --build -d >> "%START_LOG_FILE%" 2>> "%ERROR_LOG_FILE%"
+REM Clean up any port conflicts
+call :log_message INFO "Cleaning up port conflicts..."
+for %%p in (3000 8000 8001 8003 6379 9092 2181) do (
+    for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":%%p "') do (
+        taskkill /PID %%a /F >nul 2>&1
+    )
+)
+
+REM Build and start services with force recreate
+call :log_message INFO "Building and starting all services with Docker Compose..."
+call :log_message INFO "This may take a few minutes for the first build..."
+docker-compose up --build -d --remove-orphans --force-recreate >> "%START_LOG_FILE%" 2>> "%ERROR_LOG_FILE%"
 
 if %errorlevel% equ 0 (
-    call :log_success "NIS Protocol services are starting in Docker mode!"
+    call :log_success "NIS Protocol services are building and starting!"
     echo.
-    echo %GREEN%✅ Services are starting up...%RESET%
-    echo %CYAN%🌐 Backend API: http://localhost:8000%RESET%
-    echo %CYAN%🎨 Frontend UI: http://localhost:3000%RESET%
-    echo %CYAN%📊 Analytics: http://localhost:3000/analytics%RESET%
-    echo %CYAN%🗺️ Interactive Map: http://localhost:3000/map%RESET%
-    echo %CYAN%💬 AI Chat: http://localhost:3000/chat%RESET%
-    echo.
-    echo %BLUE%Useful commands:%RESET%
-    echo   docker-compose logs -f     (view live logs)
-    echo   docker-compose ps          (check service status)
-    echo   stop.bat                   (stop all services)
+    echo %GREEN%✅ All services are starting up...%RESET%
+    echo %BLUE%Please wait while containers initialize (30-60 seconds)...%RESET%
     echo.
     
-    REM Wait for services to start
+    REM Extended wait for services to start
     call :log_message INFO "Waiting for services to initialize..."
-    timeout /t 10 /nobreak >nul
+    timeout /t 30 /nobreak >nul
     
     REM Check service health
     call :check_service_health
     
+    echo.
+    echo %GREEN%🎉 NIS Protocol Archaeological Discovery Platform is LIVE!%RESET%
+    echo %BLUE%════════════════════════════════════════════════════════════════════%RESET%
+    echo %YELLOW%🌍 Access Your Archaeological Discovery System:%RESET%
+    echo.
+    echo %GREEN%🎨 Frontend Interface:     %CYAN%http://localhost:3000%RESET%
+    echo %BLUE%🔧 Main Backend API:       %CYAN%http://localhost:8000%RESET%
+    echo %BLUE%📋 API Documentation:     %CYAN%http://localhost:8000/docs%RESET%
+    echo %MAGENTA%📜 IKRP Codex Service:     %CYAN%http://localhost:8001%RESET%
+    echo %YELLOW%🛡️  Fallback Backend:      %CYAN%http://localhost:8003%RESET%
+    echo %YELLOW%📋 Fallback API Docs:     %CYAN%http://localhost:8003/docs%RESET%
+    echo.
+    echo %BLUE%🏗️  Infrastructure Services:%RESET%
+    echo    Redis Cache:       localhost:6379
+    echo    Kafka Messaging:   localhost:9092
+    echo    Zookeeper:         localhost:2181
+    echo.
+    echo %GREEN%🔧 Management Commands:%RESET%
+    echo   docker-compose logs -f     (view live logs)
+    echo   docker-compose ps          (check service status)
+    echo   stop.bat                   (stop all services)
+    echo.
+    echo %BLUE%📊 Powered by Organica AI Solutions • https://organicaai.com%RESET%
+    echo %BLUE%════════════════════════════════════════════════════════════════════%RESET%
+    
 ) else (
     call :log_error "Failed to start services with Docker Compose"
+    echo.
+    echo %RED%❌ Service startup failed. Showing logs for debugging:%RESET%
+    docker-compose logs --tail=50
     goto :error_exit
 )
 goto :end

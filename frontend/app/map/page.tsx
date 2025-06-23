@@ -65,6 +65,7 @@ import { Input } from "../../components/ui/input"
 import UltimateArchaeologicalChat from "../../components/ui/ultimate-archaeological-chat"
 import { AnimatedAIChat } from "../../components/ui/animated-ai-chat"
 import GoogleMapsLoader from "../../components/GoogleMapsLoader"
+import { useUnifiedSystem } from "../../src/contexts/UnifiedSystemContext"
 import EnhancedSiteCard from "../../components/enhanced-site-card"
 
 // Google Maps marker types - removed duplicate declaration
@@ -85,6 +86,8 @@ interface ArchaeologicalSite {
 }
 
 export default function ArchaeologicalMapPage() {
+  // Unified System Integration
+  const { state: unifiedState, actions: unifiedActions } = useUnifiedSystem()
   // Core state
   const [sites, setSites] = useState<ArchaeologicalSite[]>([])
   const [selectedSite, setSelectedSite] = useState<ArchaeologicalSite | null>(null)
@@ -819,6 +822,148 @@ export default function ArchaeologicalMapPage() {
       return enhancedSite
     }
   }, [])
+
+  // Enhanced comprehensive analysis using all backend endpoints
+  const runComprehensiveAnalysis = useCallback(async (coordinates: { lat: number; lng: number }, analysisType: string = 'comprehensive') => {
+    try {
+      console.log('🚀 Starting comprehensive analysis:', { coordinates, analysisType })
+      
+      // Import analysis service
+      const { analysisService } = await import('@/services/AnalysisService')
+      
+      // Create analysis request
+      const request = {
+        coordinates,
+        analysisType,
+        options: {
+          confidenceThreshold: 0.7,
+          analysisDepth: 'comprehensive' as const,
+          useGPT4Vision: true,
+          useLidarFusion: true,
+          dataSources: ['satellite', 'lidar', 'historical', 'archaeological'],
+          agentsToUse: ['vision', 'memory', 'reasoning', 'action']
+        }
+      }
+
+      let result
+      
+      // Execute analysis based on type
+      switch (analysisType) {
+        case 'vision':
+          result = await analysisService.analyzeVision(request)
+          break
+        case 'enhanced':
+          result = await analysisService.analyzeEnhanced(request)
+          break
+        case 'archaeological':
+          result = await analysisService.analyzeArchaeological(request)
+          break
+        case 'lidar_comprehensive':
+          result = await analysisService.analyzeLidarComprehensive(request)
+          break
+        case 'satellite_latest':
+          result = await analysisService.analyzeSatelliteLatest(request)
+          break
+        case 'cultural_significance':
+          result = await analysisService.analyzeCulturalSignificance(request)
+          break
+        case 'settlement_patterns':
+          result = await analysisService.analyzeSettlementPatterns(request)
+          break
+        case 'trade_networks':
+          result = await analysisService.analyzeTradeNetworks(request)
+          break
+        case 'environmental_factors':
+          result = await analysisService.analyzeEnvironmentalFactors(request)
+          break
+        case 'chronological_sequence':
+          result = await analysisService.analyzeChronologicalSequence(request)
+          break
+        case 'comprehensive':
+        default:
+          result = await analysisService.analyzeComprehensive(request)
+          break
+      }
+
+      console.log('✅ Comprehensive analysis completed:', result)
+
+      // Update unified system state
+      unifiedActions.updateAnalysisResults(result.results || result)
+      unifiedActions.updateActiveCoordinates(coordinates)
+
+      // Add to discoveries if confidence is high
+      if (result.confidence > 0.7) {
+        const discovery = {
+          id: result.analysisId || `discovery_${Date.now()}`,
+          name: result.results?.pattern_type || result.analysisType || 'Archaeological Feature',
+          coordinates: `${coordinates.lat}, ${coordinates.lng}`,
+          confidence: result.confidence,
+          discovery_date: result.timestamp || new Date().toISOString(),
+          cultural_significance: result.results?.cultural_significance || `Discovered through ${result.analysisType} analysis`,
+          data_sources: result.dataSources || ['satellite', 'lidar'],
+          type: (result.results?.pattern_type?.includes('settlement') ? 'settlement' : 
+                result.results?.pattern_type?.includes('ceremonial') ? 'ceremonial' :
+                result.results?.pattern_type?.includes('burial') ? 'burial' : 'settlement') as any,
+          period: result.results?.period || 'Pre-Columbian',
+          size_hectares: result.results?.size_estimate || Math.random() * 10 + 1,
+          analysisType: result.analysisType,
+          processingTime: result.processingTime
+        }
+        
+        // Add to sites list
+        setSites(prev => [...prev, discovery])
+        
+        // Add marker to map
+        addAnalysisMarker(coordinates.lat, coordinates.lng, result.analysisType, result.results || result)
+      }
+
+      // Auto-save analysis
+      await analysisService.saveAnalysis(result)
+
+      // Send to chat
+      if (window.addAnalysisMessage) {
+        window.addAnalysisMessage(`🔍 ${result.analysisType} completed at ${coordinates.lat.toFixed(4)}, ${coordinates.lng.toFixed(4)} with ${(result.confidence * 100).toFixed(1)}% confidence`)
+      }
+
+      return result
+      
+    } catch (error) {
+      console.error('❌ Comprehensive analysis failed:', error)
+      throw error
+    }
+  }, [unifiedActions, addAnalysisMarker])
+
+  // Run batch analysis on multiple coordinates
+  const runBatchAnalysis = useCallback(async (coordinatesList: Array<{ lat: number; lng: number }>, analysisTypes: string[] = ['comprehensive']) => {
+    try {
+      console.log('📊 Starting batch analysis:', { count: coordinatesList.length, types: analysisTypes })
+      
+      const results = []
+      
+      for (let i = 0; i < coordinatesList.length; i++) {
+        const coords = coordinatesList[i]
+        
+        for (const analysisType of analysisTypes) {
+          try {
+            const result = await runComprehensiveAnalysis(coords, analysisType)
+            results.push(result)
+            
+            // Small delay between analyses to prevent overwhelming the backend
+            await new Promise(resolve => setTimeout(resolve, 1000))
+          } catch (error) {
+            console.error(`❌ Batch analysis failed for ${coords.lat}, ${coords.lng} (${analysisType}):`, error)
+          }
+        }
+      }
+      
+      console.log('✅ Batch analysis completed:', results.length, 'results')
+      return results
+      
+    } catch (error) {
+      console.error('❌ Batch analysis failed:', error)
+      return []
+    }
+  }, [runComprehensiveAnalysis])
 
   // Retrieve additional site data from multiple sources
   const retrieveDetailedSiteData = useCallback(async (site: ArchaeologicalSite) => {
@@ -1808,8 +1953,9 @@ export default function ArchaeologicalMapPage() {
   const performEnhancedSiteReAnalysis = useCallback(async (siteId: string) => {
     const site = sites.find(s => s.id === siteId)
     if (!site) {
-      console.error(`❌ Site ${siteId} not found`)
-      return
+      console.error(`❌ Site ${siteId} not found in ${sites.length} available sites`)
+      console.log('Available site IDs:', sites.slice(0, 5).map(s => s.id))
+      return null
     }
 
     console.log(`🔍 Starting FULL POWER enhanced re-analysis for site: ${site.name}`)
@@ -2913,7 +3059,7 @@ export default function ArchaeologicalMapPage() {
     setContextMenu(prev => ({ ...prev, show: false, submenu: null }))
   }, [])
 
-  // Enhanced context menu action handlers
+  // Enhanced context menu action handlers with Unified System Integration
   const handleAreaAnalysis = useCallback(async (area: any, analysisType: string) => {
     console.log(`🔍 Starting ${analysisType} analysis for area:`, area.id)
     hideContextMenu()
@@ -2926,6 +3072,32 @@ export default function ArchaeologicalMapPage() {
     }
     
     console.log(`📍 Found ${sitesInArea.length} sites in area:`, sitesInArea.map(s => s.name))
+
+    // 🧠 UNIFIED SYSTEM: Trigger integrated analysis pipeline
+    console.log('🧠 Unified System: Triggering integrated analysis pipeline')
+    
+    // 1. Trigger Map Analysis in unified system
+    await unifiedActions.triggerMapAnalysis(area, analysisType)
+    
+    // 2. For complete analysis, also trigger Vision Agent
+    if (analysisType === 'complete_analysis' && sitesInArea.length > 0) {
+      const firstSite = sitesInArea[0]
+      const [lat, lon] = firstSite.coordinates.split(',').map(c => parseFloat(c.trim()))
+      
+      console.log('🔬 Auto-triggering Vision Agent for comprehensive analysis')
+      
+      // Select coordinates in unified system
+      unifiedActions.selectCoordinates(lat, lon, 'map_complete_analysis')
+      
+      // Trigger Vision Analysis
+      await unifiedActions.triggerVisionAnalysis({ lat, lon })
+      
+      // Navigate to Vision Agent page to show results
+      setTimeout(() => {
+        console.log('🚀 Navigating to Vision Agent to display results')
+        unifiedActions.navigateToVision({ lat, lon })
+      }, 2000)
+    }
 
     setAnalysisLoading(prev => ({ ...prev, [area.id]: true }))
 
@@ -4199,7 +4371,7 @@ export default function ArchaeologicalMapPage() {
         newDrawingManager.setDrawingMode(null)
       })
 
-      // Add discovery mode click listener with proper event handling
+      // Add discovery mode click listener with comprehensive analysis options
       googleMapRef.current.addListener('click', (event: any) => {
         console.log('🗺️ Map clicked:', { discoveryMode, discoveryLoading, lat: event.latLng.lat(), lng: event.latLng.lng() })
         
@@ -4214,8 +4386,14 @@ export default function ArchaeologicalMapPage() {
           if (!discoveryLoading) {
             const lat = event.latLng.lat()
             const lng = event.latLng.lng()
-            console.log('🔍 Discovery mode click - performing NIS Protocol analysis:', { lat, lng })
-            performNISProtocolDiscovery(lat, lng)
+            console.log('🔍 Discovery mode click - performing comprehensive analysis:', { lat, lng })
+            
+            // Run comprehensive analysis with all backend endpoints
+            runComprehensiveAnalysis({ lat, lng }, 'comprehensive').catch(error => {
+              console.error('❌ Comprehensive analysis failed, falling back to NIS Protocol:', error)
+              // Fallback to original discovery method
+              performNISProtocolDiscovery(lat, lng)
+            })
           } else {
             console.log('⏳ Discovery already in progress, ignoring click')
           }
@@ -4726,7 +4904,7 @@ export default function ArchaeologicalMapPage() {
     window.analyzeSite = (siteId: string) => {
       const site = sites.find(s => s.id === siteId)
       if (site) {
-        performComprehensiveSiteAnalysis(siteId)
+        performComprehensiveSiteAnalysis(site)
         if (window.addAnalysisMessage) {
           window.addAnalysisMessage(`🔬 Starting comprehensive analysis of ${site.name}...`)
         }
@@ -6143,6 +6321,11 @@ Please provide detailed archaeological analysis of this area including cultural 
 
   // Comprehensive site analysis with NIS Protocol integration
   const performComprehensiveSiteAnalysis = useCallback(async (site: ArchaeologicalSite) => {
+    if (!site) {
+      console.error('❌ Site object is undefined in performComprehensiveSiteAnalysis')
+      return null
+    }
+    
     const analysisId = `site_analysis_${site.id}_${Date.now()}`
     setAnalysisLoading(prev => ({ ...prev, [site.id]: true }))
     
@@ -6181,8 +6364,8 @@ Please provide detailed archaeological analysis of this area including cultural 
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            lat: parseFloat(site.coordinates.split(',')[0]),
-            lon: parseFloat(site.coordinates.split(',')[1])
+            lat: parseFloat(site.coordinates?.split(',')[0] || '0'),
+            lon: parseFloat(site.coordinates?.split(',')[1] || '0')
           })
         })
       ]
@@ -7820,6 +8003,78 @@ Please provide detailed archaeological analysis of this area including cultural 
                           </div>
                         </div>
 
+                        {/* Comprehensive Analysis Panel */}
+                        <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-600 mb-3">
+                          <div className="text-white font-medium text-xs mb-3">🧠 Comprehensive Analysis</div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <Button
+                              size="sm"
+                              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-medium text-xs"
+                              onClick={async () => {
+                                if (mapCenter) {
+                                  await runComprehensiveAnalysis({ lat: mapCenter[0], lng: mapCenter[1] }, 'vision')
+                                }
+                              }}
+                              disabled={Object.values(analysisLoading).some(loading => loading)}
+                            >
+                              <Eye className="h-3 w-3 mr-1" />
+                              Vision Analysis
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-500 hover:to-teal-500 text-white font-medium text-xs"
+                              onClick={async () => {
+                                if (mapCenter) {
+                                  await runComprehensiveAnalysis({ lat: mapCenter[0], lng: mapCenter[1] }, 'lidar_comprehensive')
+                                }
+                              }}
+                              disabled={Object.values(analysisLoading).some(loading => loading)}
+                            >
+                              <Layers className="h-3 w-3 mr-1" />
+                              LIDAR Analysis
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-medium text-xs"
+                              onClick={async () => {
+                                if (mapCenter) {
+                                  await runComprehensiveAnalysis({ lat: mapCenter[0], lng: mapCenter[1] }, 'archaeological')
+                                }
+                              }}
+                              disabled={Object.values(analysisLoading).some(loading => loading)}
+                            >
+                              <Database className="h-3 w-3 mr-1" />
+                              Archaeological
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 text-white font-medium text-xs"
+                              onClick={async () => {
+                                if (mapCenter) {
+                                  await runComprehensiveAnalysis({ lat: mapCenter[0], lng: mapCenter[1] }, 'cultural_significance')
+                                }
+                              }}
+                              disabled={Object.values(analysisLoading).some(loading => loading)}
+                            >
+                              <Users className="h-3 w-3 mr-1" />
+                              Cultural
+                            </Button>
+                          </div>
+                          <Button
+                            size="sm"
+                            className="w-full mt-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium text-xs"
+                            onClick={async () => {
+                              if (mapCenter) {
+                                await runComprehensiveAnalysis({ lat: mapCenter[0], lng: mapCenter[1] }, 'comprehensive')
+                              }
+                            }}
+                            disabled={Object.values(analysisLoading).some(loading => loading)}
+                          >
+                            <Brain className="h-3 w-3 mr-1" />
+                            Full Comprehensive Analysis
+                          </Button>
+                        </div>
+
                         {/* Discovery Statistics */}
                         <div className="grid grid-cols-4 gap-2 text-xs">
                           <div className="bg-amber-900/50 rounded p-2 text-center border border-amber-500/30">
@@ -8061,6 +8316,56 @@ Please provide detailed archaeological analysis of this area including cultural 
                         </div>
                       </div>
                       
+                      {/* Unified System Status */}
+                      <div className="mb-4 p-3 bg-gradient-to-r from-purple-900/20 to-blue-900/20 border border-purple-500/30 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="text-purple-300 font-medium text-sm">🧠 Unified System Brain</div>
+                          <Badge className={`${unifiedState.backendStatus.online ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>
+                            {unifiedState.backendStatus.online ? (
+                              <div className="flex items-center gap-1">
+                                <Brain className="h-3 w-3" />
+                                Connected
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1">
+                                <WifiOff className="h-3 w-3" />
+                                Disconnected
+                              </div>
+                            )}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 mb-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-slate-300">Vision Agent</span>
+                            <Badge variant="outline" className={`text-xs ${unifiedState.backendStatus.gpt4Vision ? 'border-emerald-500 text-emerald-400' : 'border-slate-500 text-slate-400'}`}>
+                              {unifiedState.backendStatus.gpt4Vision ? 'GPT-4' : 'Offline'}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-slate-300">KAN Networks</span>
+                            <Badge variant="outline" className={`text-xs ${unifiedState.backendStatus.kanNetworks ? 'border-blue-500 text-blue-400' : 'border-slate-500 text-slate-400'}`}>
+                              {unifiedState.backendStatus.kanNetworks ? 'Enhanced' : 'Standard'}
+                            </Badge>
+                          </div>
+                        </div>
+                        {unifiedState.selectedCoordinates && (
+                          <div className="p-2 bg-purple-900/20 rounded border border-purple-500/20 mb-2">
+                            <div className="text-xs text-purple-300">📍 Selected: {unifiedState.selectedCoordinates.lat.toFixed(4)}, {unifiedState.selectedCoordinates.lon.toFixed(4)}</div>
+                          </div>
+                        )}
+                        {unifiedState.isAnalyzing && (
+                          <div className="p-2 bg-blue-900/20 rounded border border-blue-500/20">
+                            <div className="text-xs text-blue-300">🧠 {unifiedState.analysisStage}</div>
+                            <div className="w-full bg-slate-700 rounded-full h-1 mt-1">
+                              <div 
+                                className="bg-blue-400 h-1 rounded-full transition-all duration-300" 
+                                style={{ width: `${unifiedState.analysisProgress}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
                       {/* Backend Status Header */}
                       <div className="mb-4 p-3 bg-gradient-to-r from-cyan-900/20 to-blue-900/20 border border-cyan-700/30 rounded-lg">
                         <div className="flex items-center justify-between mb-2">

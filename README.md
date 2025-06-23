@@ -1,357 +1,316 @@
-# ��️ The NIS Protocol: Neural Intelligence System for Archaeological Discovery
+# 🏛️ NIS Protocol - Archaeological Discovery Platform
 
-<div align="center">
+**AI-Powered Indigenous Knowledge Research & Archaeological Site Detection**
 
-![NIS Protocol Logo](frontend/public/MainLogo.png)
-
-**OpenAI to Z Challenge: Advanced Archaeological Discovery Platform**
-
-*Developed by [Diego Torres](https://www.linkedin.com/in/diego-torres--/) | [Organica AI Solutions](https://www.linkedin.com/company/organica-ai-solutions/?viewAsMember=true)*
-
-*Featured on [The NIS Protocol Podcast](https://open.spotify.com/show/0PuvaeHOTtJssMg79bFO80) | Archaeological Intelligence & Discovery Systems*
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.3.3-black.svg)](https://nextjs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Python%203.12-green.svg)](https://fastapi.tiangolo.com/)
+[![GPT-4](https://img.shields.io/badge/GPT--4-Vision-orange.svg)](https://openai.com/)
 
 ---
 
-![System Status](https://img.shields.io/badge/NIS%20Protocol-🧠%20Fully%20Operational-brightgreen)
-![Cognitive Architecture](https://img.shields.io/badge/Cognitive%20Layers-6%20Active-purple)
-![AI Agents](https://img.shields.io/badge/AI%20Agents-5%20Coordinated-blue)
-![Archaeological Success](https://img.shields.io/badge/Archaeological%20Discovery-96.8%25%20Success-brightgreen)
-![OpenAI Challenge](https://img.shields.io/badge/OpenAI%20to%20Z-Challenge%20Ready-red)
-![Real Data](https://img.shields.io/badge/Real%20Data-Integrated-lightblue)
+## 🚀 **Quick Start for Judges**
 
-### 🎬 Experience the Archaeological Discovery Revolution
+### **One-Command Launch:**
 
-<div align="center">
-
-<img src="frontend/public/nis_demo.gif" alt="NIS Protocol Demo" width="400" style="display: block; margin: 0 auto;">
-
-**📺 [Watch Full Demo](src/images/videos/NIS_Protocol_Promo_Video.mp4)**
-
-</div>
-
-**What You're Seeing:**
-- 🧠 **6-Layer Cognitive Architecture** processing archaeological data
-- 🏛️ **Real Archaeological Site Discovery** with 96.8% accuracy
-- 🤖 **Multi-Agent Coordination** for comprehensive site analysis
-- 🌍 **Global Intelligence** from Amazonian settlements to Andean terraces
-- ⚡ **Real-time Vision Analysis** with GPT-4o and satellite imagery
-- 🚀 **OpenAI to Z Challenge** demonstrating cutting-edge AI capabilities
-
-</div>
-
----
-
-## 🌟 **The Vision: Archaeological Intelligence Revolution**
-
-> *"The NIS Protocol represents the future of archaeological discovery - an AI system that doesn't just process data, but truly understands the cultural and historical significance of what it finds. This is how we bridge ancient wisdom with modern technology."*  
-> — Diego Torres, Creator of the NIS Protocol & Founder of Organica AI Solutions
-
-### 🧠 **The Breakthrough: Cognitive Archaeological Intelligence**
-
-The **NIS Protocol** represents a paradigm shift in archaeological research, moving beyond traditional data processing to create systems that understand cultural context and historical significance:
-
-**🔬 6-Layer Cognitive Architecture:**
-
-1. **🔍 Sensory Layer**: Multi-source data processing (satellite, LIDAR, cultural texts)
-2. **👁️ Perception Layer**: Archaeological feature recognition and cultural pattern detection
-3. **🧠 Memory Layer**: Historical context retention and cultural knowledge integration
-4. **❤️ Emotional Layer**: Cultural significance assessment and heritage sensitivity
-5. **⚡ Executive Layer**: Discovery prioritization and research planning
-6. **🎯 Motor Layer**: Intelligent response generation with cultural awareness
-
----
-
-## 🏛️ **Archaeological Discovery: Core Application**
-
-### 🎯 **Core Features**
-
-**🔍 Advanced Site Discovery:**
-- **CodexReader**: Real Vatican Library, Bodleian Library, and SLUB Dresden integration
-- **SatellitePage**: Planet Labs, Landsat, and Sentinel imagery analysis
-- **VisionAgent**: GPT-4o Vision with archaeological context understanding
-- **DiscoveriesView**: Comprehensive site database with AI-powered insights
-- **Cultural Intelligence**: Respecting indigenous knowledge and heritage
-
-**🗺️ **Interactive Archaeological Mapping:**
-- **Google Maps Integration** with satellite imagery overlay
-- **Research Expedition Planning** with cultural route optimization
-- **Site Correlation Analysis** (cultural, temporal, spatial patterns)
-- **Haversine Distance Calculations** for optimal archaeological surveys
-- **Real-time Discovery Visualization** with cultural significance markers
-
-**💬 **NIS Protocol Chat:**
-- **Archaeological Reasoning** through cognitive processing pipeline
-- **Cultural Sensitivity** in all communications and analyses
-- **Historical Context Integration** from multiple knowledge sources
-- **Research Workflow Automation** for complex archaeological studies
-
-**📊 **Comprehensive Analytics:**
-- **Discovery Success Metrics** with 96.8% accuracy rates
-- **Cultural Impact Assessment** for responsible archaeology
-- **Research Trend Analysis** for strategic archaeological planning
-- **Real-time Performance Monitoring** across all discovery agents
-
----
-
-## 🚀 **Universal Applications: Beyond Archaeology**
-
-### 🌍 **Environmental Conservation**
-- **Vision Agents** for real-time habitat monitoring
-- **Cultural Landscape Protection** with indigenous knowledge integration
-- **Conservation Priority Assessment** using cognitive reasoning
-
-### 🌤️ **Climate Intelligence**
-- **Archaeological Climate Reconstruction** from site data
-- **Historical Weather Pattern Analysis** for cultural context
-- **Predictive Modeling** for site preservation planning
-
-### 🛰️ **Satellite Intelligence**
-- **Autonomous Archaeological Anomaly Detection**
-- **Reduced Ground Survey Requirements** through AI analysis
-- **Edge Deployment** for remote archaeological missions
-
-### 🏙️ **Cultural Heritage Management**
-- **Smart Heritage Sites** with cognitive monitoring
-- **Adaptive Conservation Systems** responding to threats
-- **Cultural Significance Assessment** for policy making
-
-### 🤖 **Educational Robotics**
-- **Culturally Aware Educational Systems** for archaeology training
-- **Interactive Heritage Experiences** with emotional intelligence
-- **Museum Guide Intelligence** with deep cultural knowledge
-
----
-
-## 🏗️ **Technical Architecture: Archaeological Intelligence Foundation**
-
-<div align="center">
-
-```mermaid
-graph TB
-    subgraph "🧠 NIS Protocol Core - Archaeological Cognitive Layers"
-        A1[🔍 Sensory Layer - Multi-Source Data Input]
-        A2[👁️ Perception Layer - Archaeological Feature Recognition]
-        A3[🧠 Memory Layer - Cultural Knowledge & Historical Context]
-        A4[❤️ Emotional Layer - Cultural Significance Assessment]
-        A5[⚡ Executive Layer - Research Decision Making]
-        A6[🎯 Motor Layer - Discovery Response Generation]
-    end
-    
-    subgraph "🤖 Archaeological Agent Coordination"
-        B1[👁️ Vision Agent - GPT-4o Archaeological Analysis]
-        B2[🧠 Memory Agent - Cultural Context Retention]
-        B3[🤔 Reasoning Agent - Archaeological Inference]
-        B4[⚡ Action Agent - Research Workflow Management]
-        B5[🔗 Integration Agent - Multi-Source Data Synthesis]
-    end
-    
-    subgraph "🏛️ Archaeological Applications"
-        D1[📜 CodexReader - Ancient Text Analysis]
-        D2[🛰️ SatellitePage - Remote Sensing Discovery]
-        D3[👁️ VisionAgent - Image Analysis & Recognition]
-        D4[🗺️ DiscoveriesView - Site Database & Planning]
-        D5[💬 NIS Chat - Archaeological Intelligence Assistant]
-        D6[📊 Analytics - Discovery Performance Metrics]
-    end
-    
-    A1 --> A2 --> A3 --> A4 --> A5 --> A6
-    A6 --> B1 & B2 & B3 & B4 & B5
-    B1 & B2 & B3 & B4 & B5 --> D1 & D2 & D3 & D4 & D5 & D6
+**Linux/Mac:**
+```bash
+./start.sh
 ```
 
-</div>
+**Windows:**
+```cmd
+start.bat
+```
 
-### ⚙️ **Core Technologies**
-
-**🧠 Archaeological Processing Engine:**
-- **Cultural Context Understanding** with indigenous knowledge integration
-- **Real-time Learning** from archaeological databases
-- **Heritage Sensitivity** with cultural preservation priorities
-- **Historical Pattern Recognition** across civilizations
-
-**🤖 AI Model Integration:**
-- **OpenAI GPT-4o Vision** for archaeological image analysis
-- **Custom Neural Networks** for cultural feature detection
-- **Historical Text Processing** with ancient language understanding
-- **Satellite Imagery Analysis** with archaeological context
-
-**📡 Real Data Integration:**
-- **Vatican Library** codex and manuscript access
-- **Bodleian Library** archaeological document collection
-- **SLUB Dresden** historical archive integration
-- **Planet Labs, Landsat, Sentinel** satellite imagery
-- **Cultural Heritage Databases** with respectful access protocols
-
----
-
-## 🏆 **Achievements & Milestones**
-
-### 📈 **Performance Metrics**
-- **🎯 96.8% Archaeological Discovery Success Rate**
-- **⚡ 2-5 Second Analysis Response Time**
-- **🔧 99.5% System Uptime and Reliability**
-- **🧠 95%+ Multi-Agent Coordination Accuracy**
-- **🌍 129+ Verified Archaeological Sites Discovered**
-
-### 🏅 **Recognition & Impact**
-- **🎙️ Featured Podcast Series**: "The NIS Protocol" on Spotify
-- **📝 Technical Publications**: White papers on cognitive architecture
-- **🌐 LinkedIn Documentation**: Complete development journey
-- **👥 Community Building**: Through Tanda Circles and PortfolioChallenge
-- **💰 Financial Innovation**: SmartPortfolio and AlphaCortex applications
-
-### 🔬 **Research Contributions**
-- **Biological Memory Modeling** in artificial systems
-- **Emotional Intelligence Integration** in decision-making algorithms
-- **Multi-Agent Coordination** protocols for complex tasks
-- **Edge AI Deployment** strategies for autonomous systems
-- **Ethical AI Frameworks** with cognitive bias regulation
-
----
-
-## 🚀 **Getting Started: Deploy Your Own NIS Protocol**
-
-### ⚡ **Quick Start**
-
+**Prerequisites Check:**
 ```bash
-# Clone the repository
-git clone https://github.com/your-org/NIS_Protocol
-cd NIS_Protocol
+./check_prerequisites.sh
+```
 
-# Set up environment
-chmod +x setup_env.sh
-./setup_env.sh
+---
 
-# Launch the full system
-chmod +x start.sh
+## 🌟 **What is NIS Protocol?**
+
+The **NIS Protocol** (Neural Intelligence System) is an advanced AI-powered platform for archaeological discovery and indigenous knowledge research. It combines:
+
+- 🛰️ **Satellite Image Analysis** with GPT-4 Vision
+- 🤖 **Multi-Agent AI Architecture** for intelligent processing
+- 📜 **IKRP (Indigenous Knowledge Research Protocol)** for cultural sensitivity
+- 🔍 **LIDAR Data Processing** for terrain analysis
+- 🗺️ **Interactive Map Visualization** with real-time discovery
+- 💬 **Animated AI Chat Interface** with archaeological expertise
+
+---
+
+## 🏗️ **System Architecture**
+
+```
+🏛️ NIS Protocol Archaeological Discovery Platform
+├── 🎨 Frontend (Next.js 15.3.3 + React 18.3.1 + TypeScript)
+│   ├── Animated AI Chat with Glass-morphism UI
+│   ├── Interactive Map with Satellite Overlay
+│   ├── Real-time Archaeological Analysis Dashboard
+│   └── Mobile-Responsive Design
+├── 🔧 Main Backend (FastAPI + Python 3.12)
+│   ├── Multi-Agent AI Coordination
+│   ├── GPT-4 Vision Integration
+│   ├── Satellite Image Processing
+│   └── RESTful API with Auto-Documentation
+├── 📜 IKRP Service (Indigenous Knowledge Research Protocol)
+│   ├── Cultural Context Engine
+│   ├── Ethical Framework Implementation
+│   └── Community Consent Management
+├── 🛡️ Fallback Backend (Reliable LIDAR Processing)
+│   ├── LIDAR Data Analysis
+│   ├── Terrain Reconstruction
+│   └── Archaeological Site Scoring
+└── 🏗️ Infrastructure (Docker Orchestration)
+    ├── Redis (Caching & Session Management)
+    ├── Kafka (Message Queue & Event Streaming)
+    └── Zookeeper (Distributed Coordination)
+```
+
+---
+
+## 🌍 **Access Points**
+
+| **Service** | **URL** | **Description** |
+|-------------|---------|-----------------|
+| **🎨 Frontend** | http://localhost:3000 | Main Archaeological Discovery Interface |
+| **🔧 Main API** | http://localhost:8000 | Primary Backend API |
+| **📋 API Docs** | http://localhost:8000/docs | Interactive API Documentation |
+| **📜 IKRP Service** | http://localhost:8001 | Indigenous Knowledge Research Protocol |
+| **🛡️ Fallback API** | http://localhost:8003 | Reliable Backup Backend |
+
+---
+
+## 🎯 **Key Features Demo**
+
+### **1. AI-Powered Archaeological Chat**
+- **URL**: http://localhost:3000/chat
+- **Features**: Animated glass-morphism UI, real-time AI responses
+- **Test Query**: *"Analyze this satellite image for potential archaeological sites"*
+
+### **2. Interactive Satellite Analysis**
+- **URL**: http://localhost:3000/satellite
+- **Features**: GPT-4 Vision integration, drag-and-drop image upload
+- **Test**: Upload satellite imagery to detect archaeological features
+
+### **3. LIDAR Terrain Processing**
+- **URL**: http://localhost:3000/analysis
+- **Features**: 3D terrain reconstruction, anomaly detection
+- **Test**: Upload LIDAR data for archaeological site scoring
+
+### **4. Cultural Context Integration (IKRP)**
+- **URL**: http://localhost:3000/chat
+- **Features**: Indigenous knowledge integration, cultural sensitivity
+- **Test Query**: *"What indigenous communities historically lived in this region?"*
+
+### **5. Real-time Discovery Dashboard**
+- **URL**: http://localhost:3000/archaeological-discovery
+- **Features**: Live archaeological insights, discovery timeline
+- **Test**: View AI-generated archaeological analysis results
+
+---
+
+## 🔧 **Management Commands**
+
+### **System Control:**
+```bash
+# Start the complete system
 ./start.sh
 
-# Access the platform
-# Frontend: http://localhost:3000
-# Backend API: http://localhost:8000
-# IKRP Service: http://localhost:8001
+# Stop all services
+./stop.sh
+
+# Reset system (clean restart)
+./reset_nis_system.sh
+
+# Check prerequisites
+./check_prerequisites.sh
 ```
 
-### 🐳 **Docker Deployment**
-
+### **Docker Management:**
 ```bash
-# Complete containerized deployment
-docker-compose up -d
-
-# Monitor system health
+# View live logs
 docker-compose logs -f
+
+# Check service status
+docker-compose ps
+
+# Stop specific service
+docker-compose stop frontend
+
+# Rebuild and restart
+docker-compose up --build -d
 ```
 
-### 🔧 **Configuration**
+---
 
+## 📊 **Technical Specifications**
+
+### **Frontend Technologies:**
+- **Framework**: Next.js 15.3.3 with App Router
+- **UI Library**: React 18.3.1 + TypeScript 5.8.3
+- **Styling**: Tailwind CSS + Radix UI + Framer Motion
+- **Features**: Server-side rendering, optimized caching, responsive design
+
+### **Backend Technologies:**
+- **API Framework**: FastAPI with Python 3.12
+- **AI Integration**: OpenAI GPT-4 Vision API
+- **Data Processing**: NumPy, Pandas, Pillow for image processing
+- **Database**: PostgreSQL with SQLAlchemy ORM
+- **Caching**: Redis for session management and caching
+
+### **Infrastructure:**
+- **Containerization**: Docker + Docker Compose
+- **Message Queue**: Apache Kafka with Zookeeper
+- **Monitoring**: Built-in health checks and logging
+- **Security**: Environment-based configuration, CORS protection
+
+---
+
+## 🏆 **Competition Highlights**
+
+### **Innovation Points:**
+- ✅ **Multi-Agent AI Architecture** with specialized agents
+- ✅ **Real-time GPT-4 Vision Integration** for satellite analysis
+- ✅ **Indigenous Knowledge Research Protocol (IKRP)** for cultural sensitivity
+- ✅ **Advanced LIDAR Processing** with 3D terrain reconstruction
+- ✅ **Animated Glass-morphism UI** with modern design principles
+- ✅ **Complete Docker Orchestration** for seamless deployment
+
+### **Technical Excellence:**
+- ✅ **Microservices Architecture** with independent scaling
+- ✅ **Event-driven Communication** via Kafka messaging
+- ✅ **Comprehensive Error Handling** with fallback mechanisms
+- ✅ **Auto-generated API Documentation** with FastAPI
+- ✅ **Mobile-responsive Design** for cross-platform access
+- ✅ **Production-ready Deployment** with health monitoring
+
+### **Cultural Sensitivity:**
+- ✅ **IKRP Ethical Framework** for indigenous knowledge respect
+- ✅ **Community Consent Protocols** for archaeological research
+- ✅ **Cultural Context Integration** in AI responses
+- ✅ **Respectful Discovery Practices** following archaeological ethics
+
+---
+
+## 🛠️ **Troubleshooting**
+
+### **Common Issues:**
+
+**1. Docker fails to start:**
 ```bash
-# Set up credentials
-python setup_credentials.py
+# Check Docker daemon
+docker info
 
-# Configure data sources
-./prepare_data_sources.sh
+# Restart Docker Desktop, then:
+./start.sh
+```
 
-# Test system integration
-python test_system_health.py
+**2. Port conflicts:**
+```bash
+# The startup script handles this automatically
+# Manual check:
+netstat -ano | grep :3000
+```
+
+**3. Services not responding:**
+```bash
+# Check service health
+docker-compose ps
+docker-compose logs frontend
+docker-compose logs backend
+```
+
+**4. Memory issues:**
+```bash
+# Ensure 8GB+ RAM available
+# Check Docker resource limits in Docker Desktop
 ```
 
 ---
 
-## 🏛️ **Archaeological Discovery Platform: Flagship Application**
+## 📈 **Performance Metrics**
 
-### 🎯 **Core Features**
-
-**🔍 Advanced Site Discovery:**
-- **Multi-zone Analysis** processing entire regions simultaneously
-- **No-coordinate Discovery** using cultural pattern recognition
-- **Vision Analysis** with GPT-4 Vision + YOLO8 + Archaeological AI
-- **Cultural Context Integration** respecting indigenous knowledge
-- **Confidence Scoring** with realistic 68-95% accuracy ranges
-
-**🗺️ **Interactive Mapping:**
-- **Google Maps Integration** with satellite imagery overlay
-- **Research Expedition Planning** with route optimization
-- **Site Correlation Analysis** (cultural, temporal, spatial)
-- **Haversine Distance Calculations** for optimal routing
-- **Real-time Discovery Visualization** with cultural markers
-
-**💬 **NIS Protocol Chat:**
-- **Cognitive Processing Pipeline** through all 6 layers
-- **Emotional Intelligence** in archaeological assessments
-- **Memory Consolidation** of previous discoveries
-- **Cultural Sensitivity** in all communications
-- **Workflow Automation** triggers for complex analyses
-
-**📊 **Comprehensive Analytics:**
-- **Real-time Performance Metrics** across all agents
-- **Discovery Statistics** and success rates
-- **Cultural Impact Assessment** for responsible archaeology
-- **Research Trend Analysis** for strategic planning
+| **Metric** | **Expected Performance** |
+|------------|--------------------------|
+| **Startup Time** | 2-5 minutes (first build) |
+| **Memory Usage** | 4-6 GB RAM |
+| **Disk Usage** | 5-8 GB |
+| **API Response Time** | < 2 seconds |
+| **Image Processing** | 5-15 seconds per image |
+| **LIDAR Analysis** | 10-30 seconds per dataset |
 
 ---
 
-## 🌍 **Real-World Impact: Beyond the Laboratory**
+## 🎨 **Demo Scenarios for Judges**
 
-### 🏗️ **Organica AI Solutions Portfolio**
+### **Scenario 1: Archaeological Site Discovery**
+1. Navigate to http://localhost:3000/satellite
+2. Upload a satellite image (sample images in `/data/satellite/`)
+3. Watch GPT-4 Vision analyze for archaeological features
+4. View confidence scores and site classifications
+5. Check discovery dashboard for results
 
-**🏛️ NIS Protocol**: Neural Intelligence System for Archaeological Discovery
-**💰 SmartPortfolio**: AI-driven personal finance management
-**🎮 PortfolioChallenge**: Gamified investment learning platform  
-**💫 Tanda Circles**: Digital community savings groups
-**🤖 AlphaCortex**: Autonomous AI trading system
+### **Scenario 2: Cultural Context Analysis**
+1. Go to http://localhost:3000/chat
+2. Ask: *"What indigenous communities lived in the Amazon basin around 1500 CE?"*
+3. Observe IKRP service providing culturally-sensitive responses
+4. Note the ethical framework and community consent considerations
 
-### 🎙️ **Knowledge Sharing**
-
-**📺 "The NIS Protocol" Podcast**: Complete development journey documentation
-**📝 LinkedIn Series**: Technical insights and breakthrough moments
-**🔬 Research Papers**: Cognitive architecture and biological AI modeling
-**👥 Community Engagement**: Open-source contributions and knowledge sharing
-
-### 🌟 **Vision for the Future**
-
-The NIS Protocol represents more than just another AI system—it's the foundation for **Universal Intelligence** that can adapt to any domain while maintaining the ethical frameworks and cognitive patterns that make human intelligence special.
-
-From archaeological discoveries on Earth to terraforming operations on Mars, from urban traffic optimization to deep space exploration, the NIS Protocol provides the cognitive architecture for the next generation of intelligent systems.
+### **Scenario 3: LIDAR Terrain Analysis**
+1. Navigate to http://localhost:3000/analysis
+2. Upload LIDAR data (sample files in `/data/lidar/`)
+3. View 3D terrain reconstruction
+4. Analyze anomaly detection results for potential archaeological sites
 
 ---
 
-## 📞 **Connect with the Creator**
+## 📞 **Project Information**
 
-**Diego Torres** - Founder & Chief Architect
-- **LinkedIn**: [Diego Torres](https://www.linkedin.com/in/diego-torres--/)
-- **Company**: [Organica AI Solutions](https://www.linkedin.com/company/organica-ai-solutions/?viewAsMember=true)
-- **Podcast**: [The NIS Protocol on Spotify](https://open.spotify.com/show/0PuvaeHOTtJssMg79bFO80)
-- **Contact**: Connect through LinkedIn for collaboration opportunities
-
-### 🏗️ **Organica AI Solutions Portfolio**
-
-**🏛️ NIS Protocol**: Neural Intelligence System for Archaeological Discovery
-**💰 SmartPortfolio**: AI-driven personal finance management
-**🎮 PortfolioChallenge**: Gamified investment learning platform  
-**💫 Tanda Circles**: Digital community savings groups
-**🤖 AlphaCortex**: Autonomous AI trading system
+**Developed by:** Organica AI Solutions  
+**Website:** https://organicaai.com  
+**Competition:** OpenAI Challenge 2024  
+**Architecture:** Multi-Agent AI System  
+**Technologies:** Python 3.12, Next.js 15.3.3, FastAPI, Docker, GPT-4  
 
 ---
 
-## 📜 **License & Cultural Ethics**
+## 📋 **System Requirements**
 
-The NIS Protocol is developed with the highest ethical standards for archaeological research:
+### **Minimum Requirements:**
+- **RAM**: 4GB (8GB+ recommended)
+- **Storage**: 10GB free space
+- **OS**: Windows 10+, macOS 10.15+, Ubuntu 18.04+
+- **Docker**: Docker Desktop with Docker Compose
+- **Internet**: Required for AI API calls and Docker images
 
-- **Cultural Respect**: All archaeological applications respect indigenous knowledge and cultural heritage
-- **Responsible Discovery**: Ethical frameworks for sensitive archaeological sites
-- **Open Science**: Research contributions shared for scientific advancement
-- **Heritage Protection**: Built-in safeguards for cultural preservation
-
-*Licensed under MIT License - See LICENSE file for details*
+### **Recommended Requirements:**
+- **RAM**: 16GB
+- **Storage**: 20GB+ SSD
+- **CPU**: 4+ cores
+- **Network**: Stable broadband connection
 
 ---
 
-<div align="center">
+## 🎉 **Success Indicators**
 
-**🏛️ From Ancient Wisdom to Modern Intelligence 🚀**
+When the system is running correctly, you should see:
 
-*The NIS Protocol: Where Archaeological Discovery Meets Artificial Intelligence*
+✅ **All 7 containers running** (`docker-compose ps`)  
+✅ **Frontend accessible** at http://localhost:3000  
+✅ **Backend APIs responding** (health checks passing)  
+✅ **No error messages** in logs  
+✅ **Services communicating** (Kafka, Redis operational)  
 
-**⭐ Star this repository to follow the journey of Archaeological Intelligence ⭐**
+**Success message:**
+```
+🎉 NIS Protocol Archaeological Discovery Platform is LIVE!
+```
 
-</div> 
+---
+
+**🏛️ Discover the past with AI • Respect indigenous knowledge • Build the future**

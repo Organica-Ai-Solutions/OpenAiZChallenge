@@ -49,7 +49,6 @@ import {
   Save
 } from "lucide-react"
 import { config, makeBackendRequest, isBackendAvailable } from "../lib/config"
-import { loadGoogleMapsSafely, hasValidGoogleMapsKey } from "@/lib/vision-config"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface VisionAgentVisualizationProps {
@@ -317,11 +316,9 @@ export function VisionAgentVisualization({
       // If no API key, use demo imagery
       if (!googleMapsApiKey || googleMapsApiKey.length < 20) {
         console.log('🎭 Using demo satellite imagery (Google Maps API key not configured)')
-        const fallbackImage = generatePlaceholderImage(lat, lng)
-        setCurrentImage(fallbackImage)
-        setSatelliteMapLoaded(true)
+        generatePlaceholderImage(lat, lng)
         addLogEntry(`🎭 Demo imagery loaded for ${lat}, ${lng}`)
-        return fallbackImage
+        return
       }
 
       // Google Maps Static API URL for satellite imagery
@@ -373,11 +370,9 @@ export function VisionAgentVisualization({
         
         img.onerror = () => {
           console.warn('🔄 Google Maps failed, using demo imagery')
-          const fallbackImage = generatePlaceholderImage(lat, lng)
-          setCurrentImage(fallbackImage)
-          setSatelliteMapLoaded(true)
+          generatePlaceholderImage(lat, lng)
           addLogEntry(`🎭 Demo imagery fallback for ${lat}, ${lng}`)
-          resolve(fallbackImage)
+          resolve(undefined)
         }
         
         img.src = staticMapUrl
@@ -385,11 +380,9 @@ export function VisionAgentVisualization({
       
     } catch (error) {
       console.warn('🔄 Google Maps error, using demo imagery:', error)
-      const fallbackImage = generatePlaceholderImage(lat, lng)
-      setCurrentImage(fallbackImage)
-      setSatelliteMapLoaded(true)
+      generatePlaceholderImage(lat, lng)
       addLogEntry(`🎭 Demo imagery error fallback for ${lat}, ${lng}`)
-      return fallbackImage
+      return
     }
   }
 
@@ -743,52 +736,7 @@ export function VisionAgentVisualization({
     }
   }, [imageEnhancement, currentImage])
 
-  // Initialize Google Maps for satellite view
-  useEffect(() => {
-    if (googleMapsLoaded && coordinates && mapRef.current) {
-      initializeSatelliteMap()
-    }
-  }, [googleMapsLoaded, coordinates])
-
-  const initializeSatelliteMap = () => {
-    if (!mapRef.current || !window.google || !coordinates) return
-    
-    try {
-      const [lat, lng] = coordinates.split(',').map(coord => parseFloat(coord.trim()))
-      
-      const mapOptions = {
-        center: { lat, lng },
-        zoom: 16,
-        mapTypeId: window.google.maps.MapTypeId.SATELLITE,
-        mapTypeControl: true,
-        streetViewControl: false,
-        fullscreenControl: true,
-        zoomControl: true
-      }
-
-      googleMapRef.current = new window.google.maps.Map(mapRef.current, mapOptions)
-      
-      // Add a marker at the analysis location
-      new window.google.maps.Marker({
-        position: { lat, lng },
-        map: googleMapRef.current,
-        title: `Analysis Location: ${coordinates}`,
-        icon: {
-          path: window.google.maps.SymbolPath.CIRCLE,
-          scale: 8,
-          fillColor: '#FF0000',
-          fillOpacity: 0.8,
-          strokeColor: '#FFFFFF',
-          strokeWeight: 2
-        }
-      })
-      
-      addLogEntry("✅ Google Maps satellite view initialized")
-    } catch (error) {
-      addLogEntry(`❌ Failed to initialize satellite map: ${error}`, "error")
-      setMapError("Failed to initialize satellite map")
-    }
-  }
+  // Google Maps initialization removed - using MapboxVisionMap instead
 
   const addLogEntry = useCallback((message: string, type: "info" | "warn" | "error" = "info") => {
     const timestamp = new Date().toISOString().slice(11, 23)
@@ -1436,7 +1384,7 @@ export function VisionAgentVisualization({
       ]
       
       setDetections(fallbackDetections)
-      addLogEntry(`🔄 Using fallback analysis results`, "warning")
+              addLogEntry(`🔄 Using fallback analysis results`, "warn")
       
       // Don't re-throw the error, return fallback data
       return {
@@ -2338,44 +2286,7 @@ export function VisionAgentVisualization({
                 </Card>
               </div>
               
-              {/* Satellite Map View */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Satellite className="h-5 w-5" />
-                    Satellite Map View
-                  </CardTitle>
-                  <CardDescription>
-                    Interactive satellite imagery with layer overlays
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="relative bg-muted aspect-video rounded-lg overflow-hidden border">
-                    {googleMapsLoaded ? (
-                      <div 
-                        ref={mapRef} 
-                        className="w-full h-full"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div className="text-center">
-                          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-gray-400" />
-                          <div className="text-gray-600">Loading Google Maps...</div>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {mapError && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-red-50">
-                        <div className="text-center text-red-600">
-                          <AlertCircle className="h-8 w-8 mx-auto mb-2" />
-                          <div className="text-sm">{mapError}</div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Satellite Map View removed - using MapboxVisionMap instead */}
             </div>
           </TabsContent>
 

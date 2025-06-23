@@ -28,6 +28,7 @@ error_log() {
 
 trap 'error_log "An error occurred during shutdown. Check $ERROR_LOG_FILE"' ERR
 
+echo -e "\033[0;36m🛑 Stopping NIS Protocol Archaeological Discovery Platform...\033[0m"
 log "Stopping all NIS Protocol services managed by Docker Compose..."
 
 # Determine Docker Compose command
@@ -36,18 +37,43 @@ if ! command -v docker-compose &> /dev/null && command -v docker && docker compo
     DOCKER_COMPOSE_CMD="docker compose"
 fi
 
-if $DOCKER_COMPOSE_CMD down --remove-orphans; then
+# Stop all services gracefully
+log "Stopping Docker Compose services..."
+if $DOCKER_COMPOSE_CMD down --remove-orphans --volumes; then
     log "All Docker Compose services stopped successfully."
 else
-    error_log "Failed to stop Docker Compose services. Check Docker daemon and logs."
-    # You might want to add specific checks here if needed, but `down` should handle it.
-    exit 1
+    error_log "Failed to stop Docker Compose services. Attempting force cleanup..."
+    
+    # Force stop individual containers if compose fails
+    log "Force stopping individual containers..."
+    docker stop $(docker ps -q --filter "name=openaizchallenge") 2>/dev/null || true
+    docker rm $(docker ps -aq --filter "name=openaizchallenge") 2>/dev/null || true
 fi
 
-# Also stop any standalone fallback backend processes
-log "Stopping any standalone fallback backend processes..."
-pkill -f "python fallback_backend.py" 2>/dev/null || true
-pkill -f "python minimal_backend.py" 2>/dev/null || true
+# Clean up any standalone containers
+log "Cleaning up standalone containers..."
+docker stop nis-redis-simple nis-kafka nis-zookeeper 2>/dev/null || true
+docker rm nis-redis-simple nis-kafka nis-zookeeper 2>/dev/null || true
+
+# Stop any standalone backend processes
+log "Stopping any standalone backend processes..."
+pkill -f "python.*backend" 2>/dev/null || true
+pkill -f "npm run dev" 2>/dev/null || true
+pkill -f "next dev" 2>/dev/null || true
+
+# Clean up any remaining processes on key ports
+log "Cleaning up processes on key ports..."
+for port in 3000 8000 8001 8003 6379 9092 2181; do
+    if netstat -ano | grep ":$port " >/dev/null 2>&1; then
+        log "Cleaning up port $port..."
+        if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
+            netstat -ano | grep ":$port " | awk '{print $5}' | xargs -r taskkill //PID //F 2>/dev/null || true
+        else
+            lsof -ti:$port | xargs -r kill -9 2>/dev/null || true
+        fi
+    fi
+done
 
 log "NIS Protocol shutdown complete."
-echo "All NIS services have been requested to stop via Docker Compose." 
+echo -e "\033[0;32m✅ All NIS Protocol services have been stopped successfully.\033[0m"
+echo -e "\033[0;34mTo restart the system, run: ./start.sh\033[0m" 

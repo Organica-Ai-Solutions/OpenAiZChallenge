@@ -6,6 +6,8 @@ import OptimizedNavigation from "../components/shared/OptimizedNavigation"
 import PageLoader from "../components/ui/page-loader"
 import { Suspense } from "react"
 import CacheCleaner from "../components/CacheCleaner"
+import { MapProvider } from "../src/contexts/MapContext"
+import { UnifiedSystemProvider } from "../src/contexts/UnifiedSystemContext"
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -50,16 +52,20 @@ export default function RootLayout({
       <body className={inter.className} suppressHydrationWarning>
         <CacheCleaner />
         <ClientProviders>
-          <OptimizedNavigation showBackendStatus={true} />
-          <PageLoader>
-            <Suspense fallback={
-              <div className="min-h-[60vh] flex items-center justify-center">
-                <div className="text-slate-400">Loading...</div>
-              </div>
-            }>
-              {children}
-            </Suspense>
-          </PageLoader>
+          <UnifiedSystemProvider>
+            <MapProvider>
+              <OptimizedNavigation showBackendStatus={true} />
+              <PageLoader>
+                <Suspense fallback={
+                  <div className="min-h-[60vh] flex items-center justify-center">
+                    <div className="text-slate-400">Loading...</div>
+                  </div>
+                }>
+                  {children}
+                </Suspense>
+              </PageLoader>
+            </MapProvider>
+          </UnifiedSystemProvider>
         </ClientProviders>
       </body>
     </html>

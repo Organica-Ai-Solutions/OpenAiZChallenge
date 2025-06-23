@@ -69,7 +69,7 @@ py3dep>=0.16.0
 # 3D visualization and terrain rendering (rayshader equivalents)
 pyvista>=0.42.0
 plotly>=5.17.0
-mayavi>=4.8.0
+# mayavi>=4.8.0  # Commented out - requires system graphics libraries not available in Docker
 
 # Advanced image processing (magick equivalent)
 opencv-python-headless>=4.5.0

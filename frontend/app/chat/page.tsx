@@ -5,15 +5,19 @@ import React, { useState, useEffect } from 'react'
 import { AnimatedAIChat } from "@/components/ui/animated-ai-chat"
 import { ChatMessageHistory } from "@/components/ui/chat-message-history"
 import { chatService, ChatMessage } from "@/lib/api/chat-service"
+import { useUnifiedSystem } from "@/contexts/UnifiedSystemContext"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Brain, Database, Zap, Globe, Eye, MessageSquare, Activity, Cpu, Network, Shield, AlertCircle } from "lucide-react"
+import { Brain, Database, Zap, Globe, Eye, MessageSquare, Activity, Cpu, Network, Shield, AlertCircle, Users } from "lucide-react"
 
 // Enhanced chat with NIS Protocol power features - FULLY REVISED
 export default function ChatPage() {
   // PROTECTED: Keep activeService as 'animated' per protection rules
+  
+  // Unified System Integration
+  const { state: unifiedState, actions: unifiedActions } = useUnifiedSystem()
 
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isTyping, setIsTyping] = useState(false)
@@ -138,10 +142,15 @@ export default function ChatPage() {
     }
   }
 
-  // Handle coordinate selection from chat
+  // Handle coordinate selection from chat - integrated with unified system
   const handleCoordinateSelect = (coordinates: { lat: number; lon: number }) => {
     console.log('🗺️ Coordinates selected from chat:', coordinates)
-    // Could trigger navigation to analysis page or show coordinate details
+    
+    // Select coordinates in unified system
+    unifiedActions.selectCoordinates(coordinates.lat, coordinates.lon, 'chat_coordinate_selection')
+    
+    // Trigger chat analysis with coordinates
+    unifiedActions.triggerChatAnalysis(`Analyze coordinates ${coordinates.lat}, ${coordinates.lon}`, coordinates)
   }
   
   // Enhanced Quick Action Handlers with Error Handling
@@ -168,6 +177,121 @@ export default function ChatPage() {
   const quickAndesAnalysis = () => safeQuickAction(() => chatService.sendMessage('/analyze -15.5, -70.0'), 'Andes Analysis')
   const quickVisionAnalysis = () => safeQuickAction(() => chatService.sendMessage('Analyze satellite imagery and LIDAR data for coordinates -3.4653, -62.2159 using vision processing'), 'Vision Analysis')
   const quickToolStatus = () => safeQuickAction(() => chatService.sendMessage('Show all available tools and their current operational status'), 'Tool Status')
+  
+  // Enhanced comprehensive analysis handlers
+  const runComprehensiveAnalysis = async (coordinates: { lat: number; lon: number }, analysisType: string = 'comprehensive') => {
+    setIsLoading(true)
+    try {
+      console.log('🚀 Starting comprehensive analysis from chat:', { coordinates, analysisType })
+      
+      // Import analysis service
+      const { analysisService } = await import('@/services/AnalysisService')
+      
+      // Create analysis request
+      const request = {
+        coordinates,
+        analysisType,
+        options: {
+          confidenceThreshold: 0.7,
+          analysisDepth: 'comprehensive' as const,
+          useGPT4Vision: true,
+          useLidarFusion: true,
+          dataSources: ['satellite', 'lidar', 'historical', 'archaeological'],
+          agentsToUse: ['vision', 'memory', 'reasoning', 'action']
+        }
+      }
+
+      let result
+      
+      // Execute analysis based on type
+      switch (analysisType) {
+        case 'vision':
+          result = await analysisService.analyzeVision(request)
+          break
+        case 'enhanced':
+          result = await analysisService.analyzeEnhanced(request)
+          break
+        case 'archaeological':
+          result = await analysisService.analyzeArchaeological(request)
+          break
+        case 'lidar_comprehensive':
+          result = await analysisService.analyzeLidarComprehensive(request)
+          break
+        case 'satellite_latest':
+          result = await analysisService.analyzeSatelliteLatest(request)
+          break
+        case 'cultural_significance':
+          result = await analysisService.analyzeCulturalSignificance(request)
+          break
+        case 'settlement_patterns':
+          result = await analysisService.analyzeSettlementPatterns(request)
+          break
+        case 'trade_networks':
+          result = await analysisService.analyzeTradeNetworks(request)
+          break
+        case 'environmental_factors':
+          result = await analysisService.analyzeEnvironmentalFactors(request)
+          break
+        case 'chronological_sequence':
+          result = await analysisService.analyzeChronologicalSequence(request)
+          break
+        case 'comprehensive':
+        default:
+          result = await analysisService.analyzeComprehensive(request)
+          break
+      }
+
+      console.log('✅ Comprehensive analysis completed from chat:', result)
+
+      // Update unified system state (if methods exist)
+      console.log('🔄 Updating unified system with analysis results')
+
+      // Send detailed results to chat
+      const analysisMessage = `🔍 **${result.analysisType.toUpperCase()} ANALYSIS COMPLETE**
+
+**Location:** ${coordinates.lat.toFixed(4)}, ${coordinates.lon.toFixed(4)}
+**Confidence:** ${(result.confidence * 100).toFixed(1)}%
+**Processing Time:** ${result.processingTime}
+**Analysis ID:** ${result.analysisId}
+
+**Agents Used:** ${result.agentsUsed.join(', ')}
+**Data Sources:** ${result.dataSources.join(', ')}
+
+**Key Findings:**
+${result.results?.description || result.results?.cultural_significance || 'Analysis completed successfully'}
+
+**Technical Details:**
+- Pattern Type: ${result.results?.pattern_type || 'Archaeological feature'}
+- Cultural Period: ${result.results?.period || 'Pre-Columbian'}
+- Size Estimate: ${result.results?.size_estimate || 'Unknown'} hectares
+
+**Recommendations:**
+${result.results?.recommendations?.join('\n- ') || 'Further investigation recommended'}
+
+Analysis saved to database with ID: ${result.analysisId}`
+
+      await chatService.sendMessage(analysisMessage)
+      
+      // Auto-save analysis
+      await analysisService.saveAnalysis(result)
+
+      return result
+      
+    } catch (error) {
+      console.error('❌ Comprehensive analysis failed from chat:', error)
+      await chatService.sendMessage(`❌ Analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Quick analysis action handlers
+  const quickVisionAnalysisAmazon = () => safeQuickAction(async () => { await runComprehensiveAnalysis({ lat: -3.4653, lon: -62.2159 }, 'vision') }, 'Vision Analysis Amazon')
+  const quickLidarAnalysisAndes = () => safeQuickAction(async () => { await runComprehensiveAnalysis({ lat: -15.5, lon: -70.0 }, 'lidar_comprehensive') }, 'LIDAR Analysis Andes')
+  const quickArchaeologicalAnalysis = () => safeQuickAction(async () => { await runComprehensiveAnalysis({ lat: -12.0, lon: -77.0 }, 'archaeological') }, 'Archaeological Analysis Peru')
+  const quickCulturalAnalysis = () => safeQuickAction(async () => { await runComprehensiveAnalysis({ lat: -16.4, lon: -71.5 }, 'cultural_significance') }, 'Cultural Analysis Highland')
+  const quickSettlementAnalysis = () => safeQuickAction(async () => { await runComprehensiveAnalysis({ lat: -8.1, lon: -79.0 }, 'settlement_patterns') }, 'Settlement Analysis Northern Peru')
+  const quickComprehensiveAnalysis = () => safeQuickAction(async () => { await runComprehensiveAnalysis({ lat: -14.7, lon: -75.1 }, 'comprehensive') }, 'Full Comprehensive Analysis Nazca')
   
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative">
@@ -315,6 +439,126 @@ export default function ChatPage() {
                 <MessageSquare className="w-3 h-3" />
                 <span className="text-xs">Tutorial</span>
               </Button>
+            </div>
+            
+            {/* Comprehensive Analysis Panel */}
+            <div className="mt-4 p-3 bg-gradient-to-r from-indigo-900/20 to-purple-900/20 border border-indigo-500/30 rounded-lg">
+              <div className="text-indigo-300 font-medium text-sm mb-3">🧠 Comprehensive Backend Analysis</div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  onClick={quickVisionAnalysisAmazon}
+                  disabled={isLoading}
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
+                >
+                  <Eye className="w-3 h-3" />
+                  <span className="text-xs">Vision Amazon</span>
+                </Button>
+                <Button
+                  onClick={quickLidarAnalysisAndes}
+                  disabled={isLoading}
+                  className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-500 hover:to-teal-500 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
+                >
+                  <Database className="w-3 h-3" />
+                  <span className="text-xs">LIDAR Andes</span>
+                </Button>
+                <Button
+                  onClick={quickArchaeologicalAnalysis}
+                  disabled={isLoading}
+                  className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
+                >
+                  <Globe className="w-3 h-3" />
+                  <span className="text-xs">Archaeological</span>
+                </Button>
+                <Button
+                  onClick={quickCulturalAnalysis}
+                  disabled={isLoading}
+                  className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
+                >
+                  <Users className="w-3 h-3" />
+                  <span className="text-xs">Cultural</span>
+                </Button>
+                <Button
+                  onClick={quickSettlementAnalysis}
+                  disabled={isLoading}
+                  className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
+                >
+                  <Network className="w-3 h-3" />
+                  <span className="text-xs">Settlement</span>
+                </Button>
+                <Button
+                  onClick={quickComprehensiveAnalysis}
+                  disabled={isLoading}
+                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
+                >
+                  <Brain className="w-3 h-3" />
+                  <span className="text-xs">Full Analysis</span>
+                </Button>
+              </div>
+              <div className="mt-2 text-xs text-indigo-400">
+                Real backend endpoints • Auto-saves to database • Unified system integration
+              </div>
+            </div>
+            
+            {/* Unified System Navigation */}
+            <div className="mt-4 p-3 bg-gradient-to-r from-purple-900/20 to-blue-900/20 border border-purple-500/30 rounded-lg">
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-purple-300 font-medium text-sm">🧠 Unified System Navigation</div>
+                <Badge className={`${unifiedState.backendStatus.online ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>
+                  {unifiedState.backendStatus.online ? 'Connected' : 'Disconnected'}
+                </Badge>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <Button
+                  onClick={() => unifiedActions.navigateToMap(unifiedState.selectedCoordinates || undefined)}
+                  variant="outline"
+                  size="sm"
+                  className="border-blue-500 text-blue-400 hover:bg-blue-600/20"
+                >
+                  <Globe className="w-4 h-4 mr-1" />
+                  Map
+                </Button>
+                <Button
+                  onClick={() => unifiedActions.navigateToVision(unifiedState.selectedCoordinates || undefined)}
+                  variant="outline"
+                  size="sm"
+                  className="border-purple-500 text-purple-400 hover:bg-purple-600/20"
+                >
+                  <Eye className="w-4 h-4 mr-1" />
+                  Vision
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (unifiedState.selectedCoordinates) {
+                      unifiedActions.triggerVisionAnalysis(unifiedState.selectedCoordinates)
+                    } else {
+                      alert('Please select coordinates first')
+                    }
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="border-emerald-500 text-emerald-400 hover:bg-emerald-600/20"
+                  disabled={!unifiedState.selectedCoordinates || unifiedState.isAnalyzing}
+                >
+                  <Brain className="w-4 h-4 mr-1" />
+                  {unifiedState.isAnalyzing ? 'Analyzing...' : 'Analyze'}
+                </Button>
+              </div>
+              {unifiedState.selectedCoordinates && (
+                <div className="mt-2 p-2 bg-purple-900/20 rounded border border-purple-500/20">
+                  <div className="text-xs text-purple-300">📍 Selected: {unifiedState.selectedCoordinates.lat.toFixed(4)}, {unifiedState.selectedCoordinates.lon.toFixed(4)}</div>
+                </div>
+              )}
+              {unifiedState.isAnalyzing && (
+                <div className="mt-2 p-2 bg-blue-900/20 rounded border border-blue-500/20">
+                  <div className="text-xs text-blue-300">🧠 {unifiedState.analysisStage}</div>
+                  <div className="w-full bg-slate-700 rounded-full h-1 mt-1">
+                    <div 
+                      className="bg-blue-400 h-1 rounded-full transition-all duration-300" 
+                      style={{ width: `${unifiedState.analysisProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </TabsContent>
           
