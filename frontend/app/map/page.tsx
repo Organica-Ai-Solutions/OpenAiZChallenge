@@ -9315,32 +9315,44 @@ Calculate detailed resource requirements, budget optimization, and logistical pl
                         <div className="grid grid-cols-4 gap-1 mb-3">
                           <Button
                             size="sm"
-                            variant={lidarVisualizationOptions.visualization === 'points' ? 'default' : 'outline'}
-                            className="text-xs py-1 px-2 h-7"
+                            className={`text-xs py-1 px-2 h-7 transition-all duration-200 ${
+                              lidarVisualizationOptions.visualization === 'points' 
+                                ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg' 
+                                : 'bg-slate-700 text-slate-300 border-slate-600 hover:bg-slate-600 hover:text-white'
+                            }`}
                             onClick={() => setLidarVisualizationOptions(prev => ({ ...prev, visualization: 'points' }))}
                           >
                             Points
                           </Button>
                           <Button
                             size="sm"
-                            variant={lidarVisualizationOptions.visualization === 'triangulation' ? 'default' : 'outline'}
-                            className="text-xs py-1 px-2 h-7"
+                            className={`text-xs py-1 px-2 h-7 transition-all duration-200 ${
+                              lidarVisualizationOptions.visualization === 'triangulation' 
+                                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg' 
+                                : 'bg-slate-700 text-slate-300 border-slate-600 hover:bg-slate-600 hover:text-white'
+                            }`}
                             onClick={() => setLidarVisualizationOptions(prev => ({ ...prev, visualization: 'triangulation' }))}
                           >
                             Mesh
                           </Button>
                           <Button
                             size="sm"
-                            variant={lidarVisualizationOptions.visualization === 'heatmap' ? 'default' : 'outline'}
-                            className="text-xs py-1 px-2 h-7"
+                            className={`text-xs py-1 px-2 h-7 transition-all duration-200 ${
+                              lidarVisualizationOptions.visualization === 'heatmap' 
+                                ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg' 
+                                : 'bg-slate-700 text-slate-300 border-slate-600 hover:bg-slate-600 hover:text-white'
+                            }`}
                             onClick={() => setLidarVisualizationOptions(prev => ({ ...prev, visualization: 'heatmap' }))}
                           >
                             Heat
                           </Button>
                           <Button
                             size="sm"
-                            variant={lidarVisualizationOptions.visualization === 'fill-extrusion' ? 'default' : 'outline'}
-                            className="text-xs py-1 px-2 h-7"
+                            className={`text-xs py-1 px-2 h-7 transition-all duration-200 ${
+                              lidarVisualizationOptions.visualization === 'fill-extrusion' 
+                                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg' 
+                                : 'bg-slate-700 text-slate-300 border-slate-600 hover:bg-slate-600 hover:text-white'
+                            }`}
                             onClick={() => setLidarVisualizationOptions(prev => ({ ...prev, visualization: 'fill-extrusion' }))}
                           >
                             3D
