@@ -43,6 +43,13 @@ export function RealMapboxLidar({
       // Better container validation to prevent duplicate initialization
       if (!mapContainer.current || map.current) return
       
+      // Additional validation for proper DOM element
+      if (!(mapContainer.current instanceof HTMLElement)) {
+        console.log('⚠️ Map container is not a valid HTML element, retrying...')
+        setTimeout(initMap, 100)
+        return
+      }
+      
       // Check if container is already initialized (has children)
       if (mapContainer.current.hasChildNodes()) {
         console.log('🔄 Map container already has content, skipping initialization')
