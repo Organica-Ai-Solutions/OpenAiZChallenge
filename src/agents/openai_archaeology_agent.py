@@ -52,11 +52,11 @@ class OpenAIArchaeologyAgent:
                 self.client = None
                 self.mock_mode = True
         
-        # Updated model names for latest OpenAI models
+        # Updated model names for latest OpenAI models (Competition requirement: GPT-4.1)
         self.models = {
-            'vision': 'gpt-4o',  # Latest GPT-4 with vision capabilities
-            'reasoning': 'gpt-4o',  # Using GPT-4o for reasoning (o3-mini not yet available)
-            'analysis': 'gpt-4o'  # Consistent model for all analysis
+            'vision': 'gpt-4.1-preview',  # GPT-4.1 with vision capabilities for competition
+            'reasoning': 'gpt-4.1-preview',  # GPT-4.1 for reasoning as required by competition
+            'analysis': 'gpt-4.1-preview'  # GPT-4.1 for all analysis as per competition rules
         }
         
         # Archaeological analysis prompts

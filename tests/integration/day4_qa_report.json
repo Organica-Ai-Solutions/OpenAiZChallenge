@@ -1,0 +1,20 @@
+{
+  "start_time": 1750827315.1839867,
+  "tests_run": 8,
+  "tests_passed": 1,
+  "tests_failed": 0,
+  "performance_metrics": {
+    "test_01_system_integration_validation": 0.0,
+    "test_02_kan_processor_performance": 0.0,
+    "test_03_lidar_processor_quality": 0.0,
+    "test_04_multi_agent_coordination": 0.0010018348693847656,
+    "test_05_performance_benchmarks": 0.0,
+    "test_06_competition_compliance": 0.0019989013671875,
+    "test_07_error_handling_robustness": 0.0,
+    "test_08_memory_efficiency": 0.0010006427764892578
+  },
+  "system_validation": {
+    "error_handling": true
+  },
+  "competition_compliance": {}
+}

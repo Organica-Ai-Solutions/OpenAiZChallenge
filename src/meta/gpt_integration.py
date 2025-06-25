@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 class GPTIntegration:
     """Integration with OpenAI's GPT models for the NIS Protocol."""
     
-    def __init__(self, model_name: str = "gpt-4-turbo"):
+    def __init__(self, model_name: str = "gpt-4.1-preview"):
         """Initialize the GPT integration.
         
         Args:

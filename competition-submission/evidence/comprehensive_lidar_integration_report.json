@@ -1,0 +1,59 @@
+{
+  "timestamp": "2025-06-21T19:31:35.922813",
+  "test_suite": "Comprehensive LiDAR Integration",
+  "components_tested": [],
+  "results": {
+    "enhanced_vision_lidar": {
+      "status": "\u274c FAILED",
+      "error": "'str' object has no attribute 'get'"
+    },
+    "multimodal_lidar": {
+      "status": "\u274c FAILED",
+      "error": "'list' object has no attribute 'keys'"
+    },
+    "archaeological_features": {
+      "status": "\u274c FAILED",
+      "error": "unhashable type: 'dict'"
+    },
+    "cultural_context": {
+      "status": "\u274c FAILED",
+      "error": "unhashable type: 'dict'"
+    },
+    "reasoning_integration": {
+      "status": "\u26a0\ufe0f PLANNED",
+      "note": "Enhanced Reasoning Agent implementation planned",
+      "planned_features": [
+        "Archaeological pattern analysis",
+        "Cultural context inference",
+        "Hypothesis generation",
+        "Evidence synthesis"
+      ]
+    },
+    "action_decisions": {
+      "status": "\u26a0\ufe0f PLANNED",
+      "note": "Enhanced Action Agent implementation planned",
+      "planned_features": [
+        "LiDAR-based excavation planning",
+        "Site protection prioritization",
+        "Resource allocation optimization",
+        "Risk assessment integration"
+      ]
+    },
+    "frontend_visualization": {
+      "status": "\u274c FAILED",
+      "error": "'charmap' codec can't decode byte 0x8f in position 548: character maps to <undefined>"
+    }
+  },
+  "overall_status": "\ud83d\udd34 NEEDS_WORK",
+  "success_rate": 0.0,
+  "status_description": "LiDAR integration requires major improvements",
+  "recommendations": [
+    "Improve Enhanced Vision Agent LiDAR processing reliability and error handling",
+    "Complete implementation of all LiDAR visualization modes (hillshade, slope, contour, elevation)",
+    "Enhance cultural context algorithms for better archaeological feature relevance",
+    "Improve frontend LiDAR visualization components with more interactive features",
+    "Implement planned Enhanced Reasoning and Action Agents for complete LiDAR integration",
+    "Consider implementing LiDAR data caching for improved performance",
+    "Add real-time LiDAR processing capabilities for live archaeological surveys"
+  ]
+}
