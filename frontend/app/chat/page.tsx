@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Brain, Database, Zap, Globe, Eye, MessageSquare, Activity, Cpu, Network, Shield, AlertCircle, Users } from "lucide-react"
+import { UniversalMapboxIntegration } from "@/components/ui/universal-mapbox-integration"
+import { useRouter } from 'next/navigation'
 
 // Enhanced chat with NIS Protocol power features - FULLY REVISED
 export default function ChatPage() {
@@ -18,6 +20,7 @@ export default function ChatPage() {
   
   // Unified System Integration
   const { state: unifiedState, actions: unifiedActions } = useUnifiedSystem()
+  const router = useRouter()
 
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isTyping, setIsTyping] = useState(false)
@@ -33,6 +36,15 @@ export default function ChatPage() {
     lastUpdate: new Date().toLocaleTimeString()
   })
   const [isLoading, setIsLoading] = useState(false)
+  
+  // Map integration state
+  const [currentCoordinates, setCurrentCoordinates] = useState(() => {
+    // Initialize from unified system or default
+    if (unifiedState.selectedCoordinates) {
+      return `${unifiedState.selectedCoordinates.lat}, ${unifiedState.selectedCoordinates.lon}`
+    }
+    return "-3.4653, -62.2159" // Default Amazon coordinates
+  })
   
   // Subscribe to chat service updates
   useEffect(() => {
@@ -56,8 +68,8 @@ export default function ChatPage() {
         const tryBackend = async (url: string) => {
           const controller = new AbortController()
           const timeout = setTimeout(() => controller.abort(), 3000)
-          
-          try {
+        
+        try {
             const response = await fetch(`${url}/health`, {
               signal: controller.signal
             })
@@ -96,13 +108,13 @@ export default function ChatPage() {
                  confidence: 0.95,
                  lastUpdate: new Date().toLocaleTimeString()
                })
-             }
-           } catch (error) {
+          }
+        } catch (error) {
              console.log('Additional endpoints unavailable, using defaults')
            }
          } else {
            setBackendStatus({ status: 'offline', message: 'All backends unavailable' })
-         }
+        }
         
         // Check agents with fallback (legacy code)
         try {
@@ -181,8 +193,49 @@ export default function ChatPage() {
     // Select coordinates in unified system
     unifiedActions.selectCoordinates(coordinates.lat, coordinates.lon, 'chat_coordinate_selection')
     
+    // Update local coordinates
+    setCurrentCoordinates(`${coordinates.lat}, ${coordinates.lon}`)
+    
     // Trigger chat analysis with coordinates
     unifiedActions.triggerChatAnalysis(`Analyze coordinates ${coordinates.lat}, ${coordinates.lon}`, coordinates)
+  }
+
+  // Handle coordinate updates from map
+  const handleMapCoordinatesChange = (newCoords: string) => {
+    console.log('🗺️ Map coordinates changed in chat:', newCoords)
+    setCurrentCoordinates(newCoords)
+    
+    // Parse and update unified system
+    const [lat, lng] = newCoords.split(',').map(s => parseFloat(s.trim()))
+    unifiedActions.selectCoordinates(lat, lng, 'chat_map_update')
+    
+    // Optionally send to chat
+    const analysisMessage = `/analyze ${newCoords}`
+    console.log('💬 Potential chat message:', analysisMessage)
+  }
+
+  // Navigation to other pages with coordinates
+  const handlePageNavigation = (targetPage: string, coordinates: string) => {
+    console.log(`🚀 Navigating from chat to ${targetPage} with coordinates:`, coordinates)
+    
+    const [lat, lng] = coordinates.split(',').map(s => parseFloat(s.trim()))
+    
+    switch (targetPage) {
+      case 'vision':
+        router.push(`/vision?lat=${lat}&lng=${lng}`)
+        break
+      case 'analysis':
+        router.push(`/analysis?lat=${lat}&lng=${lng}`)
+        break
+      case 'map':
+        router.push(`/map?lat=${lat}&lng=${lng}`)
+        break
+      case 'satellite':
+        router.push(`/satellite?lat=${lat}&lng=${lng}`)
+        break
+      default:
+        router.push(`/${targetPage}`)
+    }
   }
   
   // Enhanced Quick Action Handlers with Error Handling
@@ -361,236 +414,202 @@ Analysis saved to database with ID: ${result.analysisId}`
         
         {/* NIS Protocol Power Hub - Revised */}
         <Tabs defaultValue="power" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-slate-800/50">
+          <TabsList className="grid w-full grid-cols-5 bg-slate-800/50">
             <TabsTrigger value="power" className="text-xs">🚀 Power Hub</TabsTrigger>
+            <TabsTrigger value="map" className="text-xs">🗺️ Map</TabsTrigger>
             <TabsTrigger value="agents" className="text-xs">🤖 Agents</TabsTrigger>
             <TabsTrigger value="backend" className="text-xs">⚡ Backend</TabsTrigger>
             <TabsTrigger value="metrics" className="text-xs">📊 Metrics</TabsTrigger>
           </TabsList>
           
           <TabsContent value="power" className="mt-4">
-            <div className="grid grid-cols-4 gap-2">
-              {/* Row 1: Core Analysis */}
+            {/* Essential Quick Actions - Simplified */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
               <Button 
                 onClick={quickAnalyze}
                 disabled={isLoading}
                 className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
               >
-                <Brain className="w-3 h-3" />
+                <Globe className="w-3 h-3" />
                 <span className="text-xs">Amazon Analysis</span>
               </Button>
               <Button 
-                onClick={quickAndesAnalysis}
-                disabled={isLoading}
-                className="bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
-              >
-                <Brain className="w-3 h-3" />
-                <span className="text-xs">Andes Analysis</span>
-              </Button>
-              <Button 
-                onClick={quickVisionAnalysis}
+                onClick={quickAgentStatus}
                 disabled={isLoading}
                 className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
               >
-                <Eye className="w-3 h-3" />
-                <span className="text-xs">Vision Analysis</span>
-              </Button>
-              <Button 
-                onClick={quickBatchAnalysis}
-                disabled={isLoading}
-                className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
-              >
-                <Zap className="w-3 h-3" />
-                <span className="text-xs">Batch Discovery</span>
-              </Button>
-              
-              {/* Row 2: Data & Research */}
-              <Button 
-                onClick={quickSiteDiscovery}
-                disabled={isLoading}
-                className="bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
-              >
-                <Database className="w-3 h-3" />
-                <span className="text-xs">160+ Sites</span>
-              </Button>
-              <Button 
-                onClick={quickCodexSearch}
-                disabled={isLoading}
-                className="bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
-              >
-                <Globe className="w-3 h-3" />
-                <span className="text-xs">26 Codices</span>
-              </Button>
-              <Button 
-                onClick={quickDataFusion}
-                disabled={isLoading}
-                className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
-              >
-                <Network className="w-3 h-3" />
-                <span className="text-xs">Data Fusion</span>
+                <Activity className="w-3 h-3" />
+                <span className="text-xs">Agent Status</span>
               </Button>
               <Button 
                 onClick={quickBrazilDemo}
                 disabled={isLoading}
-                className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
+                className="bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
               >
-                <Zap className="w-3 h-3" />
+                <Users className="w-3 h-3" />
                 <span className="text-xs">Brazil Demo</span>
-              </Button>
-              
-              {/* Row 3: Advanced Features */}
-              <Button 
-                onClick={quickAgentStatus}
-                disabled={isLoading}
-                className="bg-purple-500 hover:bg-purple-600 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
-              >
-                <Cpu className="w-3 h-3" />
-                <span className="text-xs">6 Agents</span>
-              </Button>
-              <Button 
-                onClick={quickConsciousness}
-                disabled={isLoading}
-                className="bg-pink-600 hover:bg-pink-700 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
-              >
-                <Brain className="w-3 h-3" />
-                <span className="text-xs">Consciousness</span>
-              </Button>
-              <Button 
-                onClick={quickToolStatus}
-                disabled={isLoading}
-                className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
-              >
-                <Activity className="w-3 h-3" />
-                <span className="text-xs">15 Tools</span>
               </Button>
               <Button 
                 onClick={quickTutorial}
                 disabled={isLoading}
-                className="bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
+                className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
               >
                 <MessageSquare className="w-3 h-3" />
                 <span className="text-xs">Tutorial</span>
               </Button>
             </div>
-            
+              
             {/* Comprehensive Analysis Panel */}
             <div className="mt-4 p-3 bg-gradient-to-r from-indigo-900/20 to-purple-900/20 border border-indigo-500/30 rounded-lg">
               <div className="text-indigo-300 font-medium text-sm mb-3">🧠 Comprehensive Backend Analysis</div>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  onClick={quickVisionAnalysisAmazon}
-                  disabled={isLoading}
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
-                >
-                  <Eye className="w-3 h-3" />
-                  <span className="text-xs">Vision Amazon</span>
-                </Button>
-                <Button
-                  onClick={quickLidarAnalysisAndes}
-                  disabled={isLoading}
-                  className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-500 hover:to-teal-500 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
-                >
-                  <Database className="w-3 h-3" />
-                  <span className="text-xs">LIDAR Andes</span>
-                </Button>
-                <Button
-                  onClick={quickArchaeologicalAnalysis}
-                  disabled={isLoading}
-                  className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
-                >
-                  <Globe className="w-3 h-3" />
-                  <span className="text-xs">Archaeological</span>
-                </Button>
-                <Button
-                  onClick={quickCulturalAnalysis}
-                  disabled={isLoading}
-                  className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
-                >
-                  <Users className="w-3 h-3" />
-                  <span className="text-xs">Cultural</span>
-                </Button>
-                <Button
-                  onClick={quickSettlementAnalysis}
-                  disabled={isLoading}
-                  className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
-                >
-                  <Network className="w-3 h-3" />
-                  <span className="text-xs">Settlement</span>
-                </Button>
-                <Button
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <Button 
                   onClick={quickComprehensiveAnalysis}
-                  disabled={isLoading}
-                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 text-white p-2 h-auto flex flex-col items-center gap-1"
-                >
-                  <Brain className="w-3 h-3" />
-                  <span className="text-xs">Full Analysis</span>
-                </Button>
+                disabled={isLoading}
+                  className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white border-0 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
+              >
+                  <Brain className="w-4 h-4 mr-2" />
+                  Full Analysis
+              </Button>
+                
+              <Button 
+                  onClick={quickVisionAnalysisAmazon}
+                disabled={isLoading}
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-0 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
+              >
+                  <Eye className="w-4 h-4 mr-2" />
+                  Vision Analysis
+              </Button>
+                
+              <Button 
+                  onClick={quickBatchAnalysis}
+                disabled={isLoading}
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
+              >
+                  <Zap className="w-4 h-4 mr-2" />
+                  Batch Discovery
+              </Button>
               </div>
               <div className="mt-2 text-xs text-indigo-400">
                 Real backend endpoints • Auto-saves to database • Unified system integration
               </div>
             </div>
             
-            {/* Unified System Navigation */}
-            <div className="mt-4 p-3 bg-gradient-to-r from-purple-900/20 to-blue-900/20 border border-purple-500/30 rounded-lg">
-              <div className="flex items-center justify-between mb-3">
-                <div className="text-purple-300 font-medium text-sm">🧠 Unified System Navigation</div>
-                <Badge className={`${unifiedState.backendStatus.online ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>
-                  {unifiedState.backendStatus.online ? 'Connected' : 'Disconnected'}
-                </Badge>
+            {/* Quick Tools Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+              <Button 
+                onClick={quickAgentStatus}
+                disabled={isLoading}
+                className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white border-0 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
+              >
+                <Activity className="w-4 h-4 mr-2" />
+                Agent Status
+              </Button>
+              
+              <Button 
+                onClick={() => safeQuickAction(() => chatService.sendMessage('/sites'), 'Sites')}
+                disabled={isLoading}
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white border-0 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
+              >
+                <Globe className="w-4 h-4 mr-2" />
+                Browse Sites
+              </Button>
+              
+              <Button 
+                onClick={quickBrazilDemo}
+                disabled={isLoading}
+                className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white border-0 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
+              >
+                <Users className="w-4 h-4 mr-2" />
+                Brazil Demo
+              </Button>
+              
+              <Button 
+                onClick={quickTutorial}
+                disabled={isLoading}
+                className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white border-0 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
+              >
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Tutorial
+              </Button>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="map" className="mt-4">
+            {/* Integrated Mapbox Map for Chat */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-white font-semibold flex items-center gap-2">
+                  <Globe className="w-5 h-5 text-emerald-400" />
+                  Interactive Archaeological Map
+                </h3>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-xs bg-emerald-500/20 border-emerald-500/50 text-emerald-300">
+                    Current: {currentCoordinates}
+                  </Badge>
+                </div>
               </div>
-              <div className="grid grid-cols-3 gap-2">
-                <Button
-                  onClick={() => unifiedActions.navigateToMap(unifiedState.selectedCoordinates || undefined)}
-                  variant="outline"
+              
+              <UniversalMapboxIntegration
+                coordinates={currentCoordinates}
+                onCoordinatesChange={handleMapCoordinatesChange}
+                height="350px"
+                showControls={true}
+                pageType="chat"
+                onPageNavigation={handlePageNavigation}
+                enableLidarVisualization={true}
+              />
+              
+              {/* Quick Map Actions */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <Button 
+                  onClick={() => handleMapCoordinatesChange("-3.4653, -62.2159")}
                   size="sm"
-                  className="border-blue-500 text-blue-400 hover:bg-blue-600/20"
-                >
-                  <Globe className="w-4 h-4 mr-1" />
-                  Map
-                </Button>
-                <Button
-                  onClick={() => unifiedActions.navigateToVision(unifiedState.selectedCoordinates || undefined)}
                   variant="outline"
-                  size="sm"
-                  className="border-purple-500 text-purple-400 hover:bg-purple-600/20"
+                  className="text-xs border-emerald-500 text-emerald-400"
                 >
-                  <Eye className="w-4 h-4 mr-1" />
-                  Vision
+                  Amazon Basin
                 </Button>
-                <Button
+                <Button 
+                  onClick={() => handleMapCoordinatesChange("-15.5, -70.0")}
+                  size="sm"
+                  variant="outline"
+                  className="text-xs border-blue-500 text-blue-400"
+                >
+                  Andes Mountains
+                </Button>
+                <Button 
+                  onClick={() => handleMapCoordinatesChange("-14.7, -75.1")}
+                  size="sm"
+                  variant="outline"
+                  className="text-xs border-purple-500 text-purple-400"
+                >
+                  Nazca Lines
+                </Button>
+                <Button 
                   onClick={() => {
-                    if (unifiedState.selectedCoordinates) {
-                      unifiedActions.triggerVisionAnalysis(unifiedState.selectedCoordinates)
-                    } else {
-                      alert('Please select coordinates first')
-                    }
+                    const message = `/analyze ${currentCoordinates}`
+                    chatService.sendMessage(message)
                   }}
-                  variant="outline"
                   size="sm"
-                  className="border-emerald-500 text-emerald-400 hover:bg-emerald-600/20"
-                  disabled={!unifiedState.selectedCoordinates || unifiedState.isAnalyzing}
+                  className="text-xs bg-gradient-to-r from-emerald-600 to-cyan-600"
                 >
-                  <Brain className="w-4 h-4 mr-1" />
-                  {unifiedState.isAnalyzing ? 'Analyzing...' : 'Analyze'}
+                  Analyze Here
                 </Button>
               </div>
-              {unifiedState.selectedCoordinates && (
-                <div className="mt-2 p-2 bg-purple-900/20 rounded border border-purple-500/20">
-                  <div className="text-xs text-purple-300">📍 Selected: {unifiedState.selectedCoordinates.lat.toFixed(4)}, {unifiedState.selectedCoordinates.lon.toFixed(4)}</div>
+              
+              {/* Map Instructions */}
+              <div className="p-3 bg-slate-900/50 border border-slate-700 rounded-lg">
+                <div className="text-slate-300 text-xs">
+                  <div className="font-medium mb-2">🗺️ Chat Map Integration:</div>
+                  <ul className="space-y-1 text-slate-400">
+                    <li>• Click anywhere on the map to select coordinates</li>
+                    <li>• Use "Analyze Here" to send coordinates to chat</li>
+                    <li>• Navigate to other pages with current coordinates</li>
+                    <li>• LIDAR points and archaeological sites are visualized</li>
+                  </ul>
                 </div>
-              )}
-              {unifiedState.isAnalyzing && (
-                <div className="mt-2 p-2 bg-blue-900/20 rounded border border-blue-500/20">
-                  <div className="text-xs text-blue-300">🧠 {unifiedState.analysisStage}</div>
-                  <div className="w-full bg-slate-700 rounded-full h-1 mt-1">
-                    <div 
-                      className="bg-blue-400 h-1 rounded-full transition-all duration-300" 
-                      style={{ width: `${unifiedState.analysisProgress}%` }}
-                    />
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
           </TabsContent>
           

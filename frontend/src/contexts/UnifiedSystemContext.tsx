@@ -90,6 +90,7 @@ interface UnifiedSystemActions {
   // Site management
   addDiscoveredSite: (site: ArchaeologicalSite) => void
   selectSite: (site: ArchaeologicalSite) => void
+  navigateToSite: (site: ArchaeologicalSite, targetPage?: 'vision' | 'map' | 'chat') => void
   
   // Backend communication
   checkBackendStatus: () => Promise<void>
@@ -131,15 +132,9 @@ export function UnifiedSystemProvider({ children }: { children: React.ReactNode 
   // Check backend status
   const checkBackendStatus = useCallback(async () => {
     try {
-      // Try port 8000 first, then 8001
-      let baseUrl = 'http://localhost:8000'
-      let healthResponse = await fetch(`${baseUrl}/system/health`).catch(() => null)
-      
-      if (!healthResponse || !healthResponse.ok) {
-        baseUrl = 'http://localhost:8001'
-        healthResponse = await fetch(`${baseUrl}/system/health`)
-      }
-      
+      // Use port 8000 since it's the working backend
+      const baseUrl = 'http://localhost:8000'
+      const healthResponse = await fetch(`${baseUrl}/system/health`)
       const agentResponse = await fetch(`${baseUrl}/agents/status`)
       const kanResponse = await fetch(`${baseUrl}/agents/kan-enhanced-vision-status`)
       
@@ -244,17 +239,9 @@ export function UnifiedSystemProvider({ children }: { children: React.ReactNode 
       // Stage 3: LIDAR Analysis
       setState(prev => ({ ...prev, analysisStage: "🏔️ Processing LIDAR with Delaunay Triangulation...", analysisProgress: 70 }))
 
-      const lidarResponse = await fetch(`${backendUrl}/agents/vision/comprehensive-lidar-analysis`, {
+      const lidarResponse = await fetch(`${backendUrl}/agents/vision/comprehensive-lidar-analysis?lat=${coordinates.lat}&lon=${coordinates.lon}&radius_km=5&include_3d_data=true&analysis_depth=comprehensive`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          lat: coordinates.lat,
-          lon: coordinates.lon,
-          radius_km: 5,
-          include_triangulation: true,
-          include_3d_visualization: true,
-          archaeological_focus: true
-        })
+        headers: { 'Content-Type': 'application/json' }
       })
 
       if (lidarResponse.ok) {
@@ -404,29 +391,98 @@ export function UnifiedSystemProvider({ children }: { children: React.ReactNode 
     }
   }, [backendUrl])
 
-  // Navigation functions
+  // Enhanced Navigation functions with proper coordinate synchronization
   const navigateToVision = useCallback((coordinates?: { lat: number; lon: number }) => {
+    console.log('🧠 Unified System: Navigating to Vision Agent with coordinates:', coordinates)
+    
     setState(prev => ({ ...prev, activeView: 'vision' }))
+    
     if (coordinates) {
+      // Update coordinates first
       setState(prev => ({ ...prev, selectedCoordinates: coordinates }))
+      
+      // Add navigation message to chat
+      const navMessage: ChatMessage = {
+        id: Date.now().toString(),
+        role: 'system',
+        content: `🧠 Navigating to Vision Agent at coordinates ${coordinates.lat.toFixed(4)}, ${coordinates.lon.toFixed(4)}`,
+        timestamp: new Date(),
+        coordinates,
+        metadata: { source: 'navigation', target: 'vision' }
+      }
+      
+      setState(prev => ({
+        ...prev,
+        chatMessages: [...prev.chatMessages, navMessage]
+      }))
+      
+      // Store coordinates in URL params for persistence
+      router.push(`/vision?lat=${coordinates.lat}&lng=${coordinates.lon}`)
+    } else {
+      router.push('/vision')
     }
-    router.push('/vision')
   }, [router])
 
   const navigateToMap = useCallback((coordinates?: { lat: number; lon: number }) => {
+    console.log('🗺️ Unified System: Navigating to Map with coordinates:', coordinates)
+    
     setState(prev => ({ ...prev, activeView: 'map' }))
+    
     if (coordinates) {
+      // Update coordinates first
       setState(prev => ({ ...prev, selectedCoordinates: coordinates }))
+      
+      // Add navigation message to chat
+      const navMessage: ChatMessage = {
+        id: Date.now().toString(),
+        role: 'system',
+        content: `🗺️ Navigating to Map view at coordinates ${coordinates.lat.toFixed(4)}, ${coordinates.lon.toFixed(4)}`,
+        timestamp: new Date(),
+        coordinates,
+        metadata: { source: 'navigation', target: 'map' }
+      }
+      
+      setState(prev => ({
+        ...prev,
+        chatMessages: [...prev.chatMessages, navMessage]
+      }))
+      
+      // Store coordinates in URL params for persistence
+      router.push(`/map?lat=${coordinates.lat}&lng=${coordinates.lon}`)
+    } else {
+      router.push('/map')
     }
-    router.push('/map')
   }, [router])
 
   const navigateToChat = useCallback((coordinates?: { lat: number; lon: number }) => {
+    console.log('💬 Unified System: Navigating to Chat with coordinates:', coordinates)
+    
     setState(prev => ({ ...prev, activeView: 'chat' }))
+    
     if (coordinates) {
+      // Update coordinates first
       setState(prev => ({ ...prev, selectedCoordinates: coordinates }))
+      
+      // Add navigation message to chat
+      const navMessage: ChatMessage = {
+        id: Date.now().toString(),
+        role: 'system',
+        content: `💬 Navigating to Chat at coordinates ${coordinates.lat.toFixed(4)}, ${coordinates.lon.toFixed(4)}`,
+        timestamp: new Date(),
+        coordinates,
+        metadata: { source: 'navigation', target: 'chat' }
+      }
+      
+      setState(prev => ({
+        ...prev,
+        chatMessages: [...prev.chatMessages, navMessage]
+      }))
+      
+      // Store coordinates in URL params for persistence
+      router.push(`/chat?lat=${coordinates.lat}&lng=${coordinates.lon}`)
+    } else {
+      router.push('/chat')
     }
-    router.push('/chat')
   }, [router])
 
   // Results sharing
@@ -490,8 +546,57 @@ export function UnifiedSystemProvider({ children }: { children: React.ReactNode 
 
   const selectSite = useCallback((site: ArchaeologicalSite) => {
     const [lat, lon] = site.coordinates.split(',').map(c => parseFloat(c.trim()))
+    console.log('🏛️ Unified System: Selecting archaeological site:', site.name, 'at', lat, lon)
+    
+    // Update coordinates and selected site
+    setState(prev => ({
+      ...prev,
+      selectedCoordinates: { lat, lon },
+      selectedSites: prev.selectedSites.some(s => s.id === site.id) 
+        ? prev.selectedSites 
+        : [...prev.selectedSites, site]
+    }))
+    
+    // Add site selection message to chat
+    const siteMessage: ChatMessage = {
+      id: Date.now().toString(),
+      role: 'system',
+      content: `🏛️ **Archaeological Site Selected**\n\n**${site.name}**\n📍 Coordinates: ${lat.toFixed(4)}, ${lon.toFixed(4)}\n🎯 Confidence: ${Math.round(site.confidence * 100)}%\n🏺 Type: ${site.type || 'Archaeological Site'}\n📅 Discovery: ${site.discovery_date}\n\n🔍 **Cultural Significance**: ${site.cultural_significance}\n\n📊 **Data Sources**: ${site.data_sources.join(', ')}`,
+      timestamp: new Date(),
+      coordinates: { lat, lon },
+      confidence: site.confidence,
+      metadata: { source: 'site_selection', site }
+    }
+    
+    setState(prev => ({
+      ...prev,
+      chatMessages: [...prev.chatMessages, siteMessage]
+    }))
+    
     selectCoordinates(lat, lon, 'site_selection')
   }, [selectCoordinates])
+
+  // Navigate to site with specific analysis
+  const navigateToSite = useCallback((site: ArchaeologicalSite, targetPage: 'vision' | 'map' | 'chat' = 'map') => {
+    const [lat, lon] = site.coordinates.split(',').map(c => parseFloat(c.trim()))
+    console.log(`🎯 Unified System: Navigating to ${targetPage} for site:`, site.name)
+    
+    // Select the site first
+    selectSite(site)
+    
+    // Navigate to the specified page with coordinates
+    switch (targetPage) {
+      case 'vision':
+        navigateToVision({ lat, lon })
+        break
+      case 'map':
+        navigateToMap({ lat, lon })
+        break
+      case 'chat':
+        navigateToChat({ lat, lon })
+        break
+    }
+  }, [selectSite, navigateToVision, navigateToMap, navigateToChat])
 
   // Initialize backend status check
   useEffect(() => {
@@ -514,6 +619,7 @@ export function UnifiedSystemProvider({ children }: { children: React.ReactNode 
     sendChatMessage,
     addDiscoveredSite,
     selectSite,
+    navigateToSite,
     checkBackendStatus
   }
 

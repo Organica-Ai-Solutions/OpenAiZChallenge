@@ -11,8 +11,8 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { 
   RefreshCw, 
-  Download, 
-  Crosshair, 
+  Download,
+  Crosshair,
   MapPin, 
   Satellite, 
   Mountain, 
@@ -90,14 +90,14 @@ export function MapboxVisionMap({
 
   // Mapbox token
   const MAPBOX_TOKEN = 'pk.eyJ1IjoicGVudGl1czAwIiwiYSI6ImNtYXRtZXpmZTB4djgya29mNWZ0dG5pZDUifQ.dmsZjiJKZ7dxGs5KHVEK2g'
-
+  
   // Enhanced LIDAR data fetching with professional processing
   const fetchRealLidarData = useCallback(async () => {
     if (!coordinates) return
     
     console.log('🏔️ Fetching professional LIDAR data:', coordinates)
-    setDataLoading(true)
-    
+      setDataLoading(true)
+      
     try {
       const response = await fetch(`http://localhost:8000/lidar/data/latest`, {
         method: 'POST',
@@ -168,7 +168,7 @@ export function MapboxVisionMap({
       console.warn('⚠️ Could not fetch satellite data:', error)
     }
   }, [coordinates])
-
+  
   // Initialize professional Mapbox map
   useEffect(() => {
     const initializeMap = async () => {
@@ -179,7 +179,7 @@ export function MapboxVisionMap({
         
         const mapboxgl = await import('mapbox-gl')
         mapboxgl.default.accessToken = MAPBOX_TOKEN
-
+        
         const mapInstance = new mapboxgl.default.Map({
           container: mapContainer.current,
           style: 'mapbox://styles/mapbox/satellite-v9',
@@ -305,20 +305,20 @@ export function MapboxVisionMap({
         }
 
         map.current.addSource('lidar-triangulated', {
-          type: 'geojson',
+        type: 'geojson',
           data: triangulatedGeoJSON
-        })
+      })
 
         // Add triangulated mesh layer with 3D extrusion
-        map.current.addLayer({
+      map.current.addLayer({
           id: 'lidar-triangulation',
           type: 'fill-extrusion',
           source: 'lidar-triangulated',
-          paint: {
+        paint: {
             'fill-extrusion-color': getColorExpression(lidarViz.mode, lidarViz.colorScheme),
             'fill-extrusion-height': lidarViz.extrusion ? [
-              'interpolate',
-              ['linear'],
+            'interpolate',
+            ['linear'],
               ['get', 'elevation'],
               dataStats?.elevation_min || 140, 0,
               dataStats?.elevation_max || 200, ['*', ['get', 'elevation_diff'], 3]
@@ -366,7 +366,7 @@ export function MapboxVisionMap({
         }))
 
         map.current.addSource('archaeological-data', {
-          type: 'geojson',
+        type: 'geojson',
           data: {
             type: 'FeatureCollection',
             features: archaeologicalFeatures
@@ -459,7 +459,7 @@ export function MapboxVisionMap({
             elevation_diff: elevDiff,
             triangle_type: 'upper'
           },
-          geometry: {
+        geometry: {
             type: 'Polygon',
             coordinates: [[
               [lng2, lat1],
@@ -596,7 +596,7 @@ export function MapboxVisionMap({
         <div className="text-center text-red-300">
           <p className="text-lg font-semibold">Professional Map Error</p>
           <p className="text-sm">{mapError}</p>
-        </div>
+          </div>
       </div>
     )
   }
@@ -611,7 +611,7 @@ export function MapboxVisionMap({
       />
 
       {/* Professional Loading Overlay */}
-      {dataLoading && (
+            {dataLoading && (
         <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
           <div className="text-center text-white">
             <Zap className="w-8 h-8 animate-pulse mx-auto mb-2 text-blue-400" />
@@ -637,7 +637,7 @@ export function MapboxVisionMap({
                 <Select
                   value={lidarViz.mode}
                   onValueChange={(value: any) => {
-                    setLidarViz(prev => ({ ...prev, mode: value }))
+                  setLidarViz(prev => ({ ...prev, mode: value }))
                   }}
                 >
                   <SelectTrigger className="mt-1 bg-slate-800 border-slate-600">
@@ -653,13 +653,13 @@ export function MapboxVisionMap({
                   </SelectContent>
                 </Select>
               </div>
-
+              
               <div>
                 <Label className="text-xs font-semibold">Color Scheme</Label>
                 <Select
                   value={lidarViz.colorScheme}
                   onValueChange={(value: any) => {
-                    setLidarViz(prev => ({ ...prev, colorScheme: value }))
+                  setLidarViz(prev => ({ ...prev, colorScheme: value }))
                   }}
                 >
                   <SelectTrigger className="mt-1 bg-slate-800 border-slate-600">
@@ -703,24 +703,24 @@ export function MapboxVisionMap({
 
               <div className="grid grid-cols-2 gap-2">
                 <div className="flex items-center space-x-2">
-                  <Switch
+                    <Switch
                     checked={lidarViz.extrusion}
                     onCheckedChange={(checked) => {
                       setLidarViz(prev => ({ ...prev, extrusion: checked }))
                     }}
-                    className="scale-75"
-                  />
+                      className="scale-75"
+                    />
                   <Label className="text-xs">3D Extrusion</Label>
-                </div>
+                  </div>
                 
                 <div className="flex items-center space-x-2">
-                  <Switch
+                    <Switch
                     checked={lidarViz.triangulation}
                     onCheckedChange={(checked) => {
                       setLidarViz(prev => ({ ...prev, triangulation: checked }))
                     }}
-                    className="scale-75"
-                  />
+                      className="scale-75"
+                    />
                   <Label className="text-xs">Triangulation</Label>
                 </div>
               </div>
@@ -771,20 +771,20 @@ export function MapboxVisionMap({
                   <div className="flex justify-between">
                     <span>Elevation Range:</span>
                     <span>{dataStats.elevation_min?.toFixed(1)}m - {dataStats.elevation_max?.toFixed(1)}m</span>
-                  </div>
+        </div>
                   <div className="flex justify-between">
                     <span>Mean Elevation:</span>
                     <span>{dataStats.elevation_mean?.toFixed(1)}m</span>
-                  </div>
+        </div>
                   <div className="flex justify-between">
                     <span>Archaeological Features:</span>
                     <span>{dataStats.archaeological_features_detected || 0}</span>
-                  </div>
+        </div>
                   <div className="flex justify-between">
                     <span>Data Quality:</span>
                     <span className="text-green-400">{realLidarData?.quality_assessment?.data_completeness ? Math.round(realLidarData.quality_assessment.data_completeness * 100) : 85}%</span>
-                  </div>
-                </div>
+        </div>
+      </div>
               )}
             </TabsContent>
           </Tabs>
@@ -800,8 +800,8 @@ export function MapboxVisionMap({
           onClick={handleRefreshMap}
           title="Refresh LIDAR Data"
         >
-          <RefreshCw className="w-4 h-4" />
-        </Button>
+                <RefreshCw className="w-4 h-4" />
+              </Button>
         
         <Button 
           size="sm" 
@@ -810,8 +810,8 @@ export function MapboxVisionMap({
           onClick={handleExportData}
           title="Export Professional Data"
         >
-          <Download className="w-4 h-4" />
-        </Button>
+                <Download className="w-4 h-4" />
+              </Button>
         
         <Button 
           size="sm" 
@@ -820,8 +820,8 @@ export function MapboxVisionMap({
           onClick={handleCenterMap}
           title="Center Map"
         >
-          <Crosshair className="w-4 h-4" />
-        </Button>
+                <Crosshair className="w-4 h-4" />
+              </Button>
       </div>
 
       {/* Professional Status Display */}

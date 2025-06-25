@@ -194,56 +194,8 @@ export function AnimatedAIChat({ onSendMessage, onCoordinateSelect, messages: ex
     
     // Initialize with welcome message showcasing NIS Protocol superiority (only if no external messages)
     useEffect(() => {
-        if (!externalMessages && messages.length === 0) {
-            const welcomeMessage: Message = {
-                id: 'welcome',
-                role: 'assistant',
-                content: `🏛️ **Welcome to NIS Protocol - Next-Generation Archaeological AI**
-
-**🧠 Why NIS Protocol > Current AI Systems:**
-
-**🤖 Multi-Agent Architecture vs. Single Model:**
-• **Current AI** (ChatGPT/Claude): Single model, text-only processing
-• **NIS Protocol**: 6 specialized agents + consciousness integration
-
-**🔍 Our 6-Agent Network:**
-• **🧠 Consciousness Agent** → Global workspace coordination
-• **👁️ Vision Agent** → GPT-4 Vision + satellite analysis
-• **🧠 Memory Agent** → 148+ archaeological sites + cultural knowledge
-• **🤔 Reasoning Agent** → Archaeological interpretation
-• **⚡ Action Agent** → Strategic planning + recommendations  
-• **🔗 Integration Agent** → Multi-source data correlation
-
-**📜 IKRP Codex System Integration:**
-• **26+ Ancient Manuscripts** → FAMSI, World Digital Library, INAH
-• **Coordinate-Based Discovery** → Find codices relevant to archaeological sites
-• **AI-Powered Analysis** → GPT-4 Vision interpretation of historical documents
-• **Cultural Cross-Referencing** → Correlate ancient texts with satellite data
-
-**🚀 Unique Capabilities (Impossible with Standard AI):**
-• Coordinate analysis with satellite + historical document correlation
-• Multi-agent consciousness-guided archaeological reasoning
-• Real-time integration of vision, memory, and cultural context
-• Specialized archaeological intelligence vs. general text generation
-
-**💡 Try These Research Commands:**
-• \`/tutorial\` → Learn NIS Protocol research methodology
-• \`/discover [coordinates]\` → AI-powered archaeological site discovery
-• \`/batch-discover [coords] [coords] [coords]\` → Analyze multiple sites simultaneously
-• \`/save\` → Store discoveries in research database
-• \`/analyze [coordinates]\` → Full 6-agent archaeological analysis
-• \`/codex\` → Access IKRP ancient manuscript system
-• \`/agents\` → See all 6 agents working in real-time
-
-**🏆 Proven Success**: We recently discovered **12+ new archaeological sites** in Brazil using these exact methods!
-
-**This is the future of archaeological AI - specialized, multi-agent, consciousness-integrated intelligence with real discovery capabilities.**`,
-                confidence: 0.98,
-                timestamp: new Date(),
-                metadata: { welcome: true, superiority: 'demonstrated' }
-            };
-            setInternalMessages([welcomeMessage]);
-        }
+        // REMOVED: Automatic welcome message that was causing chat to get stuck
+        // The chat service will handle initial responses properly
     }, [externalMessages, messages.length]);
     
     // Auto-scroll functionality - COMPLETELY REDESIGNED
@@ -1831,18 +1783,9 @@ The NIS Protocol has successfully processed your request.
     useEffect(() => {
         checkBackendHealth();
         
-        // Add welcome message when component mounts
-        if (messages.length === 0) {
-            const welcomeMessage: Message = {
-                id: 'welcome_' + Date.now(),
-                role: 'assistant',
-                content: `🏛️ **Welcome to NIS Protocol Archaeological Assistant!**\n\n✅ **Backend Status**: ${backendStatus === 'online' ? 'CONNECTED' : 'Checking...'}\n\n**Available Commands:**\n🔍 \`/analyze [coordinates]\` - Archaeological analysis\n👁️ \`/vision [coordinates]\` - Satellite imagery analysis\n🏛️ \`/sites\` - Browse archaeological discoveries\n📊 \`/status\` - System health check\n\n**Example:**\n\`/analyze -3.4653, -62.2159\`\n\`/sites\`\n\`What archaeological sites are in Peru?\`\n\nTry sending a message to test the connection!`,
-                timestamp: new Date(),
-                confidence: 1.0
-            };
-            setInternalMessages([welcomeMessage]);
-        }
-    }, [checkBackendHealth, backendStatus, messages.length]);
+        // REMOVED: Second automatic welcome message that was causing chat to get stuck
+        // The chat service will handle responses properly without auto-initialization
+    }, [checkBackendHealth, backendStatus]);
 
     useEffect(() => {
         setMounted(true);

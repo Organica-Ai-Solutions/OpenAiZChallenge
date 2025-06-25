@@ -19,10 +19,8 @@ const navigationLinks = [
   { href: "/archaeological-discovery", label: "Discovery" },
   { href: "/analysis", label: "Analysis" },
   { href: "/vision", label: "Vision Agent" },
-  { href: "/satellite", label: "Satellite" },
   { href: "/map", label: "Maps" },
   { href: "/analytics", label: "Analytics" },
-  { href: "/codex-reader", label: "Codex Reader" },
   { href: "/chat", label: "Chat" },
   { href: "/documentation", label: "Docs" },
 ];
@@ -70,7 +68,7 @@ export default function OptimizedNavigation({
       const checkBackend = async () => {
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 1000); // Reduced timeout
+          const timeoutId = setTimeout(() => controller.abort(), 3000); // Increased timeout to match vision page
           
           const response = await fetch('http://localhost:8000/system/health', {
             signal: controller.signal,
@@ -86,7 +84,7 @@ export default function OptimizedNavigation({
       };
       
       checkBackend();
-      const interval = setInterval(checkBackend, 60000); // Reduced to 1 minute
+      const interval = setInterval(checkBackend, 30000); // Reduced to 30 seconds for better responsiveness
       return () => clearInterval(interval);
     }
   }, [showBackendStatus, mounted]);

@@ -258,18 +258,9 @@ export class AnalysisService {
   async analyzeLidarComprehensive(request: AnalysisRequest): Promise<AnalysisResult> {
     const backend = await this.getWorkingBackend()
     
-    const response = await fetch(`${backend}/agents/vision/comprehensive-lidar-analysis`, {
+    const response = await fetch(`${backend}/agents/vision/comprehensive-lidar-analysis?lat=${request.coordinates.lat}&lon=${request.coordinates.lon}&radius_km=5&include_3d_data=true&analysis_depth=comprehensive`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        lat: request.coordinates.lat,
-        lon: request.coordinates.lon,
-        radius_km: 5,
-        include_triangulation: true,
-        include_3d_visualization: true,
-        archaeological_focus: true,
-        nasa_gedi_integration: true
-      })
+      headers: { 'Content-Type': 'application/json' }
     })
 
     const result = await response.json()

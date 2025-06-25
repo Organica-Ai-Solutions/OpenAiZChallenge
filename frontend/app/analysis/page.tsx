@@ -14,6 +14,9 @@ import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useRouter } from 'next/navigation'
+import { useUnifiedSystem } from '../../src/contexts/UnifiedSystemContext'
+import { UniversalMapboxIntegration } from '@/components/ui/universal-mapbox-integration'
 import { 
   Search, MapPin, Satellite, Eye, Brain, Database, Activity, Settings, Play, Save, 
   Layers, Clock, Users, Target, Zap, Globe, BarChart3, FileText, MessageSquare,
@@ -103,8 +106,23 @@ const AGENT_TYPES = [
 ]
 
 export default function NISAnalysisPage() {
+  // Unified System Integration
+  const router = useRouter()
+  const { actions } = useUnifiedSystem()
+  
   // Core State
-  const [coordinates, setCoordinates] = useState('')
+  const [coordinates, setCoordinates] = useState(() => {
+    // Initialize from URL parameters or unified system
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const lat = urlParams.get('lat')
+      const lng = urlParams.get('lng')
+      if (lat && lng) {
+        return `${lat}, ${lng}`
+      }
+    }
+    return '5.1542, -73.7792' // Default coordinates
+  })
   const [analysisType, setAnalysisType] = useState<'quick' | 'comprehensive' | 'specialized'>('comprehensive')
   const [selectedDataSources, setSelectedDataSources] = useState<string[]>(['satellite', 'lidar', 'historical'])
   const [selectedAgents, setSelectedAgents] = useState<string[]>(['vision', 'cultural', 'temporal', 'geospatial'])
@@ -587,20 +605,194 @@ export default function NISAnalysisPage() {
     }
   }
 
-  // Workflow Integration
+  // Enhanced Workflow Integration with Unified System Navigation
   const openInChat = (coordinates: string) => {
-    const chatUrl = `/chat?coordinates=${encodeURIComponent(coordinates)}&mode=analysis`
-    window.open(chatUrl, '_blank')
+    if (!coordinates) return
+    const [lat, lon] = coordinates.split(',').map(c => parseFloat(c.trim()))
+    console.log('💬 Navigating to chat with coordinates from analysis:', lat, lon)
+    
+    // Use unified system navigation for proper coordinate synchronization
+    actions.navigateToChat({ lat, lon })
   }
 
   const openInMap = (coordinates: string) => {
-    const mapUrl = `/map?coordinates=${encodeURIComponent(coordinates)}&analysis=true`
-    window.open(mapUrl, '_blank')
+    if (!coordinates) return
+    const [lat, lon] = coordinates.split(',').map(c => parseFloat(c.trim()))
+    console.log('🗺️ Navigating to map with coordinates from analysis:', lat, lon)
+    
+    // Use unified system navigation for proper coordinate synchronization
+    actions.navigateToMap({ lat, lon })
   }
 
   const openInVision = (coordinates: string) => {
-    const visionUrl = `/vision?coordinates=${encodeURIComponent(coordinates)}&analysis=true`
-    window.open(visionUrl, '_blank')
+    if (!coordinates) return
+    const [lat, lon] = coordinates.split(',').map(c => parseFloat(c.trim()))
+    console.log('🧠 Navigating to vision with coordinates from analysis:', lat, lon)
+    
+    // Use unified system navigation for proper coordinate synchronization
+    actions.navigateToVision({ lat, lon })
+  }
+
+  // Enhanced navigation with site context
+  const openInChatWithSite = (analysis: Analysis) => {
+    if (!analysis.coordinates) return
+    const [lat, lon] = analysis.coordinates.split(',').map(c => parseFloat(c.trim()))
+    
+    // Create archaeological site object from analysis
+    const site = {
+      id: analysis.id,
+      name: analysis.session_name || `Analysis Site ${analysis.id}`,
+      coordinates: analysis.coordinates,
+      confidence: analysis.results?.confidence || 0,
+      type: analysis.results?.pattern_type || 'archaeological',
+      description: analysis.results?.description || 'Archaeological analysis site',
+      cultural_significance: analysis.results?.cultural_significance || 'Under investigation',
+      discovery_date: analysis.created_at,
+      data_sources: analysis.results?.data_sources || []
+    }
+    
+    console.log('💬 Navigating to chat with analysis site context:', site)
+    actions.navigateToSite(site, 'chat')
+  }
+
+  const openInMapWithSite = (analysis: Analysis) => {
+    if (!analysis.coordinates) return
+    const [lat, lon] = analysis.coordinates.split(',').map(c => parseFloat(c.trim()))
+    
+    // Create archaeological site object from analysis
+    const site = {
+      id: analysis.id,
+      name: analysis.session_name || `Analysis Site ${analysis.id}`,
+      coordinates: analysis.coordinates,
+      confidence: analysis.results?.confidence || 0,
+      type: analysis.results?.pattern_type || 'archaeological',
+      description: analysis.results?.description || 'Archaeological analysis site',
+      cultural_significance: analysis.results?.cultural_significance || 'Under investigation',
+      discovery_date: analysis.created_at,
+      data_sources: analysis.results?.data_sources || []
+    }
+    
+    console.log('🗺️ Navigating to map with analysis site context:', site)
+    actions.navigateToSite(site, 'map')
+  }
+
+  const openInVisionWithSite = (analysis: Analysis) => {
+    if (!analysis.coordinates) return
+    const [lat, lon] = analysis.coordinates.split(',').map(c => parseFloat(c.trim()))
+    
+    // Create archaeological site object from analysis
+    const site = {
+      id: analysis.id,
+      name: analysis.session_name || `Analysis Site ${analysis.id}`,
+      coordinates: analysis.coordinates,
+      confidence: analysis.results?.confidence || 0,
+      type: analysis.results?.pattern_type || 'archaeological',
+      description: analysis.results?.description || 'Archaeological analysis site',
+      cultural_significance: analysis.results?.cultural_significance || 'Under investigation',
+      discovery_date: analysis.created_at,
+      data_sources: analysis.results?.data_sources || []
+    }
+    
+    console.log('🧠 Navigating to vision with analysis site context:', site)
+    actions.navigateToSite(site, 'vision')
+  }
+
+  // Enhanced navigation functions for AnalysisResult (used in detail modal)
+  const openInChatWithResult = (result: AnalysisResult) => {
+    if (!result.coordinates) return
+    const [lat, lon] = result.coordinates.split(',').map(c => parseFloat(c.trim()))
+    
+    // Create archaeological site object from analysis result
+    const site = {
+      id: result.analysis_id,
+      name: `Analysis ${result.analysis_id}`,
+      coordinates: result.coordinates,
+      confidence: result.confidence || 0,
+      type: result.pattern_type || 'archaeological',
+      description: result.description || 'Archaeological analysis site',
+      cultural_significance: result.cultural_significance || 'Under investigation',
+      discovery_date: result.timestamp,
+      data_sources: result.data_sources || []
+    }
+    
+    console.log('💬 Navigating to chat with analysis result context:', site)
+    actions.navigateToSite(site, 'chat')
+  }
+
+  const openInMapWithResult = (result: AnalysisResult) => {
+    if (!result.coordinates) return
+    const [lat, lon] = result.coordinates.split(',').map(c => parseFloat(c.trim()))
+    
+    // Create archaeological site object from analysis result
+    const site = {
+      id: result.analysis_id,
+      name: `Analysis ${result.analysis_id}`,
+      coordinates: result.coordinates,
+      confidence: result.confidence || 0,
+      type: result.pattern_type || 'archaeological',
+      description: result.description || 'Archaeological analysis site',
+      cultural_significance: result.cultural_significance || 'Under investigation',
+      discovery_date: result.timestamp,
+      data_sources: result.data_sources || []
+    }
+    
+    console.log('🗺️ Navigating to map with analysis result context:', site)
+    actions.navigateToSite(site, 'map')
+  }
+
+  const openInVisionWithResult = (result: AnalysisResult) => {
+    if (!result.coordinates) return
+    const [lat, lon] = result.coordinates.split(',').map(c => parseFloat(c.trim()))
+    
+    // Create archaeological site object from analysis result
+    const site = {
+      id: result.analysis_id,
+      name: `Analysis ${result.analysis_id}`,
+      coordinates: result.coordinates,
+      confidence: result.confidence || 0,
+      type: result.pattern_type || 'archaeological',
+      description: result.description || 'Archaeological analysis site',
+      cultural_significance: result.cultural_significance || 'Under investigation',
+      discovery_date: result.timestamp,
+      data_sources: result.data_sources || []
+    }
+    
+    console.log('🧠 Navigating to vision with analysis result context:', site)
+    actions.navigateToSite(site, 'vision')
+  }
+
+  // Handle map coordinate updates
+  const handleMapCoordinatesChange = (newCoords: string) => {
+    console.log('🗺️ Analysis page coordinates changed:', newCoords)
+    setCoordinates(newCoords)
+    
+    // Update unified system
+    const [lat, lng] = newCoords.split(',').map(s => parseFloat(s.trim()))
+    actions.selectCoordinates(lat, lng, 'analysis_map_update')
+  }
+
+  // Handle navigation to other pages with coordinates
+  const handlePageNavigation = (targetPage: string, coordinates: string) => {
+    console.log(`🚀 Navigating from analysis to ${targetPage} with coordinates:`, coordinates)
+    
+    const [lat, lng] = coordinates.split(',').map(s => parseFloat(s.trim()))
+    
+    switch (targetPage) {
+      case 'vision':
+        router.push(`/vision?lat=${lat}&lng=${lng}`)
+        break
+      case 'chat':
+        router.push(`/chat?lat=${lat}&lng=${lng}`)
+        break
+      case 'map':
+        router.push(`/map?lat=${lat}&lng=${lng}`)
+        break
+      case 'satellite':
+        router.push(`/satellite?lat=${lat}&lng=${lng}`)
+        break
+      default:
+        router.push(`/${targetPage}`)
+    }
   }
 
   // Safe value getters
@@ -1012,13 +1204,20 @@ export default function NISAnalysisPage() {
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* 🎯 ENHANCED POWER TABS */}
-          <TabsList className="grid w-full grid-cols-5 bg-slate-800/50 border border-slate-700 rounded-xl backdrop-blur-sm">
+          <TabsList className="grid w-full grid-cols-6 bg-slate-800/50 border border-slate-700 rounded-xl backdrop-blur-sm">
             <TabsTrigger 
               value="analysis" 
               className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white text-slate-300 hover:text-white font-medium transition-all duration-300"
             >
               <Target className="w-4 h-4 mr-2" />
               🎯 ANALYSIS
+            </TabsTrigger>
+            <TabsTrigger 
+              value="map" 
+              className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white text-slate-300 hover:text-white font-medium transition-all duration-300"
+            >
+              <MapPin className="w-4 h-4 mr-2" />
+              🗺️ MAP
             </TabsTrigger>
             <TabsTrigger 
               value="realtime" 
@@ -1303,7 +1502,7 @@ export default function NISAnalysisPage() {
                       {/* Action Buttons */}
                       <div className="flex flex-wrap gap-3 pt-4 border-t border-slate-600">
                         <Button
-                          onClick={() => openInChat(currentAnalysis.coordinates || coordinates)}
+                          onClick={() => openInChatWithResult(currentAnalysis)}
                           variant="outline"
                           size="sm"
                           className="bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600 hover:text-white"
@@ -1313,7 +1512,7 @@ export default function NISAnalysisPage() {
                         </Button>
                         
                         <Button
-                          onClick={() => openInMap(currentAnalysis.coordinates || coordinates)}
+                          onClick={() => openInMapWithResult(currentAnalysis)}
                           variant="outline"
                           size="sm"
                           className="bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600 hover:text-white"
@@ -1323,7 +1522,7 @@ export default function NISAnalysisPage() {
                         </Button>
                         
                         <Button
-                          onClick={() => openInVision(currentAnalysis.coordinates || coordinates)}
+                          onClick={() => openInVisionWithResult(currentAnalysis)}
                           variant="outline"
                           size="sm"
                           className="bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600 hover:text-white"
@@ -1528,6 +1727,195 @@ export default function NISAnalysisPage() {
             </div>
           </TabsContent>
 
+          {/* Map Tab */}
+          <TabsContent value="map" className="space-y-6">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+                  <MapPin className="w-6 h-6 text-emerald-400" />
+                  🗺️ Interactive Analysis Map
+                </h2>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="bg-emerald-500/20 border-emerald-500/50 text-emerald-300">
+                    Current: {coordinates || 'No coordinates set'}
+                  </Badge>
+                </div>
+              </div>
+              
+              <UniversalMapboxIntegration
+                coordinates={coordinates || '5.1542, -73.7792'}
+                onCoordinatesChange={handleMapCoordinatesChange}
+                height="450px"
+                showControls={true}
+                pageType="analysis"
+                onPageNavigation={handlePageNavigation}
+                enableLidarVisualization={true}
+                analysisHistory={analysisHistory}
+              />
+              
+              {/* Analysis Map Actions */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <Button 
+                  onClick={() => {
+                    const newCoords = "5.1542, -73.7792"
+                    handleMapCoordinatesChange(newCoords)
+                  }}
+                  size="sm"
+                  variant="outline"
+                  className="border-emerald-500 text-emerald-400 hover:bg-emerald-500/20"
+                >
+                  <Globe className="w-4 h-4 mr-2" />
+                  Colombia Site
+                </Button>
+                <Button 
+                  onClick={() => {
+                    const newCoords = "-3.4653, -62.2159"
+                    handleMapCoordinatesChange(newCoords)
+                  }}
+                  size="sm"
+                  variant="outline"
+                  className="border-blue-500 text-blue-400 hover:bg-blue-500/20"
+                >
+                  <TreePine className="w-4 h-4 mr-2" />
+                  Amazon Basin
+                </Button>
+                <Button 
+                  onClick={() => {
+                    const newCoords = "-14.7, -75.1"
+                    handleMapCoordinatesChange(newCoords)
+                  }}
+                  size="sm"
+                  variant="outline"
+                  className="border-purple-500 text-purple-400 hover:bg-purple-500/20"
+                >
+                  <Mountain className="w-4 h-4 mr-2" />
+                  Nazca Region
+                </Button>
+                <Button 
+                  onClick={runAnalysis}
+                  disabled={isAnalyzing || !coordinates.trim()}
+                  size="sm"
+                  className="bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700"
+                >
+                  {isAnalyzing ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Zap className="w-4 h-4 mr-2" />
+                  )}
+                  Analyze Location
+                </Button>
+              </div>
+              
+              {/* Map Analysis Tools */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <Card className="bg-slate-800/50 border-slate-700">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center text-sm">
+                      <Target className="w-4 h-4 mr-2 text-emerald-400" />
+                      Quick Analysis
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="text-xs text-slate-400">
+                      Click anywhere on the map to set coordinates for analysis.
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => {
+                          setAnalysisType('quick')
+                          if (coordinates.trim()) runAnalysis()
+                        }}
+                        disabled={!coordinates.trim()}
+                        className="text-xs"
+                      >
+                        Quick Scan
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => {
+                          setAnalysisType('comprehensive')
+                          if (coordinates.trim()) runAnalysis()
+                        }}
+                        disabled={!coordinates.trim()}
+                        className="text-xs"
+                      >
+                        Deep Analysis
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-slate-800/50 border-slate-700">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center text-sm">
+                      <Network className="w-4 h-4 mr-2 text-blue-400" />
+                      Data Sources
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className="text-xs text-slate-400">
+                      Active sources for map analysis:
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {selectedDataSources.map(source => (
+                        <Badge key={source} variant="outline" className="text-xs border-blue-500/30 text-blue-400">
+                          {source}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-slate-800/50 border-slate-700">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center text-sm">
+                      <Brain className="w-4 h-4 mr-2 text-purple-400" />
+                      Active Agents
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className="text-xs text-slate-400">
+                      Agents available for analysis:
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {selectedAgents.map(agent => (
+                        <Badge key={agent} variant="outline" className="text-xs border-purple-500/30 text-purple-400">
+                          {agent}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              {/* Map Instructions */}
+              <Card className="bg-slate-900/50 border-slate-700">
+                <CardContent className="p-4">
+                  <div className="text-slate-300 text-sm">
+                    <div className="font-medium mb-3 text-emerald-400">🗺️ Map-Integrated Analysis Workflow:</div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <ul className="space-y-1 text-slate-400 text-xs">
+                        <li>• Click on the map to select analysis coordinates</li>
+                        <li>• Use preset locations for known archaeological regions</li>
+                        <li>• LIDAR points and archaeological sites are visualized</li>
+                        <li>• Analysis results are automatically saved to history</li>
+                      </ul>
+                      <ul className="space-y-1 text-slate-400 text-xs">
+                        <li>• Navigate to Vision Agent for detailed image analysis</li>
+                        <li>• Open Chat for interactive analysis discussion</li>
+                        <li>• View full Map page for advanced GIS features</li>
+                        <li>• All coordinate changes sync across the platform</li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
           {/* History Tab */}
           <TabsContent value="history" className="space-y-6">
             <div className="flex items-center justify-between mb-6">
@@ -1687,7 +2075,7 @@ export default function NISAnalysisPage() {
                           </Button>
                           
                           <Button
-                            onClick={() => openInChat(analysis.coordinates)}
+                            onClick={() => openInChatWithSite(analysis)}
                             variant="outline"
                             size="sm"
                             className="bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600 hover:text-white"
@@ -1698,7 +2086,7 @@ export default function NISAnalysisPage() {
                           </Button>
 
                           <Button
-                            onClick={() => openInMap(analysis.coordinates)}
+                            onClick={() => openInMapWithSite(analysis)}
                             variant="outline"
                             size="sm"
                             className="bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600 hover:text-white"
@@ -1775,7 +2163,7 @@ export default function NISAnalysisPage() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Button 
-                    onClick={() => window.open('/chat', '_blank')}
+                    onClick={() => actions.navigateToChat()}
                     variant="outline" 
                     className="w-full justify-start bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600 hover:text-white"
                   >
@@ -1784,7 +2172,7 @@ export default function NISAnalysisPage() {
                   </Button>
                   
                   <Button 
-                    onClick={() => window.open('/map', '_blank')}
+                    onClick={() => actions.navigateToMap()}
                     variant="outline" 
                     className="w-full justify-start bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600 hover:text-white"
                   >
@@ -1793,7 +2181,7 @@ export default function NISAnalysisPage() {
                   </Button>
                   
                   <Button 
-                    onClick={() => window.open('/vision', '_blank')}
+                    onClick={() => actions.navigateToVision()}
                     variant="outline" 
                     className="w-full justify-start bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600 hover:text-white"
                   >
@@ -1802,7 +2190,7 @@ export default function NISAnalysisPage() {
                   </Button>
                   
                   <Button 
-                    onClick={() => window.open('/satellite', '_blank')}
+                    onClick={() => router.push('/satellite')}
                     variant="outline" 
                     className="w-full justify-start bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600 hover:text-white"
                   >
@@ -2714,14 +3102,14 @@ export default function NISAnalysisPage() {
                 <div className="flex items-center justify-between mt-6 pt-6 border-t border-slate-700">
                   <div className="flex items-center space-x-3">
                     <Button
-                      onClick={() => openInChat(selectedAnalysisDetail.coordinates)}
+                      onClick={() => openInChatWithResult(selectedAnalysisDetail)}
                       className="bg-blue-600 hover:bg-blue-700"
                     >
                       <MessageSquare className="w-4 h-4 mr-2" />
                       Discuss in Chat
                     </Button>
                     <Button
-                      onClick={() => openInMap(selectedAnalysisDetail.coordinates)}
+                      onClick={() => openInMapWithResult(selectedAnalysisDetail)}
                       variant="outline"
                       className="border-green-500 text-green-400 hover:bg-green-500/10"
                     >
@@ -2729,7 +3117,7 @@ export default function NISAnalysisPage() {
                       View on Map
                     </Button>
                     <Button
-                      onClick={() => openInVision(selectedAnalysisDetail.coordinates)}
+                      onClick={() => openInVisionWithResult(selectedAnalysisDetail)}
                       variant="outline"
                       className="border-purple-500 text-purple-400 hover:bg-purple-500/10"
                     >

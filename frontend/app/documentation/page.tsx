@@ -1538,19 +1538,9 @@ export default function DocumentationPage() {
                             <div>Coordinate analysis, satellite overlays, discoveries</div>
                           </div>
                           <div className="grid grid-cols-3 gap-2">
-                            <div><code>/codex-reader</code></div>
-                            <div>Enhanced Codex Reader</div>
-                            <div>Discovery workflow, AI analysis, full downloads</div>
-                          </div>
-                          <div className="grid grid-cols-3 gap-2">
                             <div><code>/vision-analysis</code></div>
                             <div>Vision Analysis</div>
                             <div>GPT-4.1 Vision, image upload, archaeological insights</div>
-                          </div>
-                          <div className="grid grid-cols-3 gap-2">
-                            <div><code>/satellite</code></div>
-                            <div>Satellite Imagery</div>
-                            <div>Real imagery, change detection, overlays</div>
                           </div>
                           <div className="grid grid-cols-3 gap-2">
                             <div><code>/archaeological-discovery</code></div>

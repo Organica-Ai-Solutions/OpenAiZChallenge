@@ -7,8 +7,10 @@ import {
   Globe, Satellite, ArrowLeft, Wifi, WifiOff, MapPin, RefreshCw, Download, Eye, Activity, 
   Zap, AlertCircle, Calendar, Filter, Layers, Cloud, Settings, Database, Brain, 
   Search, FileUp, MonitorIcon, Target, Radar, Cpu, Network, Shield, 
-  BarChart3, TrendingUp, Clock, Users, Map, Play, Pause, RotateCcw, Sparkles, Bot
+  BarChart3, TrendingUp, Clock, Users, Map, Play, Pause, RotateCcw, Sparkles, Bot, Info, Copy
 } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent } from "@/components/ui/tabs"
 
 // 🛰️ NIS Protocol Satellite Data Interface - REAL-TIME INTEGRATION
 interface SatelliteData {
@@ -17,7 +19,7 @@ interface SatelliteData {
   coordinates: {
     lat: number
     lng: number
-    bounds: {
+    bounds?: {
       north: number
       south: number
       east: number
@@ -27,12 +29,29 @@ interface SatelliteData {
   resolution: number
   cloudCover: number
   source: string
-  bands: Record<string, string>
+  bands: {
+    red: string
+    green: string
+    blue: string
+    nir: string
+    swir?: string
+  }
   url: string
-  download_url: string
+  download_url?: string
+  metadata?: {
+    scene_id: string
+    platform: string
+    processing_level: string
+    bands_available: string[]
+    local_file?: string
+    data_points?: number
+    description?: string
+    sun_elevation?: number
+    sun_azimuth?: number
+  }
+  real_data?: boolean
   quality_score?: number
   archaeological_potential?: string
-  metadata?: any
 }
 
 interface LidarData {
@@ -232,41 +251,43 @@ function NISProtocolSatelliteMonitor({ isBackendOnline = false }: { isBackendOnl
 
   // 🔄 Real-time data loading with comprehensive error handling
   const loadSatelliteData = useCallback(async (coords: { lat: number; lng: number }) => {
-    if (!isBackendOnline) {
-      setError('🔴 Backend offline - Real-time satellite data requires live connection')
-      setSatelliteData([])
-      return
-    }
+    if (!isBackendOnline) return
 
     setIsLoading(true)
     setError(null)
     
     try {
-      console.log('🛰️ [NIS Protocol] Loading real-time satellite data...')
+      console.log(`🛰️ [NIS Protocol] Loading satellite data for ${coords.lat}, ${coords.lng}...`)
       
-      const response = await fetch('http://localhost:8000/satellite/imagery/latest', {
+      // Use the working satellite endpoint with proper request format
+      let response = await fetch('http://localhost:8000/satellite/imagery/latest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          coordinates: coords, 
-          radius: 5000,
-          include_metadata: true,
-          archaeological_focus: true,
-          use_ai_enhancement: true
+          coordinates: {
+            lat: coords.lat,
+            lng: coords.lng
+          },
+          radius: 5000
         })
       })
-      
+
       if (!response.ok) {
         throw new Error(`Satellite API Error: ${response.status} ${response.statusText}`)
       }
-      
+
       const data = await response.json()
+      console.log('📡 [NIS Protocol] Satellite data received:', data)
+      
+      // Extract images from the response
       const imageData = data.data || []
       
       if (imageData.length === 0) {
         setError('⚠️ No satellite imagery available for these coordinates')
       } else {
-        console.log(`✅ [NIS Protocol] Loaded ${imageData.length} real satellite images`)
+        const realDataCount = imageData.filter((img: any) => img.real_data === true).length
+        const totalCount = imageData.length
+        console.log(`✅ [NIS Protocol] Loaded ${totalCount} satellite images (${realDataCount} real, ${totalCount - realDataCount} mock)`)
       }
       
       setSatelliteData(imageData)
@@ -788,60 +809,39 @@ function NISProtocolSatelliteMonitor({ isBackendOnline = false }: { isBackendOnl
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
           >
-            {activeTab === 'live-feed' && (
-              <SatelliteFeedTab 
-                data={filteredData}
-                isLoading={isLoading}
-                onAnalyze={analyzeImagery}
-                onFiltersChange={handleFiltersChange}
-                filters={filters}
-                coordinates={coordinates}
-                archaeologicalSites={archaeologicalSites}
-                onImageClick={openImageViewer}
-              />
-            )}
-            
-            {activeTab === 'analysis' && (
-              <AnalysisTab 
-                results={analysisResults}
-                isLoading={isLoading}
-                coordinates={coordinates}
-              />
-            )}
-            
-            {activeTab === 'lidar' && (
-              <LidarTab 
-                data={lidarData}
-                coordinates={coordinates}
-                isLoading={isLoading}
-              />
-            )}
-            
-            {activeTab === 'agents' && (
-              <AgentCoordinationTab 
-                agents={activeAgents}
-                tasks={multiAgentTasks}
-                processingQueue={processingQueue}
-                isBackendOnline={isBackendOnline}
-                onInitializeCoordination={initializeAgentCoordination}
-              />
-            )}
-            
-            {activeTab === 'consciousness' && (
-              <ConsciousnessTab 
-                metrics={consciousnessMetrics}
-                isBackendOnline={isBackendOnline}
-                onRefreshMetrics={loadConsciousnessMetrics}
-              />
-            )}
-            
-            {activeTab === 'monitoring' && (
-              <MonitoringTab 
-                systemStatus={systemStatus}
-                metrics={realTimeMetrics}
-                isBackendOnline={isBackendOnline}
-              />
-            )}
+            <Tabs defaultValue="satellite-feed" className="space-y-4">
+              <TabsContent value="satellite-feed" className="space-y-6">
+                <div className="text-center text-slate-400 p-8">
+                  <Satellite className="w-12 h-12 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Satellite Feed</h3>
+                  <p>Real-time satellite imagery feed will be displayed here</p>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="analysis" className="space-y-6">
+                <div className="text-center text-slate-400 p-8">
+                  <Brain className="w-12 h-12 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Analysis Results</h3>
+                  <p>AI-powered analysis results will be displayed here</p>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="lidar" className="space-y-6">
+                <div className="text-center text-slate-400 p-8">
+                  <Radar className="w-12 h-12 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">LIDAR Data</h3>
+                  <p>LIDAR point cloud data will be displayed here</p>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="coordination" className="space-y-6">
+                <div className="text-center text-slate-400 p-8">
+                  <Network className="w-12 h-12 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Agent Coordination</h3>
+                  <p>Multi-agent coordination interface will be displayed here</p>
+                </div>
+              </TabsContent>
+            </Tabs>
           </motion.div>
         </AnimatePresence>
       </div>
@@ -945,6 +945,73 @@ function NISProtocolSatelliteMonitor({ isBackendOnline = false }: { isBackendOnl
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Data Source Information Panel */}
+      <div className="mb-6 bg-gradient-to-r from-blue-900/30 to-slate-800/30 rounded-lg border border-blue-500/30 p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-lg font-semibold text-white flex items-center">
+            <Database className="w-5 h-5 mr-2 text-blue-400" />
+            Satellite Data Sources
+          </h3>
+          <div className="flex items-center space-x-2">
+            {satelliteData.length > 0 && (
+              <>
+                <div className="flex items-center space-x-1">
+                  <div className="w-2 h-2 rounded-full bg-green-400"></div>
+                  <span className="text-xs text-green-400">
+                    {satelliteData.filter(img => img.real_data === true).length} Real
+                  </span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <div className="w-2 h-2 rounded-full bg-orange-400"></div>
+                  <span className="text-xs text-orange-400">
+                    {satelliteData.filter(img => img.real_data !== true).length} Demo
+                  </span>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div className="space-y-2">
+            <div className="flex items-center text-green-400">
+              <div className="w-2 h-2 rounded-full bg-green-400 mr-2"></div>
+              <span className="font-semibold">Real Satellite Data</span>
+            </div>
+            <ul className="text-slate-300 text-xs space-y-1 ml-4">
+              <li>• Sentinel-2 Multi-Spectral Instrument (MSI)</li>
+              <li>• 10-60m spatial resolution</li>
+              <li>• 13 spectral bands including NIR and SWIR</li>
+              <li>• ESA Copernicus program data</li>
+              <li>• Archaeological feature detection algorithms</li>
+            </ul>
+          </div>
+          
+          <div className="space-y-2">
+            <div className="flex items-center text-orange-400">
+              <div className="w-2 h-2 rounded-full bg-orange-400 mr-2"></div>
+              <span className="font-semibold">Demo Data</span>
+            </div>
+            <ul className="text-slate-300 text-xs space-y-1 ml-4">
+              <li>• Placeholder imagery for demonstration</li>
+              <li>• Simulated metadata and properties</li>
+              <li>• Used when real satellite API unavailable</li>
+              <li>• Represents typical satellite data structure</li>
+              <li>• For development and testing purposes</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div className="mt-3 pt-3 border-t border-blue-500/20">
+          <p className="text-xs text-slate-400">
+            <span className="text-blue-400">ℹ️ Note:</span> Real satellite data requires API credentials (SENTINEL_USERNAME, SENTINEL_PASSWORD). 
+            When unavailable, the system displays demonstration data that maintains the same structure and interface.
+          </p>
+        </div>
+      </div>
+
+      {/* Controls */}
     </div>
   )
 }

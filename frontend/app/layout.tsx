@@ -47,6 +47,9 @@ export default function RootLayout({
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
         
+        {/* Mapbox GL JS CSS */}
+        <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+        
         {/* Google Maps will be loaded by GoogleMapsLoader component */}
       </head>
       <body className={inter.className} suppressHydrationWarning>
@@ -54,16 +57,16 @@ export default function RootLayout({
         <ClientProviders>
           <UnifiedSystemProvider>
             <MapProvider>
-              <OptimizedNavigation showBackendStatus={true} />
-              <PageLoader>
-                <Suspense fallback={
-                  <div className="min-h-[60vh] flex items-center justify-center">
-                    <div className="text-slate-400">Loading...</div>
-                  </div>
-                }>
-                  {children}
-                </Suspense>
-              </PageLoader>
+          <OptimizedNavigation showBackendStatus={true} />
+          <PageLoader>
+            <Suspense fallback={
+              <div className="min-h-[60vh] flex items-center justify-center">
+                <div className="text-slate-400">Loading...</div>
+              </div>
+            }>
+              {children}
+            </Suspense>
+          </PageLoader>
             </MapProvider>
           </UnifiedSystemProvider>
         </ClientProviders>

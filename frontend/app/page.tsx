@@ -36,6 +36,8 @@ import {
   Play
 } from "lucide-react"
 import { nisDataService } from '@/lib/api/nis-data-service'
+import { MiniMapboxPreview } from '@/components/ui/mini-mapbox-preview'
+import { UniversalMapboxIntegration } from '@/components/ui/universal-mapbox-integration'
 
 interface SystemStats {
   totalDiscoveries: number
@@ -68,6 +70,11 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [recentActivity, setRecentActivity] = useState<any[]>([])
   const [connectionStatus, setConnectionStatus] = useState<{ online: boolean; health?: any }>({ online: false })
+  
+  // Map integration state
+  const [currentCoordinates, setCurrentCoordinates] = useState(() => {
+    return "-3.4653, -62.2159" // Default Amazon coordinates
+  })
 
   useEffect(() => {
     loadSystemStats()
@@ -216,7 +223,18 @@ export default function HomePage() {
   const exploreLatestDiscovery = () => {
     if (systemStats.lastDiscovery) {
       const { latitude, longitude } = systemStats.lastDiscovery
+      router.push(`/vision?lat=${latitude}&lng=${longitude}`)
+    } else {
+      router.push('/vision')
+    }
+  }
+
+  const exploreLatestDiscoveryOnMap = () => {
+    if (systemStats.lastDiscovery) {
+      const { latitude, longitude } = systemStats.lastDiscovery
       router.push(`/map?lat=${latitude}&lng=${longitude}&zoom=15`)
+    } else {
+      router.push('/map')
     }
   }
 
@@ -232,6 +250,50 @@ export default function HomePage() {
     if (systemStats.systemHealth > 90) return "NIS OPTIMAL"
     if (systemStats.systemHealth > 70) return "NIS DEGRADED"
     return "NIS CRITICAL"
+  }
+
+  // Map integration handlers
+  const handleMapCoordinatesChange = (newCoords: string) => {
+    console.log('🗺️ Main page coordinates changed:', newCoords)
+    setCurrentCoordinates(newCoords)
+    
+    // Update last discovery coordinates for consistency
+    const [lat, lng] = newCoords.split(',').map(s => parseFloat(s.trim()))
+    setSystemStats(prev => ({
+      ...prev,
+      lastDiscovery: {
+        ...prev.lastDiscovery!,
+        latitude: lat,
+        longitude: lng
+      }
+    }))
+  }
+
+  // Handle navigation to other pages with coordinates
+  const handlePageNavigation = (targetPage: string, coordinates: string) => {
+    console.log(`🚀 Navigating from main to ${targetPage} with coordinates:`, coordinates)
+    
+    const [lat, lng] = coordinates.split(',').map(s => parseFloat(s.trim()))
+    
+    switch (targetPage) {
+      case 'vision':
+        router.push(`/vision?lat=${lat}&lng=${lng}`)
+        break
+      case 'analysis':
+        router.push(`/analysis?lat=${lat}&lng=${lng}`)
+        break
+      case 'chat':
+        router.push(`/chat?lat=${lat}&lng=${lng}`)
+        break
+      case 'map':
+        router.push(`/map?lat=${lat}&lng=${lng}`)
+        break
+      case 'satellite':
+        router.push(`/satellite?lat=${lat}&lng=${lng}`)
+        break
+      default:
+        router.push(`/${targetPage}`)
+    }
   }
 
   const features = [
@@ -272,15 +334,6 @@ export default function HomePage() {
       action: () => router.push('/map')
     },
     {
-      title: 'Satellite Analysis',
-      description: 'Real-time satellite imagery analysis and pattern detection',
-      icon: Satellite,
-      href: '/satellite',
-      color: 'bg-indigo-500',
-      stats: `${systemStats.dataSourcesActive} active`,
-      action: () => router.push('/satellite')
-    },
-    {
       title: 'AI Agent Network',
       description: 'Vision, reasoning, memory, and action agents working together',
       icon: Brain,
@@ -288,6 +341,15 @@ export default function HomePage() {
       color: 'bg-teal-500',
       stats: `${systemStats.activeAgents} agents`,
       action: () => router.push('/agent')
+    },
+    {
+      title: 'Vision Agent Analysis',
+      description: 'GPT-4 Vision + LIDAR + Mapbox integration for archaeological analysis',
+      icon: Eye,
+      href: '/vision',
+      color: 'bg-indigo-500',
+      stats: 'AI-Powered',
+      action: () => router.push('/vision')
     }
   ]
 
@@ -478,7 +540,7 @@ export default function HomePage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="flex flex-wrap gap-4 justify-center mb-12">
+        <div className="flex flex-wrap gap-4 justify-center mb-8">
           <Button 
             onClick={quickDiscovery}
             size="lg" 
@@ -488,15 +550,7 @@ export default function HomePage() {
             Explore {systemStats.totalDiscoveries} Discoveries
           </Button>
           
-          <Button 
-            onClick={() => router.push('/satellite')}
-            size="lg" 
-            variant="outline"
-            className="border-blue-600 text-blue-400 hover:bg-blue-600/20"
-          >
-            <Satellite className="h-5 w-5 mr-2" />
-            NIS Satellite Analysis
-          </Button>
+
           
           <Button 
             onClick={() => router.push('/map')}
@@ -508,6 +562,115 @@ export default function HomePage() {
             View {systemStats.culturalDiversity}+ Cultures
           </Button>
         </div>
+
+        {/* Map Navigation Hub */}
+        <Card className="bg-gradient-to-r from-indigo-900/20 to-purple-900/20 border-indigo-500/30 mb-12">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center justify-center">
+              <Globe className="h-6 w-6 mr-2 text-indigo-400" />
+              Interactive Mapping & Analysis Hub
+            </CardTitle>
+            <CardDescription className="text-center text-slate-300">
+              Explore archaeological sites with our advanced Mapbox-powered visualization tools
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Button 
+                onClick={() => router.push('/map')}
+                variant="outline"
+                className="h-20 flex flex-col items-center justify-center border-blue-500 text-blue-400 hover:bg-blue-500/20"
+              >
+                <Map className="h-6 w-6 mb-2" />
+                <span className="font-semibold">Geographic Map</span>
+                <span className="text-xs opacity-75">Full site overview</span>
+              </Button>
+              
+              <Button 
+                onClick={() => router.push('/vision')}
+                variant="outline"
+                className="h-20 flex flex-col items-center justify-center border-purple-500 text-purple-400 hover:bg-purple-500/20"
+              >
+                <Eye className="h-6 w-6 mb-2" />
+                <span className="font-semibold">Vision Agent</span>
+                <span className="text-xs opacity-75">AI-powered analysis</span>
+              </Button>
+              
+              <Button 
+                onClick={() => router.push('/satellite')}
+                variant="outline"
+                className="h-20 flex flex-col items-center justify-center border-green-500 text-green-400 hover:bg-green-500/20"
+              >
+                <Satellite className="h-6 w-6 mb-2" />
+                <span className="font-semibold">Satellite View</span>
+                <span className="text-xs opacity-75">Real imagery</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Full Map Integration Section */}
+        <Card className="bg-slate-800/50 border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center">
+              <Globe className="h-5 w-5 mr-2" />
+              🗺️ Integrated Archaeological Map
+            </CardTitle>
+            <CardDescription className="text-slate-400">
+              Interactive Mapbox map with LIDAR visualization and real-time coordinate synchronization
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <UniversalMapboxIntegration
+              coordinates={currentCoordinates}
+              onCoordinatesChange={handleMapCoordinatesChange}
+              height="400px"
+              showControls={true}
+              pageType="main"
+              onPageNavigation={handlePageNavigation}
+              enableLidarVisualization={true}
+            />
+            
+            {/* Map Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+              <Button 
+                onClick={() => handlePageNavigation('vision', currentCoordinates)}
+                size="sm"
+                variant="outline"
+                className="border-purple-500 text-purple-400 hover:bg-purple-500/20"
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                Vision Analysis
+              </Button>
+              <Button 
+                onClick={() => handlePageNavigation('analysis', currentCoordinates)}
+                size="sm"
+                variant="outline"
+                className="border-emerald-500 text-emerald-400 hover:bg-emerald-500/20"
+              >
+                <Brain className="w-4 h-4 mr-2" />
+                Deep Analysis
+              </Button>
+              <Button 
+                onClick={() => handlePageNavigation('chat', currentCoordinates)}
+                size="sm"
+                variant="outline"
+                className="border-blue-500 text-blue-400 hover:bg-blue-500/20"
+              >
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Research Chat
+              </Button>
+              <Button 
+                onClick={() => handlePageNavigation('map', currentCoordinates)}
+                size="sm"
+                className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700"
+              >
+                <Map className="w-4 h-4 mr-2" />
+                Full Map
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Feature Cards */}
@@ -582,7 +745,7 @@ export default function HomePage() {
               </CardContent>
             </Card>
 
-            {/* Last Discovery */}
+            {/* Latest Discovery with Mini Mapbox Preview */}
             {systemStats.lastDiscovery && (
               <Card className="bg-slate-800/50 border-slate-700 mt-6">
                 <CardHeader>
@@ -592,28 +755,14 @@ export default function HomePage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Location:</span>
-                      <span className="text-slate-300">
-                        {systemStats.lastDiscovery.latitude.toFixed(4)}, {systemStats.lastDiscovery.longitude.toFixed(4)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Confidence:</span>
-                      <span className="text-green-400 font-semibold">
-                        {systemStats.lastDiscovery.confidence.toFixed(1)}%
-                      </span>
-                    </div>
-                    <Button 
-                      size="sm" 
-                      className="w-full mt-4"
-                      onClick={exploreLatestDiscovery}
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      View Details
-                    </Button>
-                  </div>
+                  <MiniMapboxPreview
+                    latitude={systemStats.lastDiscovery.latitude}
+                    longitude={systemStats.lastDiscovery.longitude}
+                    confidence={systemStats.lastDiscovery.confidence}
+                    name={systemStats.lastDiscovery.name}
+                    onViewFullMap={exploreLatestDiscoveryOnMap}
+                    onAnalyze={exploreLatestDiscovery}
+                  />
                 </CardContent>
               </Card>
             )}
@@ -642,7 +791,6 @@ export default function HomePage() {
               <h3 className="font-semibold text-white mb-3">Research Tools</h3>
               <ul className="space-y-2 text-sm">
                 <li><Link href="/archaeological-discovery" className="hover:text-blue-400 transition-colors">Archaeological Discovery</Link></li>
-                <li><Link href="/satellite" className="hover:text-blue-400 transition-colors">Satellite Monitoring</Link></li>
                 <li><Link href="/map" className="hover:text-blue-400 transition-colors">Interactive Maps</Link></li>
                 <li><Link href="/analytics" className="hover:text-blue-400 transition-colors">Data Analytics</Link></li>
               </ul>
