@@ -8248,7 +8248,7 @@ Please provide detailed archaeological analysis of this area including cultural 
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="discoveries" className="mt-4 h-full overflow-hidden">
+                  <TabsContent value="discoveries" className="mt-4 h-full overflow-y-auto">
                     <div className="px-4 h-full flex flex-col">
                       
                       {/* 🔍 ADVANCED DISCOVERY COMMAND CENTER */}
@@ -8418,7 +8418,7 @@ Please provide detailed archaeological analysis of this area including cultural 
                       </div>
 
                       {/* Discovery Results */}
-                      <div className="flex-1 overflow-y-auto space-y-3">
+                      <div className="flex-1 overflow-y-auto space-y-3 pb-6">
                         {discoveryResults.length === 0 ? (
                           <div className="text-center py-8">
                             <div className="text-slate-400 text-sm mb-2">No discoveries yet</div>
@@ -9974,8 +9974,8 @@ Archaeological LIDAR
                   </TabsContent>
 
                   {/* Universal Map Integration Tab */}
-                  <TabsContent value="universal" className="mt-4 overflow-y-auto">
-                    <div className="px-4 space-y-4">
+                  <TabsContent value="universal" className="mt-4 h-full overflow-y-auto">
+                    <div className="px-4 space-y-4 pb-6">
                       <div className="flex items-center justify-between">
                         <h3 className="text-white font-semibold flex items-center gap-2">
                           <Globe className="w-5 h-5 text-emerald-400" />
