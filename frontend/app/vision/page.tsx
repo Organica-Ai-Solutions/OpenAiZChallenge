@@ -681,8 +681,8 @@ export default function UltimateVisionAgentPage() {
   }, [lidarVisualization])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
-      <div className="container mx-auto px-4 py-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-y-auto">
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Header */}
           <motion.div 
           initial={{ opacity: 0, y: -20 }}
@@ -785,7 +785,7 @@ export default function UltimateVisionAgentPage() {
           </motion.div>
 
         <Tabs defaultValue="analysis" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-slate-800">
+          <TabsList className="grid w-full grid-cols-4 bg-slate-800 h-12">
             <TabsTrigger value="analysis">🔬 Analysis</TabsTrigger>
             <TabsTrigger value="results">📊 Results</TabsTrigger>
             <TabsTrigger value="lidar">🏔️ LIDAR 3D</TabsTrigger>

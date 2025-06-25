@@ -8,7 +8,7 @@ import { AnalyticsDashboard } from "../../src/components/ui/analytics-dashboard"
 
 export default function AnalyticsPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden pt-20">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-y-auto pt-20">
       {/* Animated Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-emerald-900/5 to-blue-900/10" />
       <div className="absolute inset-0">
@@ -20,7 +20,7 @@ export default function AnalyticsPage() {
 
       {/* Main Content */}
       <div className="relative z-10">
-        <div className="container mx-auto px-6 py-8">
+        <div className="container mx-auto px-6 py-8 max-w-7xl">
           {/* Page Header */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}

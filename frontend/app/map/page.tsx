@@ -8249,7 +8249,7 @@ Please provide detailed archaeological analysis of this area including cultural 
                   </TabsContent>
 
                   <TabsContent value="discoveries" className="mt-4 h-full overflow-y-auto">
-                    <div className="px-4 h-full flex flex-col">
+                    <div className="px-4 h-full flex flex-col max-h-[calc(100vh-200px)]">
                       
                       {/* 🔍 ADVANCED DISCOVERY COMMAND CENTER */}
                       <div className="mb-4 p-4 bg-gradient-to-br from-amber-900/30 via-orange-900/30 to-red-900/30 border border-amber-500/50 rounded-xl shadow-2xl">

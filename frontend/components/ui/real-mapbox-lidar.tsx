@@ -33,6 +33,7 @@ export function RealMapboxLidar({
   const map = useRef<any>(null)
   const [mapLoaded, setMapLoaded] = useState(false)
   const [mapError, setMapError] = useState<string | null>(null)
+  const [containerId] = useState(() => `mapbox-container-${Math.random().toString(36).substr(2, 9)}`)
 
   // Parse coordinates
   const [lat, lng] = coordinates.split(',').map(c => parseFloat(c.trim()))
@@ -41,18 +42,34 @@ export function RealMapboxLidar({
   useEffect(() => {
     const initMap = async () => {
       // Better container validation to prevent duplicate initialization
-      if (!mapContainer.current || map.current) return
+      if (!mapContainer.current || map.current) {
+        console.log('🔄 Skipping map init - container or map already exists')
+        return
+      }
+      
+      // Check if this container already has a map instance
+      if (mapContainer.current.hasAttribute('data-mapbox-initialized')) {
+        console.log('🔄 Container already initialized, skipping')
+        return
+      }
       
       // Additional validation for proper DOM element
       if (!(mapContainer.current instanceof HTMLElement)) {
         console.log('⚠️ Map container is not a valid HTML element, retrying...')
-        setTimeout(initMap, 100)
+        setTimeout(initMap, 200)
         return
       }
       
       // Check if container is already initialized (has children)
       if (mapContainer.current.hasChildNodes()) {
         console.log('🔄 Map container already has content, skipping initialization')
+        return
+      }
+
+      // Ensure container has proper dimensions
+      if (mapContainer.current.offsetWidth === 0 || mapContainer.current.offsetHeight === 0) {
+        console.log('⚠️ Map container has no dimensions, retrying...')
+        setTimeout(initMap, 200)
         return
       }
 
@@ -70,16 +87,28 @@ export function RealMapboxLidar({
           mapContainer.current.innerHTML = ''
         }
         
+        // Final validation before creating map instance
+        if (!mapContainer.current) {
+          throw new Error('Container disappeared during initialization')
+        }
+
         // Create map instance with better error handling
+        // Try using the ref first, then fallback to ID
+        const container = mapContainer.current || document.getElementById(containerId)
+        if (!container) {
+          throw new Error('Neither ref nor ID container found')
+        }
+        
         const mapInstance = new mapboxgl.default.Map({
-          container: mapContainer.current,
+          container: container,
           style: 'mapbox://styles/mapbox/satellite-v9', // Satellite view for archaeological work
           center: [lng, lat],
           zoom: 16,
           pitch: 45, // 3D view for LIDAR
           bearing: 0,
           antialias: true,
-          preserveDrawingBuffer: true // For screenshots/demo
+          preserveDrawingBuffer: true, // For screenshots/demo
+          failIfMajorPerformanceCaveat: false // Don't fail on performance issues
         })
 
         // Add navigation controls
@@ -111,6 +140,11 @@ export function RealMapboxLidar({
         })
 
         map.current = mapInstance
+        
+        // Mark container as initialized
+        if (mapContainer.current) {
+          mapContainer.current.setAttribute('data-mapbox-initialized', 'true')
+        }
 
       } catch (error) {
         console.error('❌ Map initialization failed:', error)
@@ -123,12 +157,24 @@ export function RealMapboxLidar({
       }
     }
 
-    initMap()
+    // Delay initialization to ensure DOM is ready
+    const timer = setTimeout(initMap, 100)
 
     return () => {
+      clearTimeout(timer)
       if (map.current) {
-        map.current.remove()
+        try {
+          map.current.remove()
+        } catch (error) {
+          console.warn('⚠️ Error removing map:', error)
+        }
         map.current = null
+      }
+      
+      // Clean up container attributes
+      if (mapContainer.current) {
+        mapContainer.current.removeAttribute('data-mapbox-initialized')
+        mapContainer.current.innerHTML = ''
       }
     }
   }, [lat, lng, setCoordinates])
@@ -353,6 +399,7 @@ export function RealMapboxLidar({
           {/* Map Container */}
           <div 
             ref={mapContainer} 
+            id={containerId}
             className="w-full h-full"
             style={{ height: '600px' }}
           />

@@ -467,7 +467,7 @@ export function AnalyticsDashboard() {
 
   useEffect(() => {
     if (autoRefresh) {
-      const interval = setInterval(loadRealData, 60000) // Refresh every minute
+      const interval = setInterval(loadRealData, 30000) // Refresh every 30 seconds for real-time data
       return () => clearInterval(interval)
     }
   }, [autoRefresh])
@@ -501,13 +501,14 @@ export function AnalyticsDashboard() {
         transition={{ duration: 0.6 }}
       >
         <Card className="w-full h-96 flex items-center justify-center bg-white/[0.02] backdrop-blur-sm border border-white/[0.08]">
-          <div className="flex items-center space-x-3 text-white">
-            <RefreshCw className="h-8 w-8 animate-spin text-emerald-400" />
-            <div>
-              <p className="font-medium text-lg">Loading Real Analytics Data...</p>
-              <p className="text-sm text-white/60">Connecting to NIS Protocol backend</p>
+                      <div className="flex items-center space-x-3 text-white">
+              <RefreshCw className="h-8 w-8 animate-spin text-emerald-400" />
+              <div>
+                <p className="font-medium text-lg">Loading Real Archaeological Data...</p>
+                <p className="text-sm text-white/60">Fetching live data from NIS Protocol backend (localhost:8000)</p>
+                <p className="text-xs text-emerald-400 mt-1">✨ No demo data - Only real discoveries and statistics</p>
+              </div>
             </div>
-          </div>
         </Card>
       </motion.div>
     )
@@ -556,7 +557,7 @@ export function AnalyticsDashboard() {
   const diagnostics = data.diagnostics
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-h-screen overflow-y-auto pb-8">
       {/* Backend Status Banner */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
@@ -568,9 +569,9 @@ export function AnalyticsDashboard() {
           <div className="flex items-center space-x-3">
             <CheckCircle className="h-5 w-5 text-emerald-400" />
             <div>
-              <p className="text-emerald-100 font-medium">NIS Protocol Backend Online</p>
+              <p className="text-emerald-100 font-medium">🔴 LIVE: NIS Protocol Backend Connected</p>
               <p className="text-emerald-300 text-sm">
-                Real archaeological data • Last refresh: {lastRefresh.toLocaleTimeString()}
+                Real archaeological data only • No demo/mock data • Last refresh: {lastRefresh.toLocaleTimeString()}
               </p>
             </div>
           </div>
@@ -756,7 +757,7 @@ export function AnalyticsDashboard() {
 
       {/* Enhanced Charts */}
       <Tabs defaultValue="site_types" className="w-full">
-        <TabsList className="grid w-full grid-cols-7 bg-slate-800 border-slate-700">
+        <TabsList className="grid w-full grid-cols-7 bg-slate-800 border-slate-700 h-12">
           <TabsTrigger value="site_types" className="data-[state=active]:bg-emerald-600">Site Types</TabsTrigger>
           <TabsTrigger value="model_performance" className="data-[state=active]:bg-emerald-600">AI Models</TabsTrigger>
           <TabsTrigger value="data_sources" className="data-[state=active]:bg-emerald-600">Data Sources</TabsTrigger>
