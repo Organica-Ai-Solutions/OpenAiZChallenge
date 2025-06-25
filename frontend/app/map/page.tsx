@@ -4021,9 +4021,6 @@ export default function ArchaeologicalMapPage() {
     
     const [lat, lng] = coordinates.split(',').map(s => parseFloat(s.trim()))
     
-    // Use Next.js router for navigation
-    const router = require('next/navigation').useRouter()
-    
     switch (targetPage) {
       case 'vision':
         window.location.href = `/vision?lat=${lat}&lng=${lng}`
@@ -4036,6 +4033,9 @@ export default function ArchaeologicalMapPage() {
         break
       case 'satellite':
         window.location.href = `/satellite?lat=${lat}&lng=${lng}`
+        break
+      case 'map':
+        window.location.href = `/map?lat=${lat}&lng=${lng}`
         break
       default:
         window.location.href = `/${targetPage}`
@@ -9979,19 +9979,91 @@ Archaeological LIDAR
                       <div className="flex items-center justify-between">
                         <h3 className="text-white font-semibold flex items-center gap-2">
                           <Globe className="w-5 h-5 text-emerald-400" />
-                          🗺️ Universal Map Integration
+                          🗺️ Universal Map Integration - Secondary Map
                         </h3>
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className="bg-emerald-500/20 border-emerald-500/50 text-emerald-300">
                             Current: {currentCoordinates}
                           </Badge>
+                          <Badge variant="outline" className="bg-blue-500/20 border-blue-500/50 text-blue-300">
+                            Secondary Map
+                          </Badge>
                         </div>
                       </div>
                       
+                      {/* Main Interactive Map - Moved from Home Page */}
+                      <Card className="bg-slate-800/50 border-slate-700">
+                        <CardHeader>
+                          <CardTitle className="text-white flex items-center">
+                            <Globe className="h-5 w-5 mr-2" />
+                            🗺️ Main Archaeological Map (From Home Page)
+                          </CardTitle>
+                          <CardDescription className="text-slate-400">
+                            Interactive Mapbox map with LIDAR visualization and real-time coordinate synchronization
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <UniversalMapboxIntegration
+                            coordinates={currentCoordinates}
+                            onCoordinatesChange={handleMapCoordinatesChange}
+                            height="400px"
+                            showControls={true}
+                            pageType="map_secondary"
+                            onPageNavigation={handlePageNavigation}
+                            enableLidarVisualization={true}
+                          />
+                          
+                          {/* Map Actions - Enhanced from Home Page */}
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+                            <Button 
+                              onClick={() => handlePageNavigation('vision', currentCoordinates)}
+                              size="sm"
+                              variant="outline"
+                              className="border-purple-500 text-purple-400 hover:bg-purple-500/20"
+                            >
+                              <Eye className="w-4 h-4 mr-2" />
+                              Vision Analysis
+                            </Button>
+                            <Button 
+                              onClick={() => handlePageNavigation('analysis', currentCoordinates)}
+                              size="sm"
+                              variant="outline"
+                              className="border-emerald-500 text-emerald-400 hover:bg-emerald-500/20"
+                            >
+                              <Brain className="w-4 h-4 mr-2" />
+                              Deep Analysis
+                            </Button>
+                            <Button 
+                              onClick={() => handlePageNavigation('chat', currentCoordinates)}
+                              size="sm"
+                              variant="outline"
+                              className="border-blue-500 text-blue-400 hover:bg-blue-500/20"
+                            >
+                              <span className="text-lg mr-2">💬</span>
+                              Research Chat
+                            </Button>
+                            <Button 
+                              onClick={() => {
+                                // Sync coordinates with Google Maps
+                                const [lat, lng] = currentCoordinates.split(',').map(s => parseFloat(s.trim()))
+                                setMapCenter([lat, lng])
+                                setActiveTab('sites')
+                              }}
+                              size="sm"
+                              className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700"
+                            >
+                              <MapPin className="w-4 h-4 mr-2" />
+                              Sync with Google Maps
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      {/* Compact Universal Integration */}
                       <UniversalMapboxIntegration
                         coordinates={currentCoordinates}
                         onCoordinatesChange={handleMapCoordinatesChange}
-                        height="400px"
+                        height="300px"
                         showControls={true}
                         pageType="map"
                         onPageNavigation={handlePageNavigation}

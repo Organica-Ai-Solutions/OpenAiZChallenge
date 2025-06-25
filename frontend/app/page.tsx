@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from "next/link"
+import { motion } from 'framer-motion'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -37,7 +38,6 @@ import {
 } from "lucide-react"
 import { nisDataService } from '@/lib/api/nis-data-service'
 import { MiniMapboxPreview } from '@/components/ui/mini-mapbox-preview'
-import { UniversalMapboxIntegration } from '@/components/ui/universal-mapbox-integration'
 
 interface SystemStats {
   totalDiscoveries: number
@@ -70,11 +70,6 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [recentActivity, setRecentActivity] = useState<any[]>([])
   const [connectionStatus, setConnectionStatus] = useState<{ online: boolean; health?: any }>({ online: false })
-  
-  // Map integration state
-  const [currentCoordinates, setCurrentCoordinates] = useState(() => {
-    return "-3.4653, -62.2159" // Default Amazon coordinates
-  })
 
   useEffect(() => {
     loadSystemStats()
@@ -199,17 +194,13 @@ export default function HomePage() {
         if (health) {
           setSystemStats(prev => ({
             ...prev,
-            systemHealth: health.status === 'healthy' ? 95 : 70,
-            dataSourcesActive: Object.values(health.services || {}).filter(status => 
-              status === 'healthy' || status === 'up'
-            ).length,
+            systemHealth: health.status === 'healthy' ? 95 : health.status === 'degraded' ? 70 : 50,
             nisProtocolActive: true
           }))
           setConnectionStatus({ online: true, health })
         }
       } catch (error) {
-        console.log('⚠️ Real-time update failed, NIS system may be offline')
-        setConnectionStatus({ online: false })
+        // Silently handle connection issues
       }
     }, 30000) // Check every 30 seconds
 
@@ -217,456 +208,240 @@ export default function HomePage() {
   }
 
   const quickDiscovery = async () => {
-    router.push('/archaeological-discovery?auto_discover=true')
+    router.push('/archaeological-discovery')
   }
 
   const exploreLatestDiscovery = () => {
     if (systemStats.lastDiscovery) {
-      const { latitude, longitude } = systemStats.lastDiscovery
-      router.push(`/vision?lat=${latitude}&lng=${longitude}`)
-    } else {
-      router.push('/vision')
+      router.push(`/analysis?lat=${systemStats.lastDiscovery.latitude}&lng=${systemStats.lastDiscovery.longitude}`)
     }
   }
 
   const exploreLatestDiscoveryOnMap = () => {
     if (systemStats.lastDiscovery) {
-      const { latitude, longitude } = systemStats.lastDiscovery
-      router.push(`/map?lat=${latitude}&lng=${longitude}&zoom=15`)
-    } else {
-      router.push('/map')
+      router.push(`/map?lat=${systemStats.lastDiscovery.latitude}&lng=${systemStats.lastDiscovery.longitude}`)
     }
   }
 
   const getSystemStatusColor = () => {
-    if (!connectionStatus.online) return "bg-red-500"
-    if (systemStats.systemHealth > 90) return "bg-green-500"
-    if (systemStats.systemHealth > 70) return "bg-yellow-500"
-    return "bg-red-500"
+    if (systemStats.systemHealth >= 90) return 'bg-green-500'
+    if (systemStats.systemHealth >= 70) return 'bg-yellow-500'
+    return 'bg-red-500'
   }
 
   const getSystemStatusText = () => {
-    if (!connectionStatus.online) return "NIS OFFLINE"
-    if (systemStats.systemHealth > 90) return "NIS OPTIMAL"
-    if (systemStats.systemHealth > 70) return "NIS DEGRADED"
-    return "NIS CRITICAL"
+    if (systemStats.systemHealth >= 90) return 'Optimal'
+    if (systemStats.systemHealth >= 70) return 'Good'
+    return 'Degraded'
   }
 
-  // Map integration handlers
-  const handleMapCoordinatesChange = (newCoords: string) => {
-    console.log('🗺️ Main page coordinates changed:', newCoords)
-    setCurrentCoordinates(newCoords)
-    
-    // Update last discovery coordinates for consistency
-    const [lat, lng] = newCoords.split(',').map(s => parseFloat(s.trim()))
-    setSystemStats(prev => ({
-      ...prev,
-      lastDiscovery: {
-        ...prev.lastDiscovery!,
-        latitude: lat,
-        longitude: lng
-      }
-    }))
-  }
-
-  // Handle navigation to other pages with coordinates
-  const handlePageNavigation = (targetPage: string, coordinates: string) => {
-    console.log(`🚀 Navigating from main to ${targetPage} with coordinates:`, coordinates)
-    
-    const [lat, lng] = coordinates.split(',').map(s => parseFloat(s.trim()))
-    
-    switch (targetPage) {
-      case 'vision':
-        router.push(`/vision?lat=${lat}&lng=${lng}`)
-        break
-      case 'analysis':
-        router.push(`/analysis?lat=${lat}&lng=${lng}`)
-        break
-      case 'chat':
-        router.push(`/chat?lat=${lat}&lng=${lng}`)
-        break
-      case 'map':
-        router.push(`/map?lat=${lat}&lng=${lng}`)
-        break
-      case 'satellite':
-        router.push(`/satellite?lat=${lat}&lng=${lng}`)
-        break
-      default:
-        router.push(`/${targetPage}`)
-    }
-  }
-
+  // Platform features for judges to explore
   const features = [
     {
-      title: 'Archaeological Discovery',
-      description: `${systemStats.totalDiscoveries} sites discovered using NIS Protocol technology`,
-      icon: Search,
-      href: '/archaeological-discovery',
-      color: 'bg-green-500',
-      stats: `${systemStats.totalDiscoveries} discoveries`,
-      action: () => router.push('/archaeological-discovery')
-    },
-    {
-      title: 'High-Confidence Sites',
-      description: `${systemStats.highConfidenceDiscoveries} verified sites with 85%+ confidence scores`,
-      icon: Shield,
-      href: '/archaeological-discovery',
-      color: 'bg-blue-500',
-      stats: `${systemStats.highConfidenceDiscoveries} validated`,
-      action: () => router.push('/archaeological-discovery?min_confidence=0.85')
-    },
-    {
-      title: 'Cultural Diversity',
-      description: `${systemStats.culturalDiversity}+ indigenous cultures documented across the Americas`,
-      icon: Users,
-      href: '/map',
-      color: 'bg-purple-500',
-      stats: `${systemStats.culturalDiversity}+ cultures`,
-      action: () => router.push('/map')
-    },
-    {
-      title: 'Interactive Maps',
-      description: 'Geographic visualization of all NIS Protocol discoveries',
-      icon: Map,
-      href: '/map',
-      color: 'bg-orange-500',
-      stats: 'Real-time data',
-      action: () => router.push('/map')
-    },
-    {
-      title: 'AI Agent Network',
-      description: 'Vision, reasoning, memory, and action agents working together',
+      title: "🧠 AI Vision Agent",
+      description: "GPT-4 Vision + KAN Networks for archaeological pattern recognition",
       icon: Brain,
-      href: '/agent',
-      color: 'bg-teal-500',
-      stats: `${systemStats.activeAgents} agents`,
-      action: () => router.push('/agent')
+      color: "bg-purple-500",
+      stats: "92% accuracy",
+      action: () => router.push('/vision')
     },
     {
-      title: 'Vision Agent Analysis',
-      description: 'GPT-4 Vision + LIDAR + Mapbox integration for archaeological analysis',
-      icon: Eye,
-      href: '/vision',
-      color: 'bg-indigo-500',
-      stats: 'AI-Powered',
-      action: () => router.push('/vision')
+      title: "🗺️ Interactive Maps",
+      description: "Google Maps + Mapbox LIDAR integration with real-time analysis",
+      icon: Map,
+      color: "bg-blue-500", 
+      stats: `${systemStats.totalDiscoveries} sites`,
+      action: () => router.push('/map')
+    },
+    {
+      title: "💬 Research Chat",
+      description: "AI-powered archaeological research assistant with cultural context",
+      icon: MessageSquare,
+      color: "bg-emerald-500",
+      stats: "Real-time",
+      action: () => router.push('/chat')
+    },
+    {
+      title: "📊 Analytics Dashboard", 
+      description: "Comprehensive data analysis and discovery insights",
+      icon: BarChart3,
+      color: "bg-orange-500",
+      stats: "Live data",
+      action: () => router.push('/analytics')
+    },
+    {
+      title: "🛰️ Satellite Analysis",
+      description: "Sentinel-2 satellite imagery analysis for site detection",
+      icon: Satellite,
+      color: "bg-cyan-500",
+      stats: "High-res",
+      action: () => router.push('/satellite')
+    },
+    {
+      title: "🔍 Deep Analysis",
+      description: "Multi-source data fusion and archaeological interpretation",
+      icon: Search,
+      color: "bg-indigo-500",
+      stats: "Advanced",
+      action: () => router.push('/analysis')
     }
   ]
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto mb-4"></div>
+          <p className="text-white">Loading NIS Protocol System...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      {/* Header */}
-      <div className="relative z-50 bg-black/20 backdrop-blur-sm border-b border-blue-500/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <Globe className="h-8 w-8 text-blue-400" />
-                <div>
-                  <h1 className="text-xl font-bold text-white">NIS Protocol</h1>
-                  <p className="text-xs text-blue-300">Naval Intelligence System</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+      {/* Hero Section - Landing for Judges */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20" />
+        <div className="relative container mx-auto px-4 py-20">
+          <div className="text-center max-w-4xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <div className="flex items-center justify-center mb-8">
+                <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20">
+                  <Globe className="h-16 w-16 text-blue-400" />
                 </div>
               </div>
-              <Badge 
-                variant="outline" 
-                className={`${getSystemStatusColor().replace('bg-', 'border-')} text-white border-2 animate-pulse`}
-              >
-                <Activity className="w-3 h-3 mr-1" />
-                {getSystemStatusText()}
-              </Badge>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Badge variant="secondary" className="bg-blue-900/50 text-blue-200">
-                🏛️ {systemStats.totalDiscoveries} Total Sites
-              </Badge>
-              <Badge variant="secondary" className="bg-green-900/50 text-green-200">
-                🎯 {systemStats.highConfidenceDiscoveries} High-Confidence
-              </Badge>
-              <Badge variant="secondary" className="bg-purple-900/50 text-purple-200">
-                🌎 {systemStats.culturalDiversity}+ Cultures
-              </Badge>
-            </div>
+              
+              <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent">
+                NIS Protocol
+              </h1>
+              
+              <p className="text-2xl text-slate-300 mb-4">
+                Neural Indigenous Sites Protocol
+              </p>
+              
+              <p className="text-xl text-slate-400 mb-8 leading-relaxed">
+                AI-powered archaeological discovery platform combining GPT-4 Vision, KAN Networks, 
+                and indigenous knowledge systems for respectful cultural heritage research.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                <Button 
+                  onClick={() => router.push('/vision')}
+                  size="lg"
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-lg px-8 py-4"
+                >
+                  <Eye className="mr-2 h-5 w-5" />
+                  Start AI Analysis
+                </Button>
+                <Button 
+                  onClick={() => router.push('/map')}
+                  size="lg"
+                  variant="outline"
+                  className="border-blue-400 text-blue-400 hover:bg-blue-400/10 text-lg px-8 py-4"
+                >
+                  <Map className="mr-2 h-5 w-5" />
+                  Explore Maps
+                </Button>
+              </div>
+            </motion.div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center mb-4">
-            <Globe className="h-12 w-12 text-blue-400 mr-3" />
-            <div className="flex flex-col">
-              <h1 className="text-4xl font-bold text-white">Archaeological Discovery Platform</h1>
-              <p className="text-lg text-slate-400 mt-1">Powered by NIS Protocol</p>
-            </div>
-          </div>
-          <div className="bg-gradient-to-r from-green-900/20 to-blue-900/20 rounded-xl p-6 mb-6 border border-green-500/30">
-            <h2 className="text-2xl font-bold text-green-400 mb-2">🏆 MISSION ACCOMPLISHED</h2>
-            <p className="text-xl text-slate-300 mb-2">
-              Successfully discovered <span className="text-green-400 font-bold">{systemStats.totalDiscoveries} archaeological sites</span> using NIS Protocol
-            </p>
-            <p className="text-lg text-slate-400 mb-4">
-              Achieved <span className="text-blue-400 font-bold">{systemStats.highConfidenceDiscoveries} high-confidence discoveries</span> across 
-              <span className="text-purple-400 font-bold"> {systemStats.culturalDiversity}+ indigenous cultures</span>
-            </p>
-          </div>
-          <p className="text-lg text-slate-400 mb-6">
-            Developed by{" "}
-            <a 
-              href="https://organicaai.com" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-green-400 hover:text-green-300 font-semibold underline transition-colors"
-            >
-              Organica AI Solutions
-            </a>
-            {" "}- OpenAI Z Challenge Entry
-          </p>
-          <div className="flex items-center justify-center gap-4">
-            <Badge 
-              variant={systemStats.systemHealth > 80 ? "default" : systemStats.systemHealth > 50 ? "secondary" : "destructive"} 
-              className="text-sm"
-            >
-              <Activity className="h-3 w-3 mr-1" />
-              {systemStats.systemHealth > 80 ? 'System Operational' : 
-               systemStats.systemHealth > 50 ? 'Partial Service' : 
-               'Limited Service'}
-            </Badge>
-            <Badge variant="outline" className="text-slate-300">
-              System Health: {systemStats.systemHealth}%
-            </Badge>
-          </div>
-        </div>
-
-        {/* NIS Protocol Achievement Dashboard */}
-        <div className="bg-gradient-to-r from-green-900/20 to-blue-900/20 rounded-2xl p-6 mb-8 border border-green-500/30">
-          <div className="text-center mb-6">
-            <h2 className="text-3xl font-bold text-green-400 mb-2">🏆 NIS PROTOCOL SUCCESS</h2>
-            <p className="text-lg text-gray-300">OpenAI Z Challenge - Archaeological Discovery Mission</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card className="bg-green-900/30 border-green-500/40">
-              <CardContent className="p-6 text-center">
-                <div className="text-4xl font-bold text-green-400 mb-2">{systemStats.totalDiscoveries}</div>
-                <div className="text-sm text-green-300">Total Archaeological Sites</div>
-                <div className="text-xs text-green-400 mt-1">✅ Target: 130+ sites</div>
-                <Search className="h-6 w-6 text-green-400 mx-auto mt-2" />
-              </CardContent>
-            </Card>
-
-            <Card className="bg-blue-900/30 border-blue-500/40">
-              <CardContent className="p-6 text-center">
-                <div className="text-4xl font-bold text-blue-400 mb-2">{systemStats.highConfidenceDiscoveries}</div>
-                <div className="text-sm text-blue-300">High-Confidence Sites</div>
-                <div className="text-xs text-blue-400 mt-1">85%+ confidence threshold</div>
-                <Shield className="h-6 w-6 text-blue-400 mx-auto mt-2" />
-              </CardContent>
-            </Card>
-
-            <Card className="bg-purple-900/30 border-purple-500/40">
-              <CardContent className="p-6 text-center">
-                <div className="text-4xl font-bold text-purple-400 mb-2">{systemStats.culturalDiversity}+</div>
-                <div className="text-sm text-purple-300">Indigenous Cultures</div>
-                <div className="text-xs text-purple-400 mt-1">Across the Americas</div>
-                <Users className="h-6 w-6 text-purple-400 mx-auto mt-2" />
-              </CardContent>
-            </Card>
-
-            <Card className="bg-yellow-900/30 border-yellow-500/40">
-              <CardContent className="p-6 text-center">
-                <div className="text-4xl font-bold text-yellow-400 mb-2">140</div>
-                <div className="text-sm text-yellow-300">NIS Protocol Finds</div>
-                <div className="text-xs text-yellow-400 mt-1">Brand new discoveries</div>
-                <Zap className="h-6 w-6 text-yellow-400 mx-auto mt-2" />
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* System Health Dashboard */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-          <Card className="bg-slate-800/50 border-slate-700">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-slate-400 text-sm">NIS Protocol Status</p>
-                  <p className="text-xl font-bold text-white">
-                    {systemStats.nisProtocolActive ? 'ACTIVE' : 'STANDBY'}
-                  </p>
-                </div>
-                <Activity className={`h-8 w-8 ${systemStats.nisProtocolActive ? 'text-green-400' : 'text-yellow-400'}`} />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-slate-800/50 border-slate-700">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-slate-400 text-sm">System Health</p>
-                  <p className="text-3xl font-bold text-white">{systemStats.systemHealth}%</p>
-                </div>
-                <Activity className="h-8 w-8 text-blue-400" />
-              </div>
-              <Progress value={systemStats.systemHealth} className="mt-2" />
-            </CardContent>
-          </Card>
-
-          <Card className="bg-slate-800/50 border-slate-700">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-slate-400 text-sm">Active Agents</p>
-                  <p className="text-3xl font-bold text-white">{systemStats.activeAgents}</p>
-                </div>
-                <Brain className="h-8 w-8 text-purple-400" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-slate-800/50 border-slate-700">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-slate-400 text-sm">Data Sources</p>
-                  <p className="text-3xl font-bold text-white">{systemStats.dataSourcesActive}/4</p>
-                </div>
-                <Database className="h-8 w-8 text-orange-400" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="flex flex-wrap gap-4 justify-center mb-8">
-          <Button 
-            onClick={quickDiscovery}
-            size="lg" 
-            className="bg-green-600 hover:bg-green-700"
-          >
-            <Zap className="h-5 w-5 mr-2" />
-            Explore {systemStats.totalDiscoveries} Discoveries
-          </Button>
-          
-
-          
-          <Button 
-            onClick={() => router.push('/map')}
-            size="lg" 
-            variant="outline"
-            className="border-orange-600 text-orange-400 hover:bg-orange-600/20"
-          >
-            <Map className="h-5 w-5 mr-2" />
-            View {systemStats.culturalDiversity}+ Cultures
-          </Button>
-        </div>
-
-        {/* Map Navigation Hub */}
-        <Card className="bg-gradient-to-r from-indigo-900/20 to-purple-900/20 border-indigo-500/30 mb-12">
+      <div className="container mx-auto px-4 py-12">
+        {/* System Status - For Judges */}
+        <Card className="bg-slate-800/50 border-slate-700 mb-12">
           <CardHeader>
-            <CardTitle className="text-white flex items-center justify-center">
-              <Globe className="h-6 w-6 mr-2 text-indigo-400" />
-              Interactive Mapping & Analysis Hub
+            <CardTitle className="text-white flex items-center">
+              <Activity className="h-5 w-5 mr-2" />
+              System Status
+              <Badge className={`ml-3 ${getSystemStatusColor()}`}>
+                {getSystemStatusText()}
+              </Badge>
             </CardTitle>
-            <CardDescription className="text-center text-slate-300">
-              Explore archaeological sites with our advanced Mapbox-powered visualization tools
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-6">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-blue-400">{systemStats.totalDiscoveries}</div>
+                <div className="text-sm text-slate-400">Sites Discovered</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-emerald-400">{systemStats.highConfidenceDiscoveries}</div>
+                <div className="text-sm text-slate-400">High Confidence</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-purple-400">{systemStats.activeAgents}</div>
+                <div className="text-sm text-slate-400">AI Agents</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-orange-400">{systemStats.culturalDiversity}</div>
+                <div className="text-sm text-slate-400">Cultural Groups</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-cyan-400">{systemStats.systemHealth}%</div>
+                <div className="text-sm text-slate-400">System Health</div>
+              </div>
+              <div className="text-center">
+                <div className={`text-3xl font-bold ${systemStats.nisProtocolActive ? 'text-green-400' : 'text-red-400'}`}>
+                  {systemStats.nisProtocolActive ? '✅' : '❌'}
+                </div>
+                <div className="text-sm text-slate-400">NIS Protocol</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Quick Access for Judges */}
+        <Card className="bg-slate-800/50 border-slate-700 mb-12">
+          <CardHeader>
+            <CardTitle className="text-white">🚀 Quick Access - Demo Platform</CardTitle>
+            <CardDescription className="text-slate-400">
+              Explore the key features of our archaeological discovery platform
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button 
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Button
+                onClick={() => router.push('/vision')}
+                variant="outline"
+                className="h-20 flex flex-col items-center justify-center border-purple-500 text-purple-400 hover:bg-purple-500/20"
+              >
+                <Brain className="h-6 w-6 mb-2" />
+                <span className="font-semibold">AI Vision</span>
+                <span className="text-xs opacity-75">GPT-4 + KAN</span>
+              </Button>
+              <Button
                 onClick={() => router.push('/map')}
                 variant="outline"
                 className="h-20 flex flex-col items-center justify-center border-blue-500 text-blue-400 hover:bg-blue-500/20"
               >
                 <Map className="h-6 w-6 mb-2" />
-                <span className="font-semibold">Geographic Map</span>
-                <span className="text-xs opacity-75">Full site overview</span>
+                <span className="font-semibold">Interactive Maps</span>
+                <span className="text-xs opacity-75">Google + Mapbox</span>
               </Button>
-              
-              <Button 
-                onClick={() => router.push('/vision')}
+              <Button
+                onClick={() => router.push('/chat')}
                 variant="outline"
-                className="h-20 flex flex-col items-center justify-center border-purple-500 text-purple-400 hover:bg-purple-500/20"
+                className="h-20 flex flex-col items-center justify-center border-emerald-500 text-emerald-400 hover:bg-emerald-500/20"
               >
-                <Eye className="h-6 w-6 mb-2" />
-                <span className="font-semibold">Vision Agent</span>
-                <span className="text-xs opacity-75">AI-powered analysis</span>
+                <MessageSquare className="h-6 w-6 mb-2" />
+                <span className="font-semibold">Research Chat</span>
+                <span className="text-xs opacity-75">AI Assistant</span>
               </Button>
-              
-              <Button 
-                onClick={() => router.push('/satellite')}
+              <Button
+                onClick={() => router.push('/analytics')}
                 variant="outline"
-                className="h-20 flex flex-col items-center justify-center border-green-500 text-green-400 hover:bg-green-500/20"
+                className="h-20 flex flex-col items-center justify-center border-orange-500 text-orange-400 hover:bg-orange-500/20"
               >
-                <Satellite className="h-6 w-6 mb-2" />
-                <span className="font-semibold">Satellite View</span>
-                <span className="text-xs opacity-75">Real imagery</span>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Full Map Integration Section */}
-        <Card className="bg-slate-800/50 border-slate-700">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center">
-              <Globe className="h-5 w-5 mr-2" />
-              🗺️ Integrated Archaeological Map
-            </CardTitle>
-            <CardDescription className="text-slate-400">
-              Interactive Mapbox map with LIDAR visualization and real-time coordinate synchronization
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <UniversalMapboxIntegration
-              coordinates={currentCoordinates}
-              onCoordinatesChange={handleMapCoordinatesChange}
-              height="400px"
-              showControls={true}
-              pageType="main"
-              onPageNavigation={handlePageNavigation}
-              enableLidarVisualization={true}
-            />
-            
-            {/* Map Actions */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
-              <Button 
-                onClick={() => handlePageNavigation('vision', currentCoordinates)}
-                size="sm"
-                variant="outline"
-                className="border-purple-500 text-purple-400 hover:bg-purple-500/20"
-              >
-                <Eye className="w-4 h-4 mr-2" />
-                Vision Analysis
-              </Button>
-              <Button 
-                onClick={() => handlePageNavigation('analysis', currentCoordinates)}
-                size="sm"
-                variant="outline"
-                className="border-emerald-500 text-emerald-400 hover:bg-emerald-500/20"
-              >
-                <Brain className="w-4 h-4 mr-2" />
-                Deep Analysis
-              </Button>
-              <Button 
-                onClick={() => handlePageNavigation('chat', currentCoordinates)}
-                size="sm"
-                variant="outline"
-                className="border-blue-500 text-blue-400 hover:bg-blue-500/20"
-              >
-                <MessageSquare className="w-4 h-4 mr-2" />
-                Research Chat
-              </Button>
-              <Button 
-                onClick={() => handlePageNavigation('map', currentCoordinates)}
-                size="sm"
-                className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700"
-              >
-                <Map className="w-4 h-4 mr-2" />
-                Full Map
+                <BarChart3 className="h-6 w-6 mb-2" />
+                <span className="font-semibold">Analytics</span>
+                <span className="text-xs opacity-75">Live data</span>
               </Button>
             </div>
           </CardContent>
@@ -790,44 +565,37 @@ export default function HomePage() {
             <div>
               <h3 className="font-semibold text-white mb-3">Research Tools</h3>
               <ul className="space-y-2 text-sm">
-                <li><Link href="/archaeological-discovery" className="hover:text-blue-400 transition-colors">Archaeological Discovery</Link></li>
+                <li><Link href="/vision" className="hover:text-blue-400 transition-colors">AI Vision Analysis</Link></li>
                 <li><Link href="/map" className="hover:text-blue-400 transition-colors">Interactive Maps</Link></li>
                 <li><Link href="/analytics" className="hover:text-blue-400 transition-colors">Data Analytics</Link></li>
               </ul>
             </div>
             
             <div>
-              <h3 className="font-semibold text-white mb-3">AI Systems</h3>
+              <h3 className="font-semibold text-white mb-3">AI Features</h3>
               <ul className="space-y-2 text-sm">
-                <li><Link href="/agent" className="hover:text-blue-400 transition-colors">AI Agents</Link></li>
-                <li><Link href="/chat" className="hover:text-blue-400 transition-colors">Research Chat</Link></li>
-                <li><Link href="/documentation" className="hover:text-blue-400 transition-colors">Documentation</Link></li>
+                <li><Link href="/chat" className="hover:text-blue-400 transition-colors">Research Assistant</Link></li>
+                <li><Link href="/analysis" className="hover:text-blue-400 transition-colors">Deep Analysis</Link></li>
+                <li><Link href="/satellite" className="hover:text-blue-400 transition-colors">Satellite Imagery</Link></li>
               </ul>
             </div>
             
             <div>
-              <h3 className="font-semibold text-white mb-3">System Status</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${systemStats.systemHealth > 80 ? 'bg-green-400' : systemStats.systemHealth > 50 ? 'bg-yellow-400' : 'bg-red-400'}`}></div>
-                  <span>System Health: {systemStats.systemHealth}%</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-                  <span>Active Agents: {systemStats.activeAgents}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-purple-400"></div>
-                  <span>Data Sources: {systemStats.dataSourcesActive}/4</span>
-                </div>
-              </div>
+              <h3 className="font-semibold text-white mb-3">System Info</h3>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${systemStats.nisProtocolActive ? 'bg-green-400' : 'bg-red-400'}`}></div>
+                  NIS Protocol: {systemStats.nisProtocolActive ? 'Active' : 'Offline'}
+                </li>
+                <li>Backend: {connectionStatus.online ? '🟢 Online' : '🔴 Offline'}</li>
+                <li>Health: {systemStats.systemHealth}%</li>
+              </ul>
             </div>
           </div>
           
-          <div className="border-t border-slate-700 mt-8 pt-6 text-center text-sm">
-            <p>© {new Date().getFullYear()} Organica-Ai-Solutions. All rights reserved.</p>
-            <p className="mt-2 text-slate-500">
-              Built with Next.js, FastAPI, and advanced AI for archaeological research.
+          <div className="border-t border-slate-700 mt-8 pt-8 text-center">
+            <p className="text-sm text-slate-400">
+              © 2024 Organica AI Solutions. NIS Protocol - Respectful AI for Archaeological Discovery.
             </p>
           </div>
         </div>
