@@ -197,11 +197,51 @@ class EnhancedMultiAgentCoordinator:
             self.logger.error(f"❌ KAN agent error: {str(e)}")
     
     async def _run_lidar_agent(self, lat: float, lon: float, radius_km: float):
-        """Run professional LiDAR agent analysis"""
-        self.logger.info("🌐 Running professional LiDAR agent...")
+        """Run professional HD LiDAR agent analysis"""
+        self.logger.info("🌐 Running professional HD LiDAR agent...")
         
         try:
-            # Process with professional LiDAR processor
+            # Try HD LiDAR processor first
+            try:
+                from api.lidar_hd_processor import HDLidarProcessor
+                hd_processor = HDLidarProcessor()
+                
+                # Use high-resolution processing for agents
+                hd_result = hd_processor.process_hd_lidar(
+                    coordinates={'lat': lat, 'lng': lon},
+                    zoom_level=1,  # Ultra-high resolution for agents
+                    radius=int(radius_km * 1000),  # Convert km to meters
+                    resolution='high'
+                )
+                
+                if hd_result['success']:
+                    # Calculate confidence based on HD processing results
+                    confidence = min(0.95, 0.7 + (len(hd_result.get('archaeological_features', [])) * 0.05))
+                    
+                    self.agents['lidar_agent'] = {
+                        'status': 'completed',
+                        'confidence': confidence,
+                        'results': {
+                            'processor_type': 'HD LiDAR Professional',
+                            'zoom_level': hd_result.get('zoom_level', 1),
+                            'point_count': hd_result['processing_results']['point_count'],
+                            'ground_points': hd_result['processing_results']['ground_points'],
+                            'features_detected': len(hd_result.get('archaeological_features', [])),
+                            'processing_quality': hd_result['hd_capabilities']['detail_level'],
+                            'triangulation_available': len(hd_result.get('triangulated_mesh', [])) > 0,
+                            'rgb_coloring_available': len(hd_result.get('rgb_colored_points', [])) > 0,
+                            'micro_feature_detection': hd_result['hd_capabilities']['micro_feature_detection'],
+                            'archaeological_features': hd_result.get('archaeological_features', []),
+                            'coverage_area_m2': hd_result['processing_results']['coverage_area_m2']
+                        }
+                    }
+                    self.logger.info(f"✅ HD LiDAR agent completed: {confidence:.1%} confidence")
+                    return
+                    
+            except Exception as e:
+                self.logger.warning(f"HD LiDAR processor not available: {e}")
+            
+            # Fallback to standard LiDAR processor
             result = self.lidar_processor.process_point_cloud(lat, lon, radius_km)
             
             if result['status'] == 'success':
@@ -209,6 +249,7 @@ class EnhancedMultiAgentCoordinator:
                     'status': 'completed',
                     'confidence': result['confidence_score'],
                     'results': {
+                        'processor_type': 'Standard LiDAR',
                         'point_count': result['point_count'],
                         'features_detected': len(result['archaeological_features']),
                         'processing_quality': result['processing_metadata']['quality'],

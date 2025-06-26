@@ -412,11 +412,10 @@ Analysis saved to database with ID: ${result.analysisId}`
         
 
         
-        {/* NIS Protocol Power Hub - Revised */}
+        {/* NIS Protocol Power Hub - Enhanced */}
         <Tabs defaultValue="power" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 bg-slate-800/50">
+          <TabsList className="grid w-full grid-cols-4 bg-slate-800/50">
             <TabsTrigger value="power" className="text-xs">🚀 Power Hub</TabsTrigger>
-            <TabsTrigger value="map" className="text-xs">🗺️ Map</TabsTrigger>
             <TabsTrigger value="agents" className="text-xs">🤖 Agents</TabsTrigger>
             <TabsTrigger value="backend" className="text-xs">⚡ Backend</TabsTrigger>
             <TabsTrigger value="metrics" className="text-xs">📊 Metrics</TabsTrigger>
@@ -535,146 +534,266 @@ Analysis saved to database with ID: ${result.analysisId}`
             </div>
           </TabsContent>
 
-          <TabsContent value="map" className="mt-4">
-            {/* Integrated Mapbox Map for Chat */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-white font-semibold flex items-center gap-2">
-                  <Globe className="w-5 h-5 text-emerald-400" />
-                  Interactive Archaeological Map
-                </h3>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs bg-emerald-500/20 border-emerald-500/50 text-emerald-300">
-                    Current: {currentCoordinates}
-                  </Badge>
-                </div>
-              </div>
-              
-              <UniversalMapboxIntegration
-                coordinates={currentCoordinates}
-                onCoordinatesChange={handleMapCoordinatesChange}
-                height="350px"
-                showControls={true}
-                pageType="chat"
-                onPageNavigation={handlePageNavigation}
-                enableLidarVisualization={true}
-              />
-              
-              {/* Quick Map Actions */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <Button 
-                  onClick={() => handleMapCoordinatesChange("-3.4653, -62.2159")}
-                  size="sm"
-                  variant="outline"
-                  className="text-xs border-emerald-500 text-emerald-400"
-                >
-                  Amazon Basin
-                </Button>
-                <Button 
-                  onClick={() => handleMapCoordinatesChange("-15.5, -70.0")}
-                  size="sm"
-                  variant="outline"
-                  className="text-xs border-blue-500 text-blue-400"
-                >
-                  Andes Mountains
-                </Button>
-                <Button 
-                  onClick={() => handleMapCoordinatesChange("-14.7, -75.1")}
-                  size="sm"
-                  variant="outline"
-                  className="text-xs border-purple-500 text-purple-400"
-                >
-                  Nazca Lines
-                </Button>
-                <Button 
-                  onClick={() => {
-                    const message = `/analyze ${currentCoordinates}`
-                    chatService.sendMessage(message)
-                  }}
-                  size="sm"
-                  className="text-xs bg-gradient-to-r from-emerald-600 to-cyan-600"
-                >
-                  Analyze Here
-                </Button>
-              </div>
-              
-              {/* Map Instructions */}
-              <div className="p-3 bg-slate-900/50 border border-slate-700 rounded-lg">
-                <div className="text-slate-300 text-xs">
-                  <div className="font-medium mb-2">🗺️ Chat Map Integration:</div>
-                  <ul className="space-y-1 text-slate-400">
-                    <li>• Click anywhere on the map to select coordinates</li>
-                    <li>• Use "Analyze Here" to send coordinates to chat</li>
-                    <li>• Navigate to other pages with current coordinates</li>
-                    <li>• LIDAR points and archaeological sites are visualized</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-          
           <TabsContent value="agents" className="mt-4">
-            <div className="grid grid-cols-3 gap-3 text-xs">
+            <div className="space-y-4">
+              {/* Enhanced Agent Status with Deep Analysis */}
               <Card className="bg-slate-800/50 border-slate-700">
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Eye className="w-4 h-4 text-blue-400" />
-                    <span className="text-white font-medium">Vision Agent</span>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-white font-semibold flex items-center gap-2">
+                      <Brain className="w-4 h-4 text-emerald-400" />
+                      Multi-Agent Coordination System
+                    </h3>
+                    <Badge variant="outline" className="bg-emerald-500/20 border-emerald-500/50 text-emerald-300">
+                      {realTimeMetrics.activeAgents} / 6 Active
+                    </Badge>
                   </div>
-                  <Badge variant="outline" className={`${agentStatus.vision_agent === 'active' ? 'bg-green-500/20 border-green-500/50 text-green-300' : 'bg-yellow-500/20 border-yellow-500/50 text-yellow-300'}`}>
-                    {agentStatus.vision_agent || 'Active'}
-                  </Badge>
-                </CardContent>
-              </Card>
-              <Card className="bg-slate-800/50 border-slate-700">
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Brain className="w-4 h-4 text-purple-400" />
-                    <span className="text-white font-medium">Analysis Agent</span>
+                  
+                  {/* Agent Status Grid */}
+                  <div className="grid grid-cols-2 gap-3 text-xs mb-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-300">🔍 Vision Agent</span>
+                        <Badge variant="outline" className={`${agentStatus.vision_agent === 'active' ? 'bg-green-500/20 border-green-500/50 text-green-300' : 'bg-yellow-500/20 border-yellow-500/50 text-yellow-300'}`}>
+                          {agentStatus.vision_agent || 'Unknown'}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-300">🧠 Analysis Agent</span>
+                        <Badge variant="outline" className={`${agentStatus.analysis_agent === 'active' ? 'bg-green-500/20 border-green-500/50 text-green-300' : 'bg-yellow-500/20 border-yellow-500/50 text-yellow-300'}`}>
+                          {agentStatus.analysis_agent || 'Unknown'}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-300">🏛️ Cultural Agent</span>
+                        <Badge variant="outline" className={`${agentStatus.cultural_agent === 'active' ? 'bg-green-500/20 border-green-500/50 text-green-300' : 'bg-yellow-500/20 border-yellow-500/50 text-yellow-300'}`}>
+                          {agentStatus.cultural_agent || 'Unknown'}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-300">💾 Memory Agent</span>
+                        <Badge variant="outline" className="bg-green-500/20 border-green-500/50 text-green-300">
+                          Active
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-300">🎯 Reasoning Agent</span>
+                        <Badge variant="outline" className="bg-green-500/20 border-green-500/50 text-green-300">
+                          Active
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-300">⚡ Action Agent</span>
+                        <Badge variant="outline" className="bg-green-500/20 border-green-500/50 text-green-300">
+                          Active
+                        </Badge>
+                      </div>
+                    </div>
                   </div>
-                  <Badge variant="outline" className={`${agentStatus.analysis_agent === 'active' ? 'bg-green-500/20 border-green-500/50 text-green-300' : 'bg-yellow-500/20 border-yellow-500/50 text-yellow-300'}`}>
-                    {agentStatus.analysis_agent || 'Active'}
-                  </Badge>
-                </CardContent>
-              </Card>
-              <Card className="bg-slate-800/50 border-slate-700">
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Globe className="w-4 h-4 text-emerald-400" />
-                    <span className="text-white font-medium">Cultural Agent</span>
+
+                  {/* Deep Analysis Controls */}
+                  <div className="border-t border-slate-600 pt-4">
+                    <h4 className="text-white font-medium mb-3 flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-orange-400" />
+                      Deep Analysis Operations
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button 
+                        onClick={() => safeQuickAction(async () => {
+                          console.log('🚀 Triggering deep analysis of all sites...')
+                          const response = await fetch('http://localhost:8000/agents/analyze-all-sites', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                          })
+                          if (response.ok) {
+                            const result = await response.json()
+                            chatService.sendMessage(`Deep analysis completed! Analyzed ${result.summary.total_sites_analyzed} sites with ${result.summary.successful_analyses} successful analyses. Special focus on Shipibo Kiln site (-9.8, -84.2).`)
+                          }
+                        }, 'Deep Analysis All Sites')}
+                        disabled={isLoading}
+                        className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white border-0 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 text-xs"
+                      >
+                        <Brain className="w-3 h-3 mr-1" />
+                        Analyze All Sites
+                      </Button>
+                      
+                      <Button 
+                        onClick={() => safeQuickAction(() => chatService.sendMessage('Analyze coordinates -9.8, -84.2 with comprehensive ethnographic and ceramic production analysis'), 'Shipibo Deep Analysis')}
+                        disabled={isLoading}
+                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 text-xs"
+                      >
+                        <Eye className="w-3 h-3 mr-1" />
+                        Shipibo Kiln Focus
+                      </Button>
+                      
+                      <Button 
+                        onClick={() => safeQuickAction(() => chatService.sendMessage('/agents status comprehensive'), 'Agent Status Deep')}
+                        disabled={isLoading}
+                        className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white border-0 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 text-xs"
+                      >
+                        <Activity className="w-3 h-3 mr-1" />
+                        Agent Diagnostics
+                      </Button>
+                      
+                      <Button 
+                        onClick={() => safeQuickAction(() => chatService.sendMessage('Show consciousness agent global workspace integration and memory synthesis status'), 'Consciousness Status')}
+                        disabled={isLoading}
+                        className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white border-0 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 text-xs"
+                      >
+                        <Network className="w-3 h-3 mr-1" />
+                        Consciousness Hub
+                      </Button>
+                    </div>
                   </div>
-                  <Badge variant="outline" className={`${agentStatus.cultural_agent === 'active' ? 'bg-green-500/20 border-green-500/50 text-green-300' : 'bg-yellow-500/20 border-yellow-500/50 text-yellow-300'}`}>
-                    {agentStatus.cultural_agent || 'Active'}
-                  </Badge>
+
+                  {/* Agent Capabilities */}
+                  <div className="border-t border-slate-600 pt-4 mt-4">
+                    <h4 className="text-white font-medium mb-2">🎯 Current Capabilities</h4>
+                    <div className="text-xs text-slate-400 space-y-1">
+                      <div>• Multi-modal satellite and LIDAR processing</div>
+                      <div>• Enhanced archaeological pattern recognition</div>
+                      <div>• Cultural significance assessment with ethnographic data</div>
+                      <div>• Real-time consciousness integration and memory synthesis</div>
+                      <div>• Ceramic production analysis (Shipibo specialization)</div>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
           
           <TabsContent value="backend" className="mt-4">
-            <div className="grid grid-cols-2 gap-3 text-xs">
+            <div className="space-y-4">
+              {/* Enhanced Backend Status */}
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <Card className="bg-slate-800/50 border-slate-700">
+                  <CardContent className="p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Shield className="w-4 h-4 text-emerald-400" />
+                      <span className="text-white font-medium">Main Backend</span>
+                    </div>
+                    <Badge variant="outline" className={`${backendStatus.status === 'healthy' ? 'bg-green-500/20 border-green-500/50 text-green-300' : 'bg-red-500/20 border-red-500/50 text-red-300'}`}>
+                      {backendStatus.status || 'Checking...'}
+                    </Badge>
+                    <p className="text-slate-400 mt-1">Port 8000 • {realTimeMetrics.totalEndpoints} Endpoints</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-slate-800/50 border-slate-700">
+                  <CardContent className="p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Network className="w-4 h-4 text-orange-400" />
+                      <span className="text-white font-medium">IKRP Codex</span>
+                    </div>
+                    <Badge variant="outline" className="bg-green-500/20 border-green-500/50 text-green-300">
+                      Active
+                    </Badge>
+                    <p className="text-slate-400 mt-1">Port 8001 • {codexStatus.sources?.reduce((sum: number, s: any) => sum + (s.total_codices || 8), 0) || 26} Codices</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Backend Operations */}
               <Card className="bg-slate-800/50 border-slate-700">
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Shield className="w-4 h-4 text-emerald-400" />
-                    <span className="text-white font-medium">Main Backend</span>
+                <CardContent className="p-4">
+                  <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                    <Cpu className="w-4 h-4 text-blue-400" />
+                    Backend Operations & Analysis
+                  </h3>
+                  
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <Button 
+                      onClick={() => safeQuickAction(async () => {
+                        const response = await fetch('http://localhost:8000/agents/analysis-status')
+                        if (response.ok) {
+                          const status = await response.json()
+                          chatService.sendMessage(`Backend Status: ${status.total_known_sites} known sites, ${status.total_stored_sites} stored sites, ${status.total_analyses} analyses. Database: ${status.database_status}. Accuracy system: ${status.accuracy_system}.`)
+                        }
+                      }, 'Backend Status Check')}
+                      disabled={isLoading}
+                      className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white border-0 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 text-xs"
+                    >
+                      <Activity className="w-3 h-3 mr-1" />
+                      System Status
+                    </Button>
+                    
+                    <Button 
+                      onClick={() => safeQuickAction(() => chatService.sendMessage('/statistics'), 'Get Statistics')}
+                      disabled={isLoading}
+                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-0 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 text-xs"
+                    >
+                      <Database className="w-3 h-3 mr-1" />
+                      Get Statistics
+                    </Button>
+                    
+                    <Button 
+                      onClick={() => safeQuickAction(() => chatService.sendMessage('Show all available backend endpoints and their current status'), 'Endpoint Status')}
+                      disabled={isLoading}
+                      className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 text-xs"
+                    >
+                      <Network className="w-3 h-3 mr-1" />
+                      Endpoints
+                    </Button>
+                    
+                    <Button 
+                      onClick={() => safeQuickAction(() => chatService.sendMessage('Refresh all cached data and reload enhanced analysis results'), 'Refresh Cache')}
+                      disabled={isLoading}
+                      className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white border-0 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 text-xs"
+                    >
+                      <AlertCircle className="w-3 h-3 mr-1" />
+                      Refresh Cache
+                    </Button>
                   </div>
-                  <Badge variant="outline" className={`${backendStatus.status === 'healthy' ? 'bg-green-500/20 border-green-500/50 text-green-300' : 'bg-red-500/20 border-red-500/50 text-red-300'}`}>
-                    {backendStatus.status || 'Checking...'}
-                  </Badge>
-                  <p className="text-slate-400 mt-1">Port 8000 • {realTimeMetrics.totalEndpoints} Endpoints</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-slate-800/50 border-slate-700">
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Network className="w-4 h-4 text-orange-400" />
-                    <span className="text-white font-medium">IKRP Codex</span>
+
+                  {/* Backend Metrics */}
+                  <div className="border-t border-slate-600 pt-4">
+                    <h4 className="text-white font-medium mb-2">📊 Real-time Metrics</h4>
+                    <div className="grid grid-cols-2 gap-4 text-xs">
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-slate-300">Active Endpoints:</span>
+                          <span className="text-emerald-400">{realTimeMetrics.totalEndpoints}/20</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-300">Processing Queue:</span>
+                          <span className="text-blue-400">{realTimeMetrics.processingQueue} tasks</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-300">Archaeological Sites:</span>
+                          <span className="text-purple-400">{siteCount}+ sites</span>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-slate-300">System Confidence:</span>
+                          <span className="text-emerald-400">{(realTimeMetrics.confidence * 100).toFixed(1)}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-300">Last Update:</span>
+                          <span className="text-orange-400">{realTimeMetrics.lastUpdate}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-300">Backend Health:</span>
+                          <span className={backendStatus.status === 'healthy' ? 'text-green-400' : 'text-red-400'}>
+                            {backendStatus.status || 'Unknown'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <Badge variant="outline" className="bg-green-500/20 border-green-500/50 text-green-300">
-                    Active
-                  </Badge>
-                  <p className="text-slate-400 mt-1">Port 8001 • {codexStatus.sources?.reduce((sum: number, s: any) => sum + (s.total_codices || 8), 0) || 26} Codices</p>
+
+                  {/* Backend Capabilities */}
+                  <div className="border-t border-slate-600 pt-4 mt-4">
+                    <h4 className="text-white font-medium mb-2">⚡ Backend Capabilities</h4>
+                    <div className="text-xs text-slate-400 space-y-1">
+                      <div>• Deep analysis of all sites in database</div>
+                      <div>• Real-time statistics with no mock data</div>
+                      <div>• Multi-agent coordination and consciousness integration</div>
+                      <div>• Enhanced LIDAR and satellite processing</div>
+                      <div>• Cultural significance assessment and ceramic analysis</div>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>

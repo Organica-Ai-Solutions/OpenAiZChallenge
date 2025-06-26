@@ -622,7 +622,7 @@ export function RealMapboxLidar({
                           console.log(`✅ HD LiDAR ${zoom}m analysis complete:`, data)
                           
                           // Show HD results notification
-                          alert(`✅ HD LiDAR ${zoom}m Analysis Complete!\n🔍 Detail Level: ${data.hd_capabilities?.detail_level}\n📊 Points: ${data.processing_results?.point_count:,}\n🎯 Features: ${data.processing_results?.detected_features}\n⚡ Quality: ${data.processing_results?.triangulation_quality}`)
+                          console.log(`✅ HD LiDAR ${zoom}m Analysis Complete!\n🔍 Detail Level: ${data.hd_capabilities?.detail_level}\n📊 Points: ${data.processing_results?.point_count}\n🎯 Features: ${data.processing_results?.detected_features}\n⚡ Quality: ${data.processing_results?.triangulation_quality}`)
                           
                           // Update map with HD data if available
                           if (data.archaeological_analysis?.features_detected) {
@@ -631,12 +631,12 @@ export function RealMapboxLidar({
                           }
                         } else {
                           console.log('⚠️ HD LiDAR analysis unavailable, using visual feedback')
-                          alert(`🔍 HD LiDAR ${zoom}m Zoom Applied!\n⚠️ Enhanced processing unavailable\n✅ Visual zoom effects active\n📊 ${zoom}m resolution simulation`)
+                          console.log(`🔍 HD LiDAR ${zoom}m Zoom Applied!\n⚠️ Enhanced processing unavailable\n✅ Visual zoom effects active\n📊 ${zoom}m resolution simulation`)
                         }
                       })
                       .catch(error => {
                         console.error('❌ HD LiDAR error:', error)
-                        alert(`🔍 HD LiDAR ${zoom}m Zoom Applied!\n⚠️ API unavailable\n✅ Visual zoom effects active\n📊 ${zoom}m resolution simulation`)
+                        console.log(`🔍 HD LiDAR ${zoom}m Zoom Applied!\n⚠️ API unavailable\n✅ Visual zoom effects active\n📊 ${zoom}m resolution simulation`)
                       })
                     }
                   }}

@@ -44,7 +44,7 @@ export default function GoogleMapsLoader() {
 
     // Load Google Maps script with proper async loading pattern
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry,drawing&loading=async&callback=initGoogleMapsCallback`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry,drawing,marker&loading=async&callback=initGoogleMapsCallback`;
     script.async = true;
     script.defer = true;
     

@@ -5,13 +5,19 @@
 fastapi==0.115.13
 uvicorn==0.32.1
 starlette==0.46.2
+websockets>=10.4
 
 # AI/ML Core
-openai==1.57.4
+openai==1.82.1
 anthropic==0.37.1
 numpy==1.26.4
 pandas==2.2.3
 scikit-learn==1.5.2
+
+# LangGraph & LangChain (CRITICAL - Used in agent_integrator.py)
+langgraph>=0.1.0
+langchain>=0.2.0
+langchain-openai>=0.1.0
 
 # Computer Vision & Image Processing
 opencv-python==4.10.0.84
@@ -40,8 +46,9 @@ sqlalchemy==2.0.36
 alembic==1.14.0
 psycopg2-binary==2.9.10
 
-# Message Queue
+# Message Queue (CRITICAL - Used in infrastructure)
 kafka-python==2.0.2
+confluent-kafka>=2.1.0
 
 # Data Processing
 scipy==1.14.1
@@ -53,10 +60,12 @@ requests==2.32.3
 aiohttp==3.11.10
 httpx==0.28.1
 
-# Authentication & Security
+# Authentication & Security (CRITICAL - Used in auth_middleware.py)
 pyjwt==2.10.1
 passlib==1.7.4
 python-multipart==0.0.17
+python-jose==3.3.0
+bcrypt==4.0.1
 
 # Configuration & Environment
 python-dotenv==1.0.1
@@ -66,6 +75,15 @@ pydantic-settings==2.6.1
 # Async Processing
 asyncio-mqtt==0.16.2
 celery==5.4.0
+
+# Distributed Computing (CRITICAL - Used in data processing)
+dask==2024.1.1
+distributed==2024.1.1
+dask-kubernetes==2024.1.1
+
+# Testing & Automation (CRITICAL - Used in test files)
+selenium==4.27.1
+webdriver-manager==4.0.2
 
 # File Processing
 openpyxl==3.1.5
@@ -160,11 +178,16 @@ types-requests==2.32.0.20241130
 # Performance Monitoring
 py-spy==0.3.14
 
+# Additional Database Support
+aiosqlite==0.19.0
+
+# FastAPI Extensions
+fastapi[all]==0.115.13
+
 # Archaeological Domain Specific
 # (These might need to be installed separately or from specific sources)
 # archaeological-python==1.0.0  # Custom package
 # cultural-heritage-tools==2.1.0  # Custom package
 
-# Competition Specific
-# langgraph==0.1.0  # For agent coordination
-# anthropic-sdk==0.37.1  # Claude integration 
+# Competition Specific - Added based on codebase analysis
+typing-extensions>=4.5.0 

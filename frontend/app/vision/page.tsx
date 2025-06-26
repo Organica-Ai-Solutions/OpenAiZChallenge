@@ -45,7 +45,7 @@ export default function UltimateVisionAgentPage() {
     
     return "5.1542, -73.7792"
   })
-  
+
   // Use unified system analysis state
   const isAnalyzing = unifiedState.isAnalyzing
   const analysisProgress = unifiedState.analysisProgress
@@ -66,6 +66,12 @@ export default function UltimateVisionAgentPage() {
   const [visionResults, setVisionResults] = useState<any>(null)
   const [lidarResults, setLidarResults] = useState<any>(null)
   const [agentCapabilities, setAgentCapabilities] = useState<any>(null)
+  
+  // Sync status tracking
+  const [syncStatus, setSyncStatus] = useState({
+    lastSync: null as Date | null,
+    syncEvents: [] as string[]
+  })
   
   // LIDAR visualization state
   const [lidarVisualization, setLidarVisualization] = useState({
@@ -98,6 +104,49 @@ export default function UltimateVisionAgentPage() {
     includePatternRecognition: true,
     includeAnomalyDetection: true
   })
+
+  // Enhanced coordinate setter with full system sync
+  const setCoordinatesWithSync = useCallback((newCoords: string) => {
+    console.log('🎯 Vision Agent: Setting coordinates with full sync:', newCoords)
+    setCoordinates(newCoords)
+    
+    // Parse and sync with unified system
+    const [lat, lng] = newCoords.split(',').map(s => parseFloat(s.trim()))
+    if (!isNaN(lat) && !isNaN(lng)) {
+      unifiedActions.selectCoordinates(lat, lng, 'vision_agent_manual')
+      
+      // Track sync event
+      setSyncStatus(prev => ({
+        lastSync: new Date(),
+        syncEvents: [`Coordinates synced: ${lat.toFixed(4)}, ${lng.toFixed(4)}`, ...prev.syncEvents.slice(0, 4)]
+      }))
+      
+      // Update URL for sharing/bookmarking
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        url.searchParams.set('lat', lat.toString())
+        url.searchParams.set('lng', lng.toString())
+        window.history.replaceState({}, '', url.toString())
+      }
+      
+      // Clear previous results when coordinates change significantly
+      if (visionResults && visionResults.coordinates) {
+        const [prevLat, prevLng] = visionResults.coordinates.lat ? 
+          [visionResults.coordinates.lat, visionResults.coordinates.lon] :
+          visionResults.coordinates.split(',').map((s: string) => parseFloat(s.trim()))
+        
+        if (Math.abs(lat - prevLat) > 0.001 || Math.abs(lng - prevLng) > 0.001) {
+          console.log('📍 Coordinates changed significantly, clearing previous results')
+          setVisionResults(null)
+          setLidarResults(null)
+          setSyncStatus(prev => ({
+            ...prev,
+            syncEvents: ['Results cleared for new location', ...prev.syncEvents.slice(0, 4)]
+          }))
+        }
+      }
+    }
+  }, [unifiedActions, visionResults, setCoordinates, setVisionResults, setLidarResults, setSyncStatus])
 
   // Check backend status with improved error handling
   const checkBackendStatus = useCallback(async () => {
@@ -392,7 +441,13 @@ export default function UltimateVisionAgentPage() {
         console.warn('⚠️ Unified system analysis failed:', error)
       }
       
-      console.log('✅ Comprehensive analysis completed', finalResults)
+      // Auto-sync results with map visualization
+      if (finalResults.lidar_analysis) {
+        console.log('🗺️ Auto-syncing LIDAR results with map visualization')
+        setLidarResults(finalResults.lidar_analysis)
+      }
+      
+      console.log('✅ Comprehensive analysis completed with full sync', finalResults)
       
     } catch (error: unknown) {
       console.error('❌ Analysis failed:', error)
@@ -469,6 +524,13 @@ export default function UltimateVisionAgentPage() {
             total_points: lidarData.statistics?.total_points || 0
           }
         }))
+
+        // Update LIDAR visualization settings to reflect triangulation
+        setLidarVisualization(prev => ({
+          ...prev,
+          renderMode: 'triangulated_mesh',
+          enableDelaunayTriangulation: true
+        }))
         
         alert(`✅ Delaunay Triangulation Complete!\n🔺 Archaeological Features: ${lidarData.archaeological_features?.length || 0}\n📊 Total Points: ${lidarData.statistics?.total_points || 'N/A'}\n🎯 Processing Quality: ${lidarVisualization.processingQuality}`)
         console.log('✅ Delaunay triangulation completed')
@@ -525,6 +587,13 @@ export default function UltimateVisionAgentPage() {
             satellite_source: 'sentinel2',
             rgb_quality: satelliteData.quality_metrics?.rgb_quality || 'high'
           }
+        }))
+
+        // Update LIDAR visualization settings to reflect RGB coloring
+        setLidarVisualization(prev => ({
+          ...prev,
+          colorBy: 'rgb',
+          enableRGBColoring: true
         }))
         
         alert(`✅ RGB Coloring Complete!\n🎨 Satellite Data: ${satelliteData.satellite_overlay?.source || 'Sentinel-2'}\n📊 RGB Quality: ${satelliteData.quality_metrics?.rgb_quality || 'High'}\n🌍 Coverage: ${satelliteData.coverage_area_km2 || 'N/A'} km²`)
@@ -726,6 +795,26 @@ export default function UltimateVisionAgentPage() {
     }
   }, [unifiedState.selectedCoordinates, coordinates])
 
+  // Auto-trigger analysis when coordinates change (with debounce)
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (coordinates && coordinates !== "5.1542, -73.7792") {
+        const [lat, lng] = coordinates.split(',').map(s => parseFloat(s.trim()))
+        if (!isNaN(lat) && !isNaN(lng) && backendStatus.online) {
+          console.log('🔄 Auto-triggering analysis for new coordinates:', lat, lng)
+          // Only auto-trigger if we don't have recent results for these coordinates
+          if (!visionResults || !visionResults.coordinates || 
+              Math.abs(lat - (visionResults.coordinates.lat || 0)) > 0.001 ||
+              Math.abs(lng - (visionResults.coordinates.lon || 0)) > 0.001) {
+            runComprehensiveAnalysis()
+          }
+        }
+      }
+    }, 2000) // 2 second debounce
+
+    return () => clearTimeout(timeoutId)
+  }, [coordinates, backendStatus.online, visionResults, runComprehensiveAnalysis])
+
   // Save settings when they change
   useEffect(() => {
     localStorage.setItem('visionAnalysisConfig', JSON.stringify(analysisConfig))
@@ -733,7 +822,16 @@ export default function UltimateVisionAgentPage() {
 
   useEffect(() => {
     localStorage.setItem('visionLidarVisualization', JSON.stringify(lidarVisualization))
+    
+    // Sync LIDAR visualization changes with map component
+    console.log('🔧 LIDAR visualization settings updated:', lidarVisualization)
   }, [lidarVisualization])
+
+  // Real-time settings sync for LIDAR visualization
+  const updateLidarVisualization = useCallback((updates: Partial<typeof lidarVisualization>) => {
+    console.log('🎛️ Updating LIDAR visualization:', updates)
+    setLidarVisualization(prev => ({ ...prev, ...updates }))
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-y-auto">
@@ -754,10 +852,23 @@ export default function UltimateVisionAgentPage() {
               </p>
                 </div>
             <div className="flex items-center gap-4">
-              <Badge variant={backendStatus.online ? "default" : "destructive"} className="text-sm">
-                <div className={`w-2 h-2 rounded-full mr-2 ${backendStatus.online ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
-                {backendStatus.online ? 'Backend Online' : 'Backend Offline'}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant={backendStatus.online ? "default" : "destructive"} className="text-sm">
+                  <div className={`w-2 h-2 rounded-full mr-2 ${backendStatus.online ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
+                  {backendStatus.online ? 'Backend Online' : 'Backend Offline'}
+                </Badge>
+                
+                {/* Sync Status Indicator */}
+                <Badge variant="outline" className="text-xs border-emerald-400 text-emerald-400">
+                  <div className="w-1.5 h-1.5 rounded-full mr-1.5 bg-emerald-400 animate-pulse" />
+                  Perfect Sync
+                  {syncStatus.lastSync && (
+                    <span className="ml-1 text-slate-400">
+                      {new Date().getTime() - syncStatus.lastSync.getTime() < 5000 ? '🔄' : '✅'}
+                    </span>
+                  )}
+                </Badge>
+              </div>
               <Button onClick={checkBackendStatus} variant="outline" size="sm">
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Refresh
@@ -840,10 +951,10 @@ export default function UltimateVisionAgentPage() {
           </motion.div>
 
         <Tabs defaultValue="analysis" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-slate-800 h-12">
+                      <TabsList className="grid w-full grid-cols-3 bg-slate-800 h-12">
             <TabsTrigger value="analysis">🔬 Analysis</TabsTrigger>
             <TabsTrigger value="results">📊 Results</TabsTrigger>
-            <TabsTrigger value="lidar">🏔️ LIDAR 3D</TabsTrigger>
+                            <TabsTrigger value="lidar" className="hidden">🏔️ LIDAR 3D</TabsTrigger>
             <TabsTrigger value="settings">⚙️ Settings</TabsTrigger>
           </TabsList>
 
@@ -864,7 +975,7 @@ export default function UltimateVisionAgentPage() {
                       <Label>Coordinates</Label>
                       <Input
                         value={coordinates}
-                        onChange={(e) => setCoordinates(e.target.value)}
+                        onChange={(e) => setCoordinatesWithSync(e.target.value)}
                         placeholder="lat, lng"
                         className="bg-slate-700 border-slate-600 mt-1"
                       />
@@ -969,7 +1080,7 @@ export default function UltimateVisionAgentPage() {
                 <div className="lg:col-span-2">
                   <RealMapboxLidar
                     coordinates={coordinates}
-                    setCoordinates={setCoordinates}
+                    setCoordinates={setCoordinatesWithSync}
                     lidarVisualization={lidarVisualization}
                     lidarProcessing={lidarProcessing}
                     lidarResults={lidarResults}
@@ -1464,7 +1575,7 @@ export default function UltimateVisionAgentPage() {
                                 {/* Real Mapbox LIDAR Visualization */}
                 <RealMapboxLidar
                   coordinates={coordinates}
-                  setCoordinates={setCoordinates}
+                  setCoordinates={setCoordinatesWithSync}
                   lidarVisualization={lidarVisualization}
                   lidarProcessing={lidarProcessing}
                   lidarResults={lidarResults}

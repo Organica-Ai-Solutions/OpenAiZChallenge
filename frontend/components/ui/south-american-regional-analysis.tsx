@@ -330,7 +330,7 @@ export function SouthAmericanRegionalAnalysis({
             <option value="all">All Levels</option>
             <option value="high">High (90%+)</option>
             <option value="medium">Medium (80-89%)</option>
-            <option value="low">Low (<80%)</option>
+            <option value="low">Low (&lt;80%)</option>
           </select>
         </div>
       </div>

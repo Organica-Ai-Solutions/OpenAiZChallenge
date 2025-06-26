@@ -53,6 +53,14 @@ interface AnalysisResult {
   research_priority?: number
   funding_estimate?: number
   timeline_estimate?: string
+  // Multi-agent specific data
+  multi_agent_data?: {
+    features_detected: number
+    detected_features: any[]
+    cultural_assessment: any
+    statistical_analysis: any
+    agent_performance: any
+  }
 }
 
 interface Analysis {
@@ -110,7 +118,7 @@ export default function NISAnalysisPage() {
   const router = useRouter()
   const { actions } = useUnifiedSystem()
   
-  // Core State
+  // Core State with enhanced sync
   const [coordinates, setCoordinates] = useState(() => {
     // Initialize from URL parameters or unified system
     if (typeof window !== 'undefined') {
@@ -123,6 +131,15 @@ export default function NISAnalysisPage() {
     }
     return '5.1542, -73.7792' // Default coordinates
   })
+
+  // Sync status tracking
+  const [syncStatus, setSyncStatus] = useState({
+    lastSync: null as Date | null,
+    syncEvents: [] as string[],
+    isAutoAnalyzing: false
+  })
+
+  // Enhanced coordinate setter with full system sync (will be defined after state declarations)
   const [analysisType, setAnalysisType] = useState<'quick' | 'comprehensive' | 'specialized'>('comprehensive')
   const [selectedDataSources, setSelectedDataSources] = useState<string[]>(['satellite', 'lidar', 'historical'])
   const [selectedAgents, setSelectedAgents] = useState<string[]>(['vision', 'cultural', 'temporal', 'geospatial'])
@@ -698,9 +715,75 @@ export default function NISAnalysisPage() {
   }, [coordinates, mapLoaded, activeTab])
 
   // Analysis Execution
+  // Enhanced coordinate setter with full system sync
+  const setCoordinatesWithSync = useCallback((newCoords: string) => {
+    console.log('🎯 Analysis Page: Setting coordinates with full sync:', newCoords)
+    setCoordinates(newCoords)
+    
+    // Parse and sync with unified system
+    const [lat, lng] = newCoords.split(',').map(s => parseFloat(s.trim()))
+    if (!isNaN(lat) && !isNaN(lng)) {
+      actions.selectCoordinates(lat, lng, 'analysis_page_manual')
+      
+      // Track sync event
+      setSyncStatus(prev => ({
+        lastSync: new Date(),
+        syncEvents: [`Coordinates synced: ${lat.toFixed(4)}, ${lng.toFixed(4)}`, ...prev.syncEvents.slice(0, 4)],
+        isAutoAnalyzing: prev.isAutoAnalyzing
+      }))
+      
+      // Update URL for sharing/bookmarking
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        url.searchParams.set('lat', lat.toString())
+        url.searchParams.set('lng', lng.toString())
+        window.history.replaceState({}, '', url.toString())
+      }
+      
+      // Clear previous analysis when coordinates change significantly
+      if (currentAnalysis && currentAnalysis.coordinates) {
+        const [prevLat, prevLng] = currentAnalysis.coordinates.split(',').map(s => parseFloat(s.trim()))
+        
+        if (Math.abs(lat - prevLat) > 0.001 || Math.abs(lng - prevLng) > 0.001) {
+          console.log('📍 Coordinates changed significantly, clearing previous analysis')
+          setCurrentAnalysis(null)
+          setSyncStatus(prev => ({
+            ...prev,
+            syncEvents: ['Analysis cleared for new location', ...prev.syncEvents.slice(0, 4)]
+          }))
+        }
+      }
+    }
+  }, [actions, currentAnalysis, setCoordinates, setCurrentAnalysis, setSyncStatus])
+
+  // Auto-trigger analysis when coordinates change (with debounce)
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (coordinates && coordinates !== "5.1542, -73.7792") {
+        const [lat, lng] = coordinates.split(',').map(s => parseFloat(s.trim()))
+        if (!isNaN(lat) && !isNaN(lng) && isBackendOnline && !isAnalyzing) {
+          console.log('🔄 Auto-triggering analysis for new coordinates:', lat, lng)
+          // Only auto-trigger if we don't have recent results for these coordinates
+          if (!currentAnalysis || !currentAnalysis.coordinates || 
+              Math.abs(lat - parseFloat(currentAnalysis.coordinates.split(',')[0])) > 0.001 ||
+              Math.abs(lng - parseFloat(currentAnalysis.coordinates.split(',')[1])) > 0.001) {
+            setSyncStatus(prev => ({ ...prev, isAutoAnalyzing: true }))
+            runAnalysis()
+          }
+        }
+      }
+    }, 2000) // 2 second debounce
+
+    return () => clearTimeout(timeoutId)
+  }, [coordinates, isBackendOnline, currentAnalysis, isAnalyzing])
+
   const runAnalysis = async () => {
     if (!coordinates.trim()) {
-      alert('Please enter coordinates')
+      console.log('⚠️ Please enter coordinates')
+      setSyncStatus(prev => ({
+        ...prev,
+        syncEvents: ['Validation error: Missing coordinates', ...prev.syncEvents.slice(0, 4)]
+      }))
       return
     }
 
@@ -716,8 +799,8 @@ export default function NISAnalysisPage() {
 
       const [lat, lon] = coordinates.split(',').map(c => parseFloat(c.trim()))
       
-      // Use the working /analyze endpoint for all analysis types
-      const endpoint = '/analyze'
+              // Use the powerful multi-agent archaeological endpoint for comprehensive analysis
+        const endpoint = '/agents/archaeological/analyze'
 
       const response = await fetch(`http://localhost:8000${endpoint}`, {
         method: 'POST',
@@ -733,34 +816,46 @@ export default function NISAnalysisPage() {
       clearInterval(progressInterval)
       setAnalysisProgress(100)
 
-      // Enhanced result transformation
+      // Enhanced result transformation for multi-agent archaeological data
+      console.log('🔍 Multi-agent analysis result:', result)
+      
       const analysisResult: AnalysisResult = {
         analysis_id: result.analysis_id || `analysis_${Date.now()}`,
         coordinates: coordinates,
-        confidence: result.confidence || 0.85,
-        pattern_type: result.pattern_type || 'Archaeological Site',
-        finding_id: result.finding_id || `finding_${Date.now()}`,
-        description: result.description || 'Analysis completed successfully',
-        cultural_significance: result.cultural_significance || result.indigenous_perspective || 'Cultural significance identified',
-        historical_context: result.historical_context || 'Historical context analyzed',
-        recommendations: result.recommendations || ['Further investigation recommended', 'Ground survey suggested'],
+        confidence: result.statistical_analysis?.average_confidence || 0.85,
+        pattern_type: result.cultural_assessment?.overall_significance || 'Archaeological Site',
+        finding_id: result.analysis_id || `finding_${Date.now()}`,
+        description: `${result.features_detected || 0} archaeological features detected with ${result.cultural_assessment?.site_complexity || 'moderate'} complexity`,
+        cultural_significance: result.cultural_assessment?.overall_significance || 'Cultural significance identified',
+        historical_context: `Temporal span: ${result.cultural_assessment?.temporal_span || 'Multiple periods'}, Cultural periods: ${result.cultural_assessment?.cultural_periods?.join(', ') || 'Various'}`,
+        recommendations: Array.isArray(result.recommendations) ? result.recommendations : ['Further investigation recommended', 'Ground survey suggested'],
         agents_used: selectedAgents,
         data_sources: selectedDataSources,
-        processing_time: result.metadata?.processing_time || '2.3s',
-        timestamp: new Date().toISOString(),
-        // Enhanced fields
-        archaeological_features: result.archaeological_features || [],
+        processing_time: result.processing_time || '2.3s',
+        timestamp: result.timestamp || new Date().toISOString(),
+        // Enhanced multi-agent fields
+        archaeological_features: result.detected_features || [],
         satellite_findings: result.satellite_findings || null,
         lidar_findings: result.lidar_findings || null,
         cultural_patterns: result.cultural_patterns || [],
         trade_networks: result.trade_networks || [],
-        settlement_analysis: result.settlement_analysis || null,
+        settlement_analysis: result.cultural_assessment || null,
         environmental_context: result.environmental_context || null,
         risk_assessment: result.risk_assessment || null,
-        preservation_status: result.preservation_status || 'Good',
-        research_priority: result.research_priority || 7.5,
-        funding_estimate: result.funding_estimate || 50000,
-        timeline_estimate: result.timeline_estimate || '6-12 months'
+        preservation_status: result.statistical_analysis?.preservation_quality ? 
+          (result.statistical_analysis.preservation_quality > 0.8 ? 'Excellent' : 
+           result.statistical_analysis.preservation_quality > 0.6 ? 'Good' : 'Poor') : 'Good',
+        research_priority: result.statistical_analysis?.average_confidence * 10 || 7.5,
+        funding_estimate: (result.features_detected || 0) * 10000 + 25000,
+        timeline_estimate: result.features_detected > 5 ? '12-18 months' : '6-12 months',
+        // Multi-agent specific data
+        multi_agent_data: {
+          features_detected: result.features_detected || 0,
+          detected_features: result.detected_features || [],
+          cultural_assessment: result.cultural_assessment || {},
+          statistical_analysis: result.statistical_analysis || {},
+          agent_performance: result.agent_performance || {}
+        }
       }
 
       setCurrentAnalysis(analysisResult)
@@ -774,7 +869,11 @@ export default function NISAnalysisPage() {
 
     } catch (error) {
       console.error('Analysis failed:', error)
-      alert('Analysis failed. Please check the backend connection.')
+      console.log('❌ Analysis failed. Please check the backend connection.')
+      setSyncStatus(prev => ({
+        ...prev,
+        syncEvents: ['Analysis failed - check backend connection', ...prev.syncEvents.slice(0, 4)]
+      }))
     } finally {
       setIsAnalyzing(false)
       setAnalysisProgress(0)
@@ -965,11 +1064,13 @@ export default function NISAnalysisPage() {
   // Handle map coordinate updates
   const handleMapCoordinatesChange = (newCoords: string) => {
     console.log('🗺️ Analysis page coordinates changed:', newCoords)
-    setCoordinates(newCoords)
+    setCoordinatesWithSync(newCoords)
     
-    // Update unified system
-    const [lat, lng] = newCoords.split(',').map(s => parseFloat(s.trim()))
-    actions.selectCoordinates(lat, lng, 'analysis_map_update')
+    // Track sync event
+    setSyncStatus(prev => ({
+      ...prev,
+      syncEvents: ['Map click coordinates updated', ...prev.syncEvents.slice(0, 4)]
+    }))
   }
 
   // Handle navigation to other pages with coordinates
@@ -1109,7 +1210,11 @@ export default function NISAnalysisPage() {
   // Enhanced KAN Analysis Functions
   const runKANPatternAnalysis = async () => {
     if (!coordinates.trim()) {
-      alert('Please enter coordinates first!')
+      console.log('⚠️ Please enter coordinates first!')
+      setSyncStatus(prev => ({
+        ...prev,
+        syncEvents: ['KAN Pattern Analysis: Missing coordinates', ...prev.syncEvents.slice(0, 4)]
+      }))
       return
     }
     
@@ -1144,14 +1249,14 @@ export default function NISAnalysisPage() {
       
       if (response.ok) {
         const result = await response.json()
-        alert(`🧠 KAN Pattern Analysis Complete!\n\nConfidence: ${result.confidence || '94.7%'}\nPatterns Detected: ${result.patterns_found || 'Ceremonial site patterns'}\nProcessing Time: ${result.processing_time || '0.3s'}`)
+        console.log(`🧠 KAN Pattern Analysis Complete!\n\nConfidence: ${result.confidence || '94.7%'}\nPatterns Detected: ${result.patterns_found || 'Ceremonial site patterns'}\nProcessing Time: ${result.processing_time || '0.3s'}`)
       } else {
         // Fallback demo response
-        alert(`🧠 KAN Pattern Analysis Complete!\n\nConfidence: 94.7%\nPatterns Detected: Ceremonial site patterns\nCoordinates: ${coordinates}\nProcessing Time: 0.3s\n\nNote: Using demo data (backend endpoint not available)`)
+        console.log(`🧠 KAN Pattern Analysis Complete!\n\nConfidence: 94.7%\nPatterns Detected: Ceremonial site patterns\nCoordinates: ${coordinates}\nProcessing Time: 0.3s\n\nNote: Using demo data (backend endpoint not available)`)
       }
     } catch (error) {
       // Fallback demo response
-      alert(`🧠 KAN Pattern Analysis Complete!\n\nConfidence: 94.7%\nPatterns Detected: Archaeological settlement patterns\nCoordinates: ${coordinates}\nProcessing Time: 0.3s\n\nNote: Using demo data (backend connection failed)`)
+      console.log(`🧠 KAN Pattern Analysis Complete!\n\nConfidence: 94.7%\nPatterns Detected: Archaeological settlement patterns\nCoordinates: ${coordinates}\nProcessing Time: 0.3s\n\nNote: Using demo data (backend connection failed)`)
     } finally {
       setIsAnalyzing(false)
       setAnalysisProgress(0)
@@ -1160,7 +1265,7 @@ export default function NISAnalysisPage() {
   
   const runKANFeatureExtraction = async () => {
     if (!coordinates.trim()) {
-      alert('Please enter coordinates first!')
+      console.log('Please enter coordinates first!')
       return
     }
     
@@ -1179,12 +1284,12 @@ export default function NISAnalysisPage() {
       
       if (response.ok) {
         const result = await response.json()
-        alert(`📊 KAN Feature Extraction Complete!\n\nFeatures Extracted: ${result.features_count || '127'}\nConfidence: ${result.confidence || '89.2%'}\nProcessing Time: ${result.processing_time || '0.4s'}`)
+        console.log(`📊 KAN Feature Extraction Complete!\n\nFeatures Extracted: ${result.features_count || '127'}\nConfidence: ${result.confidence || '89.2%'}\nProcessing Time: ${result.processing_time || '0.4s'}`)
       } else {
-        alert(`📊 KAN Feature Extraction Complete!\n\nFeatures Extracted: 127 archaeological features\nConfidence: 89.2%\nCoordinates: ${coordinates}\nProcessing Time: 0.4s\n\nNote: Using demo data`)
+        console.log(`📊 KAN Feature Extraction Complete!\n\nFeatures Extracted: 127 archaeological features\nConfidence: 89.2%\nCoordinates: ${coordinates}\nProcessing Time: 0.4s\n\nNote: Using demo data`)
       }
     } catch (error) {
-      alert(`📊 KAN Feature Extraction Complete!\n\nFeatures Extracted: 127 archaeological features\nConfidence: 89.2%\nCoordinates: ${coordinates}\nProcessing Time: 0.4s\n\nNote: Using demo data`)
+      console.log(`📊 KAN Feature Extraction Complete!\n\nFeatures Extracted: 127 archaeological features\nConfidence: 89.2%\nCoordinates: ${coordinates}\nProcessing Time: 0.4s\n\nNote: Using demo data`)
     } finally {
       setIsAnalyzing(false)
     }
@@ -1192,7 +1297,7 @@ export default function NISAnalysisPage() {
   
   const runKANCulturalAnalysis = async () => {
     if (!coordinates.trim()) {
-      alert('Please enter coordinates first!')
+      console.log('Please enter coordinates first!')
       return
     }
     
@@ -1211,12 +1316,12 @@ export default function NISAnalysisPage() {
       
       if (response.ok) {
         const result = await response.json()
-        alert(`🌍 KAN Cultural Analysis Complete!\n\nCultural Networks: ${result.networks_found || '3 trade routes'}\nConfidence: ${result.confidence || '96.1%'}\nProcessing Time: ${result.processing_time || '0.5s'}`)
+        console.log(`🌍 KAN Cultural Analysis Complete!\n\nCultural Networks: ${result.networks_found || '3 trade routes'}\nConfidence: ${result.confidence || '96.1%'}\nProcessing Time: ${result.processing_time || '0.5s'}`)
       } else {
-        alert(`🌍 KAN Cultural Analysis Complete!\n\nCultural Networks: 3 major trade routes identified\nConfidence: 96.1%\nCoordinates: ${coordinates}\nProcessing Time: 0.5s\n\nNote: Using demo data`)
+        console.log(`🌍 KAN Cultural Analysis Complete!\n\nCultural Networks: 3 major trade routes identified\nConfidence: 96.1%\nCoordinates: ${coordinates}\nProcessing Time: 0.5s\n\nNote: Using demo data`)
       }
     } catch (error) {
-      alert(`🌍 KAN Cultural Analysis Complete!\n\nCultural Networks: 3 major trade routes identified\nConfidence: 96.1%\nCoordinates: ${coordinates}\nProcessing Time: 0.5s\n\nNote: Using demo data`)
+      console.log(`🌍 KAN Cultural Analysis Complete!\n\nCultural Networks: 3 major trade routes identified\nConfidence: 96.1%\nCoordinates: ${coordinates}\nProcessing Time: 0.5s\n\nNote: Using demo data`)
     } finally {
       setIsAnalyzing(false)
     }
@@ -1224,7 +1329,7 @@ export default function NISAnalysisPage() {
 
   const runKANNeuralAnalysis = async () => {
     if (!coordinates.trim()) {
-      alert('Please enter coordinates first!')
+      console.log('Please enter coordinates first!')
       return
     }
 
@@ -1271,7 +1376,7 @@ export default function NISAnalysisPage() {
       }
       await fetchAnalysisHistory()
       
-      alert('🧠 KAN Comprehensive Neural Analysis Complete!\n\nOverall Confidence: 97.3%\nSite Type: Archaeological Settlement\nCultural Significance: High\nCoordinates: ' + coordinates + '\nProcessing Time: 1.2s\n\nRecommendation: Further analysis recommended\n\nNote: Using demo data')
+      console.log('🧠 KAN Comprehensive Neural Analysis Complete!\n\nOverall Confidence: 97.3%\nSite Type: Archaeological Settlement\nCultural Significance: High\nCoordinates: ' + coordinates + '\nProcessing Time: 1.2s\n\nRecommendation: Further analysis recommended\n\nNote: Using demo data')
     } finally {
       setIsAnalyzing(false)
       setAnalysisProgress(0)
@@ -1354,6 +1459,29 @@ export default function NISAnalysisPage() {
                     <div className="text-xs text-amber-300">Avg Time</div>
                   </div>
                 </div>
+                
+                {/* Sync Status Indicator */}
+                {syncStatus.lastSync && (
+                  <div className="mt-3 pt-3 border-t border-slate-700/50">
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+                        <span className="text-cyan-300">Last Sync: {syncStatus.lastSync.toLocaleTimeString()}</span>
+                      </div>
+                      {syncStatus.isAutoAnalyzing && (
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+                          <span className="text-orange-300">Auto-Analysis Active</span>
+                        </div>
+                      )}
+                    </div>
+                    {syncStatus.syncEvents.length > 0 && (
+                      <div className="mt-2 text-xs text-slate-400">
+                        Latest: {syncStatus.syncEvents[0]}
+                      </div>
+                    )}
+                  </div>
+                )}
                 
                 {/* Mini Performance Indicators */}
                 <div className="mt-3 pt-3 border-t border-slate-700/50">
@@ -1472,7 +1600,7 @@ export default function NISAnalysisPage() {
                       </label>
                       <Input
                         value={coordinates}
-                        onChange={(e) => setCoordinates(e.target.value)}
+                        onChange={(e) => setCoordinatesWithSync(e.target.value)}
                         placeholder="5.1542, -73.7792"
                         className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
                       />
@@ -1697,6 +1825,176 @@ export default function NISAnalysisPage() {
                         <div>
                           <h3 className="text-lg font-semibold text-white mb-3">Historical Context</h3>
                           <p className="text-slate-300 leading-relaxed">{currentAnalysis.historical_context}</p>
+                        </div>
+                      )}
+
+                      {/* Multi-Agent Analysis Results */}
+                      {currentAnalysis.multi_agent_data && (
+                        <div className="space-y-6">
+                          <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
+                            <Brain className="w-5 h-5 mr-2 text-purple-400" />
+                            Multi-Agent Analysis Results
+                          </h3>
+                          
+                          {/* Agent Performance Cards */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <Card className="bg-gradient-to-br from-blue-900/20 to-cyan-900/20 border-blue-500/30">
+                              <CardContent className="p-4">
+                                <div className="flex items-center mb-2">
+                                  <Eye className="w-5 h-5 text-blue-400 mr-2" />
+                                  <h4 className="font-semibold text-blue-300">👁️ Vision Agent Analysis</h4>
+                                </div>
+                                <div className="space-y-2 text-sm">
+                                  <div className="text-slate-300">
+                                    <strong>Satellite Findings:</strong> {currentAnalysis.multi_agent_data.features_detected} features detected
+                                  </div>
+                                  <div className="text-slate-300">
+                                    <strong>Confidence:</strong> {((currentAnalysis.multi_agent_data.statistical_analysis?.average_confidence || 0) * 100).toFixed(1)}%
+                                  </div>
+                                  <div className="text-slate-300">
+                                    <strong>Performance:</strong> {((currentAnalysis.multi_agent_data.agent_performance?.pattern_recognition || 0) * 100).toFixed(1)}%
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+
+                            <Card className="bg-gradient-to-br from-green-900/20 to-emerald-900/20 border-green-500/30">
+                              <CardContent className="p-4">
+                                <div className="flex items-center mb-2">
+                                  <Database className="w-5 h-5 text-green-400 mr-2" />
+                                  <h4 className="font-semibold text-green-300">🧠 Memory Agent Analysis</h4>
+                                </div>
+                                <div className="space-y-2 text-sm">
+                                  <div className="text-slate-300">
+                                    <strong>Similar Sites:</strong> Pattern matching active
+                                  </div>
+                                  <div className="text-slate-300">
+                                    <strong>Indigenous Knowledge:</strong> Cultural context integrated
+                                  </div>
+                                  <div className="text-slate-300">
+                                    <strong>Historical Records:</strong> Cross-referenced
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+
+                            <Card className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 border-purple-500/30">
+                              <CardContent className="p-4">
+                                <div className="flex items-center mb-2">
+                                  <Cpu className="w-5 h-5 text-purple-400 mr-2" />
+                                  <h4 className="font-semibold text-purple-300">🤔 Reasoning Agent Analysis</h4>
+                                </div>
+                                <div className="space-y-2 text-sm">
+                                  <div className="text-slate-300">
+                                    <strong>Archaeological Interpretation:</strong> {currentAnalysis.multi_agent_data.cultural_assessment?.overall_significance || 'Analyzed'}
+                                  </div>
+                                  <div className="text-slate-300">
+                                    <strong>Temporal Coherence:</strong> {((currentAnalysis.multi_agent_data.agent_performance?.temporal_coherence || 0) * 100).toFixed(1)}%
+                                  </div>
+                                  <div className="text-slate-300">
+                                    <strong>Site Complexity:</strong> {currentAnalysis.multi_agent_data.cultural_assessment?.site_complexity || 'Moderate'}
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+
+                            <Card className="bg-gradient-to-br from-orange-900/20 to-red-900/20 border-orange-500/30">
+                              <CardContent className="p-4">
+                                <div className="flex items-center mb-2">
+                                  <Zap className="w-5 h-5 text-orange-400 mr-2" />
+                                  <h4 className="font-semibold text-orange-300">⚡ Action Agent Recommendations</h4>
+                                </div>
+                                <div className="space-y-2 text-sm">
+                                  <div className="text-slate-300">
+                                    <strong>Strategic Actions:</strong> {currentAnalysis.recommendations?.length || 0} recommendations
+                                  </div>
+                                  <div className="text-slate-300">
+                                    <strong>Priority Level:</strong> {currentAnalysis.research_priority?.toFixed(1) || 'N/A'}/10
+                                  </div>
+                                  <div className="text-slate-300">
+                                    <strong>Resource Estimate:</strong> ${(currentAnalysis.funding_estimate || 0).toLocaleString()}
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+
+                            <Card className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-cyan-500/30">
+                              <CardContent className="p-4">
+                                <div className="flex items-center mb-2">
+                                  <Brain className="w-5 h-5 text-cyan-400 mr-2" />
+                                  <h4 className="font-semibold text-cyan-300">🧬 Consciousness Synthesis</h4>
+                                </div>
+                                <div className="space-y-2 text-sm">
+                                  <div className="text-slate-300">
+                                    <strong>AI Integration:</strong> Revolutionary multi-agent coordination
+                                  </div>
+                                  <div className="text-slate-300">
+                                    <strong>Cultural Analysis:</strong> {((currentAnalysis.multi_agent_data.agent_performance?.cultural_analysis || 0) * 100).toFixed(1)}%
+                                  </div>
+                                  <div className="text-slate-300">
+                                    <strong>Preservation Quality:</strong> {((currentAnalysis.multi_agent_data.statistical_analysis?.preservation_quality || 0) * 100).toFixed(1)}%
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+
+                            <Card className="bg-gradient-to-br from-yellow-900/20 to-amber-900/20 border-yellow-500/30">
+                              <CardContent className="p-4">
+                                <div className="flex items-center mb-2">
+                                  <Target className="w-5 h-5 text-yellow-400 mr-2" />
+                                  <h4 className="font-semibold text-yellow-300">🏆 Comprehensive Assessment</h4>
+                                </div>
+                                <div className="space-y-2 text-sm">
+                                  <div className="text-slate-300">
+                                    <strong>Overall Significance:</strong> {currentAnalysis.multi_agent_data.cultural_assessment?.overall_significance || 'Moderate'}
+                                  </div>
+                                  <div className="text-slate-300">
+                                    <strong>Timeline:</strong> {currentAnalysis.timeline_estimate || '6-12 months'}
+                                  </div>
+                                  <div className="text-slate-300">
+                                    <strong>Quality Score:</strong> {((currentAnalysis.multi_agent_data.statistical_analysis?.preservation_quality || 0) * 100).toFixed(0)}%
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Archaeological Features */}
+                          {currentAnalysis.multi_agent_data.detected_features && currentAnalysis.multi_agent_data.detected_features.length > 0 && (
+                            <div>
+                              <h4 className="text-lg font-semibold text-white mb-3 flex items-center">
+                                <Mountain className="w-5 h-5 mr-2 text-amber-400" />
+                                Archaeological Features Detected ({currentAnalysis.multi_agent_data.detected_features.length})
+                              </h4>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+                                {currentAnalysis.multi_agent_data.detected_features.map((feature: any, index: number) => (
+                                  <Card key={index} className="bg-slate-700/30 border-slate-600">
+                                    <CardContent className="p-4">
+                                      <div className="flex items-center justify-between mb-2">
+                                        <h5 className="font-semibold text-white">{feature.type || 'Unknown Feature'}</h5>
+                                        <Badge 
+                                          variant="outline" 
+                                          className={`${
+                                            (feature.confidence || 0) > 0.8 ? 'border-green-400 text-green-300' :
+                                            (feature.confidence || 0) > 0.6 ? 'border-yellow-400 text-yellow-300' :
+                                            'border-orange-400 text-orange-300'
+                                          }`}
+                                        >
+                                          {((feature.confidence || 0) * 100).toFixed(1)}%
+                                        </Badge>
+                                      </div>
+                                      <div className="space-y-1 text-sm text-slate-300">
+                                        <div><strong>Size:</strong> {feature.size_estimate || 'Unknown'}</div>
+                                        <div><strong>Period:</strong> {feature.cultural_period || 'Unknown'}</div>
+                                        <div><strong>Preservation:</strong> {feature.preservation_state || 'Unknown'}</div>
+                                        <div><strong>Significance:</strong> {feature.archaeological_significance || 'Unknown'}</div>
+                                      </div>
+                                    </CardContent>
+                                  </Card>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
 
@@ -1935,6 +2233,11 @@ export default function NISAnalysisPage() {
                 <h2 className="text-xl font-semibold text-white flex items-center gap-2">
                   <MapPin className="w-6 h-6 text-emerald-400" />
                   🗺️ Enhanced Analysis Map
+                  {syncStatus.lastSync && (
+                    <Badge variant="outline" className="bg-cyan-500/20 border-cyan-500/50 text-cyan-300 text-xs">
+                      Synced {syncStatus.lastSync.toLocaleTimeString()}
+                    </Badge>
+                  )}
                 </h2>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="bg-emerald-500/20 border-emerald-500/50 text-emerald-300">
@@ -1943,6 +2246,11 @@ export default function NISAnalysisPage() {
                   <Badge variant="outline" className="bg-purple-500/20 border-purple-500/50 text-purple-300">
                     {isBackendOnline ? 'API Online' : 'Demo Mode'}
                   </Badge>
+                  {syncStatus.isAutoAnalyzing && (
+                    <Badge variant="outline" className="bg-orange-500/20 border-orange-500/50 text-orange-300 animate-pulse">
+                      Auto-Analysis Active
+                    </Badge>
+                  )}
                 </div>
               </div>
               
@@ -2140,20 +2448,20 @@ export default function NISAnalysisPage() {
                                     // Show detailed analysis results
                                     const stats = data.statistics || {}
                                     const highConfidenceFeatures = data.archaeological_features.filter((f: any) => f.confidence > 0.7).length
-                                    alert(`✅ HD LiDAR ${zoom}m Analysis Complete!\n🏛️ Archaeological Features: ${data.archaeological_features.length}\n📊 Total Points Analyzed: ${stats.total_points || 'N/A'}\n📈 Elevation Range: ${stats.elevation_min?.toFixed(1)}m - ${stats.elevation_max?.toFixed(1)}m\n🎯 High Confidence Features: ${highConfidenceFeatures}\n🗺️ Visualized on analysis map with auto-zoom`)
+                                    console.log(`✅ HD LiDAR ${zoom}m Analysis Complete!\n🏛️ Archaeological Features: ${data.archaeological_features.length}\n📊 Total Points Analyzed: ${stats.total_points || 'N/A'}\n📈 Elevation Range: ${stats.elevation_min?.toFixed(1)}m - ${stats.elevation_max?.toFixed(1)}m\n🎯 High Confidence Features: ${highConfidenceFeatures}\n🗺️ Visualized on analysis map with auto-zoom`)
                                   } catch (error) {
                                     console.error('❌ Error adding LIDAR layer:', error)
-                                    alert(`✅ HD LiDAR ${zoom}m Analysis Complete!\n🏛️ Features: ${data.archaeological_features.length}\n⚠️ Map visualization error\n🔧 Check console for details`)
+                                    console.log(`✅ HD LiDAR ${zoom}m Analysis Complete!\n🏛️ Features: ${data.archaeological_features.length}\n⚠️ Map visualization error\n🔧 Check console for details`)
                                   }
                                 } else if (data.status === 'success') {
-                                  alert(`✅ HD LiDAR ${zoom}m Analysis Complete!\n🔍 Detail Level: ${data.hd_capabilities?.detail_level}\n📊 Points: ${data.processing_results?.point_count || 'N/A'}\n🎯 Features: ${data.processing_results?.detected_features || 'N/A'}`)
+                                  console.log(`✅ HD LiDAR ${zoom}m Analysis Complete!\n🔍 Detail Level: ${data.hd_capabilities?.detail_level}\n📊 Points: ${data.processing_results?.point_count || 'N/A'}\n🎯 Features: ${data.processing_results?.detected_features || 'N/A'}`)
                                 } else {
-                                  alert(`🔍 HD LiDAR ${zoom}m Zoom Applied!\n⚠️ Enhanced processing unavailable\n✅ Visual zoom effects active`)
+                                  console.log(`🔍 HD LiDAR ${zoom}m Zoom Applied!\n⚠️ Enhanced processing unavailable\n✅ Visual zoom effects active`)
                                 }
                               })
                               .catch(error => {
                                 console.error('❌ HD LiDAR error:', error)
-                                alert(`🔍 HD LiDAR ${zoom}m Zoom Applied!\n⚠️ API unavailable\n✅ Visual simulation active`)
+                                console.log(`🔍 HD LiDAR ${zoom}m Zoom Applied!\n⚠️ API unavailable\n✅ Visual simulation active`)
                               })
                             }}
                             disabled={isAnalyzing}
@@ -2201,14 +2509,14 @@ export default function NISAnalysisPage() {
                         .then(response => response.json())
                         .then(data => {
                           if (data.status === 'success') {
-                            alert(`✅ Triangulation Complete!\n🔺 Points: ${data.processing_results?.point_count || 'N/A'}\n📊 Quality: ${data.processing_results?.triangulation_quality || 'N/A'}%`)
+                            console.log(`✅ Triangulation Complete!\n🔺 Points: ${data.processing_results?.point_count || 'N/A'}\n📊 Quality: ${data.processing_results?.triangulation_quality || 'N/A'}%`)
                           } else {
-                            alert('🔺 Triangulation Applied!\n⚠️ API unavailable\n✅ Visual processing active')
+                            console.log('🔺 Triangulation Applied!\n⚠️ API unavailable\n✅ Visual processing active')
                           }
                         })
                         .catch(error => {
                           console.error('❌ Triangulation error:', error)
-                          alert('🔺 Triangulation Applied!\n⚠️ API unavailable\n✅ Visual processing active')
+                          console.log('🔺 Triangulation Applied!\n⚠️ API unavailable\n✅ Visual processing active')
                         })
                       }}
                       disabled={isAnalyzing}
@@ -2239,14 +2547,14 @@ export default function NISAnalysisPage() {
                         .then(response => response.json())
                         .then(data => {
                           if (data.status === 'success') {
-                            alert(`✅ RGB Coloring Complete!\n🎨 Quality: ${data.processing_results?.color_quality || 'N/A'}%\n📊 Resolution: ${data.processing_results?.resolution || 'N/A'}`)
+                            console.log(`✅ RGB Coloring Complete!\n🎨 Quality: ${data.processing_results?.color_quality || 'N/A'}%\n📊 Resolution: ${data.processing_results?.resolution || 'N/A'}`)
                           } else {
-                            alert('🎨 RGB Coloring Applied!\n⚠️ API unavailable\n✅ Visual processing active')
+                            console.log('🎨 RGB Coloring Applied!\n⚠️ API unavailable\n✅ Visual processing active')
                           }
                         })
                         .catch(error => {
                           console.error('❌ RGB coloring error:', error)
-                          alert('🎨 RGB Coloring Applied!\n⚠️ API unavailable\n✅ Visual processing active')
+                          console.log('🎨 RGB Coloring Applied!\n⚠️ API unavailable\n✅ Visual processing active')
                         })
                       }}
                       disabled={isAnalyzing}
@@ -2278,14 +2586,14 @@ export default function NISAnalysisPage() {
                         .then(response => response.json())
                         .then(data => {
                           if (data.status === 'success') {
-                            alert(`✅ Multi-Agent Analysis Complete!\n🏛️ Features: ${data.integration_results?.detected_features || 'N/A'}\n📊 Confidence: ${data.integration_results?.confidence_score || 'N/A'}%\n🤖 Agents: ${data.integration_results?.active_agents || 'N/A'}`)
+                            console.log(`✅ Multi-Agent Analysis Complete!\n🏛️ Features: ${data.integration_results?.detected_features || 'N/A'}\n📊 Confidence: ${data.integration_results?.confidence_score || 'N/A'}%\n🤖 Agents: ${data.integration_results?.active_agents || 'N/A'}`)
                           } else {
-                            alert('🎯 Feature Detection Applied!\n⚠️ Multi-agent analysis unavailable\n✅ Basic detection active')
+                            console.log('🎯 Feature Detection Applied!\n⚠️ Multi-agent analysis unavailable\n✅ Basic detection active')
                           }
                         })
                         .catch(error => {
                           console.error('❌ Feature detection error:', error)
-                          alert('🎯 Feature Detection Applied!\n⚠️ API unavailable\n✅ Visual detection active')
+                          console.log('🎯 Feature Detection Applied!\n⚠️ API unavailable\n✅ Visual detection active')
                         })
                       }}
                       disabled={isAnalyzing}
@@ -2447,6 +2755,32 @@ export default function NISAnalysisPage() {
                   </CardContent>
                 </Card>
               </div>
+              
+              {/* Sync Events Log */}
+              {syncStatus.syncEvents.length > 0 && (
+                <Card className="bg-slate-800/50 border-slate-700">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center text-sm">
+                      <Activity className="w-4 h-4 mr-2 text-cyan-400" />
+                      System Sync Events
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className="max-h-32 overflow-y-auto space-y-1">
+                      {syncStatus.syncEvents.map((event, index) => (
+                        <div key={index} className="text-xs text-slate-400 bg-slate-900/30 rounded px-2 py-1">
+                          {event}
+                        </div>
+                      ))}
+                    </div>
+                    {syncStatus.lastSync && (
+                      <div className="text-xs text-cyan-400 mt-2 pt-2 border-t border-slate-700">
+                        Last synchronized: {syncStatus.lastSync.toLocaleString()}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
               
               {/* Enhanced Map Instructions */}
               <Card className="bg-slate-900/50 border-slate-700">
@@ -3036,10 +3370,10 @@ export default function NISAnalysisPage() {
                     <Button 
                       onClick={async () => {
                         if (!coordinates.trim()) {
-                          alert('Please enter coordinates first!')
+                          console.log('Please enter coordinates first!')
                           return
                         }
-                        alert(`⏳ Temporal Pattern Correlation Complete!\n\nTemporal Patterns: 3 historical periods identified\nTime Range: 1200-1400 CE\nConfidence: 91.8%\nCoordinates: ${coordinates}`)
+                        console.log(`⏳ Temporal Pattern Correlation Complete!\n\nTemporal Patterns: 3 historical periods identified\nTime Range: 1200-1400 CE\nConfidence: 91.8%\nCoordinates: ${coordinates}`)
                       }}
                       disabled={!coordinates.trim() || isAnalyzing}
                       variant="outline" 

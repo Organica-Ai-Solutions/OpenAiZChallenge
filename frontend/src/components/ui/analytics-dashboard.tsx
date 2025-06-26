@@ -271,13 +271,24 @@ export function AnalyticsDashboard() {
     setError(null)
     
     try {
+      console.log('🔄 [Analytics] Starting data refresh...', new Date().toLocaleTimeString())
+      
       // Test backend connectivity
-      const healthResponse = await fetch('http://localhost:8000/system/health')
+      const healthResponse = await fetch('http://localhost:8000/system/health', { 
+        method: 'GET',
+        cache: 'no-cache',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      })
       setIsBackendOnline(healthResponse.ok)
 
       if (!healthResponse.ok) {
         throw new Error('Backend is offline')
       }
+
+      console.log('✅ [Analytics] Backend is online, fetching data...')
 
       // Parallel fetch all real data sources including new analytics endpoints
       const [
@@ -291,16 +302,18 @@ export function AnalyticsDashboard() {
         satelliteStatusRes,
         satelliteAlertsRes
       ] = await Promise.all([
-        fetch('http://localhost:8000/statistics'),
-        fetch('http://localhost:8000/system/diagnostics'),
-        fetch('http://localhost:8000/research/sites?max_sites=50'),
-        fetch('http://localhost:8000/agents/agents'),
-        fetch('http://localhost:8000/system/health'),
-        fetch('http://localhost:8000/research/regions'),
-        fetch('http://localhost:8000/system/data-sources'),
-        fetch('http://localhost:8000/satellite/status'),
-        fetch('http://localhost:8000/satellite/alerts')
+        fetch('http://localhost:8000/statistics', { cache: 'no-cache' }),
+        fetch('http://localhost:8000/system/diagnostics', { cache: 'no-cache' }),
+        fetch('http://localhost:8000/research/sites?max_sites=50', { cache: 'no-cache' }),
+        fetch('http://localhost:8000/agents/agents', { cache: 'no-cache' }),
+        fetch('http://localhost:8000/system/health', { cache: 'no-cache' }),
+        fetch('http://localhost:8000/research/regions', { cache: 'no-cache' }),
+        fetch('http://localhost:8000/system/data-sources', { cache: 'no-cache' }),
+        fetch('http://localhost:8000/satellite/status', { cache: 'no-cache' }),
+        fetch('http://localhost:8000/satellite/alerts', { cache: 'no-cache' })
       ])
+
+      console.log('📊 [Analytics] Parsing responses...')
 
       const [
         statistics, 
@@ -337,22 +350,35 @@ export function AnalyticsDashboard() {
       })
 
       setLastRefresh(new Date())
-      console.log('✅ Enhanced analytics data loaded successfully:', {
+      console.log('✅ [Analytics] Enhanced analytics data loaded successfully:', {
         statistics: !!statistics,
         diagnostics: !!diagnostics,
         sites: sites?.length || 0,
         agents: agents?.length || 0,
         regions: regions?.data?.length || 0,
         dataSources: dataSources?.data?.length || 0,
-        satelliteAlerts: satelliteAlerts?.data?.length || 0
+        satelliteAlerts: satelliteAlerts?.data?.length || 0,
+        refreshTime: new Date().toLocaleTimeString()
       })
 
+      // Show success notification
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('analytics-refreshed', {
+          detail: { 
+            timestamp: new Date().toISOString(),
+            sitesCount: sites?.length || 0,
+            totalDiscoveries: statistics?.total_sites_discovered || 0
+          }
+        }))
+      }
+
     } catch (error) {
-      console.error('❌ Failed to load analytics data:', error)
+      console.error('❌ [Analytics] Failed to load analytics data:', error)
       setError(error instanceof Error ? error.message : 'Failed to load data')
       setIsBackendOnline(false)
     } finally {
       setLoading(false)
+      console.log('🏁 [Analytics] Data refresh completed at', new Date().toLocaleTimeString())
     }
   }
 
@@ -599,9 +625,28 @@ export function AnalyticsDashboard() {
               <CardTitle className="flex items-center space-x-2 text-white">
                 <BarChart3 className="h-5 w-5 text-emerald-400" />
                 <span>Real Archaeological Analytics</span>
+                <Badge variant="outline" className="bg-emerald-500/20 border-emerald-500/50 text-emerald-300 text-xs flex items-center gap-1">
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                  Live Data
+                </Badge>
+                {stats?.data_freshness && (
+                  <Badge variant="outline" className="bg-blue-500/20 border-blue-500/50 text-blue-300 text-xs">
+                    {stats.data_freshness}
+                  </Badge>
+                )}
               </CardTitle>
               <CardDescription className="text-slate-400">
                 Live data from NIS Protocol • {stats?.total_sites_discovered || 0} sites discovered • {filteredData.sites.length} sites shown
+                {lastRefresh && (
+                  <span className="text-emerald-400 ml-2">
+                    • Last updated: {lastRefresh.toLocaleTimeString()}
+                  </span>
+                )}
+                {isBackendOnline ? (
+                  <span className="text-green-400 ml-2">• Backend Online</span>
+                ) : (
+                  <span className="text-red-400 ml-2">• Backend Offline</span>
+                )}
               </CardDescription>
             </div>
             <div className="flex items-center space-x-4">
@@ -757,14 +802,14 @@ export function AnalyticsDashboard() {
 
       {/* Enhanced Charts */}
       <Tabs defaultValue="site_types" className="w-full">
-        <TabsList className="grid w-full grid-cols-7 bg-slate-800 border-slate-700 h-12">
-          <TabsTrigger value="site_types" className="data-[state=active]:bg-emerald-600">Site Types</TabsTrigger>
-          <TabsTrigger value="model_performance" className="data-[state=active]:bg-emerald-600">AI Models</TabsTrigger>
-          <TabsTrigger value="data_sources" className="data-[state=active]:bg-emerald-600">Data Sources</TabsTrigger>
-          <TabsTrigger value="geographic" className="data-[state=active]:bg-emerald-600">Geographic</TabsTrigger>
-          <TabsTrigger value="system_health" className="data-[state=active]:bg-emerald-600">System Health</TabsTrigger>
-          <TabsTrigger value="regional_analysis" className="data-[state=active]:bg-emerald-600">Regional</TabsTrigger>
-          <TabsTrigger value="satellite_monitoring" className="data-[state=active]:bg-emerald-600">Satellite</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-7 bg-slate-800 border-slate-700 h-auto min-h-12">
+          <TabsTrigger value="site_types" className="data-[state=active]:bg-emerald-600 text-xs md:text-sm">Site Types</TabsTrigger>
+          <TabsTrigger value="model_performance" className="data-[state=active]:bg-emerald-600 text-xs md:text-sm">AI Models</TabsTrigger>
+          <TabsTrigger value="data_sources" className="data-[state=active]:bg-emerald-600 text-xs md:text-sm">Data Sources</TabsTrigger>
+          <TabsTrigger value="geographic" className="data-[state=active]:bg-emerald-600 text-xs md:text-sm">Geographic</TabsTrigger>
+          <TabsTrigger value="system_health" className="data-[state=active]:bg-emerald-600 text-xs md:text-sm">System Health</TabsTrigger>
+          <TabsTrigger value="regional_analysis" className="data-[state=active]:bg-emerald-600 text-xs md:text-sm">Regional</TabsTrigger>
+          <TabsTrigger value="satellite_monitoring" className="data-[state=active]:bg-emerald-600 text-xs md:text-sm">Satellite</TabsTrigger>
         </TabsList>
 
         <TabsContent value="site_types" className="space-y-4">

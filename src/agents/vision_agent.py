@@ -455,9 +455,57 @@ class VisionAgent:
         return np.clip(stretched, 0, 255)
     
     async def _process_lidar(self, lat: float, lon: float) -> Dict:
-        """Enhanced LIDAR processing with multiple visualization techniques and archaeological analysis."""
+        """Enhanced LIDAR processing with HD professional capabilities and archaeological analysis."""
         logger.info(f"Processing LIDAR data for coordinates {lat}, {lon}")
         
+        # Try HD LiDAR processor first
+        try:
+            from api.lidar_hd_processor import HDLidarProcessor
+            hd_processor = HDLidarProcessor()
+            
+            # Use medium resolution for vision processing (balance between detail and speed)
+            hd_result = hd_processor.process_hd_lidar(
+                coordinates={'lat': lat, 'lng': lon},
+                zoom_level=2,  # 2m resolution for vision analysis
+                radius=1000,   # 1km radius
+                resolution='high'
+            )
+            
+            if hd_result['success']:
+                logger.info("✅ HD LiDAR processing successful for vision agent")
+                
+                # Extract features for GPT Vision analysis
+                features_detected = []
+                for feature in hd_result.get('archaeological_features', []):
+                    features_detected.append({
+                        "type": f"HD LiDAR Feature: {feature.get('type', 'Unknown')}",
+                        "details": feature.get('description', 'Archaeological feature detected'),
+                        "confidence": feature.get('confidence', 0.5),
+                        "coordinates": feature.get('coordinates', {}),
+                        "source": "HD LiDAR Professional Processor"
+                    })
+                
+                # Calculate overall confidence
+                feature_confidences = [f.get('confidence', 0.5) for f in hd_result.get('archaeological_features', [])]
+                overall_confidence = np.mean(feature_confidences) if feature_confidences else 0.6
+                
+                return {
+                    "confidence": overall_confidence,
+                    "features_detected": features_detected,
+                    "source": "HD LiDAR Professional Processor",
+                    "location": {"lat": lat, "lon": lon},
+                    "hd_processing": True,
+                    "zoom_level": hd_result.get('zoom_level', 2),
+                    "processing_quality": hd_result['hd_capabilities']['detail_level'],
+                    "triangulation_available": len(hd_result.get('triangulated_mesh', [])) > 0,
+                    "rgb_coloring_available": len(hd_result.get('rgb_colored_points', [])) > 0,
+                    "combined_analysis": f"HD LiDAR analysis completed at {hd_result.get('zoom_level', 2)}m resolution"
+                }
+                
+        except Exception as e:
+            logger.warning(f"HD LiDAR processor not available for vision agent: {e}")
+        
+        # Fallback to standard tile-based processing
         try:
             tile_path = get_tile_path(lat, lon, "lidar")
             if not tile_path.exists():
