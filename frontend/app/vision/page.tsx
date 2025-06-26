@@ -60,7 +60,7 @@ export default function UltimateVisionAgentPage() {
     lidarProcessing: false,
     gpuUtilization: 0
   })
-  const [backendUrl, setBackendUrl] = useState('http://localhost:8000')
+  const [backendUrl, setBackendUrl] = useState('http://localhost:8000')  // Always use 8000
   
   // Analysis results
   const [visionResults, setVisionResults] = useState<any>(null)
@@ -171,108 +171,93 @@ export default function UltimateVisionAgentPage() {
   // Check backend status with improved error handling
   const checkBackendStatus = useCallback(async () => {
     try {
-      // Try backend endpoint with timeout - only use port 8000 since we know it's working
-      const tryBackend = async (baseUrl: string) => {
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 3000)
-        
-        try {
-          const healthResponse = await fetch(`${baseUrl}/system/health`, {
+      // Always use port 8000 since we know it's working
+      const baseUrl = 'http://localhost:8000'
+      
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 3000)
+      
+      try {
+        const healthResponse = await fetch(`${baseUrl}/system/health`, {
           signal: controller.signal
         })
         clearTimeout(timeoutId)
         
-          if (healthResponse.ok) {
-            const healthData = await healthResponse.json()
-            return { baseUrl, healthData, success: true }
+        if (healthResponse.ok) {
+          const healthData = await healthResponse.json()
+          console.log('✅ Backend is healthy:', healthData)
+          
+          // Store the working backend URL
+          setBackendUrl(baseUrl)
+          
+          // Get additional status info
+          try {
+            const agentResponse = await fetch(`${baseUrl}/agents/status`)
+            const agentData = agentResponse.ok ? await agentResponse.json() : {}
+            
+            setBackendStatus({
+              online: true,
+              gpt4Vision: true,
+              pytorch: true,
+              kanNetworks: true,
+              lidarProcessing: true,
+              gpuUtilization: Math.floor(Math.random() * 30) + 60
+            })
+            
+            // Store full capabilities
+            setAgentCapabilities({
+              agents_status: agentData,
+              workingBackend: baseUrl,
+              enhancedFeatures: [
+                "gpt4_vision_integration",
+                "numpy_kan_networks", 
+                "lidar_processing",
+                "satellite_analysis",
+                "archaeological_detection",
+                "3d_visualization",
+                "real_data_access"
+              ]
+            })
+            console.log('✅ Backend fully connected and ready')
+          } catch (error) {
+            console.log('Additional status endpoints unavailable, using defaults')
+            setBackendStatus({
+              online: true,
+              gpt4Vision: true,
+              pytorch: true,
+              kanNetworks: true,
+              lidarProcessing: true,
+              gpuUtilization: 65
+            })
           }
-        } catch (error) {
-          clearTimeout(timeoutId)
+        } else {
+          throw new Error('Health check failed')
         }
-        return { success: false }
-      }
-      
-      // Only try port 8000 since it's the working backend
-      const result = await tryBackend('http://localhost:8000')
-      
-      if (result.success && result.baseUrl) {
-        // Store the working backend URL
-        setBackendUrl(result.baseUrl)
-        
-        // Get additional status info
-        try {
-          const agentResponse = await fetch(`${result.baseUrl}/agents/status`)
-          const kanResponse = await fetch(`${result.baseUrl}/agents/kan-enhanced-vision-status`)
-          
-          const agentData = agentResponse.ok ? await agentResponse.json() : {}
-          const kanData = kanResponse.ok ? await kanResponse.json() : { status: 'active' }
-          
-          setBackendStatus({
-            online: true,
-            gpt4Vision: true, // GPT-4 Vision is available through OpenAI API
-            pytorch: true, // Using NumPy-based KAN networks (no PyTorch needed)
-            kanNetworks: true, // NumPy KAN implementation is active
-            lidarProcessing: true, // Backend has LIDAR processing capabilities
-            gpuUtilization: Math.floor(Math.random() * 30) + 60 // Simulated GPU usage
-          })
-          
-          // Store full capabilities
-          setAgentCapabilities({
-            agents_status: agentData,
-            kanVisionStatus: kanData,
-            workingBackend: result.baseUrl,
-            enhancedFeatures: [
-              "gpt4_vision_integration",
-              "numpy_kan_networks", 
-              "lidar_processing",
-              "satellite_analysis",
-              "archaeological_detection",
-              "3d_visualization",
-              "real_data_access"
-            ]
-          })
-        } catch (error) {
-          console.log('Additional status endpoints unavailable, using defaults')
-          setBackendStatus({
-            online: true,
-            gpt4Vision: true,
-            pytorch: true,
-            kanNetworks: true,
-            lidarProcessing: true,
-            gpuUtilization: 65
-          })
-        }
-      } else {
-        // No backend available
-        setBackendStatus({
-          online: false,
-          gpt4Vision: false,
-          pytorch: false,
-          kanNetworks: false,
-          lidarProcessing: false,
-          gpuUtilization: 0
-        })
-        setAgentCapabilities(null)
+      } catch (error) {
+        clearTimeout(timeoutId)
+        throw error
       }
     } catch (error) {
-      console.error('Backend status check failed:', error)
-      setBackendStatus(prev => ({ ...prev, online: false }))
+      console.error('❌ Backend connection failed:', error)
+      setBackendStatus({
+        online: false,
+        gpt4Vision: false,
+        pytorch: false,
+        kanNetworks: false,
+        lidarProcessing: false,
+        gpuUtilization: 0
+      })
+      setAgentCapabilities(null)
     }
   }, [])
 
-  // Run comprehensive analysis with improved error handling
+  // Run comprehensive analysis with simple, direct approach
   const runComprehensiveAnalysis = useCallback(async () => {
-    // Prevent running if already analyzing
     if (isAnalyzing) {
       console.log('⏸️ Analysis already in progress, skipping...')
       return
     }
     
-    if (!backendStatus.online) {
-      alert('Backend is offline. Please start the backend first.')
-      return
-    }
-
     try {
       // Parse coordinates
       const [lat, lng] = coordinates.split(',').map(s => parseFloat(s.trim()))
@@ -282,224 +267,123 @@ export default function UltimateVisionAgentPage() {
         return
       }
       
-      // Start analysis with progress tracking
-      console.log('🚀 Starting comprehensive vision analysis...', { lat, lng })
+      console.log('🚀 Starting vision analysis...', { lat, lng })
       
-      // Create fallback results in case of backend errors
-      const createFallbackResults = () => ({
-        vision_analysis: {
-          coordinates: `${lat}, ${lng}`,
-          timestamp: new Date().toISOString(),
-          detection_results: [
-            {
-              id: `vis_${Date.now()}`,
-              label: "Archaeological anomaly (demo mode)",
-              confidence: 0.72,
-              bounds: { x: 150, y: 120, width: 100, height: 80 },
-              model_source: "Fallback Analysis",
-              feature_type: "potential_feature",
-              archaeological_significance: "Medium",
-              cultural_context: "Regional archaeological patterns"
-            },
-            {
-              id: `vis_${Date.now() + 1}`,
-              label: "Geometric pattern (demo mode)",
-              confidence: 0.68,
-              bounds: { x: 300, y: 200, width: 120, height: 90 },
-              model_source: "Pattern Recognition",
-              feature_type: "geometric_anomaly",
-              archaeological_significance: "Medium",
-              cultural_context: "Potential settlement pattern"
-            }
-          ],
-          model_performance: {
-            gpt4o_vision: {
-              accuracy: 75,
-              processing_time: "3.2s",
-              features_detected: 2,
-              confidence_average: 0.70,
-              status: "demo_mode"
-            }
-          },
-          processing_pipeline: [
-            {"step": "Coordinate Validation", "status": "complete", "timing": "0.1s"},
-            {"step": "Demo Analysis", "status": "complete", "timing": "2.5s"},
-            {"step": "Feature Classification", "status": "complete", "timing": "0.6s"}
-          ],
-          metadata: {
-            analysis_id: `demo_${Date.now()}`,
-            geographic_region: "demo",
-            total_features: 2,
-            demo_mode: true
-          }
-        },
-        lidar_analysis: {
-          status: "demo",
-          points_analyzed: 1250,
-          features_detected: 3,
-          elevation_range: [120, 145],
-          demo_mode: true
-        },
-        comprehensive_analysis: {
-          location: { lat, lng },
-          confidence: 0.70,
-          description: "Demo archaeological analysis showing potential features",
-          sources: ["demo_vision", "demo_lidar"],
-          pattern_type: "settlement_cluster",
-          demo_mode: true
-        },
-        coordinates: { lat, lng },
-        timestamp: new Date().toISOString(),
-        config: analysisConfig,
-        backend_status: "demo_fallback"
+      // Start unified system analysis
+      unifiedActions.startAnalysis({
+        lat,
+        lon: lng,
+        source: 'vision_agent',
+        data_sources: ['satellite', 'lidar', 'historical']
       })
       
-      // Try multiple analysis types with individual error handling
-      const analysisResults = {
-        vision_analysis: null,
-        lidar_analysis: null,
-        comprehensive_analysis: null
-      }
-      
-      // 1. Vision analysis with error handling
-      if (analysisConfig.useGPT4Vision) {
-        try {
-          const visionResponse = await fetch(`${backendUrl}/vision/analyze`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              coordinates: `${lat}, ${lng}`,
-              models: ['gpt4o_vision', 'archaeological_analysis'],
-              confidence_threshold: analysisConfig.confidenceThreshold,
-              processing_options: {
-                include_archaeological: analysisConfig.includeArchaeological,
-                include_pattern_recognition: analysisConfig.includePatternRecognition,
-                include_anomaly_detection: analysisConfig.includeAnomalyDetection
-              }
-            })
-          })
-          
-          if (visionResponse.ok) {
-            analysisResults.vision_analysis = await visionResponse.json()
-            console.log('✅ Vision analysis successful')
-          } else {
-            console.warn('⚠️ Vision analysis failed, using fallback')
-          }
-        } catch (error) {
-          console.warn('⚠️ Vision analysis error:', error)
+      // Call backend directly with fixed URL
+      const analysisPayload = {
+        coordinates: `${lat}, ${lng}`,
+        models: analysisConfig.useGPT4Vision ? ["gpt4o_vision", "archaeological_analysis"] : ["archaeological_analysis"],
+        confidence_threshold: analysisConfig.confidenceThreshold,
+        processing_options: {
+          include_archaeological: analysisConfig.includeArchaeological,
+          include_pattern_recognition: analysisConfig.includePatternRecognition,
+          include_anomaly_detection: analysisConfig.includeAnomalyDetection,
+          analysis_depth: analysisConfig.analysisDepth
         }
       }
       
-      // 2. LIDAR analysis with error handling
-      if (analysisConfig.useLidarFusion) {
-        try {
-          const lidarResponse = await fetch(`${backendUrl}/lidar/data/latest`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              coordinates: { lat, lng },
-              radius: 1000,
-              resolution: 'high',
-              include_dtm: true,
-              include_dsm: true,
-              include_intensity: true
-            })
-          })
-          
-          if (lidarResponse.ok) {
-            analysisResults.lidar_analysis = await lidarResponse.json()
-            console.log('✅ LIDAR analysis successful')
-          } else {
-            console.warn('⚠️ LIDAR analysis failed, using fallback')
-          }
-        } catch (error) {
-          console.warn('⚠️ LIDAR analysis error:', error)
-        }
+      console.log('📡 Sending analysis request to backend...')
+      
+      // Direct backend call with timeout
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 60000) // 60 second timeout
+      
+      const response = await fetch('http://localhost:8000/vision/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(analysisPayload),
+        signal: controller.signal
+      })
+      
+      clearTimeout(timeoutId)
+      
+      if (!response.ok) {
+        throw new Error(`Backend responded with status: ${response.status}`)
       }
       
-      // 3. Comprehensive analysis with error handling
-      try {
-        const comprehensiveResponse = await fetch(`${backendUrl}/analyze`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            lat,
-            lon: lng,
-            data_sources: ['satellite', 'lidar', 'historical'],
-            confidence_threshold: analysisConfig.confidenceThreshold
-          })
-        })
-        
-        if (comprehensiveResponse.ok) {
-          analysisResults.comprehensive_analysis = await comprehensiveResponse.json()
-          console.log('✅ Comprehensive analysis successful')
-        } else {
-          console.warn('⚠️ Comprehensive analysis failed, using fallback')
-        }
-      } catch (error) {
-        console.warn('⚠️ Comprehensive analysis error:', error)
-      }
-      
-      // Create final results - use real data if available, fallback if not
-      const finalResults = createFallbackResults()
-      
-      if (analysisResults.vision_analysis) {
-        finalResults.vision_analysis = analysisResults.vision_analysis
-        finalResults.backend_status = "connected"
-      }
-      if (analysisResults.lidar_analysis) {
-        finalResults.lidar_analysis = analysisResults.lidar_analysis
-      }
-      if (analysisResults.comprehensive_analysis) {
-        finalResults.comprehensive_analysis = analysisResults.comprehensive_analysis
-      }
+      const analysisResults = await response.json()
+      console.log('✅ Analysis completed successfully:', analysisResults)
       
       // Store results
-      setVisionResults(finalResults)
-      setLastAnalysisCoords(coordinates) // Track the coordinates we just analyzed
+      setVisionResults(analysisResults)
+      setLastAnalysisCoords(coordinates)
       
-      // Clear the last analysis coords after 10 seconds to allow re-analysis
-      setTimeout(() => {
-        setLastAnalysisCoords('')
-      }, 10000)
+      // Update sync status
+      setSyncStatus(prev => ({
+        lastSync: new Date(),
+        syncEvents: [`Analysis completed for ${lat.toFixed(4)}, ${lng.toFixed(4)}`, ...prev.syncEvents.slice(0, 4)]
+      }))
       
-      // Auto-sync results with map visualization
-      if (finalResults.lidar_analysis) {
-        console.log('🗺️ Auto-syncing LIDAR results with map visualization')
-        setLidarResults(finalResults.lidar_analysis)
-      }
+      // Complete unified system analysis
+      unifiedActions.completeAnalysis({
+        results: analysisResults,
+        confidence: analysisResults.detection_results?.[0]?.confidence || 0.75
+      })
       
-      console.log('✅ Comprehensive analysis completed with full sync', finalResults)
-      
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('❌ Analysis failed:', error)
-      // Create emergency fallback
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
-      const emergencyFallback = {
-        vision_analysis: {
-          coordinates,
-          timestamp: new Date().toISOString(),
-          detection_results: [{
-            id: `emergency_${Date.now()}`,
-            label: "Analysis unavailable (emergency mode)",
-            confidence: 0.50,
-            bounds: { x: 100, y: 100, width: 100, height: 100 },
-            model_source: "Emergency Fallback",
-            feature_type: "system_unavailable",
-            archaeological_significance: "Unknown",
-            cultural_context: "System in emergency mode"
-          }],
-          model_performance: { emergency_mode: true },
-          processing_pipeline: [{"step": "Emergency Fallback", "status": "active", "timing": "0.1s"}],
-          metadata: { emergency_mode: true, error: errorMessage }
+      
+      // Create fallback results so user sees something
+      const fallbackResults = {
+        coordinates: coordinates,
+        timestamp: new Date().toISOString(),
+        detection_results: [
+          {
+            id: `fallback_${Date.now()}`,
+            label: "Archaeological Analysis (Fallback Mode)",
+            confidence: 0.75,
+            bounds: { x: 150, y: 120, width: 100, height: 80 },
+            model_source: "Fallback System",
+            feature_type: "potential_feature",
+            archaeological_significance: "Medium",
+            cultural_context: "Backend connection issue - showing demo results"
+          }
+        ],
+        model_performance: {
+          gpt4o_vision: {
+            accuracy: 75,
+            processing_time: "N/A",
+            features_detected: 1,
+            confidence_average: 0.75,
+            status: "fallback_mode"
+          }
         },
-        backend_status: "emergency_mode",
-        error: errorMessage
+        processing_pipeline: [
+          {"step": "Coordinate Validation", "status": "complete", "timing": "0.1s"},
+          {"step": "Fallback Analysis", "status": "complete", "timing": "1.0s"}
+        ],
+        metadata: {
+          analysis_id: `fallback_${Date.now()}`,
+          geographic_region: "demo",
+          total_features: 1,
+          fallback_mode: true,
+          error_message: error.message
+        },
+        openai_enhanced: false
       }
-      setVisionResults(emergencyFallback)
+      
+      setVisionResults(fallbackResults)
+      
+      // Show user-friendly error
+      alert(`Analysis temporarily unavailable. Showing demo results.\nError: ${error.message}`)
+      
+      // Complete analysis in unified system with fallback
+      unifiedActions.completeAnalysis({
+        results: fallbackResults,
+        confidence: 0.75
+      })
     }
-    
-  }, [backendStatus.online, coordinates, analysisConfig, backendUrl])
+  }, [coordinates, analysisConfig, isAnalyzing, unifiedActions])
 
   // LIDAR Processing Functions
   const processLidarTriangulation = useCallback(async () => {
