@@ -41,8 +41,22 @@ export function RealMapboxLidar({
   const [mapLoaded, setMapLoaded] = useState(false)
   const [mapError, setMapError] = useState<string | null>(null)
 
-  // Parse coordinates
-  const [lat, lng] = coordinates.split(',').map(c => parseFloat(c.trim()))
+  // Parse coordinates with validation
+  const parseCoordinates = (coords: string) => {
+    try {
+      const parts = coords.split(',').map(c => parseFloat(c.trim()))
+      if (parts.length !== 2 || isNaN(parts[0]) || isNaN(parts[1])) {
+        console.warn('⚠️ Invalid coordinates, using default:', coords)
+        return [-14.739, -75.13] // Default to valid coordinates
+      }
+      return parts
+    } catch (error) {
+      console.warn('⚠️ Error parsing coordinates, using default:', error)
+      return [-14.739, -75.13] // Default to valid coordinates
+    }
+  }
+  
+  const [lat, lng] = parseCoordinates(coordinates)
 
   // Initialize Mapbox map
   useEffect(() => {

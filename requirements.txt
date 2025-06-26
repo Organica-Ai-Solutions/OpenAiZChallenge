@@ -27,12 +27,12 @@ matplotlib==3.9.2
 # LiDAR Processing
 pdal==3.4.3
 laspy==2.5.4
-open3d==0.18.0
+open3d==0.19.0
 
 # KAN Networks (Kolmogorov-Arnold Networks)
 torch==2.5.1
 torchvision==0.20.1
-tensorflow==2.18.0
+tensorflow>=2.16.0
 
 # Geospatial & Mapping
 geopandas==1.0.1
@@ -79,7 +79,7 @@ celery==5.4.0
 # Distributed Computing (CRITICAL - Used in data processing)
 dask==2024.1.1
 distributed==2024.1.1
-dask-kubernetes==2024.1.1
+dask-kubernetes>=2024.1.0
 
 # Testing & Automation (CRITICAL - Used in test files)
 selenium==4.27.1

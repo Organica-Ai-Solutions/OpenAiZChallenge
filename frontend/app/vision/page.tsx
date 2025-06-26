@@ -66,6 +66,7 @@ export default function UltimateVisionAgentPage() {
   const [visionResults, setVisionResults] = useState<any>(null)
   const [lidarResults, setLidarResults] = useState<any>(null)
   const [agentCapabilities, setAgentCapabilities] = useState<any>(null)
+  const [lastAnalysisCoords, setLastAnalysisCoords] = useState<string>('')
   
   // Sync status tracking
   const [syncStatus, setSyncStatus] = useState({
@@ -105,47 +106,66 @@ export default function UltimateVisionAgentPage() {
     includeAnomalyDetection: true
   })
 
-  // Enhanced coordinate setter with full system sync
+  // Enhanced coordinate setter with full system sync and debouncing
   const setCoordinatesWithSync = useCallback((newCoords: string) => {
     console.log('🎯 Vision Agent: Setting coordinates with full sync:', newCoords)
+    
+    // Validate coordinates before setting
+    const parts = newCoords.split(',').map(s => s.trim())
+    if (parts.length !== 2) {
+      console.warn('⚠️ Invalid coordinate format:', newCoords)
+      return
+    }
+    
+    const [lat, lng] = parts.map(s => parseFloat(s))
+    if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      console.warn('⚠️ Invalid coordinate values:', newCoords)
+      return
+    }
+    
     setCoordinates(newCoords)
     
-    // Parse and sync with unified system
-    const [lat, lng] = newCoords.split(',').map(s => parseFloat(s.trim()))
-    if (!isNaN(lat) && !isNaN(lng)) {
-      unifiedActions.selectCoordinates(lat, lng, 'vision_agent_manual')
-      
-      // Track sync event
-      setSyncStatus(prev => ({
-        lastSync: new Date(),
-        syncEvents: [`Coordinates synced: ${lat.toFixed(4)}, ${lng.toFixed(4)}`, ...prev.syncEvents.slice(0, 4)]
-      }))
-      
-      // Update URL for sharing/bookmarking
-      if (typeof window !== 'undefined') {
-        const url = new URL(window.location.href)
-        url.searchParams.set('lat', lat.toString())
-        url.searchParams.set('lng', lng.toString())
-        window.history.replaceState({}, '', url.toString())
-      }
-      
-      // Clear previous results when coordinates change significantly
-      if (visionResults && visionResults.coordinates) {
-        const [prevLat, prevLng] = visionResults.coordinates.lat ? 
-          [visionResults.coordinates.lat, visionResults.coordinates.lon] :
-          visionResults.coordinates.split(',').map((s: string) => parseFloat(s.trim()))
+    // Debounce the unified system sync to prevent rapid firing
+    const timeoutId = setTimeout(() => {
+      // Sync with unified system (coordinates already validated)
+      if (!isNaN(lat) && !isNaN(lng)) {
+        unifiedActions.selectCoordinates(lat, lng, 'vision_agent_manual')
         
-        if (Math.abs(lat - prevLat) > 0.001 || Math.abs(lng - prevLng) > 0.001) {
-          console.log('📍 Coordinates changed significantly, clearing previous results')
-          setVisionResults(null)
-          setLidarResults(null)
-          setSyncStatus(prev => ({
-            ...prev,
-            syncEvents: ['Results cleared for new location', ...prev.syncEvents.slice(0, 4)]
-          }))
+        // Track sync event
+        setSyncStatus(prev => ({
+          lastSync: new Date(),
+          syncEvents: [`Coordinates synced: ${lat.toFixed(4)}, ${lng.toFixed(4)}`, ...prev.syncEvents.slice(0, 4)]
+        }))
+        
+        // Update URL for sharing/bookmarking
+        if (typeof window !== 'undefined') {
+          const url = new URL(window.location.href)
+          url.searchParams.set('lat', lat.toString())
+          url.searchParams.set('lng', lng.toString())
+          window.history.replaceState({}, '', url.toString())
+        }
+        
+        // Clear previous results when coordinates change significantly
+        if (visionResults && visionResults.coordinates) {
+          const [prevLat, prevLng] = visionResults.coordinates.lat ? 
+            [visionResults.coordinates.lat, visionResults.coordinates.lon] :
+            visionResults.coordinates.split(',').map((s: string) => parseFloat(s.trim()))
+          
+          if (Math.abs(lat - prevLat) > 0.001 || Math.abs(lng - prevLng) > 0.001) {
+            console.log('📍 Coordinates changed significantly, clearing previous results')
+            setVisionResults(null)
+            setLidarResults(null)
+            setSyncStatus(prev => ({
+              ...prev,
+              syncEvents: ['Results cleared for new location', ...prev.syncEvents.slice(0, 4)]
+            }))
+          }
         }
       }
-    }
+    }, 500) // 500ms debounce
+    
+    // Store timeout for cleanup
+    return () => clearTimeout(timeoutId)
   }, [unifiedActions, visionResults, setCoordinates, setVisionResults, setLidarResults, setSyncStatus])
 
   // Check backend status with improved error handling
@@ -242,6 +262,12 @@ export default function UltimateVisionAgentPage() {
 
   // Run comprehensive analysis with improved error handling
   const runComprehensiveAnalysis = useCallback(async () => {
+    // Prevent running if already analyzing
+    if (isAnalyzing) {
+      console.log('⏸️ Analysis already in progress, skipping...')
+      return
+    }
+    
     if (!backendStatus.online) {
       alert('Backend is offline. Please start the backend first.')
       return
@@ -255,9 +281,6 @@ export default function UltimateVisionAgentPage() {
         alert('Invalid coordinates. Please enter valid latitude and longitude.')
         return
       }
-    
-      // Select coordinates in unified system
-      unifiedActions.selectCoordinates(lat, lng, 'vision_agent_comprehensive')
       
       // Start analysis with progress tracking
       console.log('🚀 Starting comprehensive vision analysis...', { lat, lng })
@@ -433,13 +456,12 @@ export default function UltimateVisionAgentPage() {
       
       // Store results
       setVisionResults(finalResults)
+      setLastAnalysisCoords(coordinates) // Track the coordinates we just analyzed
       
-      // Trigger unified system analysis
-      try {
-        await unifiedActions.triggerVisionAnalysis({ lat, lon: lng })
-      } catch (error) {
-        console.warn('⚠️ Unified system analysis failed:', error)
-      }
+      // Clear the last analysis coords after 10 seconds to allow re-analysis
+      setTimeout(() => {
+        setLastAnalysisCoords('')
+      }, 10000)
       
       // Auto-sync results with map visualization
       if (finalResults.lidar_analysis) {
@@ -477,7 +499,7 @@ export default function UltimateVisionAgentPage() {
       setVisionResults(emergencyFallback)
     }
     
-  }, [backendStatus.online, coordinates, analysisConfig, backendUrl, unifiedActions])
+  }, [backendStatus.online, coordinates, analysisConfig, backendUrl])
 
   // LIDAR Processing Functions
   const processLidarTriangulation = useCallback(async () => {
@@ -793,12 +815,12 @@ export default function UltimateVisionAgentPage() {
         setCoordinates(newCoords)
       }
     }
-  }, [unifiedState.selectedCoordinates, coordinates])
+  }, [unifiedState.selectedCoordinates]) // Remove coordinates dependency to prevent loop
 
   // Auto-trigger analysis when coordinates change (with debounce)
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (coordinates && coordinates !== "5.1542, -73.7792") {
+      if (coordinates && coordinates !== "5.1542, -73.7792" && coordinates !== lastAnalysisCoords) {
         const [lat, lng] = coordinates.split(',').map(s => parseFloat(s.trim()))
         if (!isNaN(lat) && !isNaN(lng) && backendStatus.online) {
           console.log('🔄 Auto-triggering analysis for new coordinates:', lat, lng)
@@ -813,7 +835,7 @@ export default function UltimateVisionAgentPage() {
     }, 2000) // 2 second debounce
 
     return () => clearTimeout(timeoutId)
-  }, [coordinates, backendStatus.online, visionResults, runComprehensiveAnalysis])
+  }, [coordinates, backendStatus.online, lastAnalysisCoords]) // Add lastAnalysisCoords to prevent re-analysis
 
   // Save settings when they change
   useEffect(() => {
@@ -972,22 +994,22 @@ export default function UltimateVisionAgentPage() {
               </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <Label>Coordinates</Label>
+                      <Label className="text-white font-medium">Coordinates</Label>
                       <Input
                         value={coordinates}
                         onChange={(e) => setCoordinatesWithSync(e.target.value)}
                         placeholder="lat, lng"
-                        className="bg-slate-700 border-slate-600 mt-1"
+                        className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 mt-1 focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400"
                       />
                     </div>
 
                     <div>
-                      <Label>Analysis Depth</Label>
+                      <Label className="text-white font-medium">Analysis Depth</Label>
                       <Select 
                         value={analysisConfig.analysisDepth} 
                         onValueChange={(value) => setAnalysisConfig(prev => ({ ...prev, analysisDepth: value }))}
                       >
-                        <SelectTrigger className="bg-slate-700 border-slate-600 mt-1">
+                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white mt-1">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -999,7 +1021,7 @@ export default function UltimateVisionAgentPage() {
                             </div>
 
                     <div>
-                      <Label>Confidence: {Math.round(analysisConfig.confidenceThreshold * 100)}%</Label>
+                      <Label className="text-white font-medium">Confidence: {Math.round(analysisConfig.confidenceThreshold * 100)}%</Label>
                       <Slider
                         value={[analysisConfig.confidenceThreshold]}
                         onValueChange={([value]) => setAnalysisConfig(prev => ({ ...prev, confidenceThreshold: value }))}
@@ -1012,7 +1034,7 @@ export default function UltimateVisionAgentPage() {
 
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <Label>GPT-4 Vision</Label>
+                        <Label className="text-white font-medium">GPT-4 Vision</Label>
                         <Switch
                           checked={analysisConfig.useGPT4Vision}
                           onCheckedChange={(checked) => setAnalysisConfig(prev => ({ ...prev, useGPT4Vision: checked }))}
@@ -1020,7 +1042,7 @@ export default function UltimateVisionAgentPage() {
                       />
                     </div>
                       <div className="flex items-center justify-between">
-                        <Label>KAN Networks</Label>
+                        <Label className="text-white font-medium">KAN Networks</Label>
                         <Switch
                           checked={analysisConfig.useKANNetworks}
                           onCheckedChange={(checked) => setAnalysisConfig(prev => ({ ...prev, useKANNetworks: checked }))}
@@ -1028,7 +1050,7 @@ export default function UltimateVisionAgentPage() {
                         />
                       </div>
                       <div className="flex items-center justify-between">
-                        <Label>LIDAR Fusion</Label>
+                        <Label className="text-white font-medium">LIDAR Fusion</Label>
                         <Switch
                           checked={analysisConfig.useLidarFusion}
                           onCheckedChange={(checked) => setAnalysisConfig(prev => ({ ...prev, useLidarFusion: checked }))}
@@ -1795,13 +1817,13 @@ export default function UltimateVisionAgentPage() {
                 <CardContent className="space-y-6">
                   {/* Backend Status */}
                   <div className="space-y-4">
-                    <h4 className="font-medium text-slate-300">Backend Services</h4>
+                    <h4 className="font-medium text-white">Backend Services</h4>
                     
                     <div className="space-y-3">
                       <div className="flex items-center justify-between p-3 bg-slate-900/50 rounded">
                         <div className="flex items-center gap-2">
                           <div className={`w-2 h-2 rounded-full ${backendStatus.online ? 'bg-green-400' : 'bg-red-400'}`}></div>
-                          <span className="text-sm">Backend API</span>
+                          <span className="text-sm text-white">Backend API</span>
                         </div>
                         <Badge variant={backendStatus.online ? "default" : "destructive"}>
                           {backendStatus.online ? 'Online' : 'Offline'}
@@ -1811,7 +1833,7 @@ export default function UltimateVisionAgentPage() {
                       <div className="flex items-center justify-between p-3 bg-slate-900/50 rounded">
                         <div className="flex items-center gap-2">
                           <div className={`w-2 h-2 rounded-full ${backendStatus.gpt4Vision ? 'bg-green-400' : 'bg-red-400'}`}></div>
-                          <span className="text-sm">GPT-4 Vision</span>
+                          <span className="text-sm text-white">GPT-4 Vision</span>
                         </div>
                         <Badge variant={backendStatus.gpt4Vision ? "default" : "secondary"}>
                           {backendStatus.gpt4Vision ? 'Available' : 'Unavailable'}
@@ -1821,7 +1843,7 @@ export default function UltimateVisionAgentPage() {
                       <div className="flex items-center justify-between p-3 bg-slate-900/50 rounded">
                         <div className="flex items-center gap-2">
                           <div className={`w-2 h-2 rounded-full ${backendStatus.kanNetworks ? 'bg-green-400' : 'bg-red-400'}`}></div>
-                          <span className="text-sm">KAN Networks</span>
+                          <span className="text-sm text-white">KAN Networks</span>
                         </div>
                         <Badge variant={backendStatus.kanNetworks ? "default" : "secondary"}>
                           {backendStatus.kanNetworks ? 'Active' : 'Inactive'}
@@ -1831,7 +1853,7 @@ export default function UltimateVisionAgentPage() {
                       <div className="flex items-center justify-between p-3 bg-slate-900/50 rounded">
                         <div className="flex items-center gap-2">
                           <div className={`w-2 h-2 rounded-full ${backendStatus.lidarProcessing ? 'bg-green-400' : 'bg-red-400'}`}></div>
-                          <span className="text-sm">LIDAR Processing</span>
+                          <span className="text-sm text-white">LIDAR Processing</span>
                         </div>
                         <Badge variant={backendStatus.lidarProcessing ? "default" : "secondary"}>
                           {backendStatus.lidarProcessing ? 'Ready' : 'Limited'}
@@ -1842,24 +1864,24 @@ export default function UltimateVisionAgentPage() {
 
                   {/* Performance Metrics */}
                   <div className="space-y-4">
-                    <h4 className="font-medium text-slate-300">Performance Metrics</h4>
+                    <h4 className="font-medium text-white">Performance Metrics</h4>
                     
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-slate-400">GPU Utilization</span>
-                        <span className="text-sm font-medium">{backendStatus.gpuUtilization}%</span>
+                        <span className="text-sm font-medium text-white">{backendStatus.gpuUtilization}%</span>
                       </div>
                       <Progress value={backendStatus.gpuUtilization} className="h-2" />
                       
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-slate-400">Memory Usage</span>
-                        <span className="text-sm font-medium">2.3 GB / 8.0 GB</span>
+                        <span className="text-sm font-medium text-white">2.3 GB / 8.0 GB</span>
                       </div>
                       <Progress value={29} className="h-2" />
                       
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-slate-400">Analysis Queue</span>
-                        <span className="text-sm font-medium">0 pending</span>
+                        <span className="text-sm font-medium text-white">0 pending</span>
                       </div>
                       <Progress value={0} className="h-2" />
                     </div>
@@ -1867,7 +1889,7 @@ export default function UltimateVisionAgentPage() {
 
                   {/* System Actions */}
                   <div className="space-y-4">
-                    <h4 className="font-medium text-slate-300">System Actions</h4>
+                    <h4 className="font-medium text-white">System Actions</h4>
                     
                     <div className="grid grid-cols-1 gap-3">
                       <Button 
@@ -1949,7 +1971,7 @@ export default function UltimateVisionAgentPage() {
                         ].map((feature, index) => (
                           <div key={index} className="flex items-center gap-2 text-sm">
                             <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                            <span className="text-slate-300">{feature}</span>
+                            <span className="text-white">{feature}</span>
                           </div>
                         ))}
                       </div>
@@ -1968,7 +1990,7 @@ export default function UltimateVisionAgentPage() {
                         ].map((feature, index) => (
                           <div key={index} className="flex items-center gap-2 text-sm">
                             <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
-                            <span className="text-slate-300">{feature}</span>
+                            <span className="text-white">{feature}</span>
                           </div>
                         ))}
                       </div>
@@ -1987,7 +2009,7 @@ export default function UltimateVisionAgentPage() {
                         ].map((source, index) => (
                           <div key={index} className="flex items-center gap-2 text-sm">
                             <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                            <span className="text-slate-300">{source}</span>
+                            <span className="text-white">{source}</span>
                           </div>
                         ))}
                       </div>
@@ -1999,15 +2021,15 @@ export default function UltimateVisionAgentPage() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                       <div>
                         <span className="text-slate-400">Vision Agent Version:</span>
-                        <span className="ml-2 font-medium">v2.1.0</span>
+                        <span className="ml-2 font-medium text-white">v2.1.0</span>
                       </div>
                       <div>
                         <span className="text-slate-400">Backend API:</span>
-                        <span className="ml-2 font-medium">v1.8.3</span>
+                        <span className="ml-2 font-medium text-white">v1.8.3</span>
                       </div>
                       <div>
                         <span className="text-slate-400">Last Updated:</span>
-                        <span className="ml-2 font-medium">2024-06-24</span>
+                        <span className="ml-2 font-medium text-white">2024-06-24</span>
                       </div>
                     </div>
                   </div>
