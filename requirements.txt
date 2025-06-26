@@ -173,7 +173,7 @@ yarl==1.18.3
 
 # Type Checking
 mypy==1.13.0
-types-requests==2.32.0.20241130
+types-requests>=2.32.0
 
 # Performance Monitoring
 py-spy==0.3.14
