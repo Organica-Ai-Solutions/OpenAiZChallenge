@@ -184,9 +184,9 @@ def test_complete_codex_reader():
     # Test 7: Frontend Accessibility
     print(f"\n7. Testing Frontend Accessibility...")
     try:
-        response = requests.get("http://localhost:3001/codex-reader", timeout=5)
+        response = requests.get("http://localhost:3000/codex-reader", timeout=5)
         if response.status_code == 200:
-            print("✅ Frontend: Accessible at http://localhost:3001/codex-reader")
+            print("✅ Frontend: Accessible at http://localhost:3000/codex-reader")
         else:
             print(f"❌ Frontend: Not accessible ({response.status_code})")
     except Exception as e:
@@ -224,7 +224,7 @@ def test_complete_codex_reader():
     print(f"   - No Mock Data: ✅ All real archaeological data")
     
     print(f"\n🌟 System Status: FULLY OPERATIONAL")
-    print(f"🔗 Access: http://localhost:3001/codex-reader")
+    print(f"🔗 Access: http://localhost:3000/codex-reader")
     print(f"📚 Ready for archaeological research!")
     
     return True

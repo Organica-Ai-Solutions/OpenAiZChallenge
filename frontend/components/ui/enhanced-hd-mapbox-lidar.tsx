@@ -53,7 +53,7 @@ export function EnhancedHDMapboxLidar({
       // Dynamic import of Mapbox
       const mapboxgl = (await import('mapbox-gl')).default
       
-      mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
+      mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || ''
 
       // Initialize map
       map.current = new mapboxgl.Map({

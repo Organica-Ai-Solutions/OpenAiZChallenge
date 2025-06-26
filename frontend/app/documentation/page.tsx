@@ -521,7 +521,7 @@ export default function DocumentationPage() {
                     <span className="text-white font-semibold">Live System Status</span>
                   </div>
                   <p className="text-emerald-100 text-sm">
-                    All NIS Protocol services are fully operational. Frontend running on localhost:3001, 
+                    All NIS Protocol services are fully operational. Frontend running on localhost:3000, 
                     backend API on localhost:8000 with Redis, Kafka, and LangGraph integration. 
                     Ready for archaeological discovery and real-time satellite analysis.
                   </p>

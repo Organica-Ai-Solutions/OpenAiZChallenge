@@ -89,7 +89,7 @@ export function MapboxVisionMap({
   const [activeLayer, setActiveLayer] = useState<'lidar' | 'satellite' | 'hybrid'>('lidar')
 
   // Mapbox token
-  const MAPBOX_TOKEN = 'pk.eyJ1IjoicGVudGl1czAwIiwiYSI6ImNtYXRtZXpmZTB4djgya29mNWZ0dG5pZDUifQ.dmsZjiJKZ7dxGs5KHVEK2g'
+  const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || ''
   
   // Enhanced LIDAR data fetching with professional processing
   const fetchRealLidarData = useCallback(async () => {

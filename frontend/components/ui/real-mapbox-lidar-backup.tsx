@@ -87,7 +87,7 @@ export function RealMapboxLidar({
         const mapboxgl = await import('mapbox-gl')
         
         // Use the working Mapbox token
-        mapboxgl.default.accessToken = 'pk.eyJ1IjoicGVudGl1czAwIiwiYSI6ImNtYXRtZXpmZTB4djgya29mNWZ0dG5pZDUifQ.dmsZjiJKZ7dxGs5KHVEK2g'
+        mapboxgl.default.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || ''
         
         // Ensure container is empty before creating map
         if (mapContainer.current) {

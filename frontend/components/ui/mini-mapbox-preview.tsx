@@ -37,8 +37,8 @@ export function MiniMapboxPreview({
         // Import Mapbox GL JS dynamically
         const mapboxgl = await import('mapbox-gl')
         
-        // Use the working Mapbox token
-        mapboxgl.default.accessToken = 'pk.eyJ1IjoicGVudGl1czAwIiwiYSI6ImNtYXRtZXpmZTB4djgya29mNWZ0dG5pZDUifQ.dmsZjiJKZ7dxGs5KHVEK2g'
+        // Use environment variable for Mapbox token
+        mapboxgl.default.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || ''
         
         // Create mini map instance
         const mapInstance = new mapboxgl.default.Map({

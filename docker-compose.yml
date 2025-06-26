@@ -156,13 +156,14 @@ services:
     container_name: nis-frontend
     restart: unless-stopped
     ports:
-      - "3001:3000"
+      - "3000:3000"
     environment:
       - NODE_ENV=development
       - NEXT_PUBLIC_API_URL=http://localhost:8000
       - NEXT_PUBLIC_FALLBACK_API_URL=http://localhost:8003
       - NEXT_PUBLIC_IKRP_API_URL=http://localhost:8001
-      - NEXT_PUBLIC_GOOGLE_MAPS_KEY=AIzaSyCCMYQ_eQdaKPV30JGFEv_556O8N-ZzV9E
+      - NEXT_PUBLIC_GOOGLE_MAPS_KEY=${NEXT_PUBLIC_GOOGLE_MAPS_KEY}
+      - NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=${NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
       - NEXT_TELEMETRY_DISABLED=1
     volumes:
       - ./frontend:/app

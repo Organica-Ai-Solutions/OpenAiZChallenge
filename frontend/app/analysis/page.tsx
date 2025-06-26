@@ -528,7 +528,7 @@ export default function NISAnalysisPage() {
         console.log('🗺️ Initializing analysis page map...')
         
         const mapboxgl = await import('mapbox-gl')
-        mapboxgl.default.accessToken = 'pk.eyJ1IjoicGVudGl1czAwIiwiYSI6ImNtYXRtZXpmZTB4djgya29mNWZ0dG5pZDUifQ.dmsZjiJKZ7dxGs5KHVEK2g'
+                    mapboxgl.default.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || ''
         
         if (mapContainer.current) {
           mapContainer.current.innerHTML = ''

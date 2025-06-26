@@ -45,7 +45,7 @@ def test_agents_status():
 def test_frontend():
     """Test frontend accessibility."""
     try:
-        response = requests.get('http://localhost:3001', timeout=5)
+        response = requests.get('http://localhost:3000', timeout=5)
         if response.status_code == 200:
             print("✅ Frontend accessibility check passed")
             return True
