@@ -506,10 +506,10 @@ export function RealMapboxLidar({
           <Triangle className="w-5 h-5 text-purple-400" />
           Real Mapbox LIDAR Map
           <Badge variant="outline" className="text-purple-400 border-purple-400">
-            {lidarVisualization.enableDelaunayTriangulation ? 'Delaunay' : 'Points'}
+            {lidarVisualization?.enableDelaunayTriangulation ? 'Delaunay' : 'Points'}
           </Badge>
           <Badge variant="outline" className="text-emerald-400 border-emerald-400">
-            {lidarVisualization.enableRGBColoring ? 'RGB' : 'Standard'}
+            {lidarVisualization?.enableRGBColoring ? 'RGB' : 'Standard'}
           </Badge>
           <Badge variant="outline" className="text-cyan-400 border-cyan-400">
             Interactive Map
@@ -587,18 +587,18 @@ export function RealMapboxLidar({
           )}
 
           {/* Processing Status Overlay */}
-          {lidarProcessing.isProcessing && (
+          {lidarProcessing?.isProcessing && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded">
               <div className="text-center text-white bg-slate-900/90 rounded-lg p-6">
                 <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3 text-cyan-400" />
-                <p className="font-semibold text-lg mb-2">{lidarProcessing.stage}</p>
+                <p className="font-semibold text-lg mb-2">{lidarProcessing?.stage}</p>
                 <div className="w-64 bg-slate-700 rounded-full h-2 mb-2">
                   <div 
                     className="bg-cyan-400 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${lidarProcessing.progress}%` }}
+                    style={{ width: `${lidarProcessing?.progress || 0}%` }}
                   />
                 </div>
-                <p className="text-sm text-slate-300">{lidarProcessing.progress}% Complete</p>
+                <p className="text-sm text-slate-300">{lidarProcessing?.progress || 0}% Complete</p>
               </div>
             </div>
           )}
@@ -612,8 +612,8 @@ export function RealMapboxLidar({
                 <span className="text-slate-400">Map: {mapLoaded ? 'Ready' : 'Loading'}</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${backendStatus.online ? 'bg-green-400' : 'bg-red-400'}`}></div>
-                <span className="text-slate-400">API: {backendStatus.online ? 'Online' : 'Offline'}</span>
+                <div className={`w-2 h-2 rounded-full ${backendStatus?.online ? 'bg-green-400' : 'bg-red-400'}`}></div>
+                <span className="text-slate-400">API: {backendStatus?.online ? 'Online' : 'Offline'}</span>
               </div>
             </div>
           </div>
@@ -649,10 +649,10 @@ export function RealMapboxLidar({
                   onClick={() => {
                     console.log(`🔍 HD zoom ${zoom}m activated`)
                     
-                    // Call HD LiDAR API
-                    fetch('http://localhost:8000/lidar/data/latest', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
+                                         // Call HD LiDAR API
+                     fetch('http://localhost:8000/lidar/data/latest', {
+                       method: 'POST',
+                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({
                         coordinates: { lat: lat, lng: lng },
                         radius: zoom * 100,
@@ -694,12 +694,12 @@ export function RealMapboxLidar({
             </h4>
             <div className="grid grid-cols-4 gap-2">
               {Object.keys(divineGradients).map((gradientName) => (
-                <Button
+          <Button 
                   key={gradientName}
                   size="sm"
                   variant={selectedGradient === gradientName ? "default" : "outline"}
                   className="text-xs"
-                  onClick={() => {
+            onClick={() => {
                     setSelectedGradient(gradientName as any)
                     if (map.current && mapLoaded) {
                       // Reload elevation with new gradient
@@ -726,21 +726,21 @@ export function RealMapboxLidar({
             className="flex-1"
           >
             <Triangle className="w-4 h-4 mr-2" />
-            {lidarVisualization.enableDelaunayTriangulation ? 'Disable' : 'Enable'} Triangulation
+            {lidarVisualization?.enableDelaunayTriangulation ? 'Disable' : 'Enable'} Triangulation
           </Button>
           
-          <Button
+          <Button 
             onClick={processLidarRGBColoring}
             disabled={isProcessing || !lidarData}
             size="sm"
-            variant="outline"
+            variant="outline" 
             className="flex-1"
           >
             <Palette className="w-4 h-4 mr-2" />
-            {lidarVisualization.enableRGBColoring ? 'Disable' : 'Enable'} RGB
+            {lidarVisualization?.enableRGBColoring ? 'Disable' : 'Enable'} RGB
           </Button>
           
-          <Button
+          <Button 
             onClick={() => {
               if (map.current) {
                 map.current.flyTo({ 
@@ -755,7 +755,7 @@ export function RealMapboxLidar({
               }
             }}
             size="sm"
-            variant="outline"
+            variant="outline" 
           >
             <RotateCcw className="w-4 h-4 mr-2" />
             Reset View
