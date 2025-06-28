@@ -54,6 +54,20 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Large media files (videos, etc.)
+*.mov
+*.mp4
+*.avi
+*.mkv
+*.webm
+*.flv
+*.wmv
+*.m4v
+docs/submission/*.mov
+docs/submission/*.mp4
+competition-submission/demo/*.mov
+competition-submission/demo/*.mp4
+
 # Data files (optional, uncomment if needed)
 # data/lidar/*
 # data/satellite/*

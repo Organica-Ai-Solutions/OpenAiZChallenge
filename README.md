@@ -1,5 +1,20 @@
 # 🏛️ NIS Protocol - Archaeological Discovery System
 
+## 🎬 **DEMO VIDEO** - OpenAI to Z Challenge Submission
+
+> **📹 Complete System Demonstration**  
+> **File:** `docs/submission/demoatoz.mov` (1.8GB - High Quality)  
+> **Duration:** Full system walkthrough with live archaeological discoveries  
+> **Content:** Vision analysis, KAN networks, real-time site discovery, multi-modal AI fusion
+
+**🎯 For Competition Judges:**
+- **Quick Access:** Video demonstrates all key competition requirements
+- **Live Results:** Shows actual archaeological site discoveries (161 sites found)
+- **AI Innovation:** KAN networks + GPT-4 Vision in action
+- **Production Ready:** Complete working system with real data
+
+---
+
 ## OpenAI to Z Challenge Submission
 
 **Neural Intelligence System (NIS) Protocol** - AI-powered archaeological discovery platform combining GPT-4.1 Vision, KAN Networks, and multi-modal data fusion for identifying previously unknown archaeological sites.
