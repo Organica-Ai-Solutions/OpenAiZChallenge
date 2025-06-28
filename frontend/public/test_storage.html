@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Storage Backend Test</title>
+</head>
+<body>
+    <h1>Storage Backend Test</h1>
+    <button onclick="testStorage()">Test Storage Backend</button>
+    <div id="results"></div>
+    
+    <script>
+        async function testStorage() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = 'Testing...';
+            
+            try {
+                console.log('🔍 Testing storage backend access...');
+                
+                const response = await fetch('http://localhost:8004/storage/list?limit=3', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    mode: 'cors'
+                });
+                
+                console.log('📡 Response status:', response.status);
+                console.log('📡 Response headers:', response.headers);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('✅ Storage data received:', data);
+                    resultsDiv.innerHTML = `
+                        <h3>✅ Success!</h3>
+                        <p>Found ${data.analyses?.length || 0} analyses</p>
+                        <p>Total stored: ${data.metadata?.total_stored || 0}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                console.error('❌ Storage test failed:', error);
+                resultsDiv.innerHTML = `
+                    <h3>❌ Failed!</h3>
+                    <p>Error: ${error.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html> 

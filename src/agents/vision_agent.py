@@ -539,20 +539,24 @@ class VisionAgent:
                 ]
             }
             
-            # Generate divine elevation grid for heatmap
+            # Generate enhanced 3D terrain data for spectacular visualization
             divine_elevation_data = self._generate_divine_elevation_grid(lat, lon)
+            enhanced_3d_terrain = await self._generate_enhanced_3d_terrain_data(lat, lon, divine_elevation_data)
             
-            # Process with divine heatmap capabilities
+            # Process with divine heatmap capabilities and 3D terrain extrusion
             divine_features = []
             for i, point in enumerate(divine_elevation_data[:50]):  # Process top 50 points
                 if point.get('archaeological_potential', 0) > 0.6:
                     divine_features.append({
-                        "type": f"Divine Heatmap Feature: {point.get('feature_type', 'Archaeological anomaly')}",
-                        "details": f"Detected via divine elevation heatmap analysis - {point.get('description', 'Elevation anomaly suggesting human modification')}",
+                        "type": f"Divine 3D Feature: {point.get('feature_type', 'Archaeological anomaly')}",
+                        "details": f"Detected via enhanced 3D terrain analysis - {point.get('description', 'Elevation anomaly suggesting human modification')}",
                         "confidence": min(point.get('archaeological_potential', 0.6) + 0.1, 0.93),
                         "coordinates": {"lat": point.get('lat', lat), "lng": point.get('lng', lon)},
-                        "source": "Divine Heatmap Processor (RealMapboxLidar Integration)",
+                        "source": "Enhanced 3D Terrain Processor (RealMapboxLidar Integration)",
                         "elevation": point.get('elevation', 0),
+                        "extrusion_height": max((point.get('elevation', 120) - 100) * 3, 1),
+                        "terrain_type": self._classify_terrain_type(point.get('elevation', 120)),
+                        "enhanced_3d": True,
                         "heatmap_enhanced": True,
                         "divine_gradient": "divine"
                     })
@@ -1031,12 +1035,12 @@ class VisionAgent:
             }]
             
             divine_confidence = min(gpt_analysis.get("confidence", 0.5) + 0.06, 0.89)
-        
-        return {
+            
+            return {
                 "confidence": divine_confidence,
-            "features_detected": features,
+                "features_detected": features,
                 "source": f"DIVINE Enhanced LIDAR Tile {tile_path.name} (Basic GPT Vision Analysis)",
-            "location": {"lat": lat, "lon": lon},
+                "location": {"lat": lat, "lon": lon},
                 "raw_gpt_response": gpt_analysis,
                 "divine_enhanced": True,
                 "divine_truth_level": divine_confidence
@@ -1071,6 +1075,522 @@ class VisionAgent:
             logger.warning("VisionAgent.get_latest_observation called before any analysis was run.")
             return {}
         return self.current_vision_observations
+
+    async def _generate_enhanced_3d_terrain_data(self, lat: float, lon: float, elevation_data: List[Dict]) -> Dict:
+        """Generate enhanced 3D terrain data for spectacular visualization."""
+        try:
+            logger.info("🏔️ VISION AGENT: Generating enhanced 3D terrain data...")
+            
+            terrain_polygons = []
+            archaeological_3d_sites = []
+            
+            # Process elevation data for 3D terrain extrusion
+            for point in elevation_data[:500]:  # Limit for performance
+                elevation = point.get('elevation', 120)
+                
+                # Create small polygon for terrain extrusion
+                grid_size = 0.0001
+                point_lat = point.get('lat', lat)
+                point_lng = point.get('lng', lon)
+                
+                terrain_polygon = {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [point_lng - grid_size, point_lat - grid_size],
+                            [point_lng + grid_size, point_lat - grid_size],
+                            [point_lng + grid_size, point_lat + grid_size],
+                            [point_lng - grid_size, point_lat + grid_size],
+                            [point_lng - grid_size, point_lat - grid_size]
+                        ]]
+                    },
+                    "properties": {
+                        "elevation": elevation,
+                        "extrusion_height": max((elevation - 100) * 2.5, 0.5),
+                        "terrain_type": self._classify_terrain_type(elevation),
+                        "enhanced_3d": True,
+                        "archaeological_potential": point.get('archaeological_potential', 0.3)
+                    }
+                }
+                
+                terrain_polygons.append(terrain_polygon)
+                
+                # Generate archaeological 3D markers for high-potential sites
+                if point.get('archaeological_potential', 0) > 0.7:
+                    arch_site = {
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [point_lng, point_lat]
+                        },
+                        "properties": {
+                            "site_type": point.get('feature_type', 'unknown'),
+                            "confidence": point.get('archaeological_potential', 0.7),
+                            "elevation": elevation,
+                            "extrusion_height": point.get('archaeological_potential', 0.7) * 20,
+                            "enhanced_3d": True
+                        }
+                    }
+                    archaeological_3d_sites.append(arch_site)
+            
+            return {
+                "terrain_polygons": terrain_polygons,
+                "archaeological_3d_sites": archaeological_3d_sites,
+                "enhanced_3d_config": {
+                    "terrain_extrusion_enabled": True,
+                    "dramatic_pitch": 70,
+                    "terrain_exaggeration": 3,
+                    "atmospheric_fog": True
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Enhanced 3D terrain generation error: {e}")
+            return {"terrain_polygons": [], "archaeological_3d_sites": []}
+    
+    def _classify_terrain_type(self, elevation: float) -> str:
+        """Classify terrain type based on elevation for enhanced visualization."""
+        if elevation < 80:
+            return "riverine"
+        elif elevation < 120:
+            return "lowland_forest"
+        elif elevation < 160:
+            return "highland_forest"
+        elif elevation < 200:
+            return "montane"
+        else:
+            return "peaks"
+
+    def get_enhanced_3d_capabilities(self) -> Dict:
+        """Get enhanced 3D terrain capabilities of the vision agent."""
+        return {
+            "enhanced_3d_features": [
+                "3D terrain extrusion generation",
+                "Archaeological 3D site markers",
+                "Terrain type classification",
+                "Elevation-based height calculation",
+                "Dramatic pitch visualization support",
+                "Atmospheric effects configuration"
+            ],
+            "mapbox_integration": {
+                "terrain_extrusion_enabled": True,
+                "dramatic_pitch_support": 70,
+                "exaggeration_range": [1, 6],
+                "atmospheric_effects": True,
+                "archaeological_3d_markers": True
+            },
+            "advanced_features": {
+                "webgl_optimization": True,
+                "binary_data_support": True,
+                "lod_system": True,
+                "deck_gl_integration": True,
+                "professional_color_schemes": True,
+                "performance_monitoring": True
+            }
+        }
+
+    async def get_advanced_lidar_capabilities(self) -> Dict[str, any]:
+        """Return comprehensive advanced LiDAR capabilities."""
+        return {
+            "processing_methods": [
+                "hillshade_analysis", "slope_calculation", "contour_generation",
+                "elevation_modeling", "archaeological_detection", "3d_reconstruction"
+            ],
+            "deck_gl_layers": [
+                "PointCloudLayer", "ScatterplotLayer", "HexagonLayer", 
+                "GridLayer", "Tile3DLayer"
+            ],
+            "mapbox_integration": {
+                "terrain_dem": True,
+                "3d_extrusion": True,
+                "atmospheric_effects": True,
+                "fog_integration": True,
+                "custom_lighting": True
+            },
+            "performance_features": {
+                "webgl_batching": True,
+                "lod_management": True,
+                "binary_attributes": True,
+                "gpu_acceleration": True,
+                "streaming_data": True
+            },
+            "color_schemes": [
+                "elevation_scientific", "archaeological_significance", 
+                "intensity_thermal", "classification_professional"
+            ],
+            "supported_formats": [
+                "LAS/LAZ", "PLY", "XYZ", "E57", "3D Tiles", "COPC"
+            ]
+        }
+
+    async def generate_advanced_lidar_visualization_config(self, coordinates: Dict[str, float], 
+                                                         options: Dict[str, any] = None) -> Dict[str, any]:
+        """Generate advanced LiDAR visualization configuration for frontend."""
+        
+        opts = options or {}
+        
+        config = {
+            "visualization_type": "advanced_lidar_3d",
+            "coordinates": coordinates,
+            "timestamp": datetime.now().isoformat(),
+            
+            # Deck.gl layer configurations
+            "deck_gl_config": {
+                "point_cloud_layer": {
+                    "id": "lidar-points",
+                    "type": "PointCloudLayer",
+                    "radiusPixels": 2,
+                    "opacity": 0.8,
+                    "pickable": True,
+                    "coordinateSystem": "LNGLAT",
+                    "material": {
+                        "ambient": 0.35,
+                        "diffuse": 0.6,
+                        "shininess": 32
+                    }
+                },
+                "archaeological_sites": {
+                    "id": "archaeological-sites",
+                    "type": "ScatterplotLayer",
+                    "radiusScale": 20,
+                    "radiusMinPixels": 5,
+                    "radiusMaxPixels": 50,
+                    "stroked": True,
+                    "filled": True,
+                    "getFillColor": [255, 215, 0, 200],
+                    "getLineColor": [255, 140, 0, 255]
+                },
+                "density_hexagons": {
+                    "id": "density-analysis",
+                    "type": "HexagonLayer",
+                    "radius": 200,
+                    "extruded": True,
+                    "elevationScale": 4,
+                    "coverage": 0.88,
+                    "colorRange": [
+                        [255, 255, 178, 100],
+                        [254, 204, 92, 150], 
+                        [253, 141, 60, 200],
+                        [240, 59, 32, 250],
+                        [189, 0, 38, 255]
+                    ]
+                }
+            },
+            
+            # Mapbox integration settings
+            "mapbox_config": {
+                "terrain": {
+                    "source": "mapbox-terrain-dem-v1",
+                    "exaggeration": opts.get("terrain_exaggeration", 3.0),
+                    "exaggeration_range": [1, 10]
+                },
+                "atmospheric_effects": {
+                    "fog": {
+                        "enabled": True,
+                        "color": "rgb(220, 220, 255)",
+                        "high_color": "rgb(36, 92, 223)",
+                        "horizon_blend": 0.03
+                    },
+                    "sky": {
+                        "type": "atmosphere",
+                        "sun_position": [0.0, 0.0],
+                        "sun_intensity": 15
+                    }
+                },
+                "camera": {
+                    "pitch": 70,
+                    "bearing": 0,
+                    "zoom": 15
+                }
+            },
+            
+            # Performance optimization settings
+            "performance": {
+                "max_points": 100000,
+                "lod_enabled": True,
+                "frustum_culling": True,
+                "gpu_aggregation": True,
+                "binary_data": True,
+                "webgl_version": "2.0"
+            },
+            
+            # Interactive features
+            "interactions": {
+                "hover_info": True,
+                "click_details": True,
+                "coordinate_display": True,
+                "elevation_readout": True,
+                "archaeological_popup": True
+            },
+            
+            # Color scheme configuration
+            "color_schemes": {
+                "elevation": {
+                    "type": "continuous",
+                    "range": [
+                        [0, [0, 0, 139]],      # Deep blue (low)
+                        [0.2, [0, 139, 139]],   # Cyan
+                        [0.4, [0, 255, 0]],     # Green
+                        [0.6, [255, 255, 0]],   # Yellow
+                        [0.8, [255, 165, 0]],   # Orange
+                        [1.0, [255, 0, 0]]      # Red (high)
+                    ]
+                },
+                "archaeological": {
+                    "type": "categorical",
+                    "categories": {
+                        "high_significance": [255, 215, 0],    # Gold
+                        "medium_significance": [255, 165, 0],  # Orange
+                        "low_significance": [128, 128, 128],   # Gray
+                        "natural_feature": [34, 139, 34]      # Forest green
+                    }
+                }
+            }
+        }
+        
+        logger.info(f"Generated advanced LiDAR visualization config for {coordinates}")
+        return config
+
+    async def optimize_lidar_for_webgl(self, lidar_data: List[Dict[str, any]], 
+                                     batch_size: int = 50000) -> Dict[str, any]:
+        """Optimize LiDAR data for high-performance WebGL rendering."""
+        
+        try:
+            optimized_data = {
+                "success": True,
+                "optimization_type": "webgl_performance",
+                "batches": [],
+                "performance_stats": {}
+            }
+            
+            # Create batches for efficient rendering
+            for i in range(0, len(lidar_data), batch_size):
+                batch = lidar_data[i:i + batch_size]
+                
+                # Convert to optimized format
+                batch_optimized = {
+                    "batch_id": len(optimized_data["batches"]),
+                    "point_count": len(batch),
+                    "vertices": [],
+                    "colors": [],
+                    "normals": []
+                }
+                
+                for point in batch:
+                    # Vertex data (x, y, z)
+                    batch_optimized["vertices"].extend([
+                        point.get("x", 0), 
+                        point.get("y", 0), 
+                        point.get("z", point.get("elevation", 0))
+                    ])
+                    
+                    # Color based on archaeological significance
+                    significance = point.get("archaeological_significance", 0.5)
+                    if significance > 0.8:
+                        batch_optimized["colors"].extend([255, 215, 0, 255])  # Gold
+                    elif significance > 0.6:
+                        batch_optimized["colors"].extend([255, 165, 0, 255])  # Orange
+                    elif significance > 0.4:
+                        batch_optimized["colors"].extend([255, 255, 0, 200])  # Yellow
+                    else:
+                        batch_optimized["colors"].extend([128, 128, 128, 150])  # Gray
+                    
+                    # Normal vector (simplified upward)
+                    batch_optimized["normals"].extend([0.0, 0.0, 1.0])
+                
+                optimized_data["batches"].append(batch_optimized)
+            
+            # Calculate performance statistics
+            total_vertices = len(lidar_data)
+            total_memory_mb = (total_vertices * 3 * 4 + total_vertices * 4 + total_vertices * 3 * 4) / (1024 * 1024)
+            
+            optimized_data["performance_stats"] = {
+                "total_vertices": total_vertices,
+                "total_batches": len(optimized_data["batches"]),
+                "memory_usage_mb": total_memory_mb,
+                "estimated_fps": "60+" if total_vertices < 100000 else "30-60",
+                "webgl_compatibility": "WebGL 1.0/2.0",
+                "optimization_level": "high"
+            }
+            
+            logger.info(f"✅ WebGL optimization complete: {len(optimized_data['batches'])} batches, {total_vertices} vertices")
+            return optimized_data
+            
+        except Exception as e:
+            logger.error(f"WebGL optimization failed: {str(e)}")
+            return {"success": False, "error": str(e)}
+
+    async def generate_professional_color_schemes(self) -> Dict[str, any]:
+        """Generate professional color schemes for LiDAR visualization."""
+        
+        return {
+            "elevation_scientific": {
+                "name": "Scientific Elevation",
+                "type": "continuous",
+                "description": "Professional elevation color scheme used in scientific publications",
+                "range": [
+                    {"value": 0.0, "color": [0, 0, 139], "label": "Sea Level"},
+                    {"value": 0.2, "color": [0, 139, 139], "label": "Lowlands"},
+                    {"value": 0.4, "color": [0, 255, 0], "label": "Plains"},
+                    {"value": 0.6, "color": [255, 255, 0], "label": "Hills"},
+                    {"value": 0.8, "color": [255, 165, 0], "label": "Mountains"},
+                    {"value": 1.0, "color": [255, 0, 0], "label": "Peaks"}
+                ]
+            },
+            "archaeological_significance": {
+                "name": "Archaeological Significance",
+                "type": "continuous",
+                "description": "Color scheme highlighting archaeological potential",
+                "range": [
+                    {"value": 0.0, "color": [34, 34, 59], "label": "Natural"},
+                    {"value": 0.25, "color": [68, 139, 85], "label": "Low Interest"},
+                    {"value": 0.5, "color": [170, 170, 127], "label": "Moderate"},
+                    {"value": 0.75, "color": [238, 187, 68], "label": "High Interest"},
+                    {"value": 1.0, "color": [255, 221, 85], "label": "Very High"}
+                ]
+            },
+            "intensity_thermal": {
+                "name": "Thermal Intensity",
+                "type": "continuous", 
+                "description": "Thermal-style color scheme for intensity values",
+                "range": [
+                    {"value": 0.0, "color": [0, 0, 0], "label": "Cold"},
+                    {"value": 0.3, "color": [139, 0, 139], "label": "Cool"},
+                    {"value": 0.6, "color": [255, 0, 0], "label": "Warm"},
+                    {"value": 0.8, "color": [255, 255, 0], "label": "Hot"},
+                    {"value": 1.0, "color": [255, 255, 255], "label": "Very Hot"}
+                ]
+            },
+            "classification_professional": {
+                "name": "Professional Classification",
+                "type": "categorical",
+                "description": "Standard colors for point cloud classification",
+                "categories": {
+                    "ground": {"color": [101, 67, 33], "label": "Ground"},
+                    "vegetation": {"color": [34, 139, 34], "label": "Vegetation"},
+                    "building": {"color": [255, 0, 0], "label": "Building"},
+                    "water": {"color": [0, 0, 255], "label": "Water"},
+                    "archaeological": {"color": [255, 215, 0], "label": "Archaeological"},
+                    "unknown": {"color": [128, 128, 128], "label": "Unknown"}
+                }
+            }
+        }
+
+    async def generate_deck_gl_layer_configurations(self, lidar_data: List[Dict[str, any]]) -> Dict[str, any]:
+        """Generate comprehensive deck.gl layer configurations for advanced visualization."""
+        
+        try:
+            layer_configs = {
+                "success": True,
+                "deck_gl_version": "8.9+",
+                "layers": []
+            }
+            
+            # 1. Main PointCloudLayer
+            point_cloud_layer = {
+                "id": "main-lidar-cloud",
+                "type": "PointCloudLayer",
+                "data": lidar_data[:50000],  # Performance limit
+                "pickable": True,
+                "coordinateSystem": "COORDINATE_SYSTEM.LNGLAT",
+                "radiusPixels": 2,
+                "opacity": 0.8,
+                "material": {
+                    "ambient": 0.35,
+                    "diffuse": 0.6,
+                    "shininess": 32,
+                    "specularColor": [30, 30, 30]
+                },
+                "getPosition": {"@@": "getPosition"},
+                "getColor": {"@@": "getArchaeologicalColor"},
+                "getNormal": [0, 0, 1]
+            }
+            layer_configs["layers"].append(point_cloud_layer)
+            
+            # 2. High-significance archaeological sites
+            high_sig_points = [p for p in lidar_data if p.get("archaeological_significance", 0) > 0.8]
+            
+            if high_sig_points:
+                scatterplot_layer = {
+                    "id": "archaeological-highlights",
+                    "type": "ScatterplotLayer",
+                    "data": high_sig_points[:200],
+                    "pickable": True,
+                    "stroked": True,
+                    "filled": True,
+                    "radiusScale": 25,
+                    "radiusMinPixels": 8,
+                    "radiusMaxPixels": 60,
+                    "lineWidthMinPixels": 3,
+                    "getPosition": {"@@": "getPosition"},
+                    "getRadius": {"@@": "getSignificanceRadius"},
+                    "getFillColor": [255, 215, 0, 220],
+                    "getLineColor": [255, 140, 0, 255]
+                }
+                layer_configs["layers"].append(scatterplot_layer)
+            
+            # 3. Density visualization with HexagonLayer
+            hexagon_layer = {
+                "id": "density-hexagons",
+                "type": "HexagonLayer",
+                "data": lidar_data,
+                "pickable": True,
+                "extruded": True,
+                "radius": 300,
+                "elevationScale": 6,
+                "elevationRange": [0, 2000],
+                "coverage": 0.9,
+                "getPosition": {"@@": "getPosition"},
+                "getElevationWeight": {"@@": "getElevationWeight"},
+                "getColorWeight": {"@@": "getArchaeologicalWeight"},
+                "colorRange": [
+                    [255, 255, 178, 120],
+                    [254, 204, 92, 160],
+                    [253, 141, 60, 200],
+                    [240, 59, 32, 240],
+                    [189, 0, 38, 255]
+                ]
+            }
+            layer_configs["layers"].append(hexagon_layer)
+            
+            # 4. Custom functions for layer accessors
+            layer_configs["custom_functions"] = {
+                "getPosition": "d => [d.lng || d.lon, d.lat, d.elevation || 0]",
+                "getArchaeologicalColor": """
+                    d => {
+                        const sig = d.archaeological_significance || 0.5;
+                        if (sig > 0.9) return [255, 215, 0, 255];      // Gold
+                        if (sig > 0.7) return [255, 165, 0, 255];      // Orange
+                        if (sig > 0.5) return [255, 255, 0, 200];      // Yellow
+                        if (sig > 0.3) return [173, 216, 230, 150];    // Light blue
+                        return [128, 128, 128, 100];                   // Gray
+                    }
+                """,
+                "getSignificanceRadius": "d => Math.max(12, (d.archaeological_significance || 0.5) * 60)",
+                "getElevationWeight": "d => Math.max(1, d.elevation || 0)",
+                "getArchaeologicalWeight": "d => (d.archaeological_significance || 0.5) * 10"
+            }
+            
+            # 5. Performance settings
+            layer_configs["performance_settings"] = {
+                "gpu_aggregation": True,
+                "binary_data": True,
+                "instanced_rendering": True,
+                "frustum_culling": True,
+                "lod_enabled": True,
+                "max_objects": 1000000,
+                "pick_radius": 15
+            }
+            
+            logger.info(f"✅ Generated {len(layer_configs['layers'])} deck.gl layer configurations")
+            return layer_configs
+            
+        except Exception as e:
+            logger.error(f"Deck.gl layer configuration failed: {str(e)}")
+            return {"success": False, "error": str(e)}
+
+
 
 # Example usage (for testing or direct invocation)
 async def main_vision_test():

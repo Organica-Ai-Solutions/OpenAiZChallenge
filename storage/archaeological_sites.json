@@ -1,0 +1,3090 @@
+{
+  "sites": [
+    {
+      "id": "-3.4653_-62.2159",
+      "name": "Archaeological Site -3.4653, -62.2159",
+      "coordinates": "-3.4653, -62.2159",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_amazon_fd7091_1751140805362",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:00:05.596973",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        },
+        {
+          "analysis_id": "divine_test_001",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T22:07:57.892395",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 17,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T22:07:59.339802",
+      "divine_blessed": true
+    },
+    {
+      "id": "-13.1631_-72.5450",
+      "name": "Archaeological Site -13.1631, -72.5450",
+      "coordinates": "-13.1631, -72.545",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_andes_67fa34_1751140807978",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:00:08.278666",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 5,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:00:08.585331",
+      "divine_blessed": true
+    },
+    {
+      "id": "-14.7390_-75.1300",
+      "name": "Archaeological Site -14.7390, -75.1300",
+      "coordinates": "-14.739, -75.13",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_nazca_9f60b1_1751140810540",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:00:10.958840",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 11,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:00:11.253012",
+      "divine_blessed": true
+    },
+    {
+      "id": "-8.1116_-79.0291",
+      "name": "Archaeological Site -8.1116, -79.0291",
+      "coordinates": "-8.1116, -79.0291",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_coastal_2e97a0_1751140813092",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:00:13.615398",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 13,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:00:13.917557",
+      "divine_blessed": true
+    },
+    {
+      "id": "-12.0464_-77.0428",
+      "name": "Archaeological Site -12.0464, -77.0428",
+      "coordinates": "-12.0464, -77.0428",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_river_607438_1751140815657",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:00:16.328950",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 12,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:00:16.633816",
+      "divine_blessed": true
+    },
+    {
+      "id": "-16.4090_-71.5375",
+      "name": "Archaeological Site -16.4090, -71.5375",
+      "coordinates": "-16.409, -71.5375",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_highland_02fcc7_1751140818239",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:00:17.730631",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 5,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:00:18.036167",
+      "divine_blessed": true
+    },
+    {
+      "id": "-11.2558_-74.2973",
+      "name": "Archaeological Site -11.2558, -74.2973",
+      "coordinates": "-11.2558, -74.2973",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_trade_97fc05_1751140820826",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:00:20.437015",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 5,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:00:20.791322",
+      "divine_blessed": true
+    },
+    {
+      "id": "-5.1945_-60.7356",
+      "name": "Archaeological Site -5.1945, -60.7356",
+      "coordinates": "-5.1945, -60.7356",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_lowland_e74893_1751140823496",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:00:23.190671",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 14,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:00:23.547904",
+      "divine_blessed": true
+    },
+    {
+      "id": "-15.5000_-70.0000",
+      "name": "Archaeological Site -15.5000, -70.0000",
+      "coordinates": "-15.5, -70.0",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_inca_highland_001_53ceb6_1751140826112",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:00:25.907073",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 13,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:00:26.244233",
+      "divine_blessed": true
+    },
+    {
+      "id": "-2.8000_-60.5000",
+      "name": "Archaeological Site -2.8000, -60.5000",
+      "coordinates": "-2.8, -60.5",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_amazon_riverine_001_aa3e9a_1751140828768",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:00:28.688833",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 5,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:00:29.013043",
+      "divine_blessed": true
+    },
+    {
+      "id": "-13.2000_-72.0000",
+      "name": "Archaeological Site -13.2000, -72.0000",
+      "coordinates": "-13.2, -72.0",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_inca_admin_001_e8ec9f_1751140831340",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:00:31.383371",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 6,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:00:31.757509",
+      "divine_blessed": true
+    },
+    {
+      "id": "-7.5000_-76.8000",
+      "name": "Archaeological Site -7.5000, -76.8000",
+      "coordinates": "-7.5, -76.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_chachapoya_001_ba8111_1751140833953",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:00:34.128417",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 7,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:00:34.464192",
+      "divine_blessed": true
+    },
+    {
+      "id": "-14.0000_-75.7000",
+      "name": "Archaeological Site -14.0000, -75.7000",
+      "coordinates": "-14.0, -75.7",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_nazca_astro_001_beb2dd_1751140836556",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:00:36.866404",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 11,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:00:37.183485",
+      "divine_blessed": true
+    },
+    {
+      "id": "-9.2000_-78.1000",
+      "name": "Archaeological Site -9.2000, -78.1000",
+      "coordinates": "-9.2, -78.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_chavin_oracle_001_f16488_1751140839125",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:00:39.568138",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 18,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:00:39.873713",
+      "divine_blessed": true
+    },
+    {
+      "id": "-4.5000_-62.3000",
+      "name": "Archaeological Site -4.5000, -62.3000",
+      "coordinates": "-4.5, -62.3",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_amazon_forest_001_713d29_1751140841707",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:00:42.261080",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 14,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:00:42.576494",
+      "divine_blessed": true
+    },
+    {
+      "id": "-11.8000_-69.3000",
+      "name": "Archaeological Site -11.8000, -69.3000",
+      "coordinates": "-11.8, -69.3",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_tiwanaku_ceremonial_001_2c4cda_1751140844293",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:00:44.965556",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 17,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:00:45.273604",
+      "divine_blessed": true
+    },
+    {
+      "id": "-8.5000_-74.5000",
+      "name": "Archaeological Site -8.5000, -74.5000",
+      "coordinates": "-8.5, -74.5",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_shipibo_pottery_001_3e0af6_1751140846925",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:00:46.468619",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 12,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:00:46.874391",
+      "divine_blessed": true
+    },
+    {
+      "id": "-16.2000_-68.1000",
+      "name": "Archaeological Site -16.2000, -68.1000",
+      "coordinates": "-16.2, -68.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_tiwanaku_agri_001_a0cd57_1751140849649",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:00:49.252022",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 9,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:00:49.561071",
+      "divine_blessed": true
+    },
+    {
+      "id": "-6.8000_-79.8000",
+      "name": "Archaeological Site -6.8000, -79.8000",
+      "coordinates": "-6.8, -79.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_moche_huaca_001_dd7bd1_1751140852224",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:00:51.932135",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 16,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:00:52.245849",
+      "divine_blessed": true
+    },
+    {
+      "id": "-12.5000_-76.8000",
+      "name": "Archaeological Site -12.5000, -76.8000",
+      "coordinates": "-12.5, -76.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_lima_pyramid_001_7f95cd_1751140854851",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:00:54.713286",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 10,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:00:55.095199",
+      "divine_blessed": true
+    },
+    {
+      "id": "-3.2000_-58.5000",
+      "name": "Archaeological Site -3.2000, -58.5000",
+      "coordinates": "-3.2, -58.5",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_marajoara_mound_001_519d2d_1751140857535",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:00:57.491576",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 15,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:00:57.791852",
+      "divine_blessed": true
+    },
+    {
+      "id": "-10.1000_-67.8000",
+      "name": "Archaeological Site -10.1000, -67.8000",
+      "coordinates": "-10.1, -67.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_casarabe_earthwork_001_0989d8_1751140860150",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:00.238232",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 16,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:01:00.654631",
+      "divine_blessed": true
+    },
+    {
+      "id": "-17.5000_-70.1000",
+      "name": "Archaeological Site -17.5000, -70.1000",
+      "coordinates": "-17.5, -70.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_pukara_sculpture_001_d286ba_1751140862842",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:03.036154",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 7,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:01:03.337307",
+      "divine_blessed": true
+    },
+    {
+      "id": "-5.1000_-81.2000",
+      "name": "Archaeological Site -5.1000, -81.2000",
+      "coordinates": "-5.1, -81.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_tallan_fishery_001_4bc093_1751140865402",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:05.692619",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 10,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:01:06.015533",
+      "divine_blessed": true
+    },
+    {
+      "id": "-15.8000_-69.2000",
+      "name": "Archaeological Site -15.8000, -69.2000",
+      "coordinates": "-15.8, -69.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_chiripa_court_001_a149ab_1751140867975",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:08.395774",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 11,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:01:08.705790",
+      "divine_blessed": true
+    },
+    {
+      "id": "-1.8000_-56.9000",
+      "name": "Archaeological Site -1.8000, -56.9000",
+      "coordinates": "-1.8, -56.9",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_monte_alegre_001_a068a6_1751140870539",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:11.092522",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 8,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:01:11.411330",
+      "divine_blessed": true
+    },
+    {
+      "id": "-18.1000_-67.5000",
+      "name": "Archaeological Site -18.1000, -67.5000",
+      "coordinates": "-18.1, -67.5",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_wankarani_houses_001_22cba4_1751140873133",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:13.772452",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 17,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:01:14.071705",
+      "divine_blessed": true
+    },
+    {
+      "id": "-11.2000_-77.5000",
+      "name": "Archaeological Site -11.2000, -77.5000",
+      "coordinates": "-11.2, -77.5",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_chancay_textile_001_e43dcf_1751140875691",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:15.174339",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 6,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:01:15.511822",
+      "divine_blessed": true
+    },
+    {
+      "id": "-4.8000_-73.2000",
+      "name": "Archaeological Site -4.8000, -73.2000",
+      "coordinates": "-4.8, -73.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_uitoto_maloca_001_111da9_1751140878281",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:17.864515",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 11,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:01:18.179584",
+      "divine_blessed": true
+    },
+    {
+      "id": "-14.8000_-74.2000",
+      "name": "Archaeological Site -14.8000, -74.2000",
+      "coordinates": "-14.8, -74.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_wari_admin_001_747bdb_1751140880837",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:20.534165",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 17,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:01:20.877912",
+      "divine_blessed": true
+    },
+    {
+      "id": "-7.2000_-78.5000",
+      "name": "Archaeological Site -7.2000, -78.5000",
+      "coordinates": "-7.2, -78.5",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_recuay_tomb_001_832373_1751140883423",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:23.235552",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 5,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:01:23.543494",
+      "divine_blessed": true
+    },
+    {
+      "id": "-2.1000_-54.8000",
+      "name": "Archaeological Site -2.1000, -54.8000",
+      "coordinates": "-2.1, -54.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_tapajos_ceramic_001_e7d2fd_1751140886000",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:25.940601",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 11,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:01:26.346618",
+      "divine_blessed": true
+    },
+    {
+      "id": "-19.2000_-65.8000",
+      "name": "Archaeological Site -19.2000, -65.8000",
+      "coordinates": "-19.2, -65.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_yura_hunting_001_eceee0_1751140888679",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:28.729962",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 6,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:01:29.047635",
+      "divine_blessed": true
+    },
+    {
+      "id": "-8.8000_-77.8000",
+      "name": "Archaeological Site -8.8000, -77.8000",
+      "coordinates": "-8.8, -77.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_cupisnique_temple_001_6cf872_1751140891262",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:31.430765",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 18,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:01:31.766140",
+      "divine_blessed": true
+    },
+    {
+      "id": "-16.8000_-71.2000",
+      "name": "Archaeological Site -16.8000, -71.2000",
+      "coordinates": "-16.8, -71.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_collagua_terraces_001_f8b9fd_1751140893880",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:34.181218",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 5,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:01:34.530880",
+      "divine_blessed": true
+    },
+    {
+      "id": "-0.8000_-52.3000",
+      "name": "Archaeological Site -0.8000, -52.3000",
+      "coordinates": "-0.8, -52.3",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_maraca_cemetery_001_bd92cc_1751140896518",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:36.954018",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 15,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:01:37.266804",
+      "divine_blessed": true
+    },
+    {
+      "id": "-13.8000_-67.2000",
+      "name": "Archaeological Site -13.8000, -67.2000",
+      "coordinates": "-13.8, -67.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_iskanwaya_fortress_001_df60cb_1751140899096",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:39.650742",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 11,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:01:39.971384",
+      "divine_blessed": true
+    },
+    {
+      "id": "-6.2000_-76.5000",
+      "name": "Archaeological Site -6.2000, -76.5000",
+      "coordinates": "-6.2, -76.5",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_jivaro_ritual_001_aada11_1751140901679",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:42.338886",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 10,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:01:42.637589",
+      "divine_blessed": true
+    },
+    {
+      "id": "-20.1000_-68.8000",
+      "name": "Archaeological Site -20.1000, -68.8000",
+      "coordinates": "-20.1, -68.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_atacameno_oasis_001_b05504_1751140904247",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:43.732787",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 16,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:01:44.069529",
+      "divine_blessed": true
+    },
+    {
+      "id": "-3.8000_-61.2000",
+      "name": "Archaeological Site -3.8000, -61.2000",
+      "coordinates": "-3.8, -61.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_yanomami_village_001_e92c68_1751140906855",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:46.445742",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 12,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:01:46.761410",
+      "divine_blessed": true
+    },
+    {
+      "id": "-12.8000_-74.8000",
+      "name": "Archaeological Site -12.8000, -74.8000",
+      "coordinates": "-12.8, -74.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_ychsma_pyramid_001_2fa055_1751140909416",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:49.149346",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 15,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:01:49.496186",
+      "divine_blessed": true
+    },
+    {
+      "id": "-9.8000_-84.2000",
+      "name": "Archaeological Site -9.8000, -84.2000",
+      "coordinates": "-9.8, -84.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_shipibo_kiln_001_b8149a_1751140912046",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:51.866920",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        },
+        {
+          "analysis_id": "vision_test_001",
+          "type": "vision_analysis",
+          "confidence": 0.87,
+          "timestamp": "2025-06-28T22:07:59.762260",
+          "storage_reason": "High confidence: 0.87"
+        }
+      ],
+      "features_detected": 12,
+      "cultural_significance": "High",
+      "last_updated": "2025-06-28T22:08:01.708405",
+      "divine_blessed": true
+    },
+    {
+      "id": "-15.2000_-72.8000",
+      "name": "Archaeological Site -15.2000, -72.8000",
+      "coordinates": "-15.2, -72.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_chuquibamba_petro_001_739648_1751140914614",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:54.555972",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 17,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:01:54.890156",
+      "divine_blessed": true
+    },
+    {
+      "id": "-5.5000_-55.1000",
+      "name": "Archaeological Site -5.5000, -55.1000",
+      "coordinates": "-5.5, -55.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_kayapo_village_001_d17f9e_1751140917216",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:57.271855",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 8,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:01:57.584029",
+      "divine_blessed": true
+    },
+    {
+      "id": "-17.8000_-63.2000",
+      "name": "Archaeological Site -17.8000, -63.2000",
+      "coordinates": "-17.8, -63.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_guarani_mission_001_e2c64a_1751140919793",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:01:59.980298",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 11,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:02:00.383912",
+      "divine_blessed": true
+    },
+    {
+      "id": "-10.5000_-75.2000",
+      "name": "Archaeological Site -10.5000, -75.2000",
+      "coordinates": "-10.5, -75.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_huanca_circle_001_7c6075_1751140922457",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:02:02.770103",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 7,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:02:03.100551",
+      "divine_blessed": true
+    },
+    {
+      "id": "-1.2000_-48.8000",
+      "name": "Archaeological Site -1.2000, -48.8000",
+      "coordinates": "-1.2, -48.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_marajoara_teso_001_e9012e_1751140925062",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:02:05.487906",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 18,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:02:05.810953",
+      "divine_blessed": true
+    },
+    {
+      "id": "-18.8000_-69.5000",
+      "name": "Archaeological Site -18.8000, -69.5000",
+      "coordinates": "-18.8, -69.5",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_chinchorro_mummy_001_bf90af_1751140927687",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:02:08.218338",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 14,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:02:08.532154",
+      "divine_blessed": true
+    },
+    {
+      "id": "-4.2000_-69.8000",
+      "name": "Archaeological Site -4.2000, -69.8000",
+      "coordinates": "-4.2, -69.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_tikuna_stilt_001_6dc1b7_1751140930256",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:02:10.913770",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 13,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:02:11.246993",
+      "divine_blessed": true
+    },
+    {
+      "id": "-14.5000_-75.9000",
+      "name": "Archaeological Site -14.5000, -75.9000",
+      "coordinates": "-14.5, -75.9",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_paracas_textile_001_26e0f8_1751140932843",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:02:12.328153",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 7,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:02:12.651507",
+      "divine_blessed": true
+    },
+    {
+      "id": "-8.1000_-79.0000",
+      "name": "Archaeological Site -8.1000, -79.0000",
+      "coordinates": "-8.1, -79.0",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_chimu_irrigation_001_e01e02_1751140935450",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:02:15.044799",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 11,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:02:15.392380",
+      "divine_blessed": true
+    },
+    {
+      "id": "-16.5000_-68.2000",
+      "name": "Archaeological Site -16.5000, -68.2000",
+      "coordinates": "-16.5, -68.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_lupaca_fields_001_81000b_1751140938085",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:02:17.808841",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 10,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:02:18.208070",
+      "divine_blessed": true
+    },
+    {
+      "id": "-2.5000_-57.8000",
+      "name": "Archaeological Site -2.5000, -57.8000",
+      "coordinates": "-2.5, -57.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_munduruku_warrior_001_d22b16_1751140940763",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:02:20.585773",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 7,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:02:20.906422",
+      "divine_blessed": true
+    },
+    {
+      "id": "-11.8000_-76.2000",
+      "name": "Archaeological Site -11.8000, -76.2000",
+      "coordinates": "-11.8, -76.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_huarochiri_shrine_001_776b57_1751140943337",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:02:23.279712",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 10,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:02:23.622935",
+      "divine_blessed": true
+    },
+    {
+      "id": "-7.8000_-72.1000",
+      "name": "Archaeological Site -7.8000, -72.1000",
+      "coordinates": "-7.8, -72.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_chachapoya_fortress_001_3ba29e_1751140945951",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:02:26.005763",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 5,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:02:26.314553",
+      "divine_blessed": true
+    },
+    {
+      "id": "-13.5000_-71.9000",
+      "name": "Archaeological Site -13.5000, -71.9000",
+      "coordinates": "-13.5, -71.9",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_inca_tambo_001_34ac8c_1751140948536",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:02:28.719031",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 5,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:02:29.049275",
+      "divine_blessed": true
+    },
+    {
+      "id": "-5.8000_-76.2000",
+      "name": "Archaeological Site -5.8000, -76.2000",
+      "coordinates": "-5.8, -76.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_awajun_longhouse_001_2faa36_1751140951132",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:02:31.431438",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 5,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:02:31.756364",
+      "divine_blessed": true
+    },
+    {
+      "id": "-19.5000_-65.2000",
+      "name": "Archaeological Site -19.5000, -65.2000",
+      "coordinates": "-19.5, -65.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_chiriguano_village_001_784685_1751140953754",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:02:34.180673",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 13,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:02:34.594079",
+      "divine_blessed": true
+    },
+    {
+      "id": "-3.1000_-59.8000",
+      "name": "Archaeological Site -3.1000, -59.8000",
+      "coordinates": "-3.1, -59.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_waimiri_plaza_001_9c795c_1751140956457",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:02:37.022233",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 8,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:02:37.352353",
+      "divine_blessed": true
+    },
+    {
+      "id": "-15.1000_-70.8000",
+      "name": "Archaeological Site -15.1000, -70.8000",
+      "coordinates": "-15.1, -70.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_colla_chullpa_001_953b4c_1751140959084",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:02:39.734963",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 10,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:02:40.046044",
+      "divine_blessed": true
+    },
+    {
+      "id": "-6.5000_-78.9000",
+      "name": "Archaeological Site -6.5000, -78.9000",
+      "coordinates": "-6.5, -78.9",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_mochica_workshop_001_8bda8a_1751140961665",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:02:41.147735",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 11,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:02:41.471108",
+      "divine_blessed": true
+    },
+    {
+      "id": "-12.1000_-68.9000",
+      "name": "Archaeological Site -12.1000, -68.9000",
+      "coordinates": "-12.1, -68.9",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_aymara_terraces_001_1dc9bf_1751140964285",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:02:43.874390",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 13,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:02:44.192427",
+      "divine_blessed": true
+    },
+    {
+      "id": "-9.5000_-77.2000",
+      "name": "Archaeological Site -9.5000, -77.2000",
+      "coordinates": "-9.5, -77.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_huaylas_sculpture_001_eb92af_1751140966861",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:02:46.568379",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 13,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:02:46.931372",
+      "divine_blessed": true
+    },
+    {
+      "id": "-4.7000_-74.1000",
+      "name": "Archaeological Site -4.7000, -74.1000",
+      "coordinates": "-4.7, -74.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_huitoto_coca_001_32fc3a_1751140969487",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:02:49.343429",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 19,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:02:49.674829",
+      "divine_blessed": true
+    },
+    {
+      "id": "-17.2000_-66.8000",
+      "name": "Archaeological Site -17.2000, -66.8000",
+      "coordinates": "-17.2, -66.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_yampara_textile_001_7b48eb_1751140972124",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:02:52.065098",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 8,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:02:52.399974",
+      "divine_blessed": true
+    },
+    {
+      "id": "-1.5000_-53.2000",
+      "name": "Archaeological Site -1.5000, -53.2000",
+      "coordinates": "-1.5, -53.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_aparai_weir_001_488235_1751140974719",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:02:54.770313",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 5,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:02:55.083717",
+      "divine_blessed": true
+    },
+    {
+      "id": "-14.2000_-68.5000",
+      "name": "Archaeological Site -14.2000, -68.5000",
+      "coordinates": "-14.2, -68.5",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_pacajes_caravan_001_e9f6d6_1751140977278",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:02:57.459012",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 19,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:02:57.797025",
+      "divine_blessed": true
+    },
+    {
+      "id": "-8.2000_-73.8000",
+      "name": "Archaeological Site -8.2000, -73.8000",
+      "coordinates": "-8.2, -73.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_cashibo_palm_001_a37555_1751140979892",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:03:00.183472",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 19,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:03:00.534887",
+      "divine_blessed": true
+    },
+    {
+      "id": "-16.8000_-64.2000",
+      "name": "Archaeological Site -16.8000, -64.2000",
+      "coordinates": "-16.8, -64.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_guarayo_mission_001_21933b_1751140982504",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:03:02.919393",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 19,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:03:03.257801",
+      "divine_blessed": true
+    },
+    {
+      "id": "-5.2000_-80.1000",
+      "name": "Archaeological Site -5.2000, -80.1000",
+      "coordinates": "-5.2, -80.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_tallan_shell_001_249f29_1751140985095",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:03:05.658115",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 11,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:03:05.989927",
+      "divine_blessed": true
+    },
+    {
+      "id": "-10.8000_-75.8000",
+      "name": "Archaeological Site -10.8000, -75.8000",
+      "coordinates": "-10.8, -75.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_yauyos_shrine_001_3a3dd5_1751140987721",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:03:08.378029",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 9,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:03:08.711436",
+      "divine_blessed": true
+    },
+    {
+      "id": "-13.8000_-72.1000",
+      "name": "Archaeological Site -13.8000, -72.1000",
+      "coordinates": "-13.8, -72.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_qanchi_terrace_001_ebb986_1751140990315",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:03:09.795713",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 18,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:03:10.127636",
+      "divine_blessed": true
+    },
+    {
+      "id": "-18.5000_-67.8000",
+      "name": "Archaeological Site -18.5000, -67.8000",
+      "coordinates": "-18.5, -67.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_quechua_platform_001_30624e_1751140992919",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:03:12.515220",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 7,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:03:12.827282",
+      "divine_blessed": true
+    },
+    {
+      "id": "-2.8000_-56.5000",
+      "name": "Archaeological Site -2.8000, -56.5000",
+      "coordinates": "-2.8, -56.5",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_wayana_maloca_001_c167a3_1751140995501",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:03:15.217120",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 17,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:03:15.599295",
+      "divine_blessed": true
+    },
+    {
+      "id": "-6.8000_-75.2000",
+      "name": "Archaeological Site -6.8000, -75.2000",
+      "coordinates": "-6.8, -75.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_shipibo_ceramic_002_5bea6f_1751140998183",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:03:18.032183",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 17,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:03:18.436547",
+      "divine_blessed": true
+    },
+    {
+      "id": "-11.5000_-69.8000",
+      "name": "Archaeological Site -11.5000, -69.8000",
+      "coordinates": "-11.5, -69.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_machiguenga_garden_001_d04cd2_1751141000885",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:03:20.843948",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 19,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:03:21.234177",
+      "divine_blessed": true
+    },
+    {
+      "id": "-15.8000_-73.2000",
+      "name": "Archaeological Site -15.8000, -73.2000",
+      "coordinates": "-15.8, -73.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_nasca_aqueduct_001_ba2e4f_1751141003546",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:03:23.622373",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 12,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:03:23.955633",
+      "divine_blessed": true
+    },
+    {
+      "id": "-7.1000_-77.5000",
+      "name": "Archaeological Site -7.1000, -77.5000",
+      "coordinates": "-7.1, -77.5",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_moche_platform_001_ed371a_1751141006169",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:03:26.347585",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 19,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:03:26.713225",
+      "divine_blessed": true
+    },
+    {
+      "id": "-16.2000_-71.8000",
+      "name": "Archaeological Site -16.2000, -71.8000",
+      "coordinates": "-16.2, -71.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_collagua_burial_001_378668_1751141008772",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:03:29.071563",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 19,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:03:29.421829",
+      "divine_blessed": true
+    },
+    {
+      "id": "-4.1000_-70.5000",
+      "name": "Archaeological Site -4.1000, -70.5000",
+      "coordinates": "-4.1, -70.5",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_bora_ceremonial_001_a47b9f_1751141011376",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:03:31.801171",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 11,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:03:32.145103",
+      "divine_blessed": true
+    },
+    {
+      "id": "-3.5000_-64.2000",
+      "name": "Archaeological Site -3.5000, -64.2000",
+      "coordinates": "-3.5, -64.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_tukano_longhouse_001_3d7a29_1751141013988",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:03:34.526384",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 7,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:03:34.883432",
+      "divine_blessed": true
+    },
+    {
+      "id": "-12.8000_-70.1000",
+      "name": "Archaeological Site -12.8000, -70.1000",
+      "coordinates": "-12.8, -70.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_inca_admin_002_7e32ca_1751141016650",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:03:37.328701",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 19,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:03:37.664997",
+      "divine_blessed": true
+    },
+    {
+      "id": "-8.8000_-74.5000",
+      "name": "Archaeological Site -8.8000, -74.5000",
+      "coordinates": "-8.8, -74.5",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_chavin_temple_001_2940ae_1751141019283",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:03:38.800765",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 12,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:03:39.153833",
+      "divine_blessed": true
+    },
+    {
+      "id": "-19.8000_-68.2000",
+      "name": "Archaeological Site -19.8000, -68.2000",
+      "coordinates": "-19.8, -68.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_atacameno_fortress_001_ddc7ea_1751141021928",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:03:41.525852",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 14,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:03:41.840557",
+      "divine_blessed": true
+    },
+    {
+      "id": "-1.8000_-55.1000",
+      "name": "Archaeological Site -1.8000, -55.1000",
+      "coordinates": "-1.8, -55.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_waiwai_village_001_bb8590_1751141024499",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:03:44.226038",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 5,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:03:44.570009",
+      "divine_blessed": true
+    },
+    {
+      "id": "-14.5000_-67.8000",
+      "name": "Archaeological Site -14.5000, -67.8000",
+      "coordinates": "-14.5, -67.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_lupaca_fields_002_109421_1751141027130",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:03:46.952056",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 8,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:03:47.260072",
+      "divine_blessed": true
+    },
+    {
+      "id": "-6.2000_-79.5000",
+      "name": "Archaeological Site -6.2000, -79.5000",
+      "coordinates": "-6.2, -79.5",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_chimu_workshop_001_a03ca2_1751141029710",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:03:49.649502",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 15,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:03:49.985089",
+      "divine_blessed": true
+    },
+    {
+      "id": "-17.5000_-65.8000",
+      "name": "Archaeological Site -17.5000, -65.8000",
+      "coordinates": "-17.5, -65.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_chane_village_001_b0b44d_1751141032294",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:03:52.373918",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 7,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:03:52.696531",
+      "divine_blessed": true
+    },
+    {
+      "id": "-9.1000_-76.3000",
+      "name": "Archaeological Site -9.1000, -76.3000",
+      "coordinates": "-9.1, -76.3",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_huanca_fortress_001_3e3756_1751141034898",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:03:55.076793",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 8,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:03:55.423451",
+      "divine_blessed": true
+    },
+    {
+      "id": "-3.7000_-63.1000",
+      "name": "Archaeological Site -3.7000, -63.1000",
+      "coordinates": "-3.7, -63.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_mura_settlement_001_3e6a33_1751141037505",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:03:57.827312",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 9,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:03:58.161951",
+      "divine_blessed": true
+    },
+    {
+      "id": "-15.9000_-69.7000",
+      "name": "Archaeological Site -15.9000, -69.7000",
+      "coordinates": "-15.9, -69.7",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_inca_estate_001_7807a8_1751141040137",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:04:00.610884",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 7,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:04:00.978906",
+      "divine_blessed": true
+    },
+    {
+      "id": "-7.9000_-78.2000",
+      "name": "Archaeological Site -7.9000, -78.2000",
+      "coordinates": "-7.9, -78.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_salinar_canal_001_ee153a_1751141042856",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:04:03.410452",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 11,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:04:03.739427",
+      "divine_blessed": true
+    },
+    {
+      "id": "-11.3000_-74.1000",
+      "name": "Archaeological Site -11.3000, -74.1000",
+      "coordinates": "-11.3, -74.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_ichma_ceremonial_001_5008f1_1751141045461",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:04:06.153661",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 14,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:04:06.476831",
+      "divine_blessed": true
+    },
+    {
+      "id": "-4.9000_-67.2000",
+      "name": "Archaeological Site -4.9000, -67.2000",
+      "coordinates": "-4.9, -67.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_bare_village_001_a0690b_1751141048069",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:04:07.595335",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 12,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:04:07.911277",
+      "divine_blessed": true
+    },
+    {
+      "id": "-18.2000_-66.1000",
+      "name": "Archaeological Site -18.2000, -66.1000",
+      "coordinates": "-18.2, -66.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_chichas_mining_001_c5f24b_1751141050684",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:04:10.293336",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 9,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:04:10.608475",
+      "divine_blessed": true
+    },
+    {
+      "id": "-2.3000_-59.1000",
+      "name": "Archaeological Site -2.3000, -59.1000",
+      "coordinates": "-2.3, -59.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_wapishana_village_001_9b5530_1751141053269",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:04:12.985443",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 18,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:04:13.303030",
+      "divine_blessed": true
+    },
+    {
+      "id": "-13.1000_-71.2000",
+      "name": "Archaeological Site -13.1000, -71.2000",
+      "coordinates": "-13.1, -71.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_inca_bridge_001_32469d_1751141055857",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:04:15.719626",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 5,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:04:16.039154",
+      "divine_blessed": true
+    },
+    {
+      "id": "-8.7000_-75.8000",
+      "name": "Archaeological Site -8.7000, -75.8000",
+      "coordinates": "-8.7, -75.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_chavin_subsidiary_001_27bf56_1751141058486",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:04:18.452134",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 14,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:04:18.852671",
+      "divine_blessed": true
+    },
+    {
+      "id": "-16.1000_-67.9000",
+      "name": "Archaeological Site -16.1000, -67.9000",
+      "coordinates": "-16.1, -67.9",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_pacajes_burial_001_29c87f_1751141061173",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:04:21.291193",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 16,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:04:21.714860",
+      "divine_blessed": true
+    },
+    {
+      "id": "-12.7000_-69.5000",
+      "name": "Archaeological Site -12.7000, -69.5000",
+      "coordinates": "-12.7, -69.5",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_inca_experiment_001_689bc2_1751141063897",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:04:24.110660",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 11,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:04:24.536400",
+      "divine_blessed": true
+    },
+    {
+      "id": "-5.8000_-78.1000",
+      "name": "Archaeological Site -5.8000, -78.1000",
+      "coordinates": "-5.8, -78.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_achuar_longhouse_001_93a016_1751141066632",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:04:26.965595",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 19,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:04:27.287593",
+      "divine_blessed": true
+    },
+    {
+      "id": "-9.8000_-77.9000",
+      "name": "Archaeological Site -9.8000, -77.9000",
+      "coordinates": "-9.8, -77.9",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_moche_workshop_002_72f7ff_1751141069223",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:04:29.659476",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 13,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:04:30.013769",
+      "divine_blessed": true
+    },
+    {
+      "id": "-14.9000_-68.8000",
+      "name": "Archaeological Site -14.9000, -68.8000",
+      "coordinates": "-14.9, -68.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_tiwanaku_subsidiary_001_c6a3ae_1751141071842",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:04:32.400251",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 19,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:04:32.758274",
+      "divine_blessed": true
+    },
+    {
+      "id": "-6.1000_-74.7000",
+      "name": "Archaeological Site -6.1000, -74.7000",
+      "coordinates": "-6.1, -74.7",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_cocama_fishing_001_427b47_1751141074469",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:04:35.149511",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 18,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:04:35.494806",
+      "divine_blessed": true
+    },
+    {
+      "id": "-17.1000_-64.8000",
+      "name": "Archaeological Site -17.1000, -64.8000",
+      "coordinates": "-17.1, -64.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_guarani_fortified_001_c16db3_1751141077073",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:04:36.595638",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 14,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:04:36.935310",
+      "divine_blessed": true
+    },
+    {
+      "id": "-3.4000_-61.8000",
+      "name": "Archaeological Site -3.4000, -61.8000",
+      "coordinates": "-3.4, -61.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_satere_village_001_09bcef_1751141079697",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:04:39.315903",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 14,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:04:39.683177",
+      "divine_blessed": true
+    },
+    {
+      "id": "-10.2000_-76.1000",
+      "name": "Archaeological Site -10.2000, -76.1000",
+      "coordinates": "-10.2, -76.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_chancay_fishing_001_2eb31e_1751141082337",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:04:42.066228",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 8,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:04:42.427094",
+      "divine_blessed": true
+    },
+    {
+      "id": "-15.3000_-71.1000",
+      "name": "Archaeological Site -15.3000, -71.1000",
+      "coordinates": "-15.3, -71.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_inca_observatory_001_b9808e_1751141084988",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:04:44.885486",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 5,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:04:45.205336",
+      "divine_blessed": true
+    },
+    {
+      "id": "-13.9000_-68.1000",
+      "name": "Archaeological Site -13.9000, -68.1000",
+      "coordinates": "-13.9, -68.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_lupaca_caravan_001_1fd8d1_1751141087620",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:04:47.591835",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 12,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:04:47.949809",
+      "divine_blessed": true
+    },
+    {
+      "id": "-8.3000_-76.9000",
+      "name": "Archaeological Site -8.3000, -76.9000",
+      "coordinates": "-8.3, -76.9",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_cupisnique_ceremonial_001_fcd1e4_1751141090253",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:04:50.345917",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 8,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:04:50.700092",
+      "divine_blessed": true
+    },
+    {
+      "id": "-5.3000_-72.8000",
+      "name": "Archaeological Site -5.3000, -72.8000",
+      "coordinates": "-5.3, -72.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_witoto_maloca_001_72e3cf_1751141092890",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:04:53.093704",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 8,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:04:53.420826",
+      "divine_blessed": true
+    },
+    {
+      "id": "-2.7000_-58.3000",
+      "name": "Archaeological Site -2.7000, -58.3000",
+      "coordinates": "-2.7, -58.3",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_macuxi_village_001_55f1cd_1751141095507",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:04:55.862310",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 15,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:04:56.227658",
+      "divine_blessed": true
+    },
+    {
+      "id": "-18.9000_-67.2000",
+      "name": "Archaeological Site -18.9000, -67.2000",
+      "coordinates": "-18.9, -67.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_quechua_valley_001_19817e_1751141098156",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:04:58.633096",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 6,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:04:58.988025",
+      "divine_blessed": true
+    },
+    {
+      "id": "-11.9000_-75.3000",
+      "name": "Archaeological Site -11.9000, -75.3000",
+      "coordinates": "-11.9, -75.3",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_huarochiri_complex_001_e6a02f_1751141100779",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:05:01.360441",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 15,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:05:01.680683",
+      "divine_blessed": true
+    },
+    {
+      "id": "-7.4000_-79.1000",
+      "name": "Archaeological Site -7.4000, -79.1000",
+      "coordinates": "-7.4, -79.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_chimu_admin_001_7056a5_1751141103359",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:05:04.057202",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 10,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:05:04.386508",
+      "divine_blessed": true
+    },
+    {
+      "id": "-14.1000_-69.9000",
+      "name": "Archaeological Site -14.1000, -69.9000",
+      "coordinates": "-14.1, -69.9",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_inca_terraces_001_accac2_1751141105957",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:05:05.503558",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 19,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:05:05.891818",
+      "divine_blessed": true
+    },
+    {
+      "id": "-4.6000_-68.9000",
+      "name": "Archaeological Site -4.6000, -68.9000",
+      "coordinates": "-4.6, -68.9",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_tikuna_ceremonial_001_78ef2c_1751141108629",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:05:08.260205",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 19,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:05:08.594905",
+      "divine_blessed": true
+    },
+    {
+      "id": "-16.7000_-66.3000",
+      "name": "Archaeological Site -16.7000, -66.3000",
+      "coordinates": "-16.7, -66.3",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_yampara_workshop_001_f3cdf8_1751141111220",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:05:10.973052",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 15,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:05:11.299397",
+      "divine_blessed": true
+    },
+    {
+      "id": "-1.9000_-54.7000",
+      "name": "Archaeological Site -1.9000, -54.7000",
+      "coordinates": "-1.9, -54.7",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_aparai_fishing_001_24ecce_1751141113805",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:05:13.672074",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 14,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:05:14.001076",
+      "divine_blessed": true
+    },
+    {
+      "id": "-12.3000_-77.1000",
+      "name": "Archaeological Site -12.3000, -77.1000",
+      "coordinates": "-12.3, -77.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_pachacamac_pilgrimage_001_4aca94_1751141116392",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:05:16.361035",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 17,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:05:16.726169",
+      "divine_blessed": true
+    },
+    {
+      "id": "-8.9000_-73.2000",
+      "name": "Archaeological Site -8.9000, -73.2000",
+      "coordinates": "-8.9, -73.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_shipibo_village_001_59601f_1751141119062",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:05:19.176259",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 7,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:05:19.605114",
+      "divine_blessed": true
+    },
+    {
+      "id": "-15.7000_-72.3000",
+      "name": "Archaeological Site -15.7000, -72.3000",
+      "coordinates": "-15.7, -72.3",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_collagua_cave_001_0fe564_1751141121776",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:05:21.999644",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 13,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:05:22.324637",
+      "divine_blessed": true
+    },
+    {
+      "id": "-6.7000_-77.8000",
+      "name": "Archaeological Site -6.7000, -77.8000",
+      "coordinates": "-6.7, -77.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_moche_sacrifice_001_06c4a4_1751141124364",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:05:24.706066",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 17,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:05:25.026018",
+      "divine_blessed": true
+    },
+    {
+      "id": "-13.3000_-70.7000",
+      "name": "Archaeological Site -13.3000, -70.7000",
+      "coordinates": "-13.3, -70.7",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_inca_residence_001_2dd9de_1751141126966",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:05:27.413034",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 19,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:05:27.740588",
+      "divine_blessed": true
+    },
+    {
+      "id": "-9.7000_-75.1000",
+      "name": "Archaeological Site -9.7000, -75.1000",
+      "coordinates": "-9.7, -75.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_chavin_oracle_002_4d53b9_1751141129545",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:05:30.110710",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 7,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:05:30.426015",
+      "divine_blessed": true
+    },
+    {
+      "id": "-17.9000_-68.7000",
+      "name": "Archaeological Site -17.9000, -68.7000",
+      "coordinates": "-17.9, -68.7",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_atacameno_towers_001_02025d_1751141132138",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:05:32.828220",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 18,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:05:33.181280",
+      "divine_blessed": true
+    },
+    {
+      "id": "-3.9000_-65.4000",
+      "name": "Archaeological Site -3.9000, -65.4000",
+      "coordinates": "-3.9, -65.4",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_tukano_forest_001_a12d25_1751141134755",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:05:34.297778",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 17,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:05:34.632857",
+      "divine_blessed": true
+    },
+    {
+      "id": "-11.1000_-78.2000",
+      "name": "Archaeological Site -11.1000, -78.2000",
+      "coordinates": "-11.1, -78.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_chimu_canal_001_a83671_1751141137386",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:05:37.029954",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 11,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:05:37.366720",
+      "divine_blessed": true
+    },
+    {
+      "id": "-14.7000_-73.1000",
+      "name": "Archaeological Site -14.7000, -73.1000",
+      "coordinates": "-14.7, -73.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_nasca_ceremonial_001_553366_1751141139987",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:05:39.726201",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 16,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:05:40.129872",
+      "divine_blessed": true
+    },
+    {
+      "id": "-7.6000_-74.9000",
+      "name": "Archaeological Site -7.6000, -74.9000",
+      "coordinates": "-7.6, -74.9",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_shipibo_production_001_597c51_1751141142649",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:05:42.516491",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 10,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:05:42.843035",
+      "divine_blessed": true
+    },
+    {
+      "id": "-16.3000_-69.1000",
+      "name": "Archaeological Site -16.3000, -69.1000",
+      "coordinates": "-16.3, -69.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_tiwanaku_drainage_001_ee2bb7_1751141145265",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:05:45.241938",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 17,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:05:45.610758",
+      "divine_blessed": true
+    },
+    {
+      "id": "-5.7000_-79.3000",
+      "name": "Archaeological Site -5.7000, -79.3000",
+      "coordinates": "-5.7, -79.3",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_tallan_maritime_001_b1aa9c_1751141147916",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:05:48.018135",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 15,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:05:48.357581",
+      "divine_blessed": true
+    },
+    {
+      "id": "-12.9000_-71.8000",
+      "name": "Archaeological Site -12.9000, -71.8000",
+      "coordinates": "-12.9, -71.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_inca_records_001_28c2d6_1751141150546",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:05:50.765580",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 18,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:05:51.127500",
+      "divine_blessed": true
+    },
+    {
+      "id": "-8.1000_-76.1000",
+      "name": "Archaeological Site -8.1000, -76.1000",
+      "coordinates": "-8.1, -76.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_cupisnique_feline_001_9a0a51_1751141153173",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:05:53.504561",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 15,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:05:53.833805",
+      "divine_blessed": true
+    },
+    {
+      "id": "-15.5000_-68.3000",
+      "name": "Archaeological Site -15.5000, -68.3000",
+      "coordinates": "-15.5, -68.3",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_lupaca_textiles_001_443368_1751141155780",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:05:56.236970",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 18,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:05:56.594136",
+      "divine_blessed": true
+    },
+    {
+      "id": "-4.3000_-71.7000",
+      "name": "Archaeological Site -4.3000, -71.7000",
+      "coordinates": "-4.3, -71.7",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_bora_ritual_001_07a63f_1751141158394",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:05:58.961443",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 12,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:05:59.283111",
+      "divine_blessed": true
+    },
+    {
+      "id": "-18.1000_-65.9000",
+      "name": "Archaeological Site -18.1000, -65.9000",
+      "coordinates": "-18.1, -65.9",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_chiriguano_storage_001_602b4c_1751141160974",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:06:01.663406",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 12,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:06:02.027641",
+      "divine_blessed": true
+    },
+    {
+      "id": "-2.1000_-56.2000",
+      "name": "Archaeological Site -2.1000, -56.2000",
+      "coordinates": "-2.1, -56.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_wayana_cooperation_001_3c6289_1751141163612",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:06:03.148728",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 10,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:06:03.515703",
+      "divine_blessed": true
+    },
+    {
+      "id": "-10.7000_-77.3000",
+      "name": "Archaeological Site -10.7000, -77.3000",
+      "coordinates": "-10.7, -77.3",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_chancay_loom_001_32dfab_1751141166320",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:06:06.009618",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 7,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:06:06.408684",
+      "divine_blessed": true
+    },
+    {
+      "id": "-13.7000_-72.9000",
+      "name": "Archaeological Site -13.7000, -72.9000",
+      "coordinates": "-13.7, -72.9",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_inca_crop_001_cdc948_1751141169044",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:06:08.807468",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 14,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:06:09.124602",
+      "divine_blessed": true
+    },
+    {
+      "id": "-6.9000_-78.1000",
+      "name": "Archaeological Site -6.9000, -78.1000",
+      "coordinates": "-6.9, -78.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_moche_metal_001_8bc574_1751141171630",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:06:11.544252",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 8,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:06:11.859911",
+      "divine_blessed": true
+    },
+    {
+      "id": "-14.3000_-70.2000",
+      "name": "Archaeological Site -14.3000, -70.2000",
+      "coordinates": "-14.3, -70.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_tiwanaku_astro_001_aed83d_1751141174348",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:06:14.382146",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 7,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:06:14.745078",
+      "divine_blessed": true
+    },
+    {
+      "id": "-7.7000_-73.7000",
+      "name": "Archaeological Site -7.7000, -73.7000",
+      "coordinates": "-7.7, -73.7",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_shipibo_design_001_842389_1751141176999",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:06:17.143480",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 8,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:06:17.460929",
+      "divine_blessed": true
+    },
+    {
+      "id": "-16.9000_-67.1000",
+      "name": "Archaeological Site -16.9000, -67.1000",
+      "coordinates": "-16.9, -67.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_pacajes_llama_001_5c648a_1751141179618",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:06:19.893017",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 9,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:06:20.294964",
+      "divine_blessed": true
+    },
+    {
+      "id": "-3.6000_-62.7000",
+      "name": "Archaeological Site -3.6000, -62.7000",
+      "coordinates": "-3.6, -62.7",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_waimiri_defense_001_25fd38_1751141182358",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:06:22.749902",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 10,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:06:23.078519",
+      "divine_blessed": true
+    },
+    {
+      "id": "-11.7000_-76.9000",
+      "name": "Archaeological Site -11.7000, -76.9000",
+      "coordinates": "-11.7, -76.9",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_huarochiri_circles_001_f19cf0_1751141184968",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:06:25.473641",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 14,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:06:25.857677",
+      "divine_blessed": true
+    },
+    {
+      "id": "-8.5000_-77.1000",
+      "name": "Archaeological Site -8.5000, -77.1000",
+      "coordinates": "-8.5, -77.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_chavin_carved_001_796fb6_1751141187629",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:06:28.227393",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 5,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:06:28.557079",
+      "divine_blessed": true
+    },
+    {
+      "id": "-8.5000_-63.2000",
+      "name": "Archaeological Site -8.5000, -63.2000",
+      "coordinates": "-8.5, -63.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_brazil_upper_amazon_001_1e6db8_1751141190219",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:06:30.936513",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 5,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:06:30.002819",
+      "divine_blessed": true
+    },
+    {
+      "id": "-15.1000_-71.7000",
+      "name": "Archaeological Site -15.1000, -71.7000",
+      "coordinates": "-15.1, -71.7",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_inca_gardens_001_48fc92_1751141192834",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:06:32.376523",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 9,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:06:32.699710",
+      "divine_blessed": true
+    },
+    {
+      "id": "-15.2000_-59.8000",
+      "name": "Archaeological Site -15.2000, -59.8000",
+      "coordinates": "-15.2, -59.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_brazil_bolivia_border_001_9e8e47_1751141195413",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:06:35.069790",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 18,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:06:35.413766",
+      "divine_blessed": true
+    },
+    {
+      "id": "-12.8000_-56.1000",
+      "name": "Archaeological Site -12.8000, -56.1000",
+      "coordinates": "-12.8, -56.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_brazil_mato_grosso_001_533fda_1751141198009",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:06:37.778899",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 18,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:06:38.099780",
+      "divine_blessed": true
+    },
+    {
+      "id": "-9.8000_-67.5000",
+      "name": "Archaeological Site -9.8000, -67.5000",
+      "coordinates": "-9.8, -67.5",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_brazil_acre_001_846282_1751141200604",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:06:40.504369",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 11,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:06:40.841007",
+      "divine_blessed": true
+    },
+    {
+      "id": "-11.2000_-62.8000",
+      "name": "Archaeological Site -11.2000, -62.8000",
+      "coordinates": "-11.2, -62.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_brazil_rondonia_001_ec5ad8_1751141203251",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:06:43.276511",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 9,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:06:43.606154",
+      "divine_blessed": true
+    },
+    {
+      "id": "-5.2000_-61.3000",
+      "name": "Archaeological Site -5.2000, -61.3000",
+      "coordinates": "-5.2, -61.3",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_brazil_amazonas_001_c89ec9_1751141205877",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:06:46.023308",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        },
+        {
+          "analysis_id": "divine_analysis_site_brazil_amazonas_001_c89ec9_1751145352187",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T21:15:52.670950",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 15,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T21:15:53.128081",
+      "divine_blessed": true
+    },
+    {
+      "id": "-2.3000_-60.7000",
+      "name": "Archaeological Site -2.3000, -60.7000",
+      "coordinates": "-2.3, -60.7",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_brazil_roraima_001_869d08_1751141208536",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:06:48.912499",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 11,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:06:49.309048",
+      "divine_blessed": true
+    },
+    {
+      "id": "-6.1000_-55.8000",
+      "name": "Archaeological Site -6.1000, -55.8000",
+      "coordinates": "-6.1, -55.8",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_brazil_para_001_cda7c5_1751141211421",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:06:51.882744",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        },
+        {
+          "analysis_id": "divine_analysis_site_brazil_para_001_cda7c5_1751148205857",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T22:03:26.872209",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 19,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T22:03:26.903328",
+      "divine_blessed": true
+    },
+    {
+      "id": "-10.5000_-48.2000",
+      "name": "Archaeological Site -10.5000, -48.2000",
+      "coordinates": "-10.5, -48.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_brazil_tocantins_001_0d4592_1751141214509",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:06:55.150097",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 11,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:06:55.642917",
+      "divine_blessed": true
+    },
+    {
+      "id": "-4.8000_-44.1000",
+      "name": "Archaeological Site -4.8000, -44.1000",
+      "coordinates": "-4.8, -44.1",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_brazil_maranhao_001_8e991e_1751141217395",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:06:58.049022",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 18,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:06:58.384926",
+      "divine_blessed": true
+    },
+    {
+      "id": "-16.1000_-49.3000",
+      "name": "Archaeological Site -16.1000, -49.3000",
+      "coordinates": "-16.1, -49.3",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_brazil_goias_001_c1ac47_1751141220005",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:06:59.534927",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 16,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:06:59.903656",
+      "divine_blessed": true
+    },
+    {
+      "id": "-18.5000_-44.2000",
+      "name": "Archaeological Site -18.5000, -44.2000",
+      "coordinates": "-18.5, -44.2",
+      "confidence": 0.94,
+      "analysis_history": [
+        {
+          "analysis_id": "divine_analysis_site_brazil_minas_001_37ca3d_1751141222717",
+          "type": "divine_analysis",
+          "confidence": 0.94,
+          "timestamp": "2025-06-28T20:07:02.317411",
+          "storage_reason": "Divine analysis - Zeus blessed"
+        }
+      ],
+      "features_detected": 16,
+      "cultural_significance": "Divine Discovery",
+      "last_updated": "2025-06-28T20:07:02.663837",
+      "divine_blessed": true
+    },
+    {
+      "id": "-12.0000_-77.0000",
+      "name": "Archaeological Site -12.0000, -77.0000",
+      "coordinates": "-12, -77",
+      "confidence": 0.82,
+      "analysis_history": [
+        {
+          "analysis_id": "high_conf_test_001",
+          "type": "enhanced_analysis",
+          "confidence": 0.82,
+          "timestamp": "2025-06-28T22:08:02.968882",
+          "storage_reason": "High confidence: 0.82"
+        }
+      ],
+      "features_detected": 8,
+      "cultural_significance": "High",
+      "last_updated": "2025-06-28T22:08:04.444161"
+    }
+  ]
+}

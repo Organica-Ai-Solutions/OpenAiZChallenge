@@ -6,3 +6,10 @@ python-multipart
 numpy
 pandas
 matplotlib
+sqlalchemy
+rasterio
+pillow
+openai
+anthropic
+python-dotenv
+aiofiles

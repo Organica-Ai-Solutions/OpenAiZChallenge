@@ -57,8 +57,20 @@ check_docker_daemon() {
     log "Docker daemon is running and accessible" "SUCCESS"
 }
 
-# Trap any errors
-trap 'error_log "An error occurred. Check the log file at $ERROR_LOG_FILE"' ERR
+# Storage backend PID for cleanup
+STORAGE_PID=""
+
+# Cleanup function for storage backend
+cleanup_storage() {
+    if [ ! -z "$STORAGE_PID" ]; then
+        log "Cleaning up storage backend (PID: $STORAGE_PID)..."
+        kill $STORAGE_PID 2>/dev/null || true
+    fi
+}
+
+# Trap any errors and cleanup
+trap 'error_log "An error occurred. Check the log file at $ERROR_LOG_FILE"; cleanup_storage' ERR
+trap 'cleanup_storage' EXIT
 
 # Check memory for macOS and Linux
 check_memory() {
@@ -452,9 +464,28 @@ function startup_nis_protocol() {
     pkill -f "next dev" 2>/dev/null || true
     pkill -f "npm run dev" 2>/dev/null || true
     
+    # Start Storage Backend (if available)
+    log "Starting Storage Backend..."
+    if [ -f "backend/simple_storage_backend.py" ]; then
+        python backend/simple_storage_backend.py &
+        STORAGE_PID=$!
+        log "Storage Backend started with PID: $STORAGE_PID"
+        
+        # Wait for storage backend to be ready
+        sleep 3
+        
+        # Check if storage backend is running
+        if ! ps -p $STORAGE_PID > /dev/null 2>&1; then
+            log "⚠️  Storage Backend failed to start" "WARNING"
+            STORAGE_PID=""
+        fi
+    else
+        log "⚠️  backend/simple_storage_backend.py not found - storage features will be limited" "WARNING"
+    fi
+    
     # Clean up any port conflicts
     log "Checking for port conflicts..."
-    for port in 3000 8000 8001 8003 6379 9092 2181; do
+    for port in 3000 8000 8001 8003 8004 6379 9092 2181; do
         if netstat -ano | grep ":$port " >/dev/null 2>&1; then
             log "Port $port is in use, attempting to free it..." "WARNING"
             # Kill processes using these ports (Windows compatible)
@@ -522,6 +553,7 @@ function startup_nis_protocol() {
         "Main Backend:http://localhost:8000/system/health"
         "IKRP Service:http://localhost:8001/"
         "Fallback Backend:http://localhost:8003/system/health"
+        "Storage Backend:http://localhost:8004/health"
         "Frontend:http://localhost:3000"
     )
     
@@ -535,6 +567,44 @@ function startup_nis_protocol() {
             log "⚠️  $service_name: Starting up or not ready" "WARNING"
         fi
     done
+    
+    # Run comprehensive site re-analysis if storage backend is available
+    log "${CYAN}🏛️ Running Comprehensive Site Re-Analysis...${RESET}"
+    if curl -s --max-time 5 "http://localhost:8004/health" >/dev/null 2>&1; then
+        log "Storage backend confirmed online - starting site re-analysis..."
+        
+        # Check if reanalysis script exists
+        if [ -f "scripts/reanalyze_all_sites.js" ]; then
+            log "🔄 Analyzing all archaeological sites with storage integration..."
+            
+            # Run the re-analysis in background to not block startup
+            (
+                sleep 5  # Give services a moment to fully initialize
+                log "🏛️ Starting comprehensive site re-analysis..."
+                
+                if command -v node &> /dev/null; then
+                    node scripts/reanalyze_all_sites.js 2>&1 | tee -a "$LOG_FILE" &
+                    log "Site re-analysis started in background"
+                else
+                    log "Node.js not found - skipping site re-analysis" "WARNING"
+                fi
+            ) &
+        else
+            log "⚠️  Site re-analysis script not found - skipping automated analysis" "WARNING"
+        fi
+        
+        # Display storage system information
+        echo -e "\n${CYAN}💾 COMPREHENSIVE STORAGE SYSTEM ACTIVE${RESET}"
+        echo -e "${BLUE}═══════════════════════════════════════════════════════════════${RESET}"
+        echo -e "${GREEN}✅ Automatic analysis storage enabled${RESET}"
+        echo -e "${GREEN}✅ High-confidence filtering active (≥ 0.7)${RESET}"
+        echo -e "${GREEN}✅ Divine analyses always stored${RESET}"
+        echo -e "${GREEN}✅ Vision analyses with features stored${RESET}"
+        echo -e "${GREEN}✅ Archaeological site management enabled${RESET}"
+        echo -e "${BLUE}═══════════════════════════════════════════════════════════════${RESET}"
+    else
+        log "Storage backend not available - analysis storage disabled" "WARNING"
+    fi
 
     echo -e "\n${GREEN}🎉 NIS Protocol Archaeological Discovery Platform is LIVE!${RESET}"
     echo -e "${BLUE}════════════════════════════════════════════════════════════════════${RESET}"
@@ -546,6 +616,11 @@ function startup_nis_protocol() {
     echo -e "${MAGENTA}📜 IKRP Codex Service:     ${CYAN}http://localhost:8001${RESET}"
     echo -e "${YELLOW}🛡️  Fallback Backend:      ${CYAN}http://localhost:8003${RESET}"
     echo -e "${YELLOW}📋 Fallback API Docs:     ${CYAN}http://localhost:8003/docs${RESET}"
+    echo -e "${CYAN}💾 Storage Backend:       ${CYAN}http://localhost:8004${RESET}"
+    echo -e "${CYAN}📊 Storage Stats:         ${CYAN}http://localhost:8004/storage/stats${RESET}"
+    echo -e "${CYAN}📋 All Analyses:         ${CYAN}http://localhost:8004/storage/list${RESET}"
+    echo -e "${CYAN}⭐ High Confidence:      ${CYAN}http://localhost:8004/storage/high-confidence${RESET}"
+    echo -e "${CYAN}🏛️ Archaeological Sites: ${CYAN}http://localhost:8004/storage/sites${RESET}"
     echo -e ""
     echo -e "${BLUE}🏗️  Infrastructure Services:${RESET}"
     echo -e "   Redis Cache:       localhost:6379"
@@ -557,6 +632,7 @@ function startup_nis_protocol() {
     echo -e "  • ${BLUE}Main Backend${RESET}: FastAPI with Python 3.12 & Pydantic v2"
     echo -e "  • ${MAGENTA}IKRP Service${RESET}: Indigenous Knowledge Research Protocol"
     echo -e "  • ${YELLOW}Fallback Backend${RESET}: Reliable LIDAR processing & Real IKRP"
+    echo -e "  • ${CYAN}Storage Backend${RESET}: Comprehensive analysis storage & site management"
     echo -e "  • ${CYAN}Infrastructure${RESET}: Redis, Kafka, Zookeeper for distributed processing"
     echo -e ""
     echo -e "${GREEN}🔧 Management Commands:${RESET}"

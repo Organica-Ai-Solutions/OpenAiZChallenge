@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 
 import { AnimatedAIChat } from "@/components/ui/animated-ai-chat"
 import { ChatMessageHistory } from "@/components/ui/chat-message-history"
-import { chatService, ChatMessage } from "@/lib/api/chat-service"
+import { enhancedChatService as chatService, ChatMessage } from "@/lib/api/enhanced-chat-service"
 import { useUnifiedSystem } from "@/contexts/UnifiedSystemContext"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -458,7 +458,7 @@ ${result?.results?.description || 'Significant archaeological patterns detected'
     setIsDivineAnalysisRunning(true)
     
     try {
-      await chatService.sendMessage(`🏛️⚡ **DIVINE ANALYSIS INITIATED - ZEUS MODE ACTIVATED!**
+      chatService.addDirectAssistantMessage(`🏛️⚡ **DIVINE ANALYSIS INITIATED - ZEUS MODE ACTIVATED!**
 
 Starting comprehensive divine analysis of ALL archaeological sites in the database...
 
@@ -512,18 +512,20 @@ Processing ${siteCount}+ sites with divine precision...`)
 
 **🎉 The archaeological database has been blessed with Zeus-level precision! Site confidence levels updated with divine truth!**`
 
-        await chatService.sendMessage(resultsMessage)
+        chatService.addDirectAssistantMessage(resultsMessage)
         
         // Update site count to reflect enhanced sites
         setSiteCount(summary.total_sites_processed)
         
       } else {
-        await chatService.sendMessage(`❌ **Divine analysis failed:** ${result.message}\n\nZeus is displeased! ${result.error}`)
+        const errorMessage = result.message || result.error || 'Divine analysis endpoint returned unsuccessful status'
+        chatService.addDirectAssistantMessage(`❌ **Divine analysis failed:** ${errorMessage}\n\nZeus is displeased! The divine analysis endpoint may be experiencing issues. Let me check the backend status...`)
       }
       
     } catch (error) {
       console.error('Divine analysis failed:', error)
-      await chatService.sendMessage(`❌ **Divine analysis failed:** ${error instanceof Error ? error.message : 'Unknown error'}\n\nThe gods require more power! Try again when the backend is fully operational.`)
+      const errorMsg = error instanceof Error ? error.message : (typeof error === 'string' ? error : 'Network or API error')
+      chatService.addDirectAssistantMessage(`❌ **Divine analysis failed:** ${errorMsg}\n\nThe gods require more power! The divine analysis endpoint at http://localhost:8003/agents/divine-analysis-all-sites may be down. Please ensure the backend is fully operational.`)
     } finally {
       setIsDivineAnalysisRunning(false)
     }

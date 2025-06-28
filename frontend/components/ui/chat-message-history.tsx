@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChatMessage } from '@/lib/api/chat-service';
+import { ChatMessage } from '@/lib/api/enhanced-chat-service';
 import { User, Bot, MapPin, Eye, Sparkles, AlertCircle, Minimize2, Maximize2 } from 'lucide-react';
 
 interface ChatMessageHistoryProps {
@@ -108,22 +108,43 @@ export function ChatMessageHistory({ messages, isTyping = false }: ChatMessageHi
                     </div>
                   )}
 
-                  {/* Metadata */}
-                  {message.metadata && (
+                  {/* Enhanced AI Metadata */}
+                  {(message.metadata || message.thinking || message.tools_used) && (
                     <div className="mt-2 pt-2 border-t border-white/10">
-                      <div className="flex items-center gap-2 text-xs text-white/50">
-                        {message.metadata.action_type && (
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-white/50">
+                        {message.metadata?.action_type && (
                           <span className="flex items-center gap-1">
                             {getActionIcon(message.metadata.action_type)}
                             {message.metadata.action_type}
                           </span>
                         )}
-                        {message.metadata.confidence && (
+                        {message.metadata?.confidence && (
                           <span>
                             {Math.round(message.metadata.confidence * 100)}% confidence
                           </span>
                         )}
+                        {message.tools_used && message.tools_used.length > 0 && (
+                          <span className="flex items-center gap-1 bg-purple-500/20 text-purple-300 px-2 py-1 rounded">
+                            🔧 {message.tools_used.length} tools used
+                          </span>
+                        )}
+                        {message.stored && (
+                          <span className="flex items-center gap-1 bg-green-500/20 text-green-300 px-2 py-1 rounded">
+                            <Sparkles className="w-3 h-3" />
+                            Saved to DB
+                          </span>
+                        )}
                       </div>
+                      {message.thinking && (
+                        <details className="mt-2">
+                          <summary className="cursor-pointer text-xs text-yellow-300 hover:text-yellow-200">
+                            🧠 AI Reasoning Process
+                          </summary>
+                          <div className="mt-1 text-xs text-white/60 bg-yellow-500/10 p-2 rounded border border-yellow-500/20">
+                            {message.thinking}
+                          </div>
+                        </details>
+                      )}
                     </div>
                   )}
                 </div>

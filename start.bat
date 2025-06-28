@@ -248,7 +248,7 @@ if %errorlevel% neq 0 (
 REM Start backend server
 cd /D "%BASE_DIR%"
 call :log_message INFO "Starting backend server..."
-start "NIS Backend" cmd /k "call venv\Scripts\activate.bat && python backend_main.py"
+start "NIS Backend" cmd /k "call venv\Scripts\activate.bat && python backend\backend_main.py"
 
 REM Start frontend server
 call :log_message INFO "Starting frontend server..."
