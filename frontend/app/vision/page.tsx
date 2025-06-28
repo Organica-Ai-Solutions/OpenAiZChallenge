@@ -266,7 +266,7 @@ export default function UltimateVisionAgentPage() {
       const [lat, lng] = coordinates.split(',').map(s => parseFloat(s.trim()))
       
       if (isNaN(lat) || isNaN(lng)) {
-        alert('Invalid coordinates. Please enter valid latitude and longitude.')
+        console.log('⚠️ Invalid coordinates. Please enter valid latitude and longitude.')
         return
       }
       
@@ -484,7 +484,7 @@ export default function UltimateVisionAgentPage() {
 🌟 ═══════════════════════════════════════════════════════════════ 🌟
       `)
       
-      alert(`🏛️ NIS PROTOCOL ANALYSIS COMPLETE! 🏛️
+      console.log(`🏛️ NIS PROTOCOL ANALYSIS COMPLETE! 🏛️
 
 👼 Angels have written ${comprehensiveResults.summary.total_features_detected} discoveries in our databases!
 ⚡ ${comprehensiveResults.summary.agents_successful}/4 agents successful
@@ -530,7 +530,7 @@ Like the King of Olympus, the NIS Protocol has spoken! 🌟`)
       setVisionResults(fallbackResults)
       
       // Show user-friendly error
-      alert(`⚠️ Some agents temporarily unavailable. Showing demo results.
+      console.log(`⚠️ Some agents temporarily unavailable. Showing demo results.
       
 🏛️ NIS Protocol Fallback Mode Active
 ✨ 1 feature detected in demo mode
@@ -543,7 +543,7 @@ Error: ${errorMessage}`)
   // LIDAR Processing Functions
   const processLidarTriangulation = useCallback(async () => {
     if (!backendStatus.online) {
-      alert('Backend offline - using fallback triangulation')
+      console.log('⚠️ Backend offline - using fallback triangulation')
       return
     }
 
@@ -593,14 +593,14 @@ Error: ${errorMessage}`)
           enableDelaunayTriangulation: true
         }))
         
-        alert(`✅ Delaunay Triangulation Complete!\n🔺 Archaeological Features: ${lidarData.archaeological_features?.length || 0}\n📊 Total Points: ${lidarData.statistics?.total_points || 'N/A'}\n🎯 Processing Quality: ${lidarVisualization.processingQuality}`)
+        console.log(`✅ Delaunay Triangulation Complete!\n🔺 Archaeological Features: ${lidarData.archaeological_features?.length || 0}\n📊 Total Points: ${lidarData.statistics?.total_points || 'N/A'}\n🎯 Processing Quality: ${lidarVisualization.processingQuality}`)
         console.log('✅ Delaunay triangulation completed')
       } else {
         throw new Error('Triangulation failed')
       }
     } catch (error) {
       console.error('❌ Triangulation error:', error)
-      alert('✅ Triangulation Applied!\n⚠️ Using enhanced fallback processing\n🔺 Delaunay algorithm active')
+      console.log('✅ Triangulation Applied!\n⚠️ Using enhanced fallback processing\n🔺 Delaunay algorithm active')
     } finally {
       setLidarProcessing({ isProcessing: false, stage: '', progress: 0 })
     }
@@ -608,7 +608,7 @@ Error: ${errorMessage}`)
 
   const processLidarRGBColoring = useCallback(async () => {
     if (!backendStatus.online) {
-      alert('Backend offline - using fallback RGB coloring')
+      console.log('⚠️ Backend offline - using fallback RGB coloring')
       return
     }
 
@@ -657,14 +657,14 @@ Error: ${errorMessage}`)
           enableRGBColoring: true
         }))
         
-        alert(`✅ RGB Coloring Complete!\n🎨 Satellite Data: ${satelliteData.satellite_overlay?.source || 'Sentinel-2'}\n📊 RGB Quality: ${satelliteData.quality_metrics?.rgb_quality || 'High'}\n🌍 Coverage: ${satelliteData.coverage_area_km2 || 'N/A'} km²`)
+        console.log(`✅ RGB Coloring Complete!\n🎨 Satellite Data: ${satelliteData.satellite_overlay?.source || 'Sentinel-2'}\n📊 RGB Quality: ${satelliteData.quality_metrics?.rgb_quality || 'High'}\n🌍 Coverage: ${satelliteData.coverage_area_km2 || 'N/A'} km²`)
         console.log('✅ RGB coloring applied')
       } else {
         throw new Error('RGB coloring failed')
       }
     } catch (error) {
       console.error('❌ RGB coloring error:', error)
-      alert('✅ RGB Coloring Applied!\n⚠️ Using enhanced fallback processing\n🎨 Satellite overlay active')
+      console.log('✅ RGB Coloring Applied!\n⚠️ Using enhanced fallback processing\n🎨 Satellite overlay active')
     } finally {
       setLidarProcessing({ isProcessing: false, stage: '', progress: 0 })
     }
@@ -672,7 +672,7 @@ Error: ${errorMessage}`)
 
   const applyLidarProcessing = useCallback(async () => {
     if (!backendStatus.online) {
-      alert('Backend offline - using enhanced fallback processing')
+      console.log('⚠️ Backend offline - using enhanced fallback processing')
       return
     }
 
@@ -718,14 +718,14 @@ Error: ${errorMessage}`)
         // Brief pause for final processing
         await new Promise(resolve => setTimeout(resolve, 500))
         
-        alert(`✅ LIDAR Processing Pipeline Complete!\n🏛️ Archaeological Features: ${lidarData.archaeological_features?.length || 0}\n📊 Total Points: ${lidarData.statistics?.total_points || 'N/A'}\n🔺 Triangulation: ${lidarVisualization.enableDelaunayTriangulation ? 'Applied' : 'Disabled'}\n🎨 RGB Coloring: ${lidarVisualization.enableRGBColoring ? 'Applied' : 'Disabled'}`)
+        console.log(`✅ LIDAR Processing Pipeline Complete!\n🏛️ Archaeological Features: ${lidarData.archaeological_features?.length || 0}\n📊 Total Points: ${lidarData.statistics?.total_points || 'N/A'}\n🔺 Triangulation: ${lidarVisualization.enableDelaunayTriangulation ? 'Applied' : 'Disabled'}\n🎨 RGB Coloring: ${lidarVisualization.enableRGBColoring ? 'Applied' : 'Disabled'}`)
         console.log('✅ LIDAR processing pipeline completed')
       } else {
         throw new Error('Failed to fetch LIDAR data')
       }
     } catch (error) {
       console.error('❌ LIDAR processing pipeline failed:', error)
-      alert('✅ LIDAR Processing Applied!\n⚠️ Using enhanced fallback mode\n🏔️ 3D visualization active')
+      console.log('✅ LIDAR Processing Applied!\n⚠️ Using enhanced fallback mode\n🏔️ 3D visualization active')
     } finally {
       setLidarProcessing({ isProcessing: false, stage: '', progress: 0 })
     }
@@ -2106,7 +2106,7 @@ Error: ${errorMessage}`)
                               names.forEach(name => caches.delete(name))
                             })
                           }
-                          alert('Cache cleared successfully!')
+                          console.log('✅ Cache cleared successfully!')
                         }}
                       >
                         <Database className="w-4 h-4 mr-2" />

@@ -472,7 +472,7 @@ Starting comprehensive divine analysis of ALL archaeological sites in the databa
 Processing ${siteCount}+ sites with divine precision...`)
 
       // Call the divine analysis endpoint
-      const response = await fetch('http://localhost:8000/agents/divine-analysis-all-sites', {
+      const response = await fetch('http://localhost:8003/agents/divine-analysis-all-sites', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

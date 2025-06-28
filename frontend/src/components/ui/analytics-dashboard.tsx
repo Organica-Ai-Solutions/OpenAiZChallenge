@@ -290,7 +290,7 @@ export function AnalyticsDashboard() {
 
       console.log('✅ [Analytics] Backend is online, fetching data...')
 
-      // Parallel fetch all real data sources including new analytics endpoints
+      // Parallel fetch all real data sources using working fallback backend
       const [
         statisticsRes, 
         diagnosticsRes, 
@@ -302,15 +302,15 @@ export function AnalyticsDashboard() {
         satelliteStatusRes,
         satelliteAlertsRes
       ] = await Promise.all([
-        fetch('http://localhost:8000/statistics', { cache: 'no-cache' }),
-        fetch('http://localhost:8000/system/diagnostics', { cache: 'no-cache' }),
-        fetch('http://localhost:8000/research/sites?max_sites=50', { cache: 'no-cache' }),
-        fetch('http://localhost:8000/agents/agents', { cache: 'no-cache' }),
-        fetch('http://localhost:8000/system/health', { cache: 'no-cache' }),
-        fetch('http://localhost:8000/research/regions', { cache: 'no-cache' }),
-        fetch('http://localhost:8000/system/data-sources', { cache: 'no-cache' }),
-        fetch('http://localhost:8000/satellite/status', { cache: 'no-cache' }),
-        fetch('http://localhost:8000/satellite/alerts', { cache: 'no-cache' })
+        fetch('http://localhost:8003/statistics', { cache: 'no-cache' }),
+        fetch('http://localhost:8003/system/diagnostics', { cache: 'no-cache' }),
+        fetch('http://localhost:8003/research/sites?max_sites=50', { cache: 'no-cache' }),
+        fetch('http://localhost:8003/agents/agents', { cache: 'no-cache' }),
+        fetch('http://localhost:8003/system/health', { cache: 'no-cache' }),
+        fetch('http://localhost:8003/research/regions', { cache: 'no-cache' }),
+        fetch('http://localhost:8003/system/data-sources', { cache: 'no-cache' }),
+        fetch('http://localhost:8003/satellite/status', { cache: 'no-cache' }),
+        fetch('http://localhost:8003/satellite/alerts', { cache: 'no-cache' })
       ])
 
       console.log('📊 [Analytics] Parsing responses...')

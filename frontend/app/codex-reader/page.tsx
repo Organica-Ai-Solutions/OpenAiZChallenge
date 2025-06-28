@@ -266,7 +266,7 @@ export default function CodexReaderPage() {
 
   const handleSearch = async () => {
     if (!coordinates) {
-      alert('Please enter coordinates (e.g., -3.4653, -62.2159)')
+      console.log('⚠️ Please enter coordinates (e.g., -3.4653, -62.2159)')
       return
     }
 
@@ -318,7 +318,7 @@ export default function CodexReaderPage() {
       }
     } catch (error) {
       console.error('Codex search failed:', error)
-      alert('Search failed. Please try again.')
+      console.log('⚠️ Search failed. Please try again.')
       updateWorkflowStep('search', false)
     } finally {
       setIsSearching(false)
@@ -460,7 +460,7 @@ export default function CodexReaderPage() {
     } catch (error) {
       console.error('Analysis failed:', error)
       setError(error instanceof Error ? error.message : 'Analysis failed')
-      alert('Analysis failed. Please try again.')
+      console.log('⚠️ Analysis failed. Please try again.')
     } finally {
       setIsAnalyzing(false)
       setTimeout(() => setProgress(0), 1000)
@@ -503,13 +503,13 @@ export default function CodexReaderPage() {
         URL.revokeObjectURL(url)
         
         console.log(`✅ Full codex downloaded: ${codex.title}`)
-        alert(`Full codex "${codex.title}" downloaded successfully! Check your downloads folder.`)
+        console.log(`✅ Full codex "${codex.title}" downloaded successfully! Check your downloads folder.`)
       } else {
         throw new Error('Download failed')
       }
     } catch (error) {
       console.error('Full codex download failed:', error)
-      alert('Download failed. Please try again.')
+                console.log('⚠️ Download failed. Please try again.')
     } finally {
       setIsAnalyzing(false)
     }
@@ -2325,7 +2325,7 @@ The analysis includes real-time archaeological data, scholarly research, and cro
   // Enhanced discovery with web search
   const handleEnhancedSearch = async () => {
     if (!coordinates.trim()) {
-      alert('Please enter coordinates first')
+              console.log('⚠️ Please enter coordinates first')
       return
     }
 
