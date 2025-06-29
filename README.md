@@ -1,6 +1,6 @@
 # 🏛️ NIS Protocol - Archaeological Discovery System
 
-![Challenge Logo](src/images/challengelogo.png)
+![Main Logo](frontend/public/MainLogo.png)
 
 ## 🎬 **DEMO VIDEO** - OpenAI to Z Challenge Submission
 
@@ -60,9 +60,6 @@
 
 ### Wave Pattern Analysis
 ![Wave Analysis](frontend/public/v3_mathematical_foundation/WAVE.PNG)
-
-### Visual Difference Analysis
-![Difference](frontend/public/v3_mathematical_foundation/difference.png)
 
 ## 🚀 Quick Start
 
@@ -157,7 +154,7 @@ cd frontend && npm install
 - Production-Ready System with comprehensive testing
 
 ### Visual Gallery
-![KAN Images](frontend/public/images/kan/image.png)
+![Challenge Logo](src/images/challengelogo.png)
 ![Video Thumbnail](src/images/video_thumbnail.png)
 
 ## 📄 License
