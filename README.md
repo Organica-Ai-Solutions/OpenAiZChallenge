@@ -27,7 +27,7 @@
 
 ## 🧠 What is NIS Protocol?
 
-**Neural Intelligence System (NIS) Protocol** is an revolutionary AI-powered archaeological discovery platform that acts like a **"Digital Indiana Jones"** - but instead of using a whip and hat, it uses cutting-edge artificial intelligence to find lost civilizations and hidden archaeological sites.
+**Neuro  Inspired System (NIS) Protocol** is an revolutionary AI-powered archaeological discovery platform that acts like a **"Digital Indiana Jones"** - but instead of using a whip and hat, it uses cutting-edge artificial intelligence to find lost civilizations and hidden archaeological sites.
 
 ### 🔍 **The Problem We Solve**
 Traditional archaeological discovery is:
@@ -77,7 +77,7 @@ Unlike traditional methods that take months, our system can analyze a region and
 
 ## 🎯 Competition Summary
 
-- **Prize Category:** OpenAI to Z Challenge ($400,000 + $205,000 credits)
+-
 - **Focus:** Archaeological site discovery using advanced AI
 - **Results:** 161 archaeological sites discovered, 406 high-confidence analyses
 - **Innovation:** First implementation of KAN networks for archaeological pattern recognition
@@ -85,7 +85,7 @@ Unlike traditional methods that take months, our system can analyze a region and
 ## 🏆 **Proven Results - Real Discoveries**
 
 ### 📈 **By the Numbers**
-- **🏛️ 161 Archaeological Sites** discovered across the Amazon Basin
+- **🏛️ 160 Archaeological Sites** discovered across the Amazon Basin
 - **🎯 406 High-Confidence Analyses** (≥70% accuracy threshold)
 - **⭐ 47 Divine-Level Discoveries** (≥85% confidence with multiple confirmations)
 - **🌍 1,200+ Sites Analyzed** across multiple continents
