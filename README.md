@@ -1,6 +1,19 @@
 # 🏛️ NIS Protocol - Archaeological Discovery System
 
+![Challenge Logo](src/images/challengelogo.png)
+
 ## 🎬 **DEMO VIDEO** - OpenAI to Z Challenge Submission
+
+### 📺 YouTube Presentation
+[![NIS Protocol Demo](https://img.youtube.com/vi/Jcmgp-GAGGw/maxresdefault.jpg)](https://www.youtube.com/watch?v=Jcmgp-GAGGw)
+
+**🎥 Watch our complete system demonstration:** [https://www.youtube.com/watch?v=Jcmgp-GAGGw](https://www.youtube.com/watch?v=Jcmgp-GAGGw)
+
+### 🎥 Banner Video
+![NIS Protocol Banner](src/images/videos/NIS-banner.mp4)
+
+### 🖼️ Live System Demo
+![NIS Demo](src/images/nis_demo.gif)
 
 > **📹 Complete System Demonstration**  
 > **File:** `docs/submission/demoatoz.mov` (1.8GB - High Quality)  
@@ -17,6 +30,8 @@
 
 ## OpenAI to Z Challenge Submission
 
+![NIS Demo Small](src/images/nis_demo_small.gif)
+
 **Neural Intelligence System (NIS) Protocol** - AI-powered archaeological discovery platform combining GPT-4.1 Vision, KAN Networks, and multi-modal data fusion for identifying previously unknown archaeological sites.
 
 ## 🎯 Competition Summary
@@ -25,6 +40,29 @@
 - **Focus:** Archaeological site discovery using advanced AI
 - **Results:** 161 archaeological sites discovered, 406 high-confidence analyses
 - **Innovation:** First implementation of KAN networks for archaeological pattern recognition
+
+## 🧠 Mathematical Foundation - KAN Networks Innovation
+
+### Why KAN Networks?
+![Why KAN](frontend/public/v3_mathematical_foundation/why.png)
+
+### KAN vs Traditional MLP
+![See The Difference](frontend/public/v3_mathematical_foundation/see_the_difference.png)
+
+### Network Architecture Comparison
+![MLP Surface](frontend/public/v3_mathematical_foundation/Regular%20MLP%20Surface%20Map.png)
+
+### Our KAN Implementation
+![KAN Architecture](frontend/public/v3_mathematical_foundation/kan.png)
+
+### Archaeological Pattern Recognition
+![KAN NIS](frontend/public/v3_mathematical_foundation/kannis.png)
+
+### Wave Pattern Analysis
+![Wave Analysis](frontend/public/v3_mathematical_foundation/WAVE.PNG)
+
+### Visual Difference Analysis
+![Difference](frontend/public/v3_mathematical_foundation/difference.png)
 
 ## 🚀 Quick Start
 
@@ -117,6 +155,10 @@ cd frontend && npm install
 - Multi-modal AI Fusion combining vision, satellite, and historical data
 - Real Archaeological Discoveries validated through multiple data sources
 - Production-Ready System with comprehensive testing
+
+### Visual Gallery
+![KAN Images](frontend/public/images/kan/image.png)
+![Video Thumbnail](src/images/video_thumbnail.png)
 
 ## 📄 License
 
