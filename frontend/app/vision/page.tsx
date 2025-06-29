@@ -1642,13 +1642,13 @@ Error: ${errorMessage}`)
                                 {result.label || result.feature_type || 'Archaeological Feature'}
                               </h4>
                               <div className="flex items-center gap-2">
-                                <Badge variant="outline" className="text-emerald-400 border-emerald-400">
+                              <Badge variant="outline" className="text-emerald-400 border-emerald-400">
                                   {Math.round((result.confidence || 0) * 100)}%
-                                </Badge>
+                              </Badge>
                                 {result.divine_enhanced && (
                                   <Badge className="bg-yellow-500/20 text-yellow-400">Divine</Badge>
                                 )}
-                              </div>
+                            </div>
                             </div>
                             
                             <div className="space-y-2 mb-3">
@@ -1664,19 +1664,19 @@ Error: ${errorMessage}`)
                             
                             <div className="grid grid-cols-2 gap-3 text-xs">
                               <div className="flex items-center justify-between">
-                                <span className="text-slate-400">Archaeological Significance:</span>
+                              <span className="text-slate-400">Archaeological Significance:</span>
                                 <Badge variant="secondary" className={`text-xs ${
                                   result.archaeological_significance === 'High' ? 'bg-emerald-900/50 text-emerald-300' :
                                   result.archaeological_significance === 'Medium' ? 'bg-amber-900/50 text-amber-300' :
                                   'bg-slate-900/50 text-slate-300'
                                 }`}>
                                   {result.archaeological_significance || 'Medium'}
-                                </Badge>
-                              </div>
+                              </Badge>
+                            </div>
                               {result.bounds && (
                                 <div className="text-slate-500">
                                   Bounds: {result.bounds.width || result.bounds}×{result.bounds.height || ''} | Source: {result.satellite_source?.source || result.source || 'satellite'}
-                                </div>
+                            </div>
                               )}
                             </div>
 
@@ -1768,7 +1768,7 @@ Error: ${errorMessage}`)
                                 <div className="text-purple-300 font-medium">
                                   {visionResults.vision_analysis?.model_performance?.gpt4o_vision?.accuracy || 
                                    visionResults.metadata?.performance?.accuracy || '58'}%
-                                </div>
+                            </div>
                               </div>
                               <div>
                                 <div className="text-xs text-slate-400">Processing</div>
@@ -1881,13 +1881,13 @@ Error: ${errorMessage}`)
                               </div>
                             )}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              <div className="flex items-center justify-between">
-                                <span className="text-xs text-slate-400">Finding ID:</span>
-                                <code className="text-xs text-yellow-400 bg-slate-900/50 px-2 py-1 rounded">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs text-slate-400">Finding ID:</span>
+                              <code className="text-xs text-yellow-400 bg-slate-900/50 px-2 py-1 rounded">
                                   {visionResults.archaeological_analysis?.finding_id || 
                                    `nis_${Date.now().toString().slice(-8)}`}
-                                </code>
-                              </div>
+                              </code>
+                            </div>
                               {visionResults.archaeological_analysis?.confidence && (
                                 <div className="flex items-center justify-between">
                                   <span className="text-xs text-slate-400">Confidence:</span>
@@ -1896,8 +1896,8 @@ Error: ${errorMessage}`)
                                   </Badge>
                                 </div>
                               )}
-                            </div>
-                            
+                          </div>
+                          
                             {/* Research Priority */}
                             {visionResults.reasoning_analysis?.research_priority && (
                               <div className="mt-3 p-2 bg-orange-900/20 rounded border border-orange-500/30">

@@ -6284,7 +6284,7 @@ export default function ArchaeologicalMapPage() {
         
         setSites(validatedData)
         setBackendOnline(true)
-        console.log('✅ NIS Protocol: Loaded', validatedData.length, 'archaeological sites from regular endpoint')
+          console.log('✅ NIS Protocol: Loaded', validatedData.length, 'archaeological sites from regular endpoint')
         
         // Plot markers after sites are loaded
         setTimeout(() => {
@@ -6293,8 +6293,8 @@ export default function ArchaeologicalMapPage() {
           }
         }, 1000)
       } else {
-        throw new Error('Both endpoints not responding')
-      }
+          throw new Error('Both endpoints not responding')
+        }
       }
     } catch (error) {
       console.log('⚠️ Backend not available, falling back to demo data')
