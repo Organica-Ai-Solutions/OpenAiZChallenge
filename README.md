@@ -321,8 +321,9 @@ After installation, open your browser and visit:
 - **🌍 Website:** [https://organicaai.com](https://organicaai.com)
 - **👔 LinkedIn:** [Diego Torres - Organica AI Solutions](https://www.linkedin.com/in/diego-fuego-organica-ai-solutions/)
 - **🎧 Podcast:** ["The NIS Protocol" on Spotify](https://open.spotify.com/show/NIS_Protocol)
-- **📧 Contact:** contact@organicaai.com
+- **📧 Contact:** diego.torres.developer@gmail.com
 
+- **🌍 NIS repo:** [https://github.com/Organica-Ai-Solutions/NIS_Protocol](https://github.com/Organica-Ai-Solutions/NIS_Protocol)
 #### **🎯 Core Mission**
 > *"Where Biological Intelligence Meets Universal Interface Design"*
 
